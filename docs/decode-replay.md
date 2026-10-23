@@ -24,7 +24,8 @@ python -m rapidtinyrec.run decode-pilot --release-root releases/office \
 Run on one A6000 with the pinned environment. No graph capture or compilation is
 permitted after warmup. A capture failure is a failed experiment; the implementation
 does not silently fall back to eager execution. CPU tests cover buffer ownership,
-shape rejection and beam reordering only. A successful CUDA pilot is required
+shape rejection, beam reordering and tiny Qwen2 forward equality after duplicate
+parent selection. These are CPU checks; a successful CUDA pilot is required
 before a full-cohort run or any performance claim.
 
 The pool supports sequential inference with one model and stream. Returned graph
