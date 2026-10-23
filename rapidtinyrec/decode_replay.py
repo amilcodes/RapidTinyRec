@@ -14,7 +14,7 @@ from transformers.modeling_outputs import CausalLMOutputWithPast
 
 TENSOR_KEYS = ('input_ids', 'position_ids', 'cache_position')
 FIXED_KEYS = {'use_cache', 'return_dict', 'logits_to_keep',
-              'output_attentions', 'output_hidden_states'}
+              'output_attentions', 'output_hidden_states', 'inputs_embeds'}
 
 
 def cache_pairs(cache):
@@ -42,6 +42,11 @@ def signature(kwargs):
     allowed=set(TENSOR_KEYS)|FIXED_KEYS|{'past_key_values','attention_mask'}
     if set(kwargs)-allowed:
         raise ValueError(f'Unsupported replay arguments: {sorted(set(kwargs)-allowed)}')
+    # Generation supplies this keyword even on token-ID decode steps. Preserve
+    # the explicit None for the compiled call; embedding inputs need a different
+    # tensor staging contract and remain unsupported.
+    if kwargs.get('inputs_embeds') is not None:
+        raise ValueError('Replay requires token IDs, not embedding inputs')
     mask=kwargs.get('attention_mask')
     if not isinstance(mask,dict) or set(mask)!={'full_attention'} or mask['full_attention'] is not None:
         raise ValueError('Replay requires the validated native-GQA mask specialization')

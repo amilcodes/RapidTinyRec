@@ -3,6 +3,13 @@
 This branch tests whether CUDA graph replay reduces the launch cost of the
 compiled native-GQA decoder. There are no A6000 results yet.
 
+The first A6000 pilot stopped during warmup, before capture or measured requests:
+Hugging Face passed `inputs_embeds=None` and the argument validator rejected the
+keyword. The validator now preserves that placeholder while still rejecting
+actual embedding tensors. A CPU integration test runs the real constrained
+50-beam generation loop through staging and compares all five scores. This fixes
+the observed compatibility error; CUDA replay remains unvalidated until a rerun.
+
 Each exact decode shape owns stable input and KV tensors. Incoming cache values
 are copied into those tensors before replay; that staging cost stays in request
 latency. Cache sequence lengths are unchanged. Captured output tensors are

@@ -1,12 +1,17 @@
 """CPU ownership/shape checks; these do not establish CUDA performance."""
+import functools
 import unittest
+from unittest.mock import patch
 
 import torch
-from transformers import Qwen2Config, Qwen2ForCausalLM
+from transformers import GenerationConfig, LogitsProcessorList, Qwen2Config, Qwen2ForCausalLM
 from transformers.modeling_outputs import CausalLMOutputWithPast
 
 from rapidtinyrec.decode_replay import (
     DecodeReplayPool, ReplayBuffers, ReplayOutput, cache_from_pairs, cache_pairs)
+from rapidtinyrec.gpu_constraints import GpuSidConstraintTables, GpuSidConstrainedLogitsProcessor
+from rapidtinyrec.shared_prefill import PrefillOnce
+from test_decoding import catalog
 
 
 def example(length=7):
@@ -17,6 +22,50 @@ def example(length=7):
 
 
 class ReplayTests(unittest.TestCase):
+    @torch.inference_mode()
+    def test_generation_kwargs_and_all_five_scores_survive_cpu_staging(self):
+        torch.set_num_threads(1)
+        torch.manual_seed(625)
+        config=Qwen2Config(vocab_size=512,hidden_size=32,intermediate_size=64,
+            num_hidden_layers=2,num_attention_heads=4,num_key_value_heads=2,
+            max_position_embeddings=64,bos_token_id=1,eos_token_id=511,pad_token_id=511)
+        model=Qwen2ForCausalLM(config).double().eval()
+        model.config._attn_implementation='sdpa'
+        tables=GpuSidConstraintTables(catalog(),(1,2,3),510,511,'cpu')
+        cfg=GenerationConfig(max_new_tokens=8,num_beams=50,num_return_sequences=50,
+            length_penalty=0.,do_sample=False,use_cache=True,pad_token_id=511,eos_token_id=511)
+        original=model.forward
+        for history in ([1,7,8,1,2,3],[1,7,8,9,10,11,12,13,1,2,3]):
+            results=[]
+            for staged in (False,True):
+                calls=[]
+                @functools.wraps(original)
+                def forward(*args,**kwargs):
+                    self.assertFalse(args)
+                    calls.append(tuple(kwargs['input_ids'].shape))
+                    kwargs['attention_mask']={'full_attention':None}
+                    if staged and kwargs['past_key_values'].get_seq_length():
+                        # Exercise the actual prepare_inputs_for_generation keys,
+                        # including its explicit inputs_embeds=None placeholder.
+                        self.assertIn('inputs_embeds',kwargs)
+                        self.assertIsNone(kwargs['inputs_embeds'])
+                        buffers=ReplayBuffers(kwargs)
+                        self.assertIn('inputs_embeds',buffers.kwargs())
+                        return ReplayOutput(original(**buffers.kwargs())).fresh()
+                    return original(**kwargs)
+                x=torch.tensor([history])
+                with patch.object(model,'forward',forward),PrefillOnce(model,50):
+                    output=model.generate(x,attention_mask=torch.ones_like(x),generation_config=cfg,
+                        logits_processor=LogitsProcessorList([GpuSidConstrainedLogitsProcessor(tables)]),
+                        return_dict_in_generate=True,output_scores=True)
+                self.assertEqual(calls,[(1,len(history))]+[(50,1)]*4)
+                transitions=model.compute_transition_scores(output.sequences,output.scores,
+                    output.beam_indices,normalize_logits=False)
+                self.assertEqual(tuple(transitions.shape),(50,5))
+                results.append((output.sequences,output.sequences_scores.float().view(torch.int32),
+                    transitions.float().view(torch.int32)))
+            self.assertTrue(all(torch.equal(a,b) for a,b in zip(*results)))
+
     @torch.inference_mode()
     def test_staged_decode_matches_qwen_after_duplicate_parent_selection(self):
         torch.set_num_threads(1)
@@ -105,6 +154,8 @@ class ReplayTests(unittest.TestCase):
         with self.assertRaises(ValueError):ReplayBuffers(args)
         args=example();args['output_attentions']=True
         with self.assertRaises(ValueError):ReplayBuffers(args)
+        args=example();args['inputs_embeds']=torch.randn(4,1,16)
+        with self.assertRaisesRegex(ValueError,'embedding inputs'):ReplayBuffers(args)
 
     def test_frozen_pool_never_captures_or_falls_back(self):
         pool=DecodeReplayPool(lambda **kwargs:self.fail('Unexpected forward'))
