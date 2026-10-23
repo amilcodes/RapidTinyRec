@@ -1,4 +1,4 @@
-"""Audit replay pilot provenance, FP32 bits and latency without importing torch."""
+"""Audit replay experiment provenance, FP32 bits and latency without importing torch."""
 import argparse
 import hashlib
 import itertools
@@ -87,10 +87,13 @@ def audit(root, historical, snapshot, run_record):
     rows, compiler = read(root / 'requests.json'), read(root / 'compilation.json')
     reference, expected = read(historical / 'manifest.json'), read(snapshot / 'expected.json')
     assert expected == read(Path(__file__).with_name('expected.json')), 'Pinned release/cohort changed'
-    assert manifest['experiment'] == 'decode_replay_pilot' and summary['complete']
+    assert manifest['experiment'] in ('decode_replay_pilot','decode_replay_500') and summary['complete']
+    full=manifest['experiment']=='decode_replay_500'
     variants=tuple(manifest.get('variants', VARIANTS))
     assert variants in (VARIANTS, VARIANTS+('direct_replay',))
     direct='direct_replay' in variants
+    if full:
+        assert direct and not manifest['profile_after_measurement']
     assert manifest['dtype'] == 'float32' and manifest['tf32'] is False
     assert manifest['hardware'] == 'NVIDIA RTX A6000'
     assert manifest['versions'] == {'torch': '2.14.0+cu126', 'transformers': '4.55.4', 'tokenizers': '0.21.4'}
@@ -102,7 +105,13 @@ def audit(root, historical, snapshot, run_record):
     lengths = sorted({u['prompt_tokens'] for u in reference['users']})
     selected = [u for length in (lengths[0], lengths[-1])
                 for u in [u for u in reference['users'] if u['prompt_tokens'] == length][:2]]
-    assert len(selected) == 4 and manifest['users'] == selected
+    if full:
+        selected=reference['users']
+        assert len(lengths)==10
+        assert setup['warmup_cohort_indices']==[next(u['cohort_index'] for u in selected if u['prompt_tokens']==n) for n in lengths]
+        assert setup['allocated_bytes']<40*1024**3 and setup['reserved_bytes']<46*1024**3
+    assert len(selected) == (500 if full else 4) and manifest['users'] == selected
+    selected_lengths=lengths if full else [lengths[0],lengths[-1]]
     source_files = SOURCE_FILES | ({'profile_decode_replay.py', 'profile_shared.py'}
                                   if manifest.get('profile_after_measurement') else set())
     if direct:
@@ -121,19 +130,25 @@ def audit(root, historical, snapshot, run_record):
     assert not compiler['compiler_counters'].get('unimplemented')
     before, after = setup['replay'], summary['replay']
     assert before['frozen'] is True and after['frozen'] is True
-    assert before['graphs'] == after['graphs'] == 8
-    assert before['events'] == after['events'] and len(after['events']) == 8
-    assert sorted(e['cache_tokens'] for e in after['events']) == sorted(n + s for n in (lengths[0], lengths[-1]) for s in range(4))
+    assert before['graphs'] == after['graphs'] == 4*len(selected_lengths)
+    assert before['events'] == after['events'] and len(after['events']) == 4*len(selected_lengths)
+    assert sorted(e['cache_tokens'] for e in after['events']) == sorted(n + s for n in selected_lengths for s in range(4))
     assert all(e['batch'] == 50 and e['capture_and_warmup_s'] > 0 and e['input_buffer_bytes'] > 0 for e in after['events'])
     assert before['input_buffer_bytes'] == after['input_buffer_bytes'] == sum(e['input_buffer_bytes'] for e in after['events'])
     assert before['capture_and_warmup_s'] == after['capture_and_warmup_s'] == sum(e['capture_and_warmup_s'] for e in after['events'])
     assert setup['combined_setup_and_warmup_s'] >= after['capture_and_warmup_s']
     assert summary['reserved_bytes'] >= summary['allocated_bytes'] >= after['input_buffer_bytes']
-    assert len(rows) == summary['measured_pairs'] and len(rows) >= 8 and len(rows) % 8 == 0
-    repeats = len(rows) // 4
+    assert len(rows) == summary['measured_pairs']
+    if full:
+        assert len(rows)==500
+        assert len(list((root/'users').glob('*.json')))==500
+        repeats=1
+    else:
+        assert len(rows)>=8 and len(rows)%8==0
+        repeats=len(rows)//4
     assert after['replays'] - before['replays'] == 4 * len(rows) * (len(variants)-1)
     if direct:
-        assert repeats%6 == 0
+        assert full or repeats%6 == 0
         first, last=setup['direct_reorder'],summary['direct_reorder']
         assert last['direct_calls']-first['direct_calls'] == 4*len(rows)
         assert last['fallback_calls']-first['fallback_calls'] == len(rows)
@@ -141,16 +156,18 @@ def audit(root, historical, snapshot, run_record):
         # Two 50-element int64 token/position arrays plus one int64 cache index.
         metadata_bytes=(50+50+1)*8
         by_length={length:sum(e['input_buffer_bytes']-metadata_bytes for e in after['events']
-                             if length <= e['cache_tokens'] < length+4) for length in (76,121)}
+                             if length <= e['cache_tokens'] < length+4) for length in selected_lengths}
         assert last['kv_bytes_written']-first['kv_bytes_written'] == sum(by_length[r['prompt_tokens']] for r in rows)
     assert [(r['repeat'], r['cohort_index']) for r in rows] == [(i, u['cohort_index']) for i in range(repeats) for u in selected]
     seen, control_pairs = {}, []
-    for row in rows:
+    for index,row in enumerate(rows):
         user = next(u for u in selected if u['cohort_index'] == row['cohort_index'])
         assert row['prompt_tokens'] == user['prompt_tokens']
-        order=list(itertools.permutations(variants))[row['repeat']%6] if direct else (variants if row['repeat']%2==0 else tuple(reversed(variants)))
+        order=list(itertools.permutations(variants))[(index if full else row['repeat'])%6] if direct else (variants if row['repeat']%2==0 else tuple(reversed(variants)))
         assert row['order'] == list(order)
         assert set(row['runs']) == set(variants)
+        if full:
+            assert row==read(root/'users'/f"{row['cohort_index']:04d}.json")
         for variant, run in row['runs'].items():
             validate_run(run)
             key = (row['cohort_index'], variant)
@@ -169,15 +186,15 @@ def audit(root, historical, snapshot, run_record):
         # that summary independently; the report above requires exact FP32 bits.
         assert sum(r['runs']['compiled_gqa'][field] == r['runs']['replay'][field] for r in rows) == summary[key]
     timing = latency(rows,variants)
-    grouped = {str(length): latency([r for r in rows if r['prompt_tokens'] == length],variants) for length in (lengths[0], lengths[-1])}
+    grouped = {str(length): latency([r for r in rows if r['prompt_tokens'] == length],variants) for length in selected_lengths}
     for actual, stored in [(timing, summary['latency'])] + [(grouped[n], summary['latency_by_length'][n]) for n in grouped]:
         for variant in variants:
             assert actual[variant]['n'] == stored[variant]['n']
             for stat in ('median', 'p95'):
                 assert math.isclose(actual[variant][stat + '_ms'], stored[variant][stat + '_s'] * 1000, rel_tol=1e-12)
     return {'integrity_audit_passed': True,
-            'scope': 'Four unique users repeated; not a 500-user latency or correctness estimate.',
-            'unique_users': 4, 'repeats': repeats, 'cohort_sha256': manifest['cohort_sha256'],
+            'scope': 'Frozen 500-user cohort, one request per variant/user.' if full else 'Four unique users repeated; not a 500-user latency or correctness estimate.',
+            'unique_users': len(selected), 'repeats': repeats, 'cohort_sha256': manifest['cohort_sha256'],
             'comparison': comparison, 'historical_control': compare(control_pairs),
             'comparisons_to_compiled_gqa':{v:compare([(r['runs']['compiled_gqa'],r['runs'][v]) for r in rows]) for v in variants[1:]},
             'direct_vs_staged':compare([(r['runs']['replay'],r['runs']['direct_replay']) for r in rows]) if direct else None,

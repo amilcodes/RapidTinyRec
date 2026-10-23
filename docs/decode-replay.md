@@ -1,8 +1,9 @@
 # Decode replay pilot
 
 This branch tests whether CUDA graph replay reduces the launch cost of the
-compiled native-GQA decoder. The four-user A6000 pilot passed exactness checks
-but produced almost no aggregate latency gain. It has not advanced to 500 users.
+compiled native-GQA decoder. Staged replay produced almost no aggregate gain.
+Direct beam gathers into graph input buffers improved the four-user pilot by
+3.77% at median latency. Full-cohort confirmation is pending.
 
 The first A6000 pilot stopped during warmup, before capture or measured requests:
 Hugging Face passed `inputs_embeds=None` and the argument validator rejected the
@@ -60,8 +61,8 @@ request, including 224 KV tensors. Matrix multiplication dominates the compiled
 control's decode kernels: approximately 62.5–63.4 ms, including vocabulary
 projection. Attention accounts for another 15.9–18.8 ms.
 
-The next bounded experiment writes beam-reordered KV values directly into the
-next graph's stable input buffers. This can remove the extra staging traffic;
+Direct beam reordering (below) writes KV values into the next graph’s stable
+input buffers. This removes the extra staging traffic;
 it does not remove the model's matrix work. Trace timings are diagnostic and
 include profiler effects; the latency figures above come from separate ordinary
 requests. [Profile audit and second pilot samples](../benchmarks/pilots/decode-replay-profile)
@@ -130,7 +131,34 @@ tensor objects. The last unused cache and uncaptured warmup shapes retain ordina
 reordering. Duplicate-parent gathers use distinct source/destination storage;
 overlapping storage is rejected. The hook restores the model on exit.
 
-This candidate is unmeasured. Its CPU checks cover the actual constrained HF loop
-on both history lengths, repeated requests, duplicate parents, exact outputs,
-no extra KV copy, and hook restoration. The A6000 pilot compares compiled GQA,
-staged replay and direct reorder before any full500 decision.
+The A6000 pilot completed on four users with six balanced repetitions:
+
+| Path | Median, ms | p95, ms |
+| :--- | ---: | ---: |
+| Compiled GQA | 137.178 | 142.876 |
+| Staged replay | 136.332 | 143.187 |
+| Direct-reorder replay | 132.010 | 138.011 |
+
+Direct reorder improves median/p95 by 3.77%/3.40% versus compiled GQA and
+3.17%/3.61% versus staged replay. Every one of the 24 paired requests is faster
+than both controls. Staged replay alone slightly regresses p95 (+0.312 ms).
+Direct reorder improves both metrics at both tested history lengths. Every
+comparison matches all 1,200 positions, 1,200 sequence scores and 6,000 transition
+scores bit for bit, with zero deltas. These are repeated four-user measurements.
+
+Buffer and CUDA allocation/reservation remain 2.14 and 10.80/12.89 GiB. Setup
+and warmup took 137.552 s; nested backend compilation was 105.097 s and graph
+preparation 0.778 s. No capture/compile occurred during measurement. The audit
+checks 96 direct gathers and 24 ordinary final-cache reorders during the timed
+phase. [Pilot samples and audit](../benchmarks/pilots/direct-reorder) retain the
+staged-replay p95 regression.
+
+CPU checks cover the actual HF loop at both history lengths, repeated requests,
+duplicate parents, exact outputs, no extra KV copy, and hook restoration. The
+full-cohort confirmation adds `--full-cohort --direct-reorder --repeats 1` to the
+pilot command. It preserves all 500 users, cycles the six execution orders,
+and warms one representative of every length before freezing all 40 graphs.
+Warmup must stay below 40 GiB allocated and 46 GiB reserved; memory failure is a
+failed experiment. All three variants save 25,000 positions and sequence scores
+plus 125,000 transition scores each, with source hashes and independent audits.
+That full-cohort result is still pending; no full500 replay claim yet.

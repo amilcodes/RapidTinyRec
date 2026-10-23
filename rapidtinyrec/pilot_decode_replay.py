@@ -1,4 +1,4 @@
-"""Short/long-history A6000 pilot; no 500-user performance claim."""
+"""Paired A6000 replay pilot, or explicit full-cohort confirmation after a pilot."""
 import argparse
 import collections
 import contextlib
@@ -18,6 +18,24 @@ from .gpu_constraints import GpuSidConstraintTables,GpuSidConstrainedLogitsProce
 torch=b.torch
 
 
+def select_users(reference_users, full_cohort):
+    assert len(reference_users)==500
+    lengths=sorted({u['prompt_tokens'] for u in reference_users})
+    if full_cohort:
+        assert len(lengths)==10
+        return reference_users,[next(u for u in reference_users if u['prompt_tokens']==n) for n in lengths]
+    users=[u for length in (lengths[0],lengths[-1])
+           for u in [x for x in reference_users if x['prompt_tokens']==length][:2]]
+    assert len(users)==4
+    return users,users
+
+
+def execution_order(variants, repeat, index, full_cohort):
+    if len(variants)==3:
+        return list(itertools.permutations(variants))[(index if full_cohort else repeat)%6]
+    return variants if repeat%2==0 else tuple(reversed(variants))
+
+
 def main():
     ap=argparse.ArgumentParser(description=__doc__)
     ap.add_argument('--release-root',type=Path,required=True)
@@ -26,10 +44,14 @@ def main():
     ap.add_argument('--repeats',type=int,default=8)
     ap.add_argument('--profile',action='store_true',help='Profile only after all uninstrumented measurements')
     ap.add_argument('--direct-reorder',action='store_true',help='Add a third, paired direct-KV-reorder variant')
+    ap.add_argument('--full-cohort',action='store_true',help='After a successful pilot: all 500 users, exactly one request per variant/user')
     args=ap.parse_args()
-    assert args.repeats>=2 and args.repeats%2==0
+    if args.full_cohort:
+        assert args.direct_reorder and args.repeats==1
+    else:
+        assert args.repeats>=2 and args.repeats%2==0
     assert not (args.profile and args.direct_reorder), 'Use the existing two-way diagnostic separately'
-    if args.direct_reorder:
+    if args.direct_reorder and not args.full_cohort:
         assert args.repeats%6==0, 'Balance all six three-way execution orders'
     variants=('compiled_gqa','replay','direct_replay') if args.direct_reorder else ('compiled_gqa','replay')
     assert torch.cuda.is_available() and torch.cuda.device_count()==1
@@ -45,12 +67,12 @@ def main():
     assert hashlib.sha256(json.dumps(reference['users'],sort_keys=True).encode()).hexdigest()==expected['users_sha256']
     for name,want in expected['release_sha256'].items():assert b.digest(args.release_root/name)==want,name
     lengths=sorted({u['prompt_tokens'] for u in reference['users']})
-    users=[u for length in (lengths[0],lengths[-1])
-           for u in [x for x in reference['users'] if x['prompt_tokens']==length][:2]]
-    assert len(users)==4
-    out=args.output_root/'decode_replay_pilot'
+    users,warm_users=select_users(reference['users'],args.full_cohort)
+    out=args.output_root/('decode_replay_500' if args.full_cohort else 'decode_replay_pilot')
     out.mkdir(parents=True,exist_ok=True)
     assert not (out/'manifest.json').exists(),'Use a new output directory'
+    if args.full_cohort:
+        (out/'users').mkdir()
     tok=b.AutoTokenizer.from_pretrained(args.release_root/'Office_ckpt',local_files_only=True)
     tok.pad_token=tok.eos_token;tok.padding_side='left'
     constraints=collections.defaultdict(set)
@@ -67,7 +89,8 @@ def main():
     assert all(p.dtype==torch.float32 for p in model.parameters())
     inputs={u['cohort_index']:torch.tensor([u['prompt_token_ids']],device='cuda') for u in users}
     masks={i:torch.ones_like(x) for i,x in inputs.items()}
-    manifest={'experiment':'decode_replay_pilot','scope':'Four representative users, repeated trials; not a 500-user estimate.',
+    manifest={'experiment':'decode_replay_500' if args.full_cohort else 'decode_replay_pilot',
+        'scope':'Frozen 500-user cohort, one request per variant/user.' if args.full_cohort else 'Four representative users, repeated trials; not a 500-user estimate.',
         'users':users,'dtype':'float32','tf32':False,'hardware':torch.cuda.get_device_name(0),
         'cohort_sha256':expected['users_sha256'],'reference_manifest_sha256':reference['manifest_sha256'],
         'versions':{n:b.importlib.metadata.version(n) for n in ['torch','transformers','tokenizers']},
@@ -79,7 +102,7 @@ def main():
         'protocol':'FP32 beam50. Same compiled GQA forward for all variants. CUDA synchronization around each request. Prefill, staging copies, graph replay, constraints and beam cache reordering included. Compilation, capture, warmup and output extraction excluded. Balanced two-way alternation or all six three-way orders.'}
     b.save(out/'manifest.json',manifest)
     compiler=CompiledForward(model,out,b.announce)
-    pool=DecodeReplayPool(compiler.compiled,max_graphs=8)
+    pool=DecodeReplayPool(compiler.compiled,max_graphs=40 if args.full_cohort else 8)
     if args.direct_reorder:
         from .direct_reorder import ReorderIntoReplay
         direct=ReorderIntoReplay(pool)
@@ -117,7 +140,7 @@ def main():
 
     setup_started=time.perf_counter()
     warm_outputs={}
-    for user in users:
+    for user in warm_users:
         for variant in variants:
             torch.cuda.synchronize();started=time.perf_counter()
             output=generate(user,variant!='compiled_gqa',variant=='direct_replay')
@@ -125,37 +148,50 @@ def main():
             warm_outputs[(user['cohort_index'],variant)]=unpack(output,user)
             del output
             compiler.add_warmup({'variant':variant,'elapsed_s':elapsed,'prompt_tokens':user['prompt_tokens']})
-    for user in users:
+    for user in warm_users:
         for variant in variants:
             output=generate(user,variant!='compiled_gqa',variant=='direct_replay')
             assert unpack(output,user)==warm_outputs[(user['cohort_index'],variant)],'Warmup instability'
             del output
     torch.cuda.synchronize()
+    # Full-cohort warmup captures every exact length before measurement. Keep
+    # explicit headroom on the 48GiB A6000; an overflow is a failed experiment.
+    assert torch.cuda.memory_allocated() < 40*1024**3
+    assert torch.cuda.memory_reserved() < 46*1024**3
     pool.freeze();compiler.freeze()
     b.save(out/'setup.json',{'combined_setup_and_warmup_s':time.perf_counter()-setup_started,'replay':pool.report(),
         'direct_reorder':direct.report() if direct else None,
+        'warmup_cohort_indices':[u['cohort_index'] for u in warm_users],
+        'allocated_bytes':torch.cuda.memory_allocated(),'reserved_bytes':torch.cuda.memory_reserved(),
         'note':'Replay preparation includes warmup calls that can compile. Timings are nested and must not be added. All setup is excluded from measured requests.'})
     rows=[]
     for repeat in range(args.repeats):
-        for user in users:
-            order=list(itertools.permutations(variants))[repeat%6] if direct else (variants if repeat%2==0 else tuple(reversed(variants)))
+        for index,user in enumerate(users):
+            order=execution_order(variants,repeat,index,args.full_cohort)
             runs={}
             for variant in order:
                 torch.cuda.synchronize();started=time.perf_counter()
                 output=generate(user,variant!='compiled_gqa',variant=='direct_replay')
                 torch.cuda.synchronize();elapsed=time.perf_counter()-started
                 raw=unpack(output,user);del output
-                assert raw==warm_outputs[(user['cohort_index'],variant)],'Replay or control drifted'
+                if (user['cohort_index'],variant) in warm_outputs:
+                    assert raw==warm_outputs[(user['cohort_index'],variant)],'Replay or control drifted'
                 runs[variant]={'elapsed_s':elapsed,**raw}
             old=json.loads((args.reference_results/'users'/f"{user['cohort_index']:04d}.json").read_text())
             row={'repeat':repeat,'cohort_index':user['cohort_index'],'prompt_tokens':user['prompt_tokens'],
                 'order':order,'runs':runs,'comparison':b.compare(runs['compiled_gqa'],runs['replay']),
                 'comparisons':{v:b.compare(runs['compiled_gqa'],runs[v]) for v in variants[1:]},
                 'historical_control':b.compare(old['runs']['compiled_gqa'],runs['compiled_gqa'])}
-            rows.append(row);b.save(out/'requests.json',rows)
+            rows.append(row)
+            if args.full_cohort:
+                b.save(out/'users'/f"{user['cohort_index']:04d}.json",row)
+            else:
+                b.save(out/'requests.json',rows)
             b.announce({'stage':'measured','repeat':repeat,'cohort_index':user['cohort_index'],
                 'rankings_equal':row['comparison']['ranked_tokens_equal'],
                 'scores_equal':row['comparison']['sequence_scores_equal_in_rank_order']})
+    if args.full_cohort:
+        b.save(out/'requests.json',rows)
     compiler.finish()
     summary={'complete':True,'scope':manifest['scope'],'measured_pairs':len(rows),
         'latency':{v:b.distribution([r['runs'][v]['elapsed_s'] for r in rows]) for v in variants},
@@ -165,7 +201,7 @@ def main():
         'replay':pool.report(),'allocated_bytes':torch.cuda.memory_allocated(),'reserved_bytes':torch.cuda.memory_reserved(),
         'direct_reorder':direct.report() if direct else None,
         'latency_by_length':{str(length):{v:b.distribution([r['runs'][v]['elapsed_s'] for r in rows if r['prompt_tokens']==length])
-            for v in variants} for length in (lengths[0],lengths[-1])}}
+            for v in variants} for length in sorted({u['prompt_tokens'] for u in users})}}
     b.save(out/'summary.json',summary);b.announce(summary)
     if args.profile:
         from .profile_decode_replay import profile
