@@ -1,0 +1,22 @@
+{
+  "snapshot_date": "2026-10-23T07:38:19.352607+00:00",
+  "status": "CPU functional tests passed; 500-user A6000 comparison pending. No performance claim.",
+  "files": {
+    "combined_suffix.py": {
+      "experiment_sha256": "7a9cebc947fe1659dd253322c935b44d64ea7c4bb91fa99d59caa808a82634f1",
+      "published_sha256": "5e11d7f6fad3756ee395dbbc411f62c2d45e9e82d895faddea2e68489e39a0e9"
+    },
+    "benchmark_suffix.py": {
+      "experiment_sha256": "01dd8cffce7238b76e61bdd1ac4afe1d0c031594c172c11592c2c04e289c55da",
+      "published_sha256": "6be46418b8fbfd1da5d9d5177f4bd09bf1e7f5530ef69d9e87bf15be9c7da383"
+    },
+    "suffix_protocol.py": {
+      "experiment_sha256": "a5ddcfe1fd68de9ef15a970bfae146d0b9bece0e460f8e2f6ab309d1ae34195a",
+      "published_sha256": "a5ddcfe1fd68de9ef15a970bfae146d0b9bece0e460f8e2f6ab309d1ae34195a"
+    },
+    "test_suffix_smoke.py": {
+      "experiment_sha256": "c70ce986da6b65a5e665314b8743254cab019ee128e1439b6e2eec62c511fd3f",
+      "published_sha256": "72db45ff6378f0f7eacbaf68c2ab4737595beeb1bf82a598a0e419ea755a9c75"
+    }
+  }
+}
