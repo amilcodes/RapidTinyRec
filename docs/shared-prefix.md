@@ -2,9 +2,10 @@
 
 The complete four-user A6000 pilot preserves all ranking and score bits while
 reducing allocated memory by about 31.7% and median/p95 latency by 2.47%/2.41%.
-The 500-user confirmation is submitted as job 7861959, run
-`prefix-full-20261023T190124Z-1ae3764cde99`, using the identical source.
-The initial timeout remains documented below.
+The 500-user confirmation timed out during its final control phase. The candidate
+finished all 500 and matches historical GQA exactly, but only 357 paired controls
+were saved. The complete paired comparison remains unverified; both timeouts
+are retained below.
 
 ## Completed pilot
 
@@ -47,6 +48,59 @@ The full pilot completed in 12m52s using source `735a73b`.
 [All paired samples, independent audit and immutable source/output hashes](../benchmarks/pilots/shared-prefix)
 are published. ABBA pairs users across phases and does not establish cross-run
 variance or concurrent-serving behavior.
+
+## Full comparison: timed out
+
+Job 7861959 (`prefix-full-20261023T190124Z-1ae3764cde99`) reached its
+15-minute bound during phase 3. Phases 0–2 completed; phase 3 saved 107 of its
+250 shared-input controls. The unchanged full audit correctly fails on the
+missing phase-3 summary. These are **incomplete diagnostics**, not a completed
+500-user ABBA performance result.
+
+The shared-prefix candidate finished all 500 users. Against historical compiled
+GQA, all 25,000 rank positions, 25,000 sequence values and 125,000 transition
+values match bit for bit, with zero maximum deltas. Against the control from
+this allocation, all 357 available rank lists, 17,850 positions/sequence values
+and 89,250 transitions match exactly. The remaining 143 paired controls are
+missing; historical latency is not substituted for them.
+
+| Complete first half only: 250 paired users | Shared inputs | Shared prefix |
+| :--- | ---: | ---: |
+| Median latency | 129.600 ms | 126.838 ms |
+| p95 latency | 137.361 ms | 133.363 ms |
+| Allocated GPU memory | 18.783 GiB | 7.485 GiB |
+| Reserved GPU memory | 22.668 GiB | 9.779 GiB |
+| Peak allocated during inference | 19.639 GiB | 7.779 GiB |
+| Logical input-view storage | 10.681 GiB | 0.371 GiB |
+| Unique input storage | 0.331 GiB | 0.0145 GiB |
+
+The first-half median/p95 reductions are 2.13%/2.91%. All ten length groups in
+that half improve at both statistics. These isolated memory readings include
+40 exact graphs per process; they are not interchangeable with the eight-graph
+pilot. The second prefix phase allocated 7.485 GiB, reserved 9.313 GiB and peaked
+at 7.784 GiB allocated. Phase 3 has setup memory only, not final measured peak
+memory, so no complete four-phase memory range is reported. Prefix/suffix
+capacity remains 6,938,624/8,601,600 bytes; unique input storage including graph
+metadata is 15,572,544 bytes versus 355,565,120 for shared inputs.
+
+| Phase | Disk artifacts | Setup/warmup | Backend compile, nested | Graph preparation, nested |
+| :--- | :--- | ---: | ---: | ---: |
+| 0: shared inputs | Cold | 137.173 s | 101.344 s | 3.787 s |
+| 1: shared prefix | Cold | 346.237 s | 266.415 s | 211.000 s |
+| 2: shared prefix | Reused | 147.296 s | 67.048 s | 82.279 s |
+| 3: shared inputs | Reused | 67.915 s | 31.535 s | 3.936 s |
+
+Setup/warmup consumed 698.621 seconds total; the saved inference calls consumed
+111.021 seconds. Model loading, output extraction/serialization and other job
+work also count toward the allocation. The scheduler stopped the process during
+measurement; no preceding Python exception was found. All four phases froze 40
+graphs before measurement. Completed phases record zero measured compilation
+and capture; phase 3 has no final capture counters or memory peaks. Compiler
+and graph preparation intervals overlap within setup and must not be added.
+
+[Partial samples, exact comparisons and source/output hashes](../benchmarks/failures/shared-prefix-full-timeout)
+are retained. No replacement was submitted. Finishing the comparison requires
+a fresh, longer bounded allocation with the same source and four-phase method.
 
 ## Implementation and protocol
 
