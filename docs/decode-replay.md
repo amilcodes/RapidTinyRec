@@ -19,7 +19,19 @@ request stability checks run outside timing. These are pilot distributions, not
 ```bash
 python -m rapidtinyrec.run decode-pilot --release-root releases/office \
   --reference-results results/gqa/gqa_500_users --output-root results/replay-pilot
+python -m rapidtinyrec.audit_decode_pilot results/replay-pilot/decode_replay_pilot \
+  --historical results/gqa/gqa_500_users \
+  --snapshot frozen-source/rapidtinyrec --run-record run-record.json \
+  --output results/replay-pilot/audit.json
 ```
+
+The standalone audit verifies the immutable source hashes in the run record,
+the pinned cohort and four-user selection, repeated request stability, every FP32
+score bit, all five summed terms, historical control outputs and timing summaries.
+It also checks that no compilation or graph capture occurred after warmup. Its
+integrity verdict is separate from the reported output-equality counts. The run
+record lists `files` and their `sha256` digests relative to `frozen-source/`, with
+the allocation's GPU count/type under `resources`.
 
 Run on one A6000 with the pinned environment. No graph capture or compilation is
 permitted after warmup. A capture failure is a failed experiment; the implementation
