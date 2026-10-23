@@ -24,7 +24,7 @@ class DirectReorderTests(unittest.TestCase):
         sources = cache_pairs(args['past_key_values'])
         original = [[x.clone() for x in pair] for pair in sources]
         direct = ReorderIntoReplay(SimpleNamespace(entries={signature(args): (buffers, None, None)}))
-        parents = torch.tensor([2, 2, 0, 3])
+        parents = torch.tensor([2, 2, 0, 3], dtype=torch.int32)
         result = direct.reorder(args['past_key_values'], parents)
         for source, saved, target, layer in zip(sources, original, buffers.pairs, result.layers):
             self.assertIs(layer.keys, target[0])

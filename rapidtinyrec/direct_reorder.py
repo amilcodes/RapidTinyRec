@@ -52,7 +52,9 @@ class ReorderIntoReplay:
             return cache
         flat_sources = [x for pair in sources for x in pair]
         flat_targets = [x for pair in targets for x in pair]
-        if beam_idx.ndim != 1 or beam_idx.dtype != torch.long or any(
+        # The pinned HF beam loop stores its ancestry in int32; index_select
+        # accepts both supported integer widths without a conversion kernel.
+        if beam_idx.ndim != 1 or beam_idx.dtype not in (torch.int32, torch.int64) or any(
                 x.shape[0] != beam_idx.numel() or x.device != beam_idx.device for x in flat_targets):
             raise ValueError('Expected one on-device parent index per beam')
         # Out-of-place gather is essential for duplicated parents. Reject any
