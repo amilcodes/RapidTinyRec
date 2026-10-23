@@ -3,7 +3,10 @@
 Paired CUDA benchmark of the released generation path. One measured request per user and
 variant, with per-shape warm-up excluded.
 Resume uses atomic per-user records and verifies the input/code manifest.
-The two variants differ only in PrefillOnce; both use the released processor.
+The default experiment varies PrefillOnce with the released processor.
+The bulk_constraints experiment uses PrefillOnce in both variants and varies
+only the constraint processor. Raw variant keys remain baseline/shared for
+compatibility; manifest.variant_definitions records their precise meanings.
 """
 import argparse
 import collections
@@ -30,6 +33,7 @@ from transformers import AutoModelForCausalLM, AutoTokenizer, GenerationConfig, 
 from .source.data import EvalSidDataset
 from .source.LogitProcessor import ConstrainedLogitsProcessor
 from .shared_prefill import PrefillOnce
+from .bulk_constraints import BulkPrefixConstrainedLogitsProcessor
 
 
 def utc_now():
@@ -122,6 +126,7 @@ def main():
     parser = argparse.ArgumentParser()
     parser.add_argument('--users', type=int, default=500)
     parser.add_argument('--dtype', choices=('bfloat16', 'float32'), default='float32')
+    parser.add_argument('--experiment', choices=('shared_prefill', 'bulk_constraints'), default='shared_prefill')
     parser.add_argument('--resume', action='store_true')
     parser.add_argument('--release-root', type=Path, required=True)
     parser.add_argument('--output-root', type=Path, default=Path(os.environ.get('RAPIDTINYREC_OUTPUT_DIR', Path('results'))))
@@ -138,7 +143,7 @@ def main():
     expected = json.loads((ROOT/'expected.json').read_text())
     assert args.users == expected['num_users'], 'This experiment uses the frozen 500-user cohort'
     release = args.release_root.resolve()
-    outdir = args.output_root.resolve()/f'shared_prefill_{args.users}_users'
+    outdir = args.output_root.resolve()/f'{args.experiment}_{args.users}_users'
     outdir.mkdir(parents=True, exist_ok=True)
     for rel, want in expected['release_sha256'].items():
         assert digest(release/rel) == want, f'Release hash mismatch: {rel}'
@@ -179,7 +184,16 @@ def main():
     assert cohort_hash == expected['users_sha256'], 'Cohort/prompt tokens differ from frozen cohort'
     provenance_files = [Path(__file__), ROOT/'shared_prefill.py', ROOT/'source/data.py',
                         ROOT/'source/LogitProcessor.py', ROOT/'expected.json']
+    if args.experiment == 'bulk_constraints':
+        provenance_files.append(ROOT/'bulk_constraints.py')
+    variant_definitions = {
+        'baseline': {'shared_prefill': args.experiment == 'bulk_constraints',
+                     'constraint_processor': 'ConstrainedLogitsProcessor'},
+        'shared': {'shared_prefill': True,
+                   'constraint_processor': 'BulkPrefixConstrainedLogitsProcessor'
+                       if args.experiment == 'bulk_constraints' else 'ConstrainedLogitsProcessor'}}
     manifest = {'selection': 'First occurrence of each of the first N distinct user IDs, in test CSV order; one example per user.',
+        'experiment': args.experiment, 'variant_definitions': variant_definitions,
         'hardware': torch.cuda.get_device_name(0), 'device': 'CUDA', 'dtype': args.dtype,
         'gpu_total_memory_bytes': torch.cuda.get_device_properties(0).total_memory,
         'cuda_runtime': torch.version.cuda, 'device_capability': list(torch.cuda.get_device_capability(0)),
@@ -242,8 +256,12 @@ def main():
         cfg = GenerationConfig(max_new_tokens=8, length_penalty=0.0, num_beams=50,
             num_return_sequences=50, pad_token_id=tok.eos_token_id, eos_token_id=tok.eos_token_id,
             bos_token_id=tok.bos_token_id, do_sample=False, top_k=None, top_p=None, use_cache=True)
-        proc = ConstrainedLogitsProcessor(allowed, 50, base_model=str(ckpt), eos_token_id=tok.eos_token_id)
-        context = PrefillOnce(model, 50) if variant == 'shared' else contextlib.nullcontext()
+        processor_class = (BulkPrefixConstrainedLogitsProcessor
+            if args.experiment == 'bulk_constraints' and variant == 'shared'
+            else ConstrainedLogitsProcessor)
+        proc = processor_class(allowed, 50, base_model=str(ckpt), eos_token_id=tok.eos_token_id)
+        context = (PrefillOnce(model, 50)
+            if variant_definitions[variant]['shared_prefill'] else contextlib.nullcontext())
         with context:
             return model.generate(input_ids, attention_mask=attention_mask, generation_config=cfg,
                 do_sample=False, return_dict_in_generate=True, output_scores=True,

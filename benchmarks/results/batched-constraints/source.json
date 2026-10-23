@@ -1,0 +1,38 @@
+{
+  "snapshot_date": "2026-10-23T02:58:05.862331+00:00",
+  "note": "Experiment hashes identify original frozen sources. Published hashes include relative imports, portable paths, FP32 defaults and removal of cluster-specific launch metadata. Vendor sources and core model math are unchanged.",
+  "files": {
+    "benchmark.py": {
+      "experiment_sha256": "542133f704128341e87bc0627910bcc7c88d771eac015736f3fd563bdb708050",
+      "published_sha256": "e10b30aaa3592b92ece57aef533db4dadbc18ea5880d160e1d2c42d9630f1c2d"
+    },
+    "shared_prefill.py": {
+      "experiment_sha256": "ada528219c8f11ea54ff55db463c4c390e8e7073b60ae6fda01ce47f23665baa",
+      "published_sha256": "ada528219c8f11ea54ff55db463c4c390e8e7073b60ae6fda01ce47f23665baa"
+    },
+    "prepare_release.py": {
+      "experiment_sha256": "4acc2a194035a81552033ae9cd2da5d929666f795e4488a3afeb6aef7f58ce79",
+      "published_sha256": "d3f783a92316289386ee43cc484289115f7c4d89685db9c556fdfa972af85be7"
+    },
+    "expected.json": {
+      "experiment_sha256": "fca32f80a6c8f85ca40c071b6579e1770e4b5058ad330f23570c987cfdadbe1e",
+      "published_sha256": "fca32f80a6c8f85ca40c071b6579e1770e4b5058ad330f23570c987cfdadbe1e"
+    },
+    "requirements.txt": {
+      "experiment_sha256": "5976ae1ce277513a5df2f83713791f5fddd22bc8e34def280406f52a7954ec23",
+      "published_sha256": "5976ae1ce277513a5df2f83713791f5fddd22bc8e34def280406f52a7954ec23"
+    },
+    "source/data.py": {
+      "experiment_sha256": "85edcb6b1e7d1124c204bbdcb312d70903920b3cb5f00bc3fc1414f3df03b555",
+      "published_sha256": "85edcb6b1e7d1124c204bbdcb312d70903920b3cb5f00bc3fc1414f3df03b555"
+    },
+    "source/LogitProcessor.py": {
+      "experiment_sha256": "13ab33ff0ed3f769370478a86624499ccc0f8813de9d63e3dc4e2fa25ec59eb8",
+      "published_sha256": "13ab33ff0ed3f769370478a86624499ccc0f8813de9d63e3dc4e2fa25ec59eb8"
+    },
+    "bulk_constraints.py": {
+      "experiment_sha256": "791e9bab01413da823f6e07d48fab864f1bb70f6bd830ac534c341b4ef6d81ee",
+      "published_sha256": "aa9b40445fdb45572f5adff31ba9dfca7f5fe03d367fb0975cee694b6ba838ec"
+    }
+  }
+}
