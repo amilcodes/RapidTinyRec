@@ -5,6 +5,7 @@ import contextlib
 import functools
 import hashlib
 import json
+import os
 from pathlib import Path
 import time
 from unittest.mock import patch
@@ -37,9 +38,18 @@ def main():
     ap.add_argument('--output-root',type=Path,required=True)
     ap.add_argument('--full-cohort',action='store_true')
     ap.add_argument('--phase',type=int,choices=range(4),required=True)
+    ap.add_argument('--reuse-compiler-artifacts',action='store_true',
+        help='Reuse this variant\'s earlier on-disk compiler artifacts; GPU process and graphs are still fresh')
     args=ap.parse_args()
     variant=('arena_replay','prefix_replay','prefix_replay','arena_replay')[args.phase]
     half=0 if args.phase<2 else 1
+    assert not args.reuse_compiler_artifacts or args.phase in (2,3)
+    cache_paths={k:Path(os.environ[k]).resolve() for k in ('TORCHINDUCTOR_CACHE_DIR','TRITON_CACHE_DIR')}
+    def artifact_inventory():
+        return {k:{'path':str(p),'files':sum(x.is_file() for x in p.rglob('*')) if p.exists() else 0}
+                for k,p in cache_paths.items()}
+    artifacts_before=artifact_inventory()
+    assert (sum(v['files'] for v in artifacts_before.values())>0)==args.reuse_compiler_artifacts
     assert torch.cuda.is_available() and torch.cuda.device_count()==1
     assert torch.cuda.get_device_name(0)=='NVIDIA RTX A6000'
     torch.manual_seed(42);torch.set_num_threads(4)
@@ -75,12 +85,13 @@ def main():
     masks={i:torch.ones_like(x) for i,x in inputs.items()}
     manifest={'experiment':'shared_prefix_500' if args.full_cohort else 'shared_prefix_pilot',
         'phase':args.phase,'variant':variant,'half':half,
+        'compiler_artifacts':{'reused':args.reuse_compiler_artifacts,'before':artifacts_before},
         'users':users,'dtype':'float32','tf32':False,'hardware':torch.cuda.get_device_name(0),
         'cohort_sha256':expected['users_sha256'],'reference_manifest_sha256':reference['manifest_sha256'],
         'versions':{n:b.importlib.metadata.version(n) for n in ['torch','transformers','tokenizers']},
         'sha256':{n:b.digest(b.ROOT/n) for n in ['benchmark_shared_prefix.py','shared_prefix.py','prefix_replay.py','prefix_prefill.py','input_arena.py','decode_replay.py',
             'compiled_forward.py','shared_prefill.py','gpu_constraints.py','expected.json','direct_reorder.py']},
-        'protocol':'Four isolated processes on one GPU allocation: arena half0, prefix half0, prefix half1, arena half1. Full cohort halves use even/odd cohort positions; pilot halves use repeats 0-2/3-5. Every phase warms all selected history lengths. FP32 beam50, all five scored tokens, full-vocabulary normalization. Same Qwen2 weights and native GQA operations; candidate keeps a single-row physical prefix and temporarily materializes dense exact-length attention K/V per layer. Only suffixes are retained and reordered. Cold compilation, capture, warmup and output extraction excluded; prefill, staging, replay, constraints and cache reordering included. No per-request process switching.'}
+        'protocol':'Four isolated processes on one GPU allocation: arena half0, prefix half0, prefix half1, arena half1. Full cohort halves use even/odd cohort positions; pilot halves use repeats 0-2/3-5. Every phase warms all selected history lengths. Phases0/1 have cold disk compiler caches; phases2/3 reuse their own variant artifacts when requested. All processes, CUDA graphs and GPU memory are fresh. FP32 beam50, all five scored tokens, full-vocabulary normalization. Same Qwen2 weights and native GQA operations; candidate keeps a single-row physical prefix and temporarily materializes dense exact-length attention K/V per layer. Only suffixes are retained and reordered. Compilation, capture, warmup and output extraction excluded; prefill, staging, replay, constraints and cache reordering included. No per-request process switching.'}
     b.save(out/'manifest.json',manifest)
     compiler=CompiledForward(model,out,b.announce)
     from .input_arena import SharedInputArena
@@ -155,6 +166,7 @@ def main():
     assert torch.cuda.memory_reserved()<46*1024**3
     pool.freeze();compiler.freeze()
     b.save(out/'setup.json',{'combined_setup_and_warmup_s':time.perf_counter()-setup_started,
+        'compiler_artifacts_after':artifact_inventory(),
         'replay':pool.report(),'direct_reorder':direct.report(),
         'warmup_cohort_indices':[u['cohort_index'] for u in warm_users],'memory':memory(),
         'note':'Isolated process residency. Setup includes nested compiler and capture timings; do not add. Peak measurement counters reset after this record.'})

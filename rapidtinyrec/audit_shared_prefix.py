@@ -19,7 +19,7 @@ def audit(root,historical,snapshot,run_record):
     assert json_digest({k:v for k,v in reference.items() if k!='manifest_sha256'})==reference['manifest_sha256']
     assert len(reference['users'])==500 and json_digest(reference['users'])==expected['users_sha256']
     all_lengths=sorted({u['prompt_tokens'] for u in reference['users']})
-    phases=[]; joined={}; historical_pairs={v:[] for v in VARIANTS}; seen={}
+    phases=[]; joined={}; historical_pairs={v:[] for v in VARIANTS}; seen={}; artifact_paths={}
     full=None
     for phase,variant in enumerate(('arena_replay','prefix_replay','prefix_replay','arena_replay')):
         path=root/f'phase_{phase}'
@@ -29,6 +29,18 @@ def audit(root,historical,snapshot,run_record):
         if full is None:full=m['experiment']=='shared_prefix_500'
         assert (m['experiment']=='shared_prefix_500')==full
         assert m['phase']==phase and m['half']==half and m['variant']==variant
+        artifacts=m['compiler_artifacts']
+        assert artifacts['reused']==(phase in (2,3))
+        assert set(artifacts['before'])==set(w['compiler_artifacts_after'])=={'TORCHINDUCTOR_CACHE_DIR','TRITON_CACHE_DIR'}
+        paths={k:v['path'] for k,v in artifacts['before'].items()}
+        assert paths=={k:v['path'] for k,v in w['compiler_artifacts_after'].items()}
+        if phase<2:
+            assert not any(v['files'] for v in artifacts['before'].values())
+            artifact_paths[variant]=paths
+        else:
+            assert paths==artifact_paths[variant]
+            assert sum(v['files'] for v in artifacts['before'].values())>0
+        assert sum(v['files'] for v in w['compiler_artifacts_after'].values())>0
         assert s['complete'] and m['hardware']=='NVIDIA RTX A6000' and m['dtype']=='float32' and m['tf32'] is False
         assert m['versions']=={'torch':'2.14.0+cu126','transformers':'4.55.4','tokenizers':'0.21.4'}
         assert m['cohort_sha256']==expected['users_sha256'] and m['reference_manifest_sha256']==reference['manifest_sha256']
@@ -120,6 +132,7 @@ def audit(root,historical,snapshot,run_record):
         assert timing['n']==s['latency']['n']
         for stat in ('median','p95'):assert math.isclose(timing[stat+'_ms'],s['latency'][stat+'_s']*1000,rel_tol=1e-12)
         phases.append({'phase':phase,'variant':variant,'latency_ms':timing,'memory':s['memory'],
+            'compiler_artifacts_reused':artifacts['reused'],
             'setup_memory':w['memory'],'unique_input_storage_bytes':physical,'logical_input_bytes':logical,
             'physical_prefix':after.get('physical_prefix'),'direct_reorder':last,
             'warmup_comparison':compare(warm_comparisons),
