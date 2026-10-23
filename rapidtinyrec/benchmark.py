@@ -129,7 +129,7 @@ def main():
     parser = argparse.ArgumentParser()
     parser.add_argument('--users', type=int, default=500)
     parser.add_argument('--dtype', choices=('bfloat16', 'float32'), default='float32')
-    parser.add_argument('--experiment', choices=('shared_prefill', 'bulk_constraints', 'gpu_constraints'), default='shared_prefill')
+    parser.add_argument('--experiment', choices=('shared_prefill', 'bulk_constraints', 'gpu_constraints', 'compile_forward'), default='shared_prefill')
     parser.add_argument('--resume', action='store_true')
     parser.add_argument('--release-root', type=Path, required=True)
     parser.add_argument('--output-root', type=Path, default=Path(os.environ.get('RAPIDTINYREC_OUTPUT_DIR', Path('results'))))
@@ -187,10 +187,13 @@ def main():
     assert cohort_hash == expected['users_sha256'], 'Cohort/prompt tokens differ from frozen cohort'
     provenance_files = [Path(__file__), ROOT/'shared_prefill.py', ROOT/'source/data.py',
                         ROOT/'source/LogitProcessor.py', ROOT/'expected.json']
-    if args.experiment in ('bulk_constraints', 'gpu_constraints'):
+    if args.experiment in ('bulk_constraints', 'gpu_constraints', 'compile_forward'):
         provenance_files.append(ROOT/'bulk_constraints.py')
-    if args.experiment == 'gpu_constraints':
+    if args.experiment in ('gpu_constraints', 'compile_forward'):
         provenance_files.extend([ROOT/'gpu_constraints.py', ROOT/'validate_gpu_constraints.py'])
+    if args.experiment == 'compile_forward':
+        from .compiled_forward import CompiledForward, SETTINGS as COMPILE_SETTINGS
+        provenance_files.extend([ROOT/'compiled_forward.py'])
     variant_definitions = {
         'baseline': {'shared_prefill': args.experiment != 'shared_prefill',
                      'constraint_processor': 'BulkPrefixConstrainedLogitsProcessor'
@@ -198,7 +201,12 @@ def main():
         'shared': {'shared_prefill': True,
                    'constraint_processor': {'shared_prefill': 'ConstrainedLogitsProcessor',
                        'bulk_constraints': 'BulkPrefixConstrainedLogitsProcessor',
-                       'gpu_constraints': 'GpuSidConstrainedLogitsProcessor'}[args.experiment]}}
+                       'gpu_constraints': 'GpuSidConstrainedLogitsProcessor',
+                       'compile_forward': 'GpuSidConstrainedLogitsProcessor'}[args.experiment]}}
+    if args.experiment == 'compile_forward':
+        variant_definitions = {
+            'baseline': {'shared_prefill': True, 'constraint_processor': 'GpuSidConstrainedLogitsProcessor', 'forward': 'eager'},
+            'shared': {'shared_prefill': True, 'constraint_processor': 'GpuSidConstrainedLogitsProcessor', 'forward': 'torch.compile_inductor'}}
     manifest = {'selection': 'First occurrence of each of the first N distinct user IDs, in test CSV order; one example per user.',
         'experiment': args.experiment, 'variant_definitions': variant_definitions,
         'hardware': torch.cuda.get_device_name(0), 'device': 'CUDA', 'dtype': args.dtype,
@@ -216,6 +224,9 @@ def main():
         'protocol': 'Warm both variants once for each prompt length. Then run one timed request per variant per user; alternate order by cohort index. Synchronize CUDA before and after generation. Exclude model load, input tokenization, input transfer, warmup, output comparison and persistence. Include generation setup, score outputs and cache expansion. No prompt cache reused between requests. Preserve all measured pairs, including mismatches and latency outliers.',
         'p95_method': 'Linear interpolation at index (N-1)*0.95 in ascending latency order.',
         'scope': 'Latency distribution across 500 distinct Office test users on one allocated NVIDIA GPU; not an M4 latency comparison, concurrent serving throughput, or all-user equivalence proof.'}
+    if args.experiment == 'compile_forward':
+        manifest['compilation'] = COMPILE_SETTINGS
+        manifest['protocol'] += ' Compile the model forward only with fresh per-run compiler caches. Complete an additional compiled shape sweep without new backend compilations, then forbid recompilation during measurements. Record all compilation and warmup time separately.'
     manifest['manifest_sha256'] = hashlib.sha256(json.dumps(manifest, sort_keys=True).encode()).hexdigest()
     manifest_path = outdir/'manifest.json'
     if manifest_path.exists():
@@ -248,7 +259,7 @@ def main():
         return constraints.get(tuple(ids), [])
 
     gpu_tables = None
-    if args.experiment == 'gpu_constraints':
+    if args.experiment in ('gpu_constraints', 'compile_forward'):
         from .validate_gpu_constraints import validate
         setup_started = time.perf_counter()
         gpu_tables = GpuSidConstraintTables(constraints, users[0]['prompt_token_ids'][-3:],
@@ -273,6 +284,7 @@ def main():
     announce({'stage': 'model_loaded', 'at': utc_now(), 'dtype': str(model_dtype),
               'cuda_allocated_bytes': torch.cuda.memory_allocated(),
               'cuda_reserved_bytes': torch.cuda.memory_reserved()})
+    compiler = CompiledForward(model, outdir, announce) if args.experiment == 'compile_forward' else None
 
     @torch.inference_mode()
     def generate(variant, input_ids, attention_mask):
@@ -286,9 +298,9 @@ def main():
             processor_class = (BulkPrefixConstrainedLogitsProcessor
                 if processor_name == 'BulkPrefixConstrainedLogitsProcessor' else ConstrainedLogitsProcessor)
             proc = processor_class(allowed, 50, base_model=str(ckpt), eos_token_id=tok.eos_token_id)
-        context = (PrefillOnce(model, 50)
-            if variant_definitions[variant]['shared_prefill'] else contextlib.nullcontext())
-        with context:
+        forward_context = compiler.select(variant == 'shared') if compiler else contextlib.nullcontext()
+        with forward_context, (PrefillOnce(model, 50)
+                if variant_definitions[variant]['shared_prefill'] else contextlib.nullcontext()):
             return model.generate(input_ids, attention_mask=attention_mask, generation_config=cfg,
                 do_sample=False, return_dict_in_generate=True, output_scores=True,
                 logits_processor=LogitsProcessorList([proc]))
@@ -307,14 +319,42 @@ def main():
         x = torch.tensor([user['prompt_token_ids']], device=device)
         mask = torch.ones_like(x)
         for variant in ('baseline', 'shared'):
+            compile_count = len(compiler.events) if compiler else 0
             start = time.perf_counter()
             generated = generate(variant, x, mask)
             torch.cuda.synchronize()
             del generated
+            elapsed = time.perf_counter()-start
+            if compiler:
+                compiler.add_warmup({'phase': 'initial', 'prompt_tokens': length, 'variant': variant,
+                    'elapsed_s': elapsed, 'new_backend_graphs': len(compiler.events)-compile_count})
             announce({'stage': 'warmup', 'prompt_tokens': length, 'variant': variant,
-                      'excluded_seconds': time.perf_counter()-start,
+                      'excluded_seconds': elapsed,
                       'cuda_allocated_bytes': torch.cuda.memory_allocated(),
                       'cuda_reserved_bytes': torch.cuda.memory_reserved()})
+
+    if compiler:
+        for sweep in range(3):
+            before = len(compiler.events)
+            for length, user in sorted(representatives.items()):
+                x = torch.tensor([user['prompt_token_ids']], device=device)
+                mask = torch.ones_like(x)
+                torch.cuda.synchronize()
+                compile_count = len(compiler.events)
+                start = time.perf_counter()
+                generated = generate('shared', x, mask)
+                torch.cuda.synchronize()
+                elapsed = time.perf_counter()-start
+                del generated
+                compiler.add_warmup({'phase': 'stability', 'sweep': sweep, 'prompt_tokens': length,
+                    'variant': 'shared', 'elapsed_s': elapsed, 'new_backend_graphs': len(compiler.events)-compile_count})
+            if len(compiler.events) == before:
+                break
+        else:
+            raise RuntimeError('Compiler did not stabilize after three shape sweeps')
+        compiler.freeze()
+        announce({'stage': 'compiler_ready', 'backend_graphs': len(compiler.events),
+                  'startup_wall_s': compiler.setup_wall_s, 'measurement_compilation_forbidden': True})
 
     session_id = utc_now()
     started = time.perf_counter()
@@ -355,6 +395,8 @@ def main():
                   'median_baseline_s': current['baseline']['median_s'],
                   'median_shared_s': current['shared']['median_s'],
                   'eta_seconds': (time.perf_counter()-started)/session_completed*(len(users)-len(records))})
+    if compiler:
+        compiler.finish()
     announce({'stage': 'finished', **summarize(records, manifest, complete=True)})
 
 

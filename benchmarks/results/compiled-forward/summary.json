@@ -1,0 +1,42 @@
+{
+  "experiment": "compiled-forward",
+  "experiment_date": "2026-10-23T04:39:29.376959+00:00",
+  "hardware": "NVIDIA RTX A6000",
+  "dtype": "float32",
+  "users": 500,
+  "beams": 50,
+  "cohort_sha256": "f78097bfedff69f5928a8ccbe39d5a96e07f7e9dd4616209953cf4f51408f487",
+  "original_manifest_sha256": "cf107bc43a2fe8dd506791c87eb569c725c887f2998e4e5fd8c29447c521101f",
+  "versions": {
+    "torch": "2.14.0+cu126",
+    "transformers": "4.55.4",
+    "tokenizers": "0.21.4"
+  },
+  "cuda_runtime": "12.6",
+  "control": "baseline",
+  "candidate": "shared",
+  "latency_ms": {
+    "baseline": {
+      "median": 175.16082152724266,
+      "p95": 180.49158388748765
+    },
+    "shared": {
+      "median": 171.70447763055563,
+      "p95": 185.02193437889218
+    }
+  },
+  "matching_rank_lists": 500,
+  "matching_rank_positions": 25000,
+  "matching_sequence_values": 1570,
+  "matching_transition_values": 14381,
+  "max_sequence_difference": 0.0001163482666015625,
+  "max_transition_difference": 0.00010251998901367188,
+  "evidence": "Derived from all original per-request records; no requests or outliers removed.",
+  "requests_sha256": "b5921814e7a002b592da564bcf0d66a5d9ac5f71aa886ab285ed9767f4314158",
+  "compilation": {
+    "setup_wall_s": 196.5555824674666,
+    "backend_compile_total_s": 145.46763849817216,
+    "measurement_compilations": 0
+  },
+  "median_reduction_percent": 1.9732402865839882
+}
