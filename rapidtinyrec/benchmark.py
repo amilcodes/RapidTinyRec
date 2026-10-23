@@ -5,7 +5,9 @@ variant, with per-shape warm-up excluded.
 Resume uses atomic per-user records and verifies the input/code manifest.
 The default experiment varies PrefillOnce with the released processor.
 The bulk_constraints experiment uses PrefillOnce in both variants and varies
-only the constraint processor. Raw variant keys remain baseline/shared for
+only the constraint processor. gpu_constraints compares batched CPU lookup
+with GPU-resident lookup, again with shared prefill on both sides.
+Raw variant keys remain baseline/shared for
 compatibility; manifest.variant_definitions records their precise meanings.
 """
 import argparse
@@ -34,6 +36,7 @@ from .source.data import EvalSidDataset
 from .source.LogitProcessor import ConstrainedLogitsProcessor
 from .shared_prefill import PrefillOnce
 from .bulk_constraints import BulkPrefixConstrainedLogitsProcessor
+from .gpu_constraints import GpuSidConstraintTables, GpuSidConstrainedLogitsProcessor
 
 
 def utc_now():
@@ -126,7 +129,7 @@ def main():
     parser = argparse.ArgumentParser()
     parser.add_argument('--users', type=int, default=500)
     parser.add_argument('--dtype', choices=('bfloat16', 'float32'), default='float32')
-    parser.add_argument('--experiment', choices=('shared_prefill', 'bulk_constraints'), default='shared_prefill')
+    parser.add_argument('--experiment', choices=('shared_prefill', 'bulk_constraints', 'gpu_constraints'), default='shared_prefill')
     parser.add_argument('--resume', action='store_true')
     parser.add_argument('--release-root', type=Path, required=True)
     parser.add_argument('--output-root', type=Path, default=Path(os.environ.get('RAPIDTINYREC_OUTPUT_DIR', Path('results'))))
@@ -184,14 +187,18 @@ def main():
     assert cohort_hash == expected['users_sha256'], 'Cohort/prompt tokens differ from frozen cohort'
     provenance_files = [Path(__file__), ROOT/'shared_prefill.py', ROOT/'source/data.py',
                         ROOT/'source/LogitProcessor.py', ROOT/'expected.json']
-    if args.experiment == 'bulk_constraints':
+    if args.experiment in ('bulk_constraints', 'gpu_constraints'):
         provenance_files.append(ROOT/'bulk_constraints.py')
+    if args.experiment == 'gpu_constraints':
+        provenance_files.extend([ROOT/'gpu_constraints.py', ROOT/'validate_gpu_constraints.py'])
     variant_definitions = {
-        'baseline': {'shared_prefill': args.experiment == 'bulk_constraints',
-                     'constraint_processor': 'ConstrainedLogitsProcessor'},
+        'baseline': {'shared_prefill': args.experiment != 'shared_prefill',
+                     'constraint_processor': 'BulkPrefixConstrainedLogitsProcessor'
+                         if args.experiment == 'gpu_constraints' else 'ConstrainedLogitsProcessor'},
         'shared': {'shared_prefill': True,
-                   'constraint_processor': 'BulkPrefixConstrainedLogitsProcessor'
-                       if args.experiment == 'bulk_constraints' else 'ConstrainedLogitsProcessor'}}
+                   'constraint_processor': {'shared_prefill': 'ConstrainedLogitsProcessor',
+                       'bulk_constraints': 'BulkPrefixConstrainedLogitsProcessor',
+                       'gpu_constraints': 'GpuSidConstrainedLogitsProcessor'}[args.experiment]}}
     manifest = {'selection': 'First occurrence of each of the first N distinct user IDs, in test CSV order; one example per user.',
         'experiment': args.experiment, 'variant_definitions': variant_definitions,
         'hardware': torch.cuda.get_device_name(0), 'device': 'CUDA', 'dtype': args.dtype,
@@ -240,6 +247,22 @@ def main():
     def allowed(batch_id, ids):
         return constraints.get(tuple(ids), [])
 
+    gpu_tables = None
+    if args.experiment == 'gpu_constraints':
+        from .validate_gpu_constraints import validate
+        setup_started = time.perf_counter()
+        gpu_tables = GpuSidConstraintTables(constraints, users[0]['prompt_token_ids'][-3:],
+            tok.encode('\n', add_special_tokens=False)[0], tok.eos_token_id, device)
+        assert tok.encode('\n', add_special_tokens=False) == [198]
+        torch.cuda.synchronize()
+        setup = {'construction_seconds': time.perf_counter()-setup_started, **gpu_tables.metadata}
+        validation_started = time.perf_counter()
+        setup['validation'] = validate(gpu_tables, constraints, users[0]['prompt_token_ids'][-3:],
+            tok.eos_token_id, len(tok), device)
+        setup['validation_seconds'] = time.perf_counter()-validation_started
+        save(outdir/'gpu_constraint_setup.json', setup)
+        announce({'stage': 'gpu_constraints_validated', **setup})
+
     model = AutoModelForCausalLM.from_pretrained(ckpt, torch_dtype=model_dtype,
         local_files_only=True, attn_implementation='sdpa').to(device).eval()
     assert all(p.dtype == model_dtype for p in model.parameters()), 'Unexpected parameter dtype'
@@ -256,10 +279,13 @@ def main():
         cfg = GenerationConfig(max_new_tokens=8, length_penalty=0.0, num_beams=50,
             num_return_sequences=50, pad_token_id=tok.eos_token_id, eos_token_id=tok.eos_token_id,
             bos_token_id=tok.bos_token_id, do_sample=False, top_k=None, top_p=None, use_cache=True)
-        processor_class = (BulkPrefixConstrainedLogitsProcessor
-            if args.experiment == 'bulk_constraints' and variant == 'shared'
-            else ConstrainedLogitsProcessor)
-        proc = processor_class(allowed, 50, base_model=str(ckpt), eos_token_id=tok.eos_token_id)
+        processor_name = variant_definitions[variant]['constraint_processor']
+        if processor_name == 'GpuSidConstrainedLogitsProcessor':
+            proc = GpuSidConstrainedLogitsProcessor(gpu_tables)
+        else:
+            processor_class = (BulkPrefixConstrainedLogitsProcessor
+                if processor_name == 'BulkPrefixConstrainedLogitsProcessor' else ConstrainedLogitsProcessor)
+            proc = processor_class(allowed, 50, base_model=str(ckpt), eos_token_id=tok.eos_token_id)
         context = (PrefillOnce(model, 50)
             if variant_definitions[variant]['shared_prefill'] else contextlib.nullcontext())
         with context:
