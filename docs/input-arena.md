@@ -1,8 +1,61 @@
 # Shared graph input storage
 
-The four-user A6000 pilot preserves every ranking and score bit while reducing
-GPU residency. Latency is essentially unchanged. Full 500-user validation is
-submitted; the pilot does not establish the full-cohort memory or latency result.
+The full 500-user A6000 comparison reduces allocated GPU memory by 35.6% while
+preserving every ranking and score bit. Median/p95 latency regress by 0.188/0.349 ms.
+The independently audited pilot and full results are recorded below.
+
+## Full 500-user result
+
+The full A6000 run confirms a memory reduction with a small latency regression.
+Every one of the 500 complete rank lists matches. All 25,000 ranked positions,
+25,000 sequence scores and 125,000 transition scores match direct reorder and
+historical compiled GQA bit for bit, with zero maximum numerical deltas. All
+five token probabilities and full-vocabulary normalization remain intact.
+
+| Metric | Direct reorder | Shared input arena |
+| :--- | ---: | ---: |
+| Median latency | 130.052 ms | 130.240 ms |
+| p95 latency | 137.956 ms | 138.305 ms |
+| Logical graph-input view bytes | 10.681 GiB | 10.681 GiB |
+| Unique graph-input storage | 10.681 GiB | 0.331 GiB |
+| Total allocated GPU memory | 29.163 GiB | 18.783 GiB |
+| Total reserved GPU memory | 34.822 GiB | 22.668 GiB |
+| Peak allocated during measurement | 30.024 GiB | 19.639 GiB |
+| Peak reserved during measurement | 34.822 GiB | 22.668 GiB |
+
+Unique input storage falls **96.9%**, and total allocated memory falls **35.6%**
+(10.38 GiB). Reserved memory falls **34.9%**. Both independent processes for each
+variant report identical residency and measurement peaks. The 40 graph inputs
+still describe the same logical tensors; counting overlapping views as separate
+allocations would hide the saving.
+
+Median latency regresses **0.188 ms (0.144%)** and p95 regresses **0.349 ms
+(0.253%)**. Both cohort halves regress at median and p95. Nine of ten history
+lengths regress at median, and all ten regress at p95; the length-level p95
+increases range from 0.240 to 0.934 ms. These are measured regressions, not a
+latency speedup. One allocation with ABBA phase pairing does not establish the
+size or cause of a persistent runtime penalty across runs. The earlier pilot's
+p95 improvement does not replace these full-cohort results.
+
+| Cold phase | Setup/warmup | Backend compile (nested) | Capture/warmup (nested) |
+| :--- | ---: | ---: | ---: |
+| 0: direct_replay | 138.923 s | 103.210 s | 3.869 s |
+| 1: arena_replay | 137.031 s | 101.812 s | 3.794 s |
+| 2: arena_replay | 136.887 s | 101.383 s | 3.803 s |
+| 3: direct_replay | 137.080 s | 101.678 s | 3.863 s |
+
+Compilation and graph capture are frozen before requests: **zero measured
+compilations or captures**. The nested setup categories must not be added. The
+four phases use separate cold compiler caches and fresh processes on the same
+allocation; every phase warms all ten lengths and captures all 40 shapes.
+This isolates memory and pairs the same users across phases, rather than keeping
+both graph pools resident for alternating requests.
+
+[All 500 paired samples, independent audit and frozen source hashes](../benchmarks/results/input-arena)
+are published. Measured source is `ff36c3f`; the full run completed in 12m57s.
+The raw per-phase manifests, outputs, compilation reports and snapshots are
+retained. This result is scoped to sequential inference on the pinned checkpoint,
+cohort, precision and hardware. Serving concurrency and other GPUs remain untested.
 
 ## Pilot result
 
@@ -25,7 +78,7 @@ small differences do not establish a latency benefit. Short-history median also
 regresses 0.339 ms; long-history median improves 0.609 ms. Both isolated phases
 of each variant report identical allocated/reserved memory. Input storage falls
 84.5%; total allocation falls 16.7%. Eight exact shapes remain resident in each
-phase. The full run captures 40 shapes per phase and must be measured separately.
+phase. The separate full run above captures 40 shapes per phase.
 
 Cold setup/warmup takes 134.266–136.173 s per direct phase and 132.880–133.128 s
 per arena phase. Nested backend compilation takes 104.205–105.656 s and

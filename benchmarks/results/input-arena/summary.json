@@ -1,0 +1,147 @@
+{
+  "experiment": "input-arena",
+  "experiment_date": "2026-10-23",
+  "hardware": "NVIDIA RTX A6000",
+  "dtype": "float32",
+  "tf32": false,
+  "users": 500,
+  "paired_requests": 500,
+  "beams": 50,
+  "cohort_sha256": "f78097bfedff69f5928a8ccbe39d5a96e07f7e9dd4616209953cf4f51408f487",
+  "control": "direct_replay",
+  "candidate": "arena_replay",
+  "requests_sha256": "5078739a8ac76353a39c522b3ea10451f9dbb713e16381d1198f35ff2f71cb5f",
+  "latency_ms": {
+    "direct_replay": {
+      "median": 130.0521083176136,
+      "p95": 137.95604649931192
+    },
+    "arena_replay": {
+      "median": 130.23995980620384,
+      "p95": 138.3049001917243
+    }
+  },
+  "matching_rank_lists": 500,
+  "phases": [
+    {
+      "phase": 0,
+      "variant": "direct_replay",
+      "latency_ms": {
+        "n": 250,
+        "median_ms": 130.01671060919762,
+        "p95_ms": 137.96197902411222
+      },
+      "memory": {
+        "allocated_bytes": 31313562624,
+        "reserved_bytes": 37390123008,
+        "peak_allocated_bytes": 32237931520,
+        "peak_reserved_bytes": 37390123008
+      },
+      "setup_memory": {
+        "allocated_bytes": 31313562624,
+        "reserved_bytes": 37390123008,
+        "peak_allocated_bytes": 32593095680,
+        "peak_reserved_bytes": 37390123008
+      },
+      "unique_input_storage_bytes": 11468832320,
+      "logical_input_bytes": 11468832320,
+      "setup_s": 138.9230139516294,
+      "backend_compile_s": 103.21020984649658,
+      "capture_and_warmup_s": 3.8694130182266235,
+      "measurement_compilations": 0,
+      "measurement_captures": 0
+    },
+    {
+      "phase": 1,
+      "variant": "arena_replay",
+      "latency_ms": {
+        "n": 250,
+        "median_ms": 130.18548116087914,
+        "p95_ms": 138.30211330205202
+      },
+      "memory": {
+        "allocated_bytes": 20168194560,
+        "reserved_bytes": 24339546112,
+        "peak_allocated_bytes": 21087174656,
+        "peak_reserved_bytes": 24339546112
+      },
+      "setup_memory": {
+        "allocated_bytes": 20168194560,
+        "reserved_bytes": 24339546112,
+        "peak_allocated_bytes": 21443384320,
+        "peak_reserved_bytes": 24339546112
+      },
+      "unique_input_storage_bytes": 355565120,
+      "logical_input_bytes": 11468832320,
+      "setup_s": 137.03141583874822,
+      "backend_compile_s": 101.81162560358644,
+      "capture_and_warmup_s": 3.7941469810903072,
+      "measurement_compilations": 0,
+      "measurement_captures": 0
+    },
+    {
+      "phase": 2,
+      "variant": "arena_replay",
+      "latency_ms": {
+        "n": 250,
+        "median_ms": 130.49734942615032,
+        "p95_ms": 138.2031362503767
+      },
+      "memory": {
+        "allocated_bytes": 20168194560,
+        "reserved_bytes": 24339546112,
+        "peak_allocated_bytes": 21087174656,
+        "peak_reserved_bytes": 24339546112
+      },
+      "setup_memory": {
+        "allocated_bytes": 20168194560,
+        "reserved_bytes": 24339546112,
+        "peak_allocated_bytes": 21443384320,
+        "peak_reserved_bytes": 24339546112
+      },
+      "unique_input_storage_bytes": 355565120,
+      "logical_input_bytes": 11468832320,
+      "setup_s": 136.88678134977818,
+      "backend_compile_s": 101.38250667974353,
+      "capture_and_warmup_s": 3.8030561693012714,
+      "measurement_compilations": 0,
+      "measurement_captures": 0
+    },
+    {
+      "phase": 3,
+      "variant": "direct_replay",
+      "latency_ms": {
+        "n": 250,
+        "median_ms": 130.10863028466702,
+        "p95_ms": 137.93124128133059
+      },
+      "memory": {
+        "allocated_bytes": 31313562624,
+        "reserved_bytes": 37390123008,
+        "peak_allocated_bytes": 32237931520,
+        "peak_reserved_bytes": 37390123008
+      },
+      "setup_memory": {
+        "allocated_bytes": 31313562624,
+        "reserved_bytes": 37390123008,
+        "peak_allocated_bytes": 32593095680,
+        "peak_reserved_bytes": 37390123008
+      },
+      "unique_input_storage_bytes": 11468832320,
+      "logical_input_bytes": 11468832320,
+      "setup_s": 137.0797106437385,
+      "backend_compile_s": 101.67830362915993,
+      "capture_and_warmup_s": 3.8626489266753197,
+      "measurement_compilations": 0,
+      "measurement_captures": 0
+    }
+  ],
+  "scope": "Memory is isolated per fresh process; latency is paired by user/repeat across ABBA phases, not interleaved requests. One allocation does not establish run-to-run variance. Setup timings are nested; do not add. Integrity passing alone does not imply bit equality.",
+  "measurement_compilations": 0,
+  "measurement_captures": 0,
+  "matching_rank_positions": 25000,
+  "matching_sequence_values": 25000,
+  "matching_transition_values": 125000,
+  "max_sequence_difference": 0.0,
+  "max_transition_difference": 0.0
+}

@@ -1,0 +1,331 @@
+{
+  "integrity_audit_passed": true,
+  "unique_users": 500,
+  "paired_requests": 500,
+  "cohort_sha256": "f78097bfedff69f5928a8ccbe39d5a96e07f7e9dd4616209953cf4f51408f487",
+  "comparison": {
+    "requests": 500,
+    "rank_positions": 25000,
+    "sequence_values": 25000,
+    "transition_values": 125000,
+    "matching_rank_lists": 500,
+    "matching_rank_positions": 25000,
+    "matching_sequence_vectors": 500,
+    "matching_transition_arrays": 500,
+    "matching_sequence_values": 25000,
+    "matching_transition_values": 125000,
+    "max_sequence_difference_common": 0.0,
+    "max_transition_difference_common": 0.0
+  },
+  "historical_comparisons": {
+    "direct_replay": {
+      "requests": 500,
+      "rank_positions": 25000,
+      "sequence_values": 25000,
+      "transition_values": 125000,
+      "matching_rank_lists": 500,
+      "matching_rank_positions": 25000,
+      "matching_sequence_vectors": 500,
+      "matching_transition_arrays": 500,
+      "matching_sequence_values": 25000,
+      "matching_transition_values": 125000,
+      "max_sequence_difference_common": 0.0,
+      "max_transition_difference_common": 0.0
+    },
+    "arena_replay": {
+      "requests": 500,
+      "rank_positions": 25000,
+      "sequence_values": 25000,
+      "transition_values": 125000,
+      "matching_rank_lists": 500,
+      "matching_rank_positions": 25000,
+      "matching_sequence_vectors": 500,
+      "matching_transition_arrays": 500,
+      "matching_sequence_values": 25000,
+      "matching_transition_values": 125000,
+      "max_sequence_difference_common": 0.0,
+      "max_transition_difference_common": 0.0
+    }
+  },
+  "latency_ms": {
+    "direct_replay": {
+      "n": 500,
+      "median_ms": 130.0521083176136,
+      "p95_ms": 137.95604649931192
+    },
+    "arena_replay": {
+      "n": 500,
+      "median_ms": 130.23995980620384,
+      "p95_ms": 138.3049001917243
+    }
+  },
+  "reductions_percent": {
+    "median_ms": -0.14444324741853531,
+    "p95_ms": -0.2528730717244132
+  },
+  "latency_by_length_ms": {
+    "76": {
+      "direct_replay": {
+        "n": 109,
+        "median_ms": 127.2788904607296,
+        "p95_ms": 128.65100726485252
+      },
+      "arena_replay": {
+        "n": 109,
+        "median_ms": 127.34437361359596,
+        "p95_ms": 129.01002690196037
+      }
+    },
+    "81": {
+      "direct_replay": {
+        "n": 39,
+        "median_ms": 128.12118232250214,
+        "p95_ms": 129.44352701306343
+      },
+      "arena_replay": {
+        "n": 39,
+        "median_ms": 128.60798463225365,
+        "p95_ms": 130.37736229598522
+      }
+    },
+    "86": {
+      "direct_replay": {
+        "n": 69,
+        "median_ms": 129.35462966561317,
+        "p95_ms": 130.81108182668686
+      },
+      "arena_replay": {
+        "n": 69,
+        "median_ms": 129.53737378120422,
+        "p95_ms": 131.47715479135513
+      }
+    },
+    "91": {
+      "direct_replay": {
+        "n": 85,
+        "median_ms": 129.94419038295746,
+        "p95_ms": 131.363146007061
+      },
+      "arena_replay": {
+        "n": 85,
+        "median_ms": 129.94055077433586,
+        "p95_ms": 131.69262036681175
+      }
+    },
+    "96": {
+      "direct_replay": {
+        "n": 58,
+        "median_ms": 132.96088576316833,
+        "p95_ms": 134.42136514931917
+      },
+      "arena_replay": {
+        "n": 58,
+        "median_ms": 133.2601923495531,
+        "p95_ms": 134.8658761009574
+      }
+    },
+    "101": {
+      "direct_replay": {
+        "n": 42,
+        "median_ms": 135.48316806554794,
+        "p95_ms": 136.9802050292492
+      },
+      "arena_replay": {
+        "n": 42,
+        "median_ms": 135.73727756738663,
+        "p95_ms": 137.47766371816397
+      }
+    },
+    "106": {
+      "direct_replay": {
+        "n": 24,
+        "median_ms": 136.27994991838932,
+        "p95_ms": 137.84399814903736
+      },
+      "arena_replay": {
+        "n": 24,
+        "median_ms": 136.30672357976437,
+        "p95_ms": 138.23896944522858
+      }
+    },
+    "111": {
+      "direct_replay": {
+        "n": 18,
+        "median_ms": 136.42404042184353,
+        "p95_ms": 138.03485836833715
+      },
+      "arena_replay": {
+        "n": 18,
+        "median_ms": 137.14951276779175,
+        "p95_ms": 138.5515581816435
+      }
+    },
+    "116": {
+      "direct_replay": {
+        "n": 13,
+        "median_ms": 137.07788288593292,
+        "p95_ms": 138.76757323741913
+      },
+      "arena_replay": {
+        "n": 13,
+        "median_ms": 137.28731498122215,
+        "p95_ms": 139.27026614546776
+      }
+    },
+    "121": {
+      "direct_replay": {
+        "n": 43,
+        "median_ms": 137.6354657113552,
+        "p95_ms": 139.51217494904995
+      },
+      "arena_replay": {
+        "n": 43,
+        "median_ms": 138.14250379800797,
+        "p95_ms": 139.75254595279694
+      }
+    }
+  },
+  "latency_by_half_ms": {
+    "0": {
+      "direct_replay": {
+        "n": 250,
+        "median_ms": 130.01671060919762,
+        "p95_ms": 137.96197902411222
+      },
+      "arena_replay": {
+        "n": 250,
+        "median_ms": 130.18548116087914,
+        "p95_ms": 138.30211330205202
+      }
+    },
+    "1": {
+      "direct_replay": {
+        "n": 250,
+        "median_ms": 130.10863028466702,
+        "p95_ms": 137.93124128133059
+      },
+      "arena_replay": {
+        "n": 250,
+        "median_ms": 130.49734942615032,
+        "p95_ms": 138.2031362503767
+      }
+    }
+  },
+  "phases": [
+    {
+      "phase": 0,
+      "variant": "direct_replay",
+      "latency_ms": {
+        "n": 250,
+        "median_ms": 130.01671060919762,
+        "p95_ms": 137.96197902411222
+      },
+      "memory": {
+        "allocated_bytes": 31313562624,
+        "reserved_bytes": 37390123008,
+        "peak_allocated_bytes": 32237931520,
+        "peak_reserved_bytes": 37390123008
+      },
+      "setup_memory": {
+        "allocated_bytes": 31313562624,
+        "reserved_bytes": 37390123008,
+        "peak_allocated_bytes": 32593095680,
+        "peak_reserved_bytes": 37390123008
+      },
+      "unique_input_storage_bytes": 11468832320,
+      "logical_input_bytes": 11468832320,
+      "setup_s": 138.9230139516294,
+      "backend_compile_s": 103.21020984649658,
+      "capture_and_warmup_s": 3.8694130182266235,
+      "measurement_compilations": 0,
+      "measurement_captures": 0
+    },
+    {
+      "phase": 1,
+      "variant": "arena_replay",
+      "latency_ms": {
+        "n": 250,
+        "median_ms": 130.18548116087914,
+        "p95_ms": 138.30211330205202
+      },
+      "memory": {
+        "allocated_bytes": 20168194560,
+        "reserved_bytes": 24339546112,
+        "peak_allocated_bytes": 21087174656,
+        "peak_reserved_bytes": 24339546112
+      },
+      "setup_memory": {
+        "allocated_bytes": 20168194560,
+        "reserved_bytes": 24339546112,
+        "peak_allocated_bytes": 21443384320,
+        "peak_reserved_bytes": 24339546112
+      },
+      "unique_input_storage_bytes": 355565120,
+      "logical_input_bytes": 11468832320,
+      "setup_s": 137.03141583874822,
+      "backend_compile_s": 101.81162560358644,
+      "capture_and_warmup_s": 3.7941469810903072,
+      "measurement_compilations": 0,
+      "measurement_captures": 0
+    },
+    {
+      "phase": 2,
+      "variant": "arena_replay",
+      "latency_ms": {
+        "n": 250,
+        "median_ms": 130.49734942615032,
+        "p95_ms": 138.2031362503767
+      },
+      "memory": {
+        "allocated_bytes": 20168194560,
+        "reserved_bytes": 24339546112,
+        "peak_allocated_bytes": 21087174656,
+        "peak_reserved_bytes": 24339546112
+      },
+      "setup_memory": {
+        "allocated_bytes": 20168194560,
+        "reserved_bytes": 24339546112,
+        "peak_allocated_bytes": 21443384320,
+        "peak_reserved_bytes": 24339546112
+      },
+      "unique_input_storage_bytes": 355565120,
+      "logical_input_bytes": 11468832320,
+      "setup_s": 136.88678134977818,
+      "backend_compile_s": 101.38250667974353,
+      "capture_and_warmup_s": 3.8030561693012714,
+      "measurement_compilations": 0,
+      "measurement_captures": 0
+    },
+    {
+      "phase": 3,
+      "variant": "direct_replay",
+      "latency_ms": {
+        "n": 250,
+        "median_ms": 130.10863028466702,
+        "p95_ms": 137.93124128133059
+      },
+      "memory": {
+        "allocated_bytes": 31313562624,
+        "reserved_bytes": 37390123008,
+        "peak_allocated_bytes": 32237931520,
+        "peak_reserved_bytes": 37390123008
+      },
+      "setup_memory": {
+        "allocated_bytes": 31313562624,
+        "reserved_bytes": 37390123008,
+        "peak_allocated_bytes": 32593095680,
+        "peak_reserved_bytes": 37390123008
+      },
+      "unique_input_storage_bytes": 11468832320,
+      "logical_input_bytes": 11468832320,
+      "setup_s": 137.0797106437385,
+      "backend_compile_s": 101.67830362915993,
+      "capture_and_warmup_s": 3.8626489266753197,
+      "measurement_compilations": 0,
+      "measurement_captures": 0
+    }
+  ],
+  "snapshot_files_verified": 35,
+  "audit_script_sha256": "a351e222eead05acdc762b5a64791dd579d3c50e4b8b55a79f4d1ad70eb6e983",
+  "note": "Memory is isolated per fresh process; latency is paired by user/repeat across ABBA phases, not interleaved requests. One allocation does not establish run-to-run variance. Setup timings are nested; do not add. Integrity passing alone does not imply bit equality."
+}
