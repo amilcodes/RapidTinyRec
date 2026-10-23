@@ -11,6 +11,7 @@ from rapidtinyrec.decode_replay import cache_from_pairs, cache_pairs
 from rapidtinyrec.shared_prefix import PrefixArena, PrefixCache, split_pairs
 from rapidtinyrec.prefix_replay import PrefixBuffers, PrefixOutput, ReorderSuffix, signature
 from rapidtinyrec.shared_prefill import PrefillOnce
+from rapidtinyrec.prefix_prefill import PrefillPrefix
 from rapidtinyrec.gpu_constraints import GpuSidConstraintTables, GpuSidConstrainedLogitsProcessor
 from test_decoding import catalog
 
@@ -78,8 +79,7 @@ class SharedPrefixTests(unittest.TestCase):
                             return result.fresh()
                         return original(**kw)
                     x=torch.tensor([history]);before=direct.report()
-                    with patch.object(model,'forward',forward), PrefillOnce(model,50,
-                            cache_expander=arena.start_request if candidate else None), \
+                    with patch.object(model,'forward',forward), (PrefillPrefix(model,50,cache_expander=arena.start_request) if candidate else PrefillOnce(model,50)), \
                             (direct.install(model) if candidate else contextlib.nullcontext()):
                         output=model.generate(x,attention_mask=torch.ones_like(x),generation_config=cfg,
                             logits_processor=LogitsProcessorList([GpuSidConstrainedLogitsProcessor(tables)]),

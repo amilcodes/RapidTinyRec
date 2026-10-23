@@ -11,6 +11,7 @@ from unittest.mock import patch
 
 from . import benchmark as b
 from .compiled_forward import CompiledForward
+from .prefix_prefill import PrefillPrefix
 from .decode_replay import DecodeReplayPool
 from .gpu_constraints import GpuSidConstraintTables,GpuSidConstrainedLogitsProcessor
 
@@ -77,7 +78,7 @@ def main():
         'users':users,'dtype':'float32','tf32':False,'hardware':torch.cuda.get_device_name(0),
         'cohort_sha256':expected['users_sha256'],'reference_manifest_sha256':reference['manifest_sha256'],
         'versions':{n:b.importlib.metadata.version(n) for n in ['torch','transformers','tokenizers']},
-        'sha256':{n:b.digest(b.ROOT/n) for n in ['benchmark_shared_prefix.py','shared_prefix.py','prefix_replay.py','input_arena.py','decode_replay.py',
+        'sha256':{n:b.digest(b.ROOT/n) for n in ['benchmark_shared_prefix.py','shared_prefix.py','prefix_replay.py','prefix_prefill.py','input_arena.py','decode_replay.py',
             'compiled_forward.py','shared_prefill.py','gpu_constraints.py','expected.json','direct_reorder.py']},
         'protocol':'Four isolated processes on one GPU allocation: arena half0, prefix half0, prefix half1, arena half1. Full cohort halves use even/odd cohort positions; pilot halves use repeats 0-2/3-5. Every phase warms all selected history lengths. FP32 beam50, all five scored tokens, full-vocabulary normalization. Same Qwen2 weights and native GQA operations; candidate keeps a single-row physical prefix and temporarily materializes dense exact-length attention K/V per layer. Only suffixes are retained and reordered. Cold compilation, capture, warmup and output extraction excluded; prefill, staging, replay, constraints and cache reordering included. No per-request process switching.'}
     b.save(out/'manifest.json',manifest)
@@ -109,7 +110,7 @@ def main():
         cfg=b.GenerationConfig(max_new_tokens=8,length_penalty=0.,num_beams=50,num_return_sequences=50,
             pad_token_id=tok.eos_token_id,eos_token_id=tok.eos_token_id,bos_token_id=tok.bos_token_id,
             do_sample=False,top_k=None,top_p=None,use_cache=True)
-        with patch.object(model,'forward',forward),b.PrefillOnce(model,50,cache_expander=arena.start_request if prefix_mode and replay else None), \
+        with patch.object(model,'forward',forward),(PrefillPrefix(model,50,cache_expander=arena.start_request) if prefix_mode and replay else b.PrefillOnce(model,50)), \
                 (direct.install(model) if direct_reorder else contextlib.nullcontext()):
             output=model.generate(inputs[user['cohort_index']],attention_mask=masks[user['cohort_index']],
                 generation_config=cfg,return_dict_in_generate=True,output_scores=True,
