@@ -2,6 +2,7 @@
 import unittest
 
 import torch
+from transformers import Qwen2Config, Qwen2ForCausalLM
 from transformers.modeling_outputs import CausalLMOutputWithPast
 
 from rapidtinyrec.decode_replay import (
@@ -16,6 +17,46 @@ def example(length=7):
 
 
 class ReplayTests(unittest.TestCase):
+    @torch.inference_mode()
+    def test_staged_decode_matches_qwen_after_duplicate_parent_selection(self):
+        torch.set_num_threads(1)
+        torch.manual_seed(914)
+        config=Qwen2Config(vocab_size=512,hidden_size=32,intermediate_size=64,
+            num_hidden_layers=2,num_attention_heads=4,num_key_value_heads=2,
+            max_position_embeddings=64)
+        model=Qwen2ForCausalLM(config).double().eval()
+        model.config._attn_implementation='sdpa'
+        for length in (7,12):
+            buffers=None
+            pointers=None
+            for request in range(3):
+                prefix=model(input_ids=torch.randint(0,512,(1,length)),
+                    use_cache=True,return_dict=True,logits_to_keep=1)
+                cache=prefix.past_key_values
+                cache.batch_repeat_interleave(50)
+                # Give rows distinct suffix states before selecting parents,
+                # so a permutation/duplication error cannot hide behind copies.
+                first=model(input_ids=torch.arange(50).view(50,1),past_key_values=cache,
+                    position_ids=torch.full((50,1),length),cache_position=torch.tensor([length]),
+                    attention_mask={'full_attention':None},use_cache=True,return_dict=True,logits_to_keep=1)
+                first.past_key_values.reorder_cache(torch.arange(49,-1,-1)//2)
+                incoming={'input_ids':torch.randint(0,512,(50,1)),
+                    'past_key_values':first.past_key_values,'position_ids':torch.full((50,1),length+1),
+                    'cache_position':torch.tensor([length+1]),'attention_mask':{'full_attention':None},
+                    'use_cache':True,'return_dict':True,'logits_to_keep':1}
+                reference=model(**{**incoming,'past_key_values':cache_from_pairs(cache_pairs(incoming['past_key_values']))})
+                if buffers is None:
+                    buffers=ReplayBuffers(incoming)
+                    pointers=[x.data_ptr() for pair in buffers.pairs for x in pair]
+                else:
+                    buffers.load(incoming)
+                actual=model(**buffers.kwargs())
+                self.assertTrue(torch.equal(reference.logits,actual.logits),(length,request))
+                for expected_pair,actual_pair in zip(cache_pairs(reference.past_key_values),cache_pairs(actual.past_key_values)):
+                    self.assertTrue(all(torch.equal(a,b) for a,b in zip(expected_pair,actual_pair)))
+                self.assertEqual(pointers,[x.data_ptr() for pair in buffers.pairs for x in pair])
+                self.assertEqual(buffers.kwargs()['past_key_values'].get_seq_length(),length+1)
+
     def test_cache_container_preserves_layer_count_and_references(self):
         args=example()
         original=cache_pairs(args['past_key_values'])
