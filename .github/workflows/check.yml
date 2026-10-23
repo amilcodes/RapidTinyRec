@@ -14,6 +14,7 @@ jobs:
       - run: python -m unittest discover -s tests -p test_evidence.py -v
       - run: python -m unittest discover -s tests -p test_audit_decode_pilot.py -v
       - run: python -m rapidtinyrec.audit_decode_pilot --help
+      - run: python -m rapidtinyrec.audit_input_arena --help
   decoding:
     runs-on: ubuntu-latest
     steps:

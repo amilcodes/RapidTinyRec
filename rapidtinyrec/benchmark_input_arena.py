@@ -4,7 +4,6 @@ import collections
 import contextlib
 import functools
 import hashlib
-import itertools
 import json
 from pathlib import Path
 import time
@@ -30,12 +29,6 @@ def select_users(reference_users, full_cohort):
     return users,users
 
 
-def execution_order(variants, repeat, index, full_cohort):
-    if len(variants)==3:
-        return list(itertools.permutations(variants))[(index if full_cohort else repeat)%6]
-    return variants if repeat%2==0 else tuple(reversed(variants))
-
-
 def main():
     ap=argparse.ArgumentParser(description=__doc__)
     ap.add_argument('--release-root',type=Path,required=True)
@@ -58,7 +51,6 @@ def main():
     assert hashlib.sha256(json.dumps(content,sort_keys=True).encode()).hexdigest()==reference['manifest_sha256']
     assert hashlib.sha256(json.dumps(reference['users'],sort_keys=True).encode()).hexdigest()==expected['users_sha256']
     for name,want in expected['release_sha256'].items():assert b.digest(args.release_root/name)==want,name
-    lengths=sorted({u['prompt_tokens'] for u in reference['users']})
     users,warm_users=select_users(reference['users'],args.full_cohort)
     out=args.output_root/f'phase_{args.phase}'
     out.mkdir(parents=True,exist_ok=True)

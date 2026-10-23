@@ -188,7 +188,7 @@ class DecodeReplayPool:
         storage={(x.device,x.untyped_storage().data_ptr()):x.untyped_storage().nbytes() for x in tensors}
         return {'graphs':len(self.entries),'frozen':self.frozen,'replays':self.replays,
             'capture_and_warmup_s':sum(e['capture_and_warmup_s'] for e in self.events),
-            'input_buffer_bytes':sum(e['input_buffer_bytes'] for e in self.events),
+            'input_buffer_bytes':sum(x.numel()*x.element_size() for x in tensors),
             'unique_input_storage_bytes':sum(storage.values()),
             'shared_input_arena':self.arena is not None,
             'events':self.events,
