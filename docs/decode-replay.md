@@ -187,10 +187,10 @@ and graph pool in the paired allocation; setup is not three independent cold
 starts. Previous allocations' absolute latencies are not additional gains.
 
 The memory cost is substantial: 10.68 GiB in graph input buffers, 29.16 GiB
-allocated and 34.90 GiB reserved in total. The next candidate is shared input
-storage across mutually exclusive exact-length graphs; that has not been
-implemented or validated. It must retain each graph’s contiguous shape/stride
-contract and borrowed-output lifetime before any memory saving is claimed.
+allocated and 34.90 GiB reserved in total. Shared input storage across mutually exclusive exact-length graphs now passes
+a four-user A6000 pilot, reducing allocated memory from 10.80 to 8.99 GiB with
+exact rankings and scores; full-cohort confirmation is pending.
+[Input-arena results and protocol](input-arena.md) retain the small median regression.
 Physical prefix sharing remains a later experiment.
 
 [All 500 samples, independent audit and source hashes](../benchmarks/results/decode-replay)
