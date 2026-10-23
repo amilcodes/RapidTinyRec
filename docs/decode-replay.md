@@ -34,10 +34,38 @@ the nested backend compilation total was 107.984 s and graph preparation was
 are excluded from the latency table and must not be added together.
 
 [Pilot fingerprints and independent audit](../benchmarks/pilots/decode-replay)
-retain all samples. The next experiment profiles staging copies, graph replay,
-cache reordering and CPU launch gaps; the extra staging traffic is a hypothesis
-for the weak gain, not yet a measured bottleneck. The 500-user README performance
-table is unchanged.
+retain all samples. A second allocation reproduced the small gain: compiled GQA
+137.016 / 143.835 ms median/p95 versus replay 135.864 / 142.631 ms (0.84% / 0.84%).
+All 1,600 positions and sequence values plus 8,000 transitions remain exact.
+The 500-user README performance table is unchanged.
+
+## What profiling found
+
+Four traces and twelve light profiles were recorded after that second benchmark.
+All 800 instrumented positions/sequence values and 4,000 transitions match the
+uninstrumented outputs bit for bit. No compilation or capture occurred.
+
+| Actual CUDA activities per request | 76-token history | 121-token history |
+| :--- | ---: | ---: |
+| Compiled decode kernels, four forwards | 82.94 ms | 88.57 ms |
+| Replayed decode kernels, four forwards | 84.31 ms | 87.81 ms |
+| Additional replay staging copies | 3.19 ms | 4.80 ms |
+| Beam reorder kernels in replay | 3.68 ms | 5.38 ms |
+
+Replay executes the same 2,360 decode kernels. It reduces host time spent inside
+those forward calls from about 43 ms to roughly 8 ms of staging, validation,
+replay and cache-container calls, but most dispatch already overlaps GPU work.
+These host and device times must not be added. Staging adds 236 device copies per
+request, including 224 KV tensors. Matrix multiplication dominates the compiled
+control's decode kernels: approximately 62.5–63.4 ms, including vocabulary
+projection. Attention accounts for another 15.9–18.8 ms.
+
+The next bounded experiment writes beam-reordered KV values directly into the
+next graph's stable input buffers. This can remove the extra staging traffic;
+it does not remove the model's matrix work. Trace timings are diagnostic and
+include profiler effects; the latency figures above come from separate ordinary
+requests. [Profile audit and second pilot samples](../benchmarks/pilots/decode-replay-profile)
+include every attributed kernel/copy and trace hashes.
 
 Each exact decode shape owns stable input and KV tensors. Incoming cache values
 are copied into those tensors before replay; that staging cost stays in request

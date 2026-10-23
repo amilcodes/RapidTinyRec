@@ -1,0 +1,545 @@
+{
+  "integrity_audit_passed": true,
+  "instrumented_output_comparison": {
+    "requests": 16,
+    "rank_positions": 800,
+    "sequence_values": 800,
+    "transition_values": 4000,
+    "matching_rank_lists": 16,
+    "matching_rank_positions": 800,
+    "matching_sequence_vectors": 16,
+    "matching_transition_arrays": 16,
+    "matching_sequence_values": 800,
+    "matching_transition_values": 4000,
+    "max_sequence_difference_common": 0.0,
+    "max_transition_difference_common": 0.0
+  },
+  "light_exclusive_host_ms_mean": [
+    {
+      "prompt_tokens": 76,
+      "variant": "compiled_gqa",
+      "repeats": 3,
+      "stages": {
+        "prepare_inputs": 1.7466569940249126,
+        "compiled_prefill": 11.53662676612536,
+        "cache_expand": 1.1836476624011993,
+        "update_model_kwargs": 0.6483718752861023,
+        "constraints": 1.7251359919706981,
+        "beam_topk_continuations": 2.1459410587946572,
+        "beam_running_update": 1.282617449760437,
+        "beam_finished_update": 2.476456264654795,
+        "cache_reorder": 6.440216054519017,
+        "beam_early_stop": 0.9547484417756399,
+        "beam_stop_sync": 0.8403745790322622,
+        "compiled_decode": 42.82197107871374,
+        "final_sync": 0.07747486233711243,
+        "request": 59.430124859015145
+      }
+    },
+    {
+      "prompt_tokens": 76,
+      "variant": "replay",
+      "repeats": 3,
+      "stages": {
+        "prepare_inputs": 1.725621521472931,
+        "compiled_prefill": 11.04134072860082,
+        "cache_expand": 1.1811045308907826,
+        "update_model_kwargs": 0.6577745079994202,
+        "constraints": 1.6801618039608002,
+        "beam_topk_continuations": 2.0982113977273307,
+        "beam_running_update": 1.2978849311669667,
+        "beam_finished_update": 2.4626788993676505,
+        "cache_reorder": 6.113314380248387,
+        "beam_early_stop": 0.9603078166643778,
+        "beam_stop_sync": 0.8263451357682546,
+        "replay_signature": 1.985754817724228,
+        "replay_input_staging": 2.895534038543701,
+        "graph_replay": 1.1098024745782216,
+        "replay_output_container": 1.39894833167394,
+        "final_sync": 0.08095925052960713,
+        "request": 93.63972395658493
+      }
+    },
+    {
+      "prompt_tokens": 121,
+      "variant": "compiled_gqa",
+      "repeats": 3,
+      "stages": {
+        "prepare_inputs": 1.736144224802653,
+        "compiled_prefill": 11.222568651040396,
+        "cache_expand": 1.1973753571510315,
+        "update_model_kwargs": 0.6464545925458273,
+        "constraints": 1.6717053949832916,
+        "beam_topk_continuations": 2.1213156481583915,
+        "beam_running_update": 1.284881184498469,
+        "beam_finished_update": 2.462254216273626,
+        "cache_reorder": 6.529337416092555,
+        "beam_early_stop": 0.9375202159086863,
+        "beam_stop_sync": 0.8371658623218536,
+        "compiled_decode": 43.00881177186966,
+        "final_sync": 0.07821619510650635,
+        "request": 69.3684034049511
+      }
+    },
+    {
+      "prompt_tokens": 121,
+      "variant": "replay",
+      "repeats": 3,
+      "stages": {
+        "prepare_inputs": 1.7286290725072224,
+        "compiled_prefill": 10.962444047133127,
+        "cache_expand": 1.1875641842683156,
+        "update_model_kwargs": 0.6543993949890137,
+        "constraints": 1.6909105082352955,
+        "beam_topk_continuations": 2.0992308855056763,
+        "beam_running_update": 1.3020038604736328,
+        "beam_finished_update": 2.4578459560871124,
+        "cache_reorder": 6.210574259360631,
+        "beam_early_stop": 0.9517955283323923,
+        "beam_stop_sync": 0.8281891544659933,
+        "replay_signature": 2.1865988771120706,
+        "replay_input_staging": 2.927428732315699,
+        "graph_replay": 1.1240852375825245,
+        "replay_output_container": 1.3863419493039448,
+        "final_sync": 0.08036320408185323,
+        "request": 105.4924080769221
+      }
+    }
+  ],
+  "traces": [
+    {
+      "prompt_tokens": 76,
+      "variant": "compiled_gqa",
+      "sha256": "fcf614d8d8d57b5b21e34a4d3341b3a18ab2d33a6dff83dea16408312b6d8c8c",
+      "activity_count": 4234,
+      "kernel_count": 3865,
+      "kernel_sum_ms": 114.19851799999999,
+      "gpu_activity_union_ms": 115.31846142578125,
+      "by_stage": {
+        "generation_other": {
+          "kernel_ms": 1.4996249999999987,
+          "copy_ms": 0.946691,
+          "kernels": 70,
+          "copies": 36
+        },
+        "prepare_inputs": {
+          "kernel_ms": 0.07097600000000001,
+          "copy_ms": 0.012415999999999998,
+          "kernels": 34,
+          "copies": 10
+        },
+        "compiled_prefill": {
+          "kernel_ms": 21.44369699999997,
+          "copy_ms": 0.037856,
+          "kernels": 562,
+          "copies": 84
+        },
+        "cache_expand": {
+          "kernel_ms": 0.4101130000000002,
+          "copy_ms": 0.0,
+          "kernels": 56,
+          "copies": 0
+        },
+        "update_model_kwargs": {
+          "kernel_ms": 0.027391,
+          "copy_ms": 0.0,
+          "kernels": 15,
+          "copies": 0
+        },
+        "constraints": {
+          "kernel_ms": 1.9210049999999999,
+          "copy_ms": 0.0,
+          "kernels": 68,
+          "copies": 0
+        },
+        "beam_topk_continuations": {
+          "kernel_ms": 1.7195009999999997,
+          "copy_ms": 0.009857000000000001,
+          "kernels": 155,
+          "copies": 10
+        },
+        "beam_running_update": {
+          "kernel_ms": 0.16035199999999994,
+          "copy_ms": 0.0,
+          "kernels": 55,
+          "copies": 0
+        },
+        "beam_finished_update": {
+          "kernel_ms": 0.3202250000000002,
+          "copy_ms": 0.0,
+          "kernels": 140,
+          "copies": 0
+        },
+        "cache_reorder": {
+          "kernel_ms": 3.5489810000000013,
+          "copy_ms": 0.0,
+          "kernels": 280,
+          "copies": 0
+        },
+        "beam_early_stop": {
+          "kernel_ms": 0.07737799999999997,
+          "copy_ms": 0.0,
+          "kernels": 35,
+          "copies": 0
+        },
+        "beam_stop_sync": {
+          "kernel_ms": 0.063488,
+          "copy_ms": 0.005919,
+          "kernels": 35,
+          "copies": 5
+        },
+        "compiled_decode": {
+          "kernel_ms": 82.93578599999996,
+          "copy_ms": 0.1072240000000001,
+          "kernels": 2360,
+          "copies": 224
+        }
+      },
+      "runtime_calls": {
+        "cudaStreamIsCapturing": 144,
+        "cudaMemcpyAsync": 51,
+        "cudaStreamSynchronize": 20,
+        "cudaLaunchKernel": 3020,
+        "cudaPeekAtLastError": 44,
+        "cudaOccupancyMaxActiveBlocksPerMultiprocessorWithFlags": 26,
+        "cudaDeviceGetAttribute": 71,
+        "cuLaunchKernel": 845,
+        "cudaMemsetAsync": 318,
+        "cudaOccupancyMaxActiveBlocksPerMultiprocessor": 928,
+        "cudaFuncSetAttribute": 140,
+        "cudaFuncGetAttributes": 15,
+        "cudaDeviceSynchronize": 2
+      }
+    },
+    {
+      "prompt_tokens": 76,
+      "variant": "replay",
+      "sha256": "e5e7ab865440f90f9455b19d5e461989a42d3e731ee1f570c28907b103df8543",
+      "activity_count": 4470,
+      "kernel_count": 3865,
+      "kernel_sum_ms": 116.410399,
+      "gpu_activity_union_ms": 120.64434155273437,
+      "by_stage": {
+        "generation_other": {
+          "kernel_ms": 1.512779,
+          "copy_ms": 0.951624,
+          "kernels": 70,
+          "copies": 36
+        },
+        "prepare_inputs": {
+          "kernel_ms": 0.07501200000000001,
+          "copy_ms": 0.013055999999999998,
+          "kernels": 34,
+          "copies": 10
+        },
+        "compiled_prefill": {
+          "kernel_ms": 22.016004000000017,
+          "copy_ms": 0.04156399999999999,
+          "kernels": 562,
+          "copies": 84
+        },
+        "cache_expand": {
+          "kernel_ms": 0.4136000000000001,
+          "copy_ms": 0.0,
+          "kernels": 56,
+          "copies": 0
+        },
+        "update_model_kwargs": {
+          "kernel_ms": 0.029216000000000002,
+          "copy_ms": 0.0,
+          "kernels": 15,
+          "copies": 0
+        },
+        "constraints": {
+          "kernel_ms": 1.9318560000000002,
+          "copy_ms": 0.0,
+          "kernels": 68,
+          "copies": 0
+        },
+        "beam_topk_continuations": {
+          "kernel_ms": 1.775340999999999,
+          "copy_ms": 0.010305,
+          "kernels": 155,
+          "copies": 10
+        },
+        "beam_running_update": {
+          "kernel_ms": 0.17267500000000005,
+          "copy_ms": 0.0,
+          "kernels": 55,
+          "copies": 0
+        },
+        "beam_finished_update": {
+          "kernel_ms": 0.3443580000000002,
+          "copy_ms": 0.0,
+          "kernels": 140,
+          "copies": 0
+        },
+        "cache_reorder": {
+          "kernel_ms": 3.683518999999998,
+          "copy_ms": 0.0,
+          "kernels": 280,
+          "copies": 0
+        },
+        "beam_early_stop": {
+          "kernel_ms": 0.08271999999999997,
+          "copy_ms": 0.0,
+          "kernels": 35,
+          "copies": 0
+        },
+        "beam_stop_sync": {
+          "kernel_ms": 0.06704199999999998,
+          "copy_ms": 0.006177,
+          "kernels": 35,
+          "copies": 5
+        },
+        "replay_input_staging": {
+          "kernel_ms": 0.0,
+          "copy_ms": 3.1947159999999992,
+          "kernels": 0,
+          "copies": 236
+        },
+        "graph_replay": {
+          "kernel_ms": 84.30627699999981,
+          "copy_ms": 0.18025900000000042,
+          "kernels": 2360,
+          "copies": 224
+        }
+      },
+      "runtime_calls": {
+        "cudaStreamIsCapturing": 32,
+        "cudaMemcpyAsync": 287,
+        "cudaStreamSynchronize": 20,
+        "cudaLaunchKernel": 1336,
+        "cudaPeekAtLastError": 44,
+        "cudaOccupancyMaxActiveBlocksPerMultiprocessorWithFlags": 26,
+        "cudaDeviceGetAttribute": 71,
+        "cuLaunchKernel": 169,
+        "cudaMemsetAsync": 94,
+        "cudaOccupancyMaxActiveBlocksPerMultiprocessor": 140,
+        "cudaFuncSetAttribute": 28,
+        "cudaFuncGetAttributes": 15,
+        "cudaGraphLaunch": 4,
+        "cudaDeviceSynchronize": 2
+      }
+    },
+    {
+      "prompt_tokens": 121,
+      "variant": "compiled_gqa",
+      "sha256": "e2f7f5cabc48a71e3aeb9b5d4f747ec77d6b07f91ead296c01a6dfa95a4738fa",
+      "activity_count": 4234,
+      "kernel_count": 3809,
+      "kernel_sum_ms": 127.43763700000001,
+      "gpu_activity_union_ms": 128.65892163085937,
+      "by_stage": {
+        "generation_other": {
+          "kernel_ms": 1.5163300000000002,
+          "copy_ms": 0.9537950000000003,
+          "kernels": 70,
+          "copies": 36
+        },
+        "prepare_inputs": {
+          "kernel_ms": 0.07664100000000001,
+          "copy_ms": 0.013215,
+          "kernels": 34,
+          "copies": 10
+        },
+        "compiled_prefill": {
+          "kernel_ms": 26.960225000000005,
+          "copy_ms": 0.1273330000000002,
+          "kernels": 506,
+          "copies": 140
+        },
+        "cache_expand": {
+          "kernel_ms": 0.635716,
+          "copy_ms": 0.0,
+          "kernels": 56,
+          "copies": 0
+        },
+        "update_model_kwargs": {
+          "kernel_ms": 0.02938,
+          "copy_ms": 0.0,
+          "kernels": 15,
+          "copies": 0
+        },
+        "constraints": {
+          "kernel_ms": 1.93742,
+          "copy_ms": 0.0,
+          "kernels": 68,
+          "copies": 0
+        },
+        "beam_topk_continuations": {
+          "kernel_ms": 1.7853230000000002,
+          "copy_ms": 0.010752,
+          "kernels": 155,
+          "copies": 10
+        },
+        "beam_running_update": {
+          "kernel_ms": 0.1745,
+          "copy_ms": 0.0,
+          "kernels": 55,
+          "copies": 0
+        },
+        "beam_finished_update": {
+          "kernel_ms": 0.34675,
+          "copy_ms": 0.0,
+          "kernels": 140,
+          "copies": 0
+        },
+        "cache_reorder": {
+          "kernel_ms": 5.254204000000002,
+          "copy_ms": 0.0,
+          "kernels": 280,
+          "copies": 0
+        },
+        "beam_early_stop": {
+          "kernel_ms": 0.08227200000000003,
+          "copy_ms": 0.0,
+          "kernels": 35,
+          "copies": 0
+        },
+        "beam_stop_sync": {
+          "kernel_ms": 0.06774799999999997,
+          "copy_ms": 0.006273,
+          "kernels": 35,
+          "copies": 5
+        },
+        "compiled_decode": {
+          "kernel_ms": 88.57112799999983,
+          "copy_ms": 0.10988899999999971,
+          "kernels": 2360,
+          "copies": 224
+        }
+      },
+      "runtime_calls": {
+        "cudaStreamIsCapturing": 144,
+        "cudaMemcpyAsync": 51,
+        "cudaStreamSynchronize": 20,
+        "cudaLaunchKernel": 2964,
+        "cudaPeekAtLastError": 44,
+        "cudaOccupancyMaxActiveBlocksPerMultiprocessorWithFlags": 26,
+        "cudaDeviceGetAttribute": 71,
+        "cuLaunchKernel": 845,
+        "cudaMemsetAsync": 374,
+        "cudaOccupancyMaxActiveBlocksPerMultiprocessor": 956,
+        "cudaFuncSetAttribute": 140,
+        "cudaFuncGetAttributes": 15,
+        "cudaDeviceSynchronize": 2
+      }
+    },
+    {
+      "prompt_tokens": 121,
+      "variant": "replay",
+      "sha256": "25c220f325d5847e77d9eecbe4b562180fe991b57ea81df0d9d7a8bca4eb64a2",
+      "activity_count": 4470,
+      "kernel_count": 3809,
+      "kernel_sum_ms": 126.792795,
+      "gpu_activity_union_ms": 132.75409912109376,
+      "by_stage": {
+        "generation_other": {
+          "kernel_ms": 1.5118500000000004,
+          "copy_ms": 0.951648,
+          "kernels": 70,
+          "copies": 36
+        },
+        "prepare_inputs": {
+          "kernel_ms": 0.07503799999999998,
+          "copy_ms": 0.013025,
+          "kernels": 34,
+          "copies": 10
+        },
+        "compiled_prefill": {
+          "kernel_ms": 26.97651300000002,
+          "copy_ms": 0.1330800000000002,
+          "kernels": 506,
+          "copies": 140
+        },
+        "cache_expand": {
+          "kernel_ms": 0.6359710000000002,
+          "copy_ms": 0.0,
+          "kernels": 56,
+          "copies": 0
+        },
+        "update_model_kwargs": {
+          "kernel_ms": 0.029089,
+          "copy_ms": 0.0,
+          "kernels": 15,
+          "copies": 0
+        },
+        "constraints": {
+          "kernel_ms": 1.9371959999999995,
+          "copy_ms": 0.0,
+          "kernels": 68,
+          "copies": 0
+        },
+        "beam_topk_continuations": {
+          "kernel_ms": 1.7739919999999996,
+          "copy_ms": 0.011360999999999998,
+          "kernels": 155,
+          "copies": 10
+        },
+        "beam_running_update": {
+          "kernel_ms": 0.17155399999999998,
+          "copy_ms": 0.0,
+          "kernels": 55,
+          "copies": 0
+        },
+        "beam_finished_update": {
+          "kernel_ms": 0.341632,
+          "copy_ms": 0.0,
+          "kernels": 140,
+          "copies": 0
+        },
+        "cache_reorder": {
+          "kernel_ms": 5.384650000000004,
+          "copy_ms": 0.0,
+          "kernels": 280,
+          "copies": 0
+        },
+        "beam_early_stop": {
+          "kernel_ms": 0.08211299999999999,
+          "copy_ms": 0.0,
+          "kernels": 35,
+          "copies": 0
+        },
+        "beam_stop_sync": {
+          "kernel_ms": 0.06652899999999999,
+          "copy_ms": 0.006176,
+          "kernels": 35,
+          "copies": 5
+        },
+        "replay_input_staging": {
+          "kernel_ms": 0.0,
+          "copy_ms": 4.798339999999999,
+          "kernels": 0,
+          "copies": 236
+        },
+        "graph_replay": {
+          "kernel_ms": 87.80666800000016,
+          "copy_ms": 0.18217500000000053,
+          "kernels": 2360,
+          "copies": 224
+        }
+      },
+      "runtime_calls": {
+        "cudaStreamIsCapturing": 32,
+        "cudaMemcpyAsync": 287,
+        "cudaStreamSynchronize": 20,
+        "cudaLaunchKernel": 1280,
+        "cudaPeekAtLastError": 44,
+        "cudaOccupancyMaxActiveBlocksPerMultiprocessorWithFlags": 26,
+        "cudaDeviceGetAttribute": 71,
+        "cuLaunchKernel": 169,
+        "cudaMemsetAsync": 150,
+        "cudaOccupancyMaxActiveBlocksPerMultiprocessor": 168,
+        "cudaFuncSetAttribute": 28,
+        "cudaFuncGetAttributes": 15,
+        "cudaGraphLaunch": 4,
+        "cudaDeviceSynchronize": 2
+      }
+    }
+  ],
+  "measurement_compilations": 0,
+  "captures_during_profiling": 0,
+  "audit_source_sha256": "df1f67d02f0c8a3ef8ae8022cf4106b45bf3e3f792b81631748581a450f6b39f",
+  "note": "Host call times overlap asynchronous GPU execution. Do not add host and GPU columns. CUDA event spans include idle and are not used as GPU compute. Trace activity durations include profiling effects; use the separate uninstrumented audit for latency. One trace per variant and length."
+}
