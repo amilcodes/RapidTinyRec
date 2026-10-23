@@ -99,7 +99,9 @@ def audit(root, historical, snapshot, run_record):
     selected = [u for length in (lengths[0], lengths[-1])
                 for u in [u for u in reference['users'] if u['prompt_tokens'] == length][:2]]
     assert len(selected) == 4 and manifest['users'] == selected
-    assert set(manifest['sha256']) == SOURCE_FILES
+    source_files = SOURCE_FILES | ({'profile_decode_replay.py', 'profile_shared.py'}
+                                  if manifest.get('profile_after_measurement') else set())
+    assert set(manifest['sha256']) == source_files
     for name, value in manifest['sha256'].items():
         assert digest(snapshot / name) == value, name
     record = read(run_record)

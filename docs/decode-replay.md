@@ -1,14 +1,43 @@
 # Decode replay pilot
 
 This branch tests whether CUDA graph replay reduces the launch cost of the
-compiled native-GQA decoder. There are no A6000 results yet.
+compiled native-GQA decoder. The four-user A6000 pilot passed exactness checks
+but produced almost no aggregate latency gain. It has not advanced to 500 users.
 
 The first A6000 pilot stopped during warmup, before capture or measured requests:
 Hugging Face passed `inputs_embeds=None` and the argument validator rejected the
 keyword. The validator now preserves that placeholder while still rejecting
 actual embedding tensors. A CPU integration test runs the real constrained
 50-beam generation loop through staging and compares all five scores. This fixes
-the observed compatibility error; CUDA replay remains unvalidated until a rerun.
+the observed compatibility error. The corrected A6000 rerun completed and passed
+its independent audit; the failed attempt remains part of the experiment record.
+
+## Pilot result
+
+| Four users, eight paired repeats | Median, ms | p95, ms |
+| :--- | ---: | ---: |
+| Compiled GQA | 138.145 | 145.429 |
+| CUDA replay with staged KV | 137.728 | 144.577 |
+
+The aggregate change is only 0.30% median / 0.59% p95. For 76-token histories,
+median moved 132.845 → 131.006 ms; for 121-token histories it regressed
+143.061 → 143.765 ms. Four selected users cannot establish a full-cohort speedup.
+
+All 32 full rank lists, 1,600 ranked positions, 1,600 sequence scores and 8,000
+transition scores match bit for bit, with zero numerical deltas. Repeated outputs
+are stable, and the compiled control matches its historical outputs exactly.
+
+Eight captured shapes require 2.14 GiB of input buffers. Total allocated/reserved
+CUDA memory at completion was 10.80 / 12.89 GiB. Setup and warmup took 138.576 s;
+the nested backend compilation total was 107.984 s and graph preparation was
+0.765 s. No compilation or capture occurred during measured requests. These costs
+are excluded from the latency table and must not be added together.
+
+[Pilot fingerprints and independent audit](../benchmarks/pilots/decode-replay)
+retain all samples. The next experiment profiles staging copies, graph replay,
+cache reordering and CPU launch gaps; the extra staging traffic is a hypothesis
+for the weak gain, not yet a measured bottleneck. The 500-user README performance
+table is unchanged.
 
 Each exact decode shape owns stable input and KV tensors. Incoming cache values
 are copied into those tensors before replay; that staging cost stays in request
@@ -39,6 +68,15 @@ It also checks that no compilation or graph capture occurred after warmup. Its
 integrity verdict is separate from the reported output-equality counts. The run
 record lists `files` and their `sha256` digests relative to `frozen-source/`, with
 the allocation's GPU count/type under `resources`.
+
+For the next diagnostic, add `--profile` to the pilot command and use a fresh
+output directory. All ordinary paired trials finish before instrumentation.
+Three light profiles and one CPU/CUDA trace per variant and history length then
+separate compiled prefill/decode, input staging, graph replay, cache expansion,
+beam reordering and generation bookkeeping. Instrumented output bits must match
+the earlier requests. CUDA event spans include stream idle time; actual GPU work
+must be read from trace kernel activities. Traces are diagnostic, not latency
+benchmark samples.
 
 Run on one A6000 with the pinned environment. No graph capture or compilation is
 permitted after warmup. A capture failure is a failed experiment; the implementation

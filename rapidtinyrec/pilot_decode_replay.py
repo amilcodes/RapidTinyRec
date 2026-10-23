@@ -22,6 +22,7 @@ def main():
     ap.add_argument('--reference-results',type=Path,required=True)
     ap.add_argument('--output-root',type=Path,required=True)
     ap.add_argument('--repeats',type=int,default=8)
+    ap.add_argument('--profile',action='store_true',help='Profile only after all uninstrumented measurements')
     args=ap.parse_args()
     assert args.repeats>=2 and args.repeats%2==0
     assert torch.cuda.is_available() and torch.cuda.device_count()==1
@@ -63,7 +64,9 @@ def main():
         'users':users,'dtype':'float32','tf32':False,'hardware':torch.cuda.get_device_name(0),
         'cohort_sha256':expected['users_sha256'],'reference_manifest_sha256':reference['manifest_sha256'],
         'versions':{n:b.importlib.metadata.version(n) for n in ['torch','transformers','tokenizers']},
-        'sha256':{n:b.digest(b.ROOT/n) for n in ['pilot_decode_replay.py','decode_replay.py','compiled_forward.py','shared_prefill.py','gpu_constraints.py','expected.json']},
+        'profile_after_measurement':args.profile,
+        'sha256':{n:b.digest(b.ROOT/n) for n in ['pilot_decode_replay.py','decode_replay.py','compiled_forward.py','shared_prefill.py','gpu_constraints.py','expected.json']+
+            (['profile_decode_replay.py','profile_shared.py'] if args.profile else [])},
         'protocol':'FP32 beam50. Same compiled GQA forward on both sides. CUDA synchronization around each request. Prefill, staging copies, graph replay, constraints and beam cache reordering included. Compilation, capture, warmup and output extraction excluded. Alternate order for every repeat.'}
     b.save(out/'manifest.json',manifest)
     compiler=CompiledForward(model,out,b.announce)
@@ -146,6 +149,9 @@ def main():
         'latency_by_length':{str(length):{v:b.distribution([r['runs'][v]['elapsed_s'] for r in rows if r['prompt_tokens']==length])
             for v in ('compiled_gqa','replay')} for length in (lengths[0],lengths[-1])}}
     b.save(out/'summary.json',summary);b.announce(summary)
+    if args.profile:
+        from .profile_decode_replay import profile
+        profile(model,compiler,pool,users,generate,unpack,warm_outputs,out)
 
 
 if __name__=='__main__':main()

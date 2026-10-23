@@ -1,6 +1,8 @@
 """CPU ownership/shape checks; these do not establish CUDA performance."""
 import functools
+import contextlib
 import unittest
+from types import SimpleNamespace
 from unittest.mock import patch
 
 import torch
@@ -11,6 +13,7 @@ from rapidtinyrec.decode_replay import (
     DecodeReplayPool, ReplayBuffers, ReplayOutput, cache_from_pairs, cache_pairs)
 from rapidtinyrec.gpu_constraints import GpuSidConstraintTables, GpuSidConstrainedLogitsProcessor
 from rapidtinyrec.shared_prefill import PrefillOnce
+from rapidtinyrec.profile_decode_replay import instrument
 from test_decoding import catalog
 
 
@@ -22,6 +25,30 @@ def example(length=7):
 
 
 class ReplayTests(unittest.TestCase):
+    def test_profile_hooks_restore_after_exception(self):
+        class FakeScopes:
+            def __init__(self):self.names=[]
+            @contextlib.contextmanager
+            def scope(self,name):
+                self.names.append(name)
+                yield
+        scopes=FakeScopes()
+        model=Qwen2ForCausalLM(Qwen2Config(vocab_size=32,hidden_size=16,intermediate_size=32,
+            num_hidden_layers=1,num_attention_heads=2,num_key_value_heads=1)).eval()
+        compiler=SimpleNamespace(compiled=model.forward)
+        forward,prepare,load,replay=compiler.compiled,model.prepare_inputs_for_generation,ReplayBuffers.load,torch.cuda.CUDAGraph.replay
+        with self.assertRaisesRegex(RuntimeError,'profiling failed'):
+            with instrument(scopes,model,compiler),torch.inference_mode():
+                output=compiler.compiled(input_ids=torch.tensor([[1,2,3]]),use_cache=True)
+                output.past_key_values.reorder_cache(torch.tensor([0]))
+                raise RuntimeError('profiling failed')
+        self.assertIn('compiled_prefill',scopes.names)
+        self.assertIn('cache_reorder',scopes.names)
+        self.assertEqual(compiler.compiled,forward)
+        self.assertEqual(model.prepare_inputs_for_generation,prepare)
+        self.assertIs(ReplayBuffers.load,load)
+        self.assertIs(torch.cuda.CUDAGraph.replay,replay)
+
     @torch.inference_mode()
     def test_generation_kwargs_and_all_five_scores_survive_cpu_staging(self):
         torch.set_num_threads(1)
