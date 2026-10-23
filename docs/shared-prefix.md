@@ -1,8 +1,54 @@
 # Physical shared-prefix cache
 
-The first pilot timed out after three of four phases. The completed first-half
-samples are exact and show lower memory/latency, but the required full pilot
-is incomplete. A corrected bounded pilot is required before the 500-user run.
+The complete four-user A6000 pilot preserves all ranking and score bits while
+reducing allocated memory by about 31.7% and median/p95 latency by 2.47%/2.41%.
+The 500-user confirmation is submitted as job 7861959, run
+`prefix-full-20261023T190124Z-1ae3764cde99`, using the identical source.
+The initial timeout remains documented below.
+
+## Completed pilot
+
+Four users span the shortest/longest histories (76/121 tokens), with six paired
+trials each. All 24 complete rank lists, 1,200 positions, 1,200 sequence values
+and 6,000 transition values match bit for bit, with zero maximum deltas. Both
+variants match historical compiled GQA exactly. Repeated requests are stable;
+eight graphs per phase are frozen, with no measured compilation or capture.
+
+| Metric | Shared inputs | Physical shared prefix |
+| :--- | ---: | ---: |
+| Median latency | 131.766 ms | 128.512 ms |
+| p95 latency | 137.404 ms | 134.095 ms |
+| Logical input-view bytes | 2.136 GiB | 0.074 GiB |
+| Unique input storage | 0.331 GiB | 0.0145 GiB |
+| Allocated GPU memory, phase range | 8.994–8.997 GiB | 6.142 GiB |
+| Reserved GPU memory, phase range | 10.711–10.969 GiB | 7.418–7.660 GiB |
+| Peak allocated during inference | 9.849–9.859 GiB | 6.436–6.442 GiB |
+| Peak reserved during inference | 10.711–10.969 GiB | 7.418–7.660 GiB |
+
+The physical prefix capacity is 6,938,624 bytes and suffix capacity 8,601,600
+bytes; the remaining graph-input storage is token/position metadata. Prefix
+batch size is one, suffix batch size is 50, and no prefix bytes are reordered.
+Both history lengths and both phase halves improve at median and p95. These
+are four-user pilot results, not evidence of a 500-user improvement. Memory
+ranges retain the differences between cold and reused-artifact processes.
+
+| Phase | Disk compiler cache | Setup/warmup | Backend compile, nested | Graph preparation, nested |
+| :--- | :--- | ---: | ---: | ---: |
+| 0: shared inputs | Cold | 134.261 s | 103.505 s | 0.768 s |
+| 1: shared prefix | Cold | 335.686 s | 262.408 s | 205.128 s |
+| 2: shared prefix | Reused from phase 1 | 143.238 s | 66.720 s | 80.097 s |
+| 3: shared inputs | Reused from phase 0 | 62.926 s | 32.016 s | 0.766 s |
+
+Graph preparation includes forward warmup, which triggers prefix compilation;
+its interval overlaps the backend compilation total. Do not add these columns.
+All setup is excluded from inference, including artifact reuse. Every process
+still loads its model and creates fresh GPU allocations and CUDA graphs.
+The full pilot completed in 12m52s using source `735a73b`.
+[All paired samples, independent audit and immutable source/output hashes](../benchmarks/pilots/shared-prefix)
+are published. ABBA pairs users across phases and does not establish cross-run
+variance or concurrent-serving behavior.
+
+## Implementation and protocol
 
 One request's history is stored once per layer, with batch size one. Each beam
 stores only its generated suffix. Beam selection gathers these suffixes into
