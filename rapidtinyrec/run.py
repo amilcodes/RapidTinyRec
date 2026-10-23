@@ -12,6 +12,7 @@ MODES = {
     'gpu': ('benchmark', ['--experiment', 'gpu_constraints']),
     'compiled': ('benchmark', ['--experiment', 'compile_forward']),
     'gqa': ('benchmark_gqa', []),
+    'decode-pilot': ('pilot_decode_replay', []),
     'profile-shared': ('profile_shared', []),
     'profile-compiled': ('profile_compiled', []),
 }
@@ -25,7 +26,7 @@ def main():
     module, flags=MODES[args.mode]
     env=dict(os.environ)
     env['TOKENIZERS_PARALLELISM']='false'
-    if args.mode in ('compiled','gqa','profile-compiled'):
+    if args.mode in ('compiled','gqa','decode-pilot','profile-compiled'):
         args.cache_root.mkdir(parents=True,exist_ok=True)
         root=Path(tempfile.mkdtemp(prefix=args.mode+'-',dir=args.cache_root)).resolve()
         env['TORCHINDUCTOR_CACHE_DIR']=str(root/'inductor')

@@ -1,0 +1,149 @@
+{
+  "integrity_audit_passed": true,
+  "scope": "Four unique users repeated; not a 500-user latency or correctness estimate.",
+  "unique_users": 4,
+  "repeats": 8,
+  "cohort_sha256": "f78097bfedff69f5928a8ccbe39d5a96e07f7e9dd4616209953cf4f51408f487",
+  "comparison": {
+    "requests": 32,
+    "rank_positions": 1600,
+    "sequence_values": 1600,
+    "transition_values": 8000,
+    "matching_rank_lists": 32,
+    "matching_rank_positions": 1600,
+    "matching_sequence_vectors": 32,
+    "matching_transition_arrays": 32,
+    "matching_sequence_values": 1600,
+    "matching_transition_values": 8000,
+    "max_sequence_difference_common": 0.0,
+    "max_transition_difference_common": 0.0
+  },
+  "historical_control": {
+    "requests": 32,
+    "rank_positions": 1600,
+    "sequence_values": 1600,
+    "transition_values": 8000,
+    "matching_rank_lists": 32,
+    "matching_rank_positions": 1600,
+    "matching_sequence_vectors": 32,
+    "matching_transition_arrays": 32,
+    "matching_sequence_values": 1600,
+    "matching_transition_values": 8000,
+    "max_sequence_difference_common": 0.0,
+    "max_transition_difference_common": 0.0
+  },
+  "latency_ms": {
+    "compiled_gqa": {
+      "n": 32,
+      "median_ms": 137.01592199504375,
+      "p95_ms": 143.8347164541483
+    },
+    "replay": {
+      "n": 32,
+      "median_ms": 135.86439937353134,
+      "p95_ms": 142.63067319989204
+    }
+  },
+  "latency_by_length_ms": {
+    "76": {
+      "compiled_gqa": {
+        "n": 16,
+        "median_ms": 131.61644712090492,
+        "p95_ms": 132.68223125487566
+      },
+      "replay": {
+        "n": 16,
+        "median_ms": 129.95018251240253,
+        "p95_ms": 130.5649010464549
+      }
+    },
+    "121": {
+      "compiled_gqa": {
+        "n": 16,
+        "median_ms": 142.1773824840784,
+        "p95_ms": 144.80289909988642
+      },
+      "replay": {
+        "n": 16,
+        "median_ms": 142.0248206704855,
+        "p95_ms": 142.68979709595442
+      }
+    }
+  },
+  "median_reduction_percent": 0.840429787097352,
+  "p95_reduction_percent": 0.8371019764481402,
+  "combined_setup_and_warmup_s": 138.35637658834457,
+  "backend_compile_total_s": 107.80058521404862,
+  "replay": {
+    "graphs": 8,
+    "frozen": true,
+    "replays": 160,
+    "capture_and_warmup_s": 0.7734219580888748,
+    "input_buffer_bytes": 2293766464,
+    "events": [
+      {
+        "cache_tokens": 76,
+        "batch": 50,
+        "capture_and_warmup_s": 0.10144925862550735,
+        "input_buffer_bytes": 217908008,
+        "allocated_delta_bytes": 478660096
+      },
+      {
+        "cache_tokens": 77,
+        "batch": 50,
+        "capture_and_warmup_s": 0.09081261232495308,
+        "input_buffer_bytes": 220775208,
+        "allocated_delta_bytes": 494429696
+      },
+      {
+        "cache_tokens": 78,
+        "batch": 50,
+        "capture_and_warmup_s": 0.08789601176977158,
+        "input_buffer_bytes": 223642408,
+        "allocated_delta_bytes": 497604096
+      },
+      {
+        "cache_tokens": 79,
+        "batch": 50,
+        "capture_and_warmup_s": 0.08988764509558678,
+        "input_buffer_bytes": 226509608,
+        "allocated_delta_bytes": 502529536
+      },
+      {
+        "cache_tokens": 121,
+        "batch": 50,
+        "capture_and_warmup_s": 0.10394780337810516,
+        "input_buffer_bytes": 346932008,
+        "allocated_delta_bytes": 738202624
+      },
+      {
+        "cache_tokens": 122,
+        "batch": 50,
+        "capture_and_warmup_s": 0.10185772553086281,
+        "input_buffer_bytes": 349799208,
+        "allocated_delta_bytes": 742442496
+      },
+      {
+        "cache_tokens": 123,
+        "batch": 50,
+        "capture_and_warmup_s": 0.09812562167644501,
+        "input_buffer_bytes": 352666408,
+        "allocated_delta_bytes": 748176896
+      },
+      {
+        "cache_tokens": 124,
+        "batch": 50,
+        "capture_and_warmup_s": 0.09944527968764305,
+        "input_buffer_bytes": 355533608,
+        "allocated_delta_bytes": 753911296
+      }
+    ],
+    "scope": "Experimental model-forward replay only. Input staging, cache containers, beam search and constraints remain in timed requests. Independent graph pools; no inter-graph memory sharing."
+  },
+  "allocated_bytes": 11596966400,
+  "reserved_bytes": 13841203200,
+  "measurement_compilations": 0,
+  "snapshot_files_verified": 27,
+  "audit_script_sha256": "279cf8b5fa4014e440a7ac9bfbb9564f20dd3bee02e29c2875e2e3254aaf37e7",
+  "note": "Integrity passing does not require control/replay equality. Setup, compile and capture timings overlap; do not add them."
+}
