@@ -18,6 +18,7 @@ paired run on the same 500 users; improvements should not be multiplied together
 | Batch constraint transfers | 186.2 → 166.6 | 187.9 → 168.1 | Bitwise exact |
 | GPU constraint lookup | 167.8 → 160.8 | 169.2 → 163.0 | Bitwise exact |
 | Restore native GQA in compiled forward | 174.4 → 159.7 | 188.2 → 169.8 | Bitwise exact |
+| Combine suffix forwards (experimental) | 134.5 → 129.3 | 142.7 → 137.4 | Small rounding differences |
 
 Every row preserves all 50 ranks for every user against its paired control.
 Compilation and warmup are excluded. Full-vocabulary normalization, newline/EOS

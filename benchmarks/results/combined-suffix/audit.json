@@ -1,0 +1,4532 @@
+{
+  "integrity_audit_passed": true,
+  "cohort_sha256": "f78097bfedff69f5928a8ccbe39d5a96e07f7e9dd4616209953cf4f51408f487",
+  "manifest_sha256": "5fc75b30cc0cc560f2df91dfe875b8be221d05aa90bf80d95502369d9fbd6835",
+  "source_files_verified": 31,
+  "audit_script_sha256": "d2cdcacbb2b0773ed4f4b94d7245413a7a518e16ec97909182a0a6430892a3f5",
+  "shared_audit_helpers_sha256": "041749fdd785ce310676956a5029ec5d95a307c7fc761f3037cc30223fbde82f",
+  "latency": {
+    "gqa": {
+      "n": 500,
+      "median_ms": 134.52261686325073,
+      "p95_ms": 142.70137436687946,
+      "min_ms": 129.5739710330963,
+      "max_ms": 144.38050240278244,
+      "mean_ms": 135.83677539229393
+    },
+    "combined_suffix": {
+      "n": 500,
+      "median_ms": 129.31026332080364,
+      "p95_ms": 137.4432023614645,
+      "min_ms": 124.67044964432716,
+      "max_ms": 139.48972895741463,
+      "mean_ms": 130.71346393972635
+    }
+  },
+  "improvement": {
+    "median_reduction_pct": 3.874704242295346,
+    "p95_reduction_pct": 3.6847381664989576,
+    "faster_users": 500,
+    "median_paired_saving_ms": 5.160510540008545
+  },
+  "comparison": {
+    "users": 500,
+    "matching_rank_lists": 500,
+    "matching_rank_positions": 25000,
+    "matching_sequence_vectors": 0,
+    "matching_transition_arrays": 0,
+    "matching_sequence_values_in_rank_order": 6506,
+    "matching_transition_values_in_rank_order": 84168,
+    "max_sequence_difference_common": 5.340576171875e-05,
+    "max_transition_difference_common": 3.075599670410156e-05,
+    "mismatches": [
+      {
+        "cohort_index": 0,
+        "rankings_equal": true,
+        "different_sequence_values": 44,
+        "different_transition_values": 93,
+        "max_sequence_difference_common": 1.049041748046875e-05,
+        "max_transition_difference_common": 9.179115295410156e-06
+      },
+      {
+        "cohort_index": 1,
+        "rankings_equal": true,
+        "different_sequence_values": 46,
+        "different_transition_values": 92,
+        "max_sequence_difference_common": 1.239776611328125e-05,
+        "max_transition_difference_common": 1.1086463928222656e-05
+      },
+      {
+        "cohort_index": 2,
+        "rankings_equal": true,
+        "different_sequence_values": 27,
+        "different_transition_values": 82,
+        "max_sequence_difference_common": 1.1444091796875e-05,
+        "max_transition_difference_common": 7.152557373046875e-06
+      },
+      {
+        "cohort_index": 3,
+        "rankings_equal": true,
+        "different_sequence_values": 29,
+        "different_transition_values": 67,
+        "max_sequence_difference_common": 8.58306884765625e-06,
+        "max_transition_difference_common": 6.198883056640625e-06
+      },
+      {
+        "cohort_index": 4,
+        "rankings_equal": true,
+        "different_sequence_values": 36,
+        "different_transition_values": 84,
+        "max_sequence_difference_common": 1.430511474609375e-05,
+        "max_transition_difference_common": 1.1801719665527344e-05
+      },
+      {
+        "cohort_index": 5,
+        "rankings_equal": true,
+        "different_sequence_values": 41,
+        "different_transition_values": 95,
+        "max_sequence_difference_common": 9.5367431640625e-06,
+        "max_transition_difference_common": 1.4066696166992188e-05
+      },
+      {
+        "cohort_index": 6,
+        "rankings_equal": true,
+        "different_sequence_values": 38,
+        "different_transition_values": 88,
+        "max_sequence_difference_common": 7.62939453125e-06,
+        "max_transition_difference_common": 7.510185241699219e-06
+      },
+      {
+        "cohort_index": 7,
+        "rankings_equal": true,
+        "different_sequence_values": 39,
+        "different_transition_values": 82,
+        "max_sequence_difference_common": 1.239776611328125e-05,
+        "max_transition_difference_common": 1.1920928955078125e-05
+      },
+      {
+        "cohort_index": 8,
+        "rankings_equal": true,
+        "different_sequence_values": 39,
+        "different_transition_values": 84,
+        "max_sequence_difference_common": 1.71661376953125e-05,
+        "max_transition_difference_common": 1.0013580322265625e-05
+      },
+      {
+        "cohort_index": 9,
+        "rankings_equal": true,
+        "different_sequence_values": 32,
+        "different_transition_values": 79,
+        "max_sequence_difference_common": 1.52587890625e-05,
+        "max_transition_difference_common": 8.344650268554688e-06
+      },
+      {
+        "cohort_index": 10,
+        "rankings_equal": true,
+        "different_sequence_values": 40,
+        "different_transition_values": 96,
+        "max_sequence_difference_common": 1.52587890625e-05,
+        "max_transition_difference_common": 1.2636184692382812e-05
+      },
+      {
+        "cohort_index": 11,
+        "rankings_equal": true,
+        "different_sequence_values": 38,
+        "different_transition_values": 92,
+        "max_sequence_difference_common": 1.71661376953125e-05,
+        "max_transition_difference_common": 1.3828277587890625e-05
+      },
+      {
+        "cohort_index": 12,
+        "rankings_equal": true,
+        "different_sequence_values": 44,
+        "different_transition_values": 82,
+        "max_sequence_difference_common": 1.811981201171875e-05,
+        "max_transition_difference_common": 1.811981201171875e-05
+      },
+      {
+        "cohort_index": 13,
+        "rankings_equal": true,
+        "different_sequence_values": 37,
+        "different_transition_values": 88,
+        "max_sequence_difference_common": 1.9073486328125e-05,
+        "max_transition_difference_common": 1.049041748046875e-05
+      },
+      {
+        "cohort_index": 14,
+        "rankings_equal": true,
+        "different_sequence_values": 30,
+        "different_transition_values": 77,
+        "max_sequence_difference_common": 7.62939453125e-06,
+        "max_transition_difference_common": 7.3909759521484375e-06
+      },
+      {
+        "cohort_index": 15,
+        "rankings_equal": true,
+        "different_sequence_values": 26,
+        "different_transition_values": 46,
+        "max_sequence_difference_common": 1.1444091796875e-05,
+        "max_transition_difference_common": 1.1682510375976562e-05
+      },
+      {
+        "cohort_index": 16,
+        "rankings_equal": true,
+        "different_sequence_values": 37,
+        "different_transition_values": 85,
+        "max_sequence_difference_common": 9.5367431640625e-06,
+        "max_transition_difference_common": 9.417533874511719e-06
+      },
+      {
+        "cohort_index": 17,
+        "rankings_equal": true,
+        "different_sequence_values": 43,
+        "different_transition_values": 89,
+        "max_sequence_difference_common": 1.9073486328125e-05,
+        "max_transition_difference_common": 1.4066696166992188e-05
+      },
+      {
+        "cohort_index": 18,
+        "rankings_equal": true,
+        "different_sequence_values": 40,
+        "different_transition_values": 91,
+        "max_sequence_difference_common": 9.5367431640625e-06,
+        "max_transition_difference_common": 7.867813110351562e-06
+      },
+      {
+        "cohort_index": 19,
+        "rankings_equal": true,
+        "different_sequence_values": 21,
+        "different_transition_values": 61,
+        "max_sequence_difference_common": 7.62939453125e-06,
+        "max_transition_difference_common": 7.033348083496094e-06
+      },
+      {
+        "cohort_index": 20,
+        "rankings_equal": true,
+        "different_sequence_values": 47,
+        "different_transition_values": 93,
+        "max_sequence_difference_common": 8.58306884765625e-06,
+        "max_transition_difference_common": 6.198883056640625e-06
+      },
+      {
+        "cohort_index": 21,
+        "rankings_equal": true,
+        "different_sequence_values": 38,
+        "different_transition_values": 88,
+        "max_sequence_difference_common": 1.1444091796875e-05,
+        "max_transition_difference_common": 9.059906005859375e-06
+      },
+      {
+        "cohort_index": 22,
+        "rankings_equal": true,
+        "different_sequence_values": 39,
+        "different_transition_values": 88,
+        "max_sequence_difference_common": 1.33514404296875e-05,
+        "max_transition_difference_common": 1.049041748046875e-05
+      },
+      {
+        "cohort_index": 23,
+        "rankings_equal": true,
+        "different_sequence_values": 41,
+        "different_transition_values": 80,
+        "max_sequence_difference_common": 8.58306884765625e-06,
+        "max_transition_difference_common": 7.867813110351562e-06
+      },
+      {
+        "cohort_index": 24,
+        "rankings_equal": true,
+        "different_sequence_values": 42,
+        "different_transition_values": 78,
+        "max_sequence_difference_common": 1.1444091796875e-05,
+        "max_transition_difference_common": 9.5367431640625e-06
+      },
+      {
+        "cohort_index": 25,
+        "rankings_equal": true,
+        "different_sequence_values": 21,
+        "different_transition_values": 59,
+        "max_sequence_difference_common": 1.52587890625e-05,
+        "max_transition_difference_common": 7.152557373046875e-06
+      },
+      {
+        "cohort_index": 26,
+        "rankings_equal": true,
+        "different_sequence_values": 45,
+        "different_transition_values": 93,
+        "max_sequence_difference_common": 2.6702880859375e-05,
+        "max_transition_difference_common": 1.6570091247558594e-05
+      },
+      {
+        "cohort_index": 27,
+        "rankings_equal": true,
+        "different_sequence_values": 36,
+        "different_transition_values": 69,
+        "max_sequence_difference_common": 9.5367431640625e-06,
+        "max_transition_difference_common": 8.106231689453125e-06
+      },
+      {
+        "cohort_index": 28,
+        "rankings_equal": true,
+        "different_sequence_values": 26,
+        "different_transition_values": 83,
+        "max_sequence_difference_common": 1.33514404296875e-05,
+        "max_transition_difference_common": 9.119510650634766e-06
+      },
+      {
+        "cohort_index": 29,
+        "rankings_equal": true,
+        "different_sequence_values": 38,
+        "different_transition_values": 77,
+        "max_sequence_difference_common": 7.62939453125e-06,
+        "max_transition_difference_common": 5.602836608886719e-06
+      },
+      {
+        "cohort_index": 30,
+        "rankings_equal": true,
+        "different_sequence_values": 42,
+        "different_transition_values": 87,
+        "max_sequence_difference_common": 1.33514404296875e-05,
+        "max_transition_difference_common": 1.2159347534179688e-05
+      },
+      {
+        "cohort_index": 31,
+        "rankings_equal": true,
+        "different_sequence_values": 35,
+        "different_transition_values": 91,
+        "max_sequence_difference_common": 1.811981201171875e-05,
+        "max_transition_difference_common": 1.1920928955078125e-05
+      },
+      {
+        "cohort_index": 32,
+        "rankings_equal": true,
+        "different_sequence_values": 38,
+        "different_transition_values": 91,
+        "max_sequence_difference_common": 1.52587890625e-05,
+        "max_transition_difference_common": 1.0728836059570312e-05
+      },
+      {
+        "cohort_index": 33,
+        "rankings_equal": true,
+        "different_sequence_values": 45,
+        "different_transition_values": 92,
+        "max_sequence_difference_common": 1.430511474609375e-05,
+        "max_transition_difference_common": 9.775161743164062e-06
+      },
+      {
+        "cohort_index": 34,
+        "rankings_equal": true,
+        "different_sequence_values": 40,
+        "different_transition_values": 90,
+        "max_sequence_difference_common": 1.33514404296875e-05,
+        "max_transition_difference_common": 7.3909759521484375e-06
+      },
+      {
+        "cohort_index": 35,
+        "rankings_equal": true,
+        "different_sequence_values": 38,
+        "different_transition_values": 75,
+        "max_sequence_difference_common": 9.5367431640625e-06,
+        "max_transition_difference_common": 9.775161743164062e-06
+      },
+      {
+        "cohort_index": 36,
+        "rankings_equal": true,
+        "different_sequence_values": 29,
+        "different_transition_values": 75,
+        "max_sequence_difference_common": 5.7220458984375e-06,
+        "max_transition_difference_common": 5.930662155151367e-06
+      },
+      {
+        "cohort_index": 37,
+        "rankings_equal": true,
+        "different_sequence_values": 30,
+        "different_transition_values": 85,
+        "max_sequence_difference_common": 1.33514404296875e-05,
+        "max_transition_difference_common": 1.049041748046875e-05
+      },
+      {
+        "cohort_index": 38,
+        "rankings_equal": true,
+        "different_sequence_values": 43,
+        "different_transition_values": 100,
+        "max_sequence_difference_common": 1.52587890625e-05,
+        "max_transition_difference_common": 1.3589859008789062e-05
+      },
+      {
+        "cohort_index": 39,
+        "rankings_equal": true,
+        "different_sequence_values": 39,
+        "different_transition_values": 87,
+        "max_sequence_difference_common": 4.76837158203125e-05,
+        "max_transition_difference_common": 2.7418136596679688e-05
+      },
+      {
+        "cohort_index": 40,
+        "rankings_equal": true,
+        "different_sequence_values": 34,
+        "different_transition_values": 69,
+        "max_sequence_difference_common": 2.47955322265625e-05,
+        "max_transition_difference_common": 1.8596649169921875e-05
+      },
+      {
+        "cohort_index": 41,
+        "rankings_equal": true,
+        "different_sequence_values": 42,
+        "different_transition_values": 89,
+        "max_sequence_difference_common": 1.430511474609375e-05,
+        "max_transition_difference_common": 9.179115295410156e-06
+      },
+      {
+        "cohort_index": 42,
+        "rankings_equal": true,
+        "different_sequence_values": 37,
+        "different_transition_values": 86,
+        "max_sequence_difference_common": 1.430511474609375e-05,
+        "max_transition_difference_common": 1.2874603271484375e-05
+      },
+      {
+        "cohort_index": 43,
+        "rankings_equal": true,
+        "different_sequence_values": 44,
+        "different_transition_values": 88,
+        "max_sequence_difference_common": 1.71661376953125e-05,
+        "max_transition_difference_common": 1.52587890625e-05
+      },
+      {
+        "cohort_index": 44,
+        "rankings_equal": true,
+        "different_sequence_values": 39,
+        "different_transition_values": 72,
+        "max_sequence_difference_common": 1.239776611328125e-05,
+        "max_transition_difference_common": 1.239776611328125e-05
+      },
+      {
+        "cohort_index": 45,
+        "rankings_equal": true,
+        "different_sequence_values": 34,
+        "different_transition_values": 71,
+        "max_sequence_difference_common": 7.62939453125e-06,
+        "max_transition_difference_common": 1.0013580322265625e-05
+      },
+      {
+        "cohort_index": 46,
+        "rankings_equal": true,
+        "different_sequence_values": 41,
+        "different_transition_values": 93,
+        "max_sequence_difference_common": 1.33514404296875e-05,
+        "max_transition_difference_common": 1.8358230590820312e-05
+      },
+      {
+        "cohort_index": 47,
+        "rankings_equal": true,
+        "different_sequence_values": 42,
+        "different_transition_values": 97,
+        "max_sequence_difference_common": 1.52587890625e-05,
+        "max_transition_difference_common": 1.0013580322265625e-05
+      },
+      {
+        "cohort_index": 48,
+        "rankings_equal": true,
+        "different_sequence_values": 19,
+        "different_transition_values": 65,
+        "max_sequence_difference_common": 8.58306884765625e-06,
+        "max_transition_difference_common": 9.059906005859375e-06
+      },
+      {
+        "cohort_index": 49,
+        "rankings_equal": true,
+        "different_sequence_values": 22,
+        "different_transition_values": 38,
+        "max_sequence_difference_common": 5.7220458984375e-06,
+        "max_transition_difference_common": 3.933906555175781e-06
+      },
+      {
+        "cohort_index": 50,
+        "rankings_equal": true,
+        "different_sequence_values": 44,
+        "different_transition_values": 90,
+        "max_sequence_difference_common": 1.621246337890625e-05,
+        "max_transition_difference_common": 1.5020370483398438e-05
+      },
+      {
+        "cohort_index": 51,
+        "rankings_equal": true,
+        "different_sequence_values": 38,
+        "different_transition_values": 78,
+        "max_sequence_difference_common": 1.1444091796875e-05,
+        "max_transition_difference_common": 7.033348083496094e-06
+      },
+      {
+        "cohort_index": 52,
+        "rankings_equal": true,
+        "different_sequence_values": 43,
+        "different_transition_values": 83,
+        "max_sequence_difference_common": 1.52587890625e-05,
+        "max_transition_difference_common": 9.5367431640625e-06
+      },
+      {
+        "cohort_index": 53,
+        "rankings_equal": true,
+        "different_sequence_values": 43,
+        "different_transition_values": 88,
+        "max_sequence_difference_common": 1.33514404296875e-05,
+        "max_transition_difference_common": 9.059906005859375e-06
+      },
+      {
+        "cohort_index": 54,
+        "rankings_equal": true,
+        "different_sequence_values": 41,
+        "different_transition_values": 82,
+        "max_sequence_difference_common": 1.0967254638671875e-05,
+        "max_transition_difference_common": 1.1205673217773438e-05
+      },
+      {
+        "cohort_index": 55,
+        "rankings_equal": true,
+        "different_sequence_values": 42,
+        "different_transition_values": 92,
+        "max_sequence_difference_common": 1.430511474609375e-05,
+        "max_transition_difference_common": 9.775161743164062e-06
+      },
+      {
+        "cohort_index": 56,
+        "rankings_equal": true,
+        "different_sequence_values": 44,
+        "different_transition_values": 85,
+        "max_sequence_difference_common": 9.5367431640625e-06,
+        "max_transition_difference_common": 9.298324584960938e-06
+      },
+      {
+        "cohort_index": 57,
+        "rankings_equal": true,
+        "different_sequence_values": 36,
+        "different_transition_values": 87,
+        "max_sequence_difference_common": 6.67572021484375e-06,
+        "max_transition_difference_common": 6.9141387939453125e-06
+      },
+      {
+        "cohort_index": 58,
+        "rankings_equal": true,
+        "different_sequence_values": 47,
+        "different_transition_values": 89,
+        "max_sequence_difference_common": 1.33514404296875e-05,
+        "max_transition_difference_common": 8.58306884765625e-06
+      },
+      {
+        "cohort_index": 59,
+        "rankings_equal": true,
+        "different_sequence_values": 40,
+        "different_transition_values": 86,
+        "max_sequence_difference_common": 1.621246337890625e-05,
+        "max_transition_difference_common": 1.2159347534179688e-05
+      },
+      {
+        "cohort_index": 60,
+        "rankings_equal": true,
+        "different_sequence_values": 40,
+        "different_transition_values": 95,
+        "max_sequence_difference_common": 1.1444091796875e-05,
+        "max_transition_difference_common": 1.0013580322265625e-05
+      },
+      {
+        "cohort_index": 61,
+        "rankings_equal": true,
+        "different_sequence_values": 42,
+        "different_transition_values": 86,
+        "max_sequence_difference_common": 1.52587890625e-05,
+        "max_transition_difference_common": 1.2040138244628906e-05
+      },
+      {
+        "cohort_index": 62,
+        "rankings_equal": true,
+        "different_sequence_values": 45,
+        "different_transition_values": 84,
+        "max_sequence_difference_common": 1.049041748046875e-05,
+        "max_transition_difference_common": 7.152557373046875e-06
+      },
+      {
+        "cohort_index": 63,
+        "rankings_equal": true,
+        "different_sequence_values": 38,
+        "different_transition_values": 80,
+        "max_sequence_difference_common": 5.7220458984375e-06,
+        "max_transition_difference_common": 9.059906005859375e-06
+      },
+      {
+        "cohort_index": 64,
+        "rankings_equal": true,
+        "different_sequence_values": 42,
+        "different_transition_values": 93,
+        "max_sequence_difference_common": 9.5367431640625e-06,
+        "max_transition_difference_common": 8.58306884765625e-06
+      },
+      {
+        "cohort_index": 65,
+        "rankings_equal": true,
+        "different_sequence_values": 41,
+        "different_transition_values": 88,
+        "max_sequence_difference_common": 1.049041748046875e-05,
+        "max_transition_difference_common": 1.0371208190917969e-05
+      },
+      {
+        "cohort_index": 66,
+        "rankings_equal": true,
+        "different_sequence_values": 42,
+        "different_transition_values": 92,
+        "max_sequence_difference_common": 2.09808349609375e-05,
+        "max_transition_difference_common": 1.2755393981933594e-05
+      },
+      {
+        "cohort_index": 67,
+        "rankings_equal": true,
+        "different_sequence_values": 46,
+        "different_transition_values": 85,
+        "max_sequence_difference_common": 1.1444091796875e-05,
+        "max_transition_difference_common": 1.1920928955078125e-05
+      },
+      {
+        "cohort_index": 68,
+        "rankings_equal": true,
+        "different_sequence_values": 33,
+        "different_transition_values": 47,
+        "max_sequence_difference_common": 7.62939453125e-06,
+        "max_transition_difference_common": 7.569789886474609e-06
+      },
+      {
+        "cohort_index": 69,
+        "rankings_equal": true,
+        "different_sequence_values": 38,
+        "different_transition_values": 94,
+        "max_sequence_difference_common": 1.71661376953125e-05,
+        "max_transition_difference_common": 1.0371208190917969e-05
+      },
+      {
+        "cohort_index": 70,
+        "rankings_equal": true,
+        "different_sequence_values": 27,
+        "different_transition_values": 73,
+        "max_sequence_difference_common": 1.33514404296875e-05,
+        "max_transition_difference_common": 9.059906005859375e-06
+      },
+      {
+        "cohort_index": 71,
+        "rankings_equal": true,
+        "different_sequence_values": 40,
+        "different_transition_values": 89,
+        "max_sequence_difference_common": 1.71661376953125e-05,
+        "max_transition_difference_common": 1.33514404296875e-05
+      },
+      {
+        "cohort_index": 72,
+        "rankings_equal": true,
+        "different_sequence_values": 27,
+        "different_transition_values": 68,
+        "max_sequence_difference_common": 1.239776611328125e-05,
+        "max_transition_difference_common": 1.1324882507324219e-05
+      },
+      {
+        "cohort_index": 73,
+        "rankings_equal": true,
+        "different_sequence_values": 45,
+        "different_transition_values": 90,
+        "max_sequence_difference_common": 1.71661376953125e-05,
+        "max_transition_difference_common": 1.1563301086425781e-05
+      },
+      {
+        "cohort_index": 74,
+        "rankings_equal": true,
+        "different_sequence_values": 38,
+        "different_transition_values": 91,
+        "max_sequence_difference_common": 9.5367431640625e-06,
+        "max_transition_difference_common": 9.5367431640625e-06
+      },
+      {
+        "cohort_index": 75,
+        "rankings_equal": true,
+        "different_sequence_values": 38,
+        "different_transition_values": 91,
+        "max_sequence_difference_common": 1.33514404296875e-05,
+        "max_transition_difference_common": 1.0013580322265625e-05
+      },
+      {
+        "cohort_index": 76,
+        "rankings_equal": true,
+        "different_sequence_values": 36,
+        "different_transition_values": 77,
+        "max_sequence_difference_common": 8.58306884765625e-06,
+        "max_transition_difference_common": 8.463859558105469e-06
+      },
+      {
+        "cohort_index": 77,
+        "rankings_equal": true,
+        "different_sequence_values": 23,
+        "different_transition_values": 69,
+        "max_sequence_difference_common": 1.1444091796875e-05,
+        "max_transition_difference_common": 1.0311603546142578e-05
+      },
+      {
+        "cohort_index": 78,
+        "rankings_equal": true,
+        "different_sequence_values": 37,
+        "different_transition_values": 91,
+        "max_sequence_difference_common": 1.1444091796875e-05,
+        "max_transition_difference_common": 1.1920928955078125e-05
+      },
+      {
+        "cohort_index": 79,
+        "rankings_equal": true,
+        "different_sequence_values": 43,
+        "different_transition_values": 94,
+        "max_sequence_difference_common": 1.52587890625e-05,
+        "max_transition_difference_common": 1.0251998901367188e-05
+      },
+      {
+        "cohort_index": 80,
+        "rankings_equal": true,
+        "different_sequence_values": 41,
+        "different_transition_values": 84,
+        "max_sequence_difference_common": 1.71661376953125e-05,
+        "max_transition_difference_common": 1.2636184692382812e-05
+      },
+      {
+        "cohort_index": 81,
+        "rankings_equal": true,
+        "different_sequence_values": 33,
+        "different_transition_values": 78,
+        "max_sequence_difference_common": 9.5367431640625e-06,
+        "max_transition_difference_common": 6.9141387939453125e-06
+      },
+      {
+        "cohort_index": 82,
+        "rankings_equal": true,
+        "different_sequence_values": 38,
+        "different_transition_values": 87,
+        "max_sequence_difference_common": 7.62939453125e-06,
+        "max_transition_difference_common": 7.62939453125e-06
+      },
+      {
+        "cohort_index": 83,
+        "rankings_equal": true,
+        "different_sequence_values": 28,
+        "different_transition_values": 89,
+        "max_sequence_difference_common": 1.1444091796875e-05,
+        "max_transition_difference_common": 1.0967254638671875e-05
+      },
+      {
+        "cohort_index": 84,
+        "rankings_equal": true,
+        "different_sequence_values": 34,
+        "different_transition_values": 89,
+        "max_sequence_difference_common": 7.62939453125e-06,
+        "max_transition_difference_common": 6.67572021484375e-06
+      },
+      {
+        "cohort_index": 85,
+        "rankings_equal": true,
+        "different_sequence_values": 41,
+        "different_transition_values": 85,
+        "max_sequence_difference_common": 9.5367431640625e-06,
+        "max_transition_difference_common": 6.9141387939453125e-06
+      },
+      {
+        "cohort_index": 86,
+        "rankings_equal": true,
+        "different_sequence_values": 40,
+        "different_transition_values": 90,
+        "max_sequence_difference_common": 1.33514404296875e-05,
+        "max_transition_difference_common": 8.344650268554688e-06
+      },
+      {
+        "cohort_index": 87,
+        "rankings_equal": true,
+        "different_sequence_values": 18,
+        "different_transition_values": 49,
+        "max_sequence_difference_common": 7.62939453125e-06,
+        "max_transition_difference_common": 5.7220458984375e-06
+      },
+      {
+        "cohort_index": 88,
+        "rankings_equal": true,
+        "different_sequence_values": 37,
+        "different_transition_values": 84,
+        "max_sequence_difference_common": 1.1444091796875e-05,
+        "max_transition_difference_common": 9.298324584960938e-06
+      },
+      {
+        "cohort_index": 89,
+        "rankings_equal": true,
+        "different_sequence_values": 29,
+        "different_transition_values": 72,
+        "max_sequence_difference_common": 1.1444091796875e-05,
+        "max_transition_difference_common": 1.0967254638671875e-05
+      },
+      {
+        "cohort_index": 90,
+        "rankings_equal": true,
+        "different_sequence_values": 42,
+        "different_transition_values": 91,
+        "max_sequence_difference_common": 1.049041748046875e-05,
+        "max_transition_difference_common": 9.655952453613281e-06
+      },
+      {
+        "cohort_index": 91,
+        "rankings_equal": true,
+        "different_sequence_values": 28,
+        "different_transition_values": 58,
+        "max_sequence_difference_common": 1.1444091796875e-05,
+        "max_transition_difference_common": 9.655952453613281e-06
+      },
+      {
+        "cohort_index": 92,
+        "rankings_equal": true,
+        "different_sequence_values": 41,
+        "different_transition_values": 82,
+        "max_sequence_difference_common": 1.71661376953125e-05,
+        "max_transition_difference_common": 1.4543533325195312e-05
+      },
+      {
+        "cohort_index": 93,
+        "rankings_equal": true,
+        "different_sequence_values": 38,
+        "different_transition_values": 95,
+        "max_sequence_difference_common": 1.52587890625e-05,
+        "max_transition_difference_common": 8.821487426757812e-06
+      },
+      {
+        "cohort_index": 94,
+        "rankings_equal": true,
+        "different_sequence_values": 34,
+        "different_transition_values": 93,
+        "max_sequence_difference_common": 1.1444091796875e-05,
+        "max_transition_difference_common": 8.106231689453125e-06
+      },
+      {
+        "cohort_index": 95,
+        "rankings_equal": true,
+        "different_sequence_values": 41,
+        "different_transition_values": 95,
+        "max_sequence_difference_common": 1.33514404296875e-05,
+        "max_transition_difference_common": 9.775161743164062e-06
+      },
+      {
+        "cohort_index": 96,
+        "rankings_equal": true,
+        "different_sequence_values": 41,
+        "different_transition_values": 80,
+        "max_sequence_difference_common": 8.58306884765625e-06,
+        "max_transition_difference_common": 8.344650268554688e-06
+      },
+      {
+        "cohort_index": 97,
+        "rankings_equal": true,
+        "different_sequence_values": 39,
+        "different_transition_values": 94,
+        "max_sequence_difference_common": 1.9073486328125e-05,
+        "max_transition_difference_common": 1.430511474609375e-05
+      },
+      {
+        "cohort_index": 98,
+        "rankings_equal": true,
+        "different_sequence_values": 41,
+        "different_transition_values": 96,
+        "max_sequence_difference_common": 1.52587890625e-05,
+        "max_transition_difference_common": 1.1324882507324219e-05
+      },
+      {
+        "cohort_index": 99,
+        "rankings_equal": true,
+        "different_sequence_values": 40,
+        "different_transition_values": 86,
+        "max_sequence_difference_common": 1.811981201171875e-05,
+        "max_transition_difference_common": 1.1205673217773438e-05
+      },
+      {
+        "cohort_index": 100,
+        "rankings_equal": true,
+        "different_sequence_values": 41,
+        "different_transition_values": 89,
+        "max_sequence_difference_common": 1.52587890625e-05,
+        "max_transition_difference_common": 9.5367431640625e-06
+      },
+      {
+        "cohort_index": 101,
+        "rankings_equal": true,
+        "different_sequence_values": 24,
+        "different_transition_values": 60,
+        "max_sequence_difference_common": 6.67572021484375e-06,
+        "max_transition_difference_common": 6.4373016357421875e-06
+      },
+      {
+        "cohort_index": 102,
+        "rankings_equal": true,
+        "different_sequence_values": 18,
+        "different_transition_values": 53,
+        "max_sequence_difference_common": 1.1444091796875e-05,
+        "max_transition_difference_common": 1.0967254638671875e-05
+      },
+      {
+        "cohort_index": 103,
+        "rankings_equal": true,
+        "different_sequence_values": 40,
+        "different_transition_values": 95,
+        "max_sequence_difference_common": 1.52587890625e-05,
+        "max_transition_difference_common": 1.33514404296875e-05
+      },
+      {
+        "cohort_index": 104,
+        "rankings_equal": true,
+        "different_sequence_values": 32,
+        "different_transition_values": 86,
+        "max_sequence_difference_common": 1.1444091796875e-05,
+        "max_transition_difference_common": 1.0967254638671875e-05
+      },
+      {
+        "cohort_index": 105,
+        "rankings_equal": true,
+        "different_sequence_values": 46,
+        "different_transition_values": 92,
+        "max_sequence_difference_common": 2.288818359375e-05,
+        "max_transition_difference_common": 1.9550323486328125e-05
+      },
+      {
+        "cohort_index": 106,
+        "rankings_equal": true,
+        "different_sequence_values": 33,
+        "different_transition_values": 73,
+        "max_sequence_difference_common": 9.5367431640625e-06,
+        "max_transition_difference_common": 7.927417755126953e-06
+      },
+      {
+        "cohort_index": 107,
+        "rankings_equal": true,
+        "different_sequence_values": 25,
+        "different_transition_values": 57,
+        "max_sequence_difference_common": 3.814697265625e-06,
+        "max_transition_difference_common": 4.76837158203125e-06
+      },
+      {
+        "cohort_index": 108,
+        "rankings_equal": true,
+        "different_sequence_values": 42,
+        "different_transition_values": 76,
+        "max_sequence_difference_common": 1.33514404296875e-05,
+        "max_transition_difference_common": 1.0251998901367188e-05
+      },
+      {
+        "cohort_index": 109,
+        "rankings_equal": true,
+        "different_sequence_values": 41,
+        "different_transition_values": 83,
+        "max_sequence_difference_common": 1.1444091796875e-05,
+        "max_transition_difference_common": 6.9141387939453125e-06
+      },
+      {
+        "cohort_index": 110,
+        "rankings_equal": true,
+        "different_sequence_values": 34,
+        "different_transition_values": 63,
+        "max_sequence_difference_common": 8.58306884765625e-06,
+        "max_transition_difference_common": 7.152557373046875e-06
+      },
+      {
+        "cohort_index": 111,
+        "rankings_equal": true,
+        "different_sequence_values": 39,
+        "different_transition_values": 96,
+        "max_sequence_difference_common": 9.5367431640625e-06,
+        "max_transition_difference_common": 9.775161743164062e-06
+      },
+      {
+        "cohort_index": 112,
+        "rankings_equal": true,
+        "different_sequence_values": 39,
+        "different_transition_values": 92,
+        "max_sequence_difference_common": 1.52587890625e-05,
+        "max_transition_difference_common": 1.2993812561035156e-05
+      },
+      {
+        "cohort_index": 113,
+        "rankings_equal": true,
+        "different_sequence_values": 25,
+        "different_transition_values": 53,
+        "max_sequence_difference_common": 1.811981201171875e-05,
+        "max_transition_difference_common": 1.5974044799804688e-05
+      },
+      {
+        "cohort_index": 114,
+        "rankings_equal": true,
+        "different_sequence_values": 28,
+        "different_transition_values": 73,
+        "max_sequence_difference_common": 1.1444091796875e-05,
+        "max_transition_difference_common": 1.0013580322265625e-05
+      },
+      {
+        "cohort_index": 115,
+        "rankings_equal": true,
+        "different_sequence_values": 37,
+        "different_transition_values": 96,
+        "max_sequence_difference_common": 1.52587890625e-05,
+        "max_transition_difference_common": 1.1682510375976562e-05
+      },
+      {
+        "cohort_index": 116,
+        "rankings_equal": true,
+        "different_sequence_values": 43,
+        "different_transition_values": 91,
+        "max_sequence_difference_common": 1.52587890625e-05,
+        "max_transition_difference_common": 1.430511474609375e-05
+      },
+      {
+        "cohort_index": 117,
+        "rankings_equal": true,
+        "different_sequence_values": 39,
+        "different_transition_values": 83,
+        "max_sequence_difference_common": 1.52587890625e-05,
+        "max_transition_difference_common": 1.3828277587890625e-05
+      },
+      {
+        "cohort_index": 118,
+        "rankings_equal": true,
+        "different_sequence_values": 45,
+        "different_transition_values": 92,
+        "max_sequence_difference_common": 1.52587890625e-05,
+        "max_transition_difference_common": 1.3828277587890625e-05
+      },
+      {
+        "cohort_index": 119,
+        "rankings_equal": true,
+        "different_sequence_values": 41,
+        "different_transition_values": 90,
+        "max_sequence_difference_common": 1.33514404296875e-05,
+        "max_transition_difference_common": 8.58306884765625e-06
+      },
+      {
+        "cohort_index": 120,
+        "rankings_equal": true,
+        "different_sequence_values": 40,
+        "different_transition_values": 87,
+        "max_sequence_difference_common": 1.71661376953125e-05,
+        "max_transition_difference_common": 1.138448715209961e-05
+      },
+      {
+        "cohort_index": 121,
+        "rankings_equal": true,
+        "different_sequence_values": 35,
+        "different_transition_values": 87,
+        "max_sequence_difference_common": 1.1444091796875e-05,
+        "max_transition_difference_common": 9.775161743164062e-06
+      },
+      {
+        "cohort_index": 122,
+        "rankings_equal": true,
+        "different_sequence_values": 38,
+        "different_transition_values": 89,
+        "max_sequence_difference_common": 1.1444091796875e-05,
+        "max_transition_difference_common": 1.0013580322265625e-05
+      },
+      {
+        "cohort_index": 123,
+        "rankings_equal": true,
+        "different_sequence_values": 38,
+        "different_transition_values": 75,
+        "max_sequence_difference_common": 7.62939453125e-06,
+        "max_transition_difference_common": 7.510185241699219e-06
+      },
+      {
+        "cohort_index": 124,
+        "rankings_equal": true,
+        "different_sequence_values": 38,
+        "different_transition_values": 68,
+        "max_sequence_difference_common": 1.0967254638671875e-05,
+        "max_transition_difference_common": 1.0967254638671875e-05
+      },
+      {
+        "cohort_index": 125,
+        "rankings_equal": true,
+        "different_sequence_values": 29,
+        "different_transition_values": 72,
+        "max_sequence_difference_common": 9.5367431640625e-06,
+        "max_transition_difference_common": 1.1920928955078125e-05
+      },
+      {
+        "cohort_index": 126,
+        "rankings_equal": true,
+        "different_sequence_values": 23,
+        "different_transition_values": 72,
+        "max_sequence_difference_common": 1.33514404296875e-05,
+        "max_transition_difference_common": 1.239776611328125e-05
+      },
+      {
+        "cohort_index": 127,
+        "rankings_equal": true,
+        "different_sequence_values": 38,
+        "different_transition_values": 77,
+        "max_sequence_difference_common": 2.47955322265625e-05,
+        "max_transition_difference_common": 1.6689300537109375e-05
+      },
+      {
+        "cohort_index": 128,
+        "rankings_equal": true,
+        "different_sequence_values": 47,
+        "different_transition_values": 87,
+        "max_sequence_difference_common": 1.621246337890625e-05,
+        "max_transition_difference_common": 1.6450881958007812e-05
+      },
+      {
+        "cohort_index": 129,
+        "rankings_equal": true,
+        "different_sequence_values": 43,
+        "different_transition_values": 91,
+        "max_sequence_difference_common": 1.049041748046875e-05,
+        "max_transition_difference_common": 9.298324584960938e-06
+      },
+      {
+        "cohort_index": 130,
+        "rankings_equal": true,
+        "different_sequence_values": 35,
+        "different_transition_values": 85,
+        "max_sequence_difference_common": 1.33514404296875e-05,
+        "max_transition_difference_common": 8.821487426757812e-06
+      },
+      {
+        "cohort_index": 131,
+        "rankings_equal": true,
+        "different_sequence_values": 45,
+        "different_transition_values": 95,
+        "max_sequence_difference_common": 1.33514404296875e-05,
+        "max_transition_difference_common": 1.0848045349121094e-05
+      },
+      {
+        "cohort_index": 132,
+        "rankings_equal": true,
+        "different_sequence_values": 32,
+        "different_transition_values": 87,
+        "max_sequence_difference_common": 1.1444091796875e-05,
+        "max_transition_difference_common": 9.298324584960938e-06
+      },
+      {
+        "cohort_index": 133,
+        "rankings_equal": true,
+        "different_sequence_values": 41,
+        "different_transition_values": 80,
+        "max_sequence_difference_common": 8.106231689453125e-06,
+        "max_transition_difference_common": 9.059906005859375e-06
+      },
+      {
+        "cohort_index": 134,
+        "rankings_equal": true,
+        "different_sequence_values": 43,
+        "different_transition_values": 89,
+        "max_sequence_difference_common": 2.09808349609375e-05,
+        "max_transition_difference_common": 1.049041748046875e-05
+      },
+      {
+        "cohort_index": 135,
+        "rankings_equal": true,
+        "different_sequence_values": 45,
+        "different_transition_values": 80,
+        "max_sequence_difference_common": 1.239776611328125e-05,
+        "max_transition_difference_common": 9.894371032714844e-06
+      },
+      {
+        "cohort_index": 136,
+        "rankings_equal": true,
+        "different_sequence_values": 45,
+        "different_transition_values": 92,
+        "max_sequence_difference_common": 1.049041748046875e-05,
+        "max_transition_difference_common": 9.775161743164062e-06
+      },
+      {
+        "cohort_index": 137,
+        "rankings_equal": true,
+        "different_sequence_values": 29,
+        "different_transition_values": 73,
+        "max_sequence_difference_common": 1.1444091796875e-05,
+        "max_transition_difference_common": 7.62939453125e-06
+      },
+      {
+        "cohort_index": 138,
+        "rankings_equal": true,
+        "different_sequence_values": 43,
+        "different_transition_values": 92,
+        "max_sequence_difference_common": 1.33514404296875e-05,
+        "max_transition_difference_common": 1.2636184692382812e-05
+      },
+      {
+        "cohort_index": 139,
+        "rankings_equal": true,
+        "different_sequence_values": 33,
+        "different_transition_values": 74,
+        "max_sequence_difference_common": 1.33514404296875e-05,
+        "max_transition_difference_common": 1.0251998901367188e-05
+      },
+      {
+        "cohort_index": 140,
+        "rankings_equal": true,
+        "different_sequence_values": 44,
+        "different_transition_values": 93,
+        "max_sequence_difference_common": 1.049041748046875e-05,
+        "max_transition_difference_common": 9.5367431640625e-06
+      },
+      {
+        "cohort_index": 141,
+        "rankings_equal": true,
+        "different_sequence_values": 31,
+        "different_transition_values": 74,
+        "max_sequence_difference_common": 5.7220458984375e-06,
+        "max_transition_difference_common": 5.9604644775390625e-06
+      },
+      {
+        "cohort_index": 142,
+        "rankings_equal": true,
+        "different_sequence_values": 37,
+        "different_transition_values": 71,
+        "max_sequence_difference_common": 9.5367431640625e-06,
+        "max_transition_difference_common": 6.67572021484375e-06
+      },
+      {
+        "cohort_index": 143,
+        "rankings_equal": true,
+        "different_sequence_values": 43,
+        "different_transition_values": 88,
+        "max_sequence_difference_common": 1.1444091796875e-05,
+        "max_transition_difference_common": 1.1682510375976562e-05
+      },
+      {
+        "cohort_index": 144,
+        "rankings_equal": true,
+        "different_sequence_values": 38,
+        "different_transition_values": 89,
+        "max_sequence_difference_common": 7.62939453125e-06,
+        "max_transition_difference_common": 5.7220458984375e-06
+      },
+      {
+        "cohort_index": 145,
+        "rankings_equal": true,
+        "different_sequence_values": 44,
+        "different_transition_values": 92,
+        "max_sequence_difference_common": 1.52587890625e-05,
+        "max_transition_difference_common": 1.1205673217773438e-05
+      },
+      {
+        "cohort_index": 146,
+        "rankings_equal": true,
+        "different_sequence_values": 33,
+        "different_transition_values": 83,
+        "max_sequence_difference_common": 1.1444091796875e-05,
+        "max_transition_difference_common": 8.881092071533203e-06
+      },
+      {
+        "cohort_index": 147,
+        "rankings_equal": true,
+        "different_sequence_values": 32,
+        "different_transition_values": 67,
+        "max_sequence_difference_common": 1.1444091796875e-05,
+        "max_transition_difference_common": 1.1205673217773438e-05
+      },
+      {
+        "cohort_index": 148,
+        "rankings_equal": true,
+        "different_sequence_values": 41,
+        "different_transition_values": 95,
+        "max_sequence_difference_common": 1.33514404296875e-05,
+        "max_transition_difference_common": 1.1682510375976562e-05
+      },
+      {
+        "cohort_index": 149,
+        "rankings_equal": true,
+        "different_sequence_values": 45,
+        "different_transition_values": 95,
+        "max_sequence_difference_common": 9.5367431640625e-06,
+        "max_transition_difference_common": 9.655952453613281e-06
+      },
+      {
+        "cohort_index": 150,
+        "rankings_equal": true,
+        "different_sequence_values": 35,
+        "different_transition_values": 68,
+        "max_sequence_difference_common": 1.1444091796875e-05,
+        "max_transition_difference_common": 1.1205673217773438e-05
+      },
+      {
+        "cohort_index": 151,
+        "rankings_equal": true,
+        "different_sequence_values": 27,
+        "different_transition_values": 75,
+        "max_sequence_difference_common": 8.58306884765625e-06,
+        "max_transition_difference_common": 8.106231689453125e-06
+      },
+      {
+        "cohort_index": 152,
+        "rankings_equal": true,
+        "different_sequence_values": 43,
+        "different_transition_values": 84,
+        "max_sequence_difference_common": 9.5367431640625e-06,
+        "max_transition_difference_common": 8.106231689453125e-06
+      },
+      {
+        "cohort_index": 153,
+        "rankings_equal": true,
+        "different_sequence_values": 45,
+        "different_transition_values": 90,
+        "max_sequence_difference_common": 1.9073486328125e-05,
+        "max_transition_difference_common": 1.3589859008789062e-05
+      },
+      {
+        "cohort_index": 154,
+        "rankings_equal": true,
+        "different_sequence_values": 44,
+        "different_transition_values": 88,
+        "max_sequence_difference_common": 1.71661376953125e-05,
+        "max_transition_difference_common": 1.52587890625e-05
+      },
+      {
+        "cohort_index": 155,
+        "rankings_equal": true,
+        "different_sequence_values": 38,
+        "different_transition_values": 88,
+        "max_sequence_difference_common": 1.049041748046875e-05,
+        "max_transition_difference_common": 1.0848045349121094e-05
+      },
+      {
+        "cohort_index": 156,
+        "rankings_equal": true,
+        "different_sequence_values": 35,
+        "different_transition_values": 51,
+        "max_sequence_difference_common": 5.245208740234375e-06,
+        "max_transition_difference_common": 5.0067901611328125e-06
+      },
+      {
+        "cohort_index": 157,
+        "rankings_equal": true,
+        "different_sequence_values": 41,
+        "different_transition_values": 87,
+        "max_sequence_difference_common": 3.0517578125e-05,
+        "max_transition_difference_common": 2.0503997802734375e-05
+      },
+      {
+        "cohort_index": 158,
+        "rankings_equal": true,
+        "different_sequence_values": 42,
+        "different_transition_values": 89,
+        "max_sequence_difference_common": 1.049041748046875e-05,
+        "max_transition_difference_common": 8.106231689453125e-06
+      },
+      {
+        "cohort_index": 159,
+        "rankings_equal": true,
+        "different_sequence_values": 41,
+        "different_transition_values": 90,
+        "max_sequence_difference_common": 2.384185791015625e-05,
+        "max_transition_difference_common": 2.0503997802734375e-05
+      },
+      {
+        "cohort_index": 160,
+        "rankings_equal": true,
+        "different_sequence_values": 25,
+        "different_transition_values": 83,
+        "max_sequence_difference_common": 1.1444091796875e-05,
+        "max_transition_difference_common": 5.245208740234375e-06
+      },
+      {
+        "cohort_index": 161,
+        "rankings_equal": true,
+        "different_sequence_values": 39,
+        "different_transition_values": 92,
+        "max_sequence_difference_common": 1.621246337890625e-05,
+        "max_transition_difference_common": 1.0967254638671875e-05
+      },
+      {
+        "cohort_index": 162,
+        "rankings_equal": true,
+        "different_sequence_values": 32,
+        "different_transition_values": 66,
+        "max_sequence_difference_common": 9.5367431640625e-06,
+        "max_transition_difference_common": 8.344650268554688e-06
+      },
+      {
+        "cohort_index": 163,
+        "rankings_equal": true,
+        "different_sequence_values": 40,
+        "different_transition_values": 82,
+        "max_sequence_difference_common": 1.33514404296875e-05,
+        "max_transition_difference_common": 1.430511474609375e-05
+      },
+      {
+        "cohort_index": 164,
+        "rankings_equal": true,
+        "different_sequence_values": 40,
+        "different_transition_values": 84,
+        "max_sequence_difference_common": 9.5367431640625e-06,
+        "max_transition_difference_common": 8.463859558105469e-06
+      },
+      {
+        "cohort_index": 165,
+        "rankings_equal": true,
+        "different_sequence_values": 45,
+        "different_transition_values": 92,
+        "max_sequence_difference_common": 1.71661376953125e-05,
+        "max_transition_difference_common": 1.049041748046875e-05
+      },
+      {
+        "cohort_index": 166,
+        "rankings_equal": true,
+        "different_sequence_values": 28,
+        "different_transition_values": 57,
+        "max_sequence_difference_common": 1.430511474609375e-05,
+        "max_transition_difference_common": 1.424551010131836e-05
+      },
+      {
+        "cohort_index": 167,
+        "rankings_equal": true,
+        "different_sequence_values": 39,
+        "different_transition_values": 97,
+        "max_sequence_difference_common": 1.33514404296875e-05,
+        "max_transition_difference_common": 9.655952453613281e-06
+      },
+      {
+        "cohort_index": 168,
+        "rankings_equal": true,
+        "different_sequence_values": 42,
+        "different_transition_values": 93,
+        "max_sequence_difference_common": 1.52587890625e-05,
+        "max_transition_difference_common": 1.2874603271484375e-05
+      },
+      {
+        "cohort_index": 169,
+        "rankings_equal": true,
+        "different_sequence_values": 42,
+        "different_transition_values": 98,
+        "max_sequence_difference_common": 1.52587890625e-05,
+        "max_transition_difference_common": 9.059906005859375e-06
+      },
+      {
+        "cohort_index": 170,
+        "rankings_equal": true,
+        "different_sequence_values": 41,
+        "different_transition_values": 90,
+        "max_sequence_difference_common": 1.811981201171875e-05,
+        "max_transition_difference_common": 1.0728836059570312e-05
+      },
+      {
+        "cohort_index": 171,
+        "rankings_equal": true,
+        "different_sequence_values": 35,
+        "different_transition_values": 80,
+        "max_sequence_difference_common": 9.5367431640625e-06,
+        "max_transition_difference_common": 7.867813110351562e-06
+      },
+      {
+        "cohort_index": 172,
+        "rankings_equal": true,
+        "different_sequence_values": 41,
+        "different_transition_values": 88,
+        "max_sequence_difference_common": 1.52587890625e-05,
+        "max_transition_difference_common": 1.1444091796875e-05
+      },
+      {
+        "cohort_index": 173,
+        "rankings_equal": true,
+        "different_sequence_values": 42,
+        "different_transition_values": 93,
+        "max_sequence_difference_common": 1.239776611328125e-05,
+        "max_transition_difference_common": 9.298324584960938e-06
+      },
+      {
+        "cohort_index": 174,
+        "rankings_equal": true,
+        "different_sequence_values": 44,
+        "different_transition_values": 89,
+        "max_sequence_difference_common": 1.52587890625e-05,
+        "max_transition_difference_common": 1.1444091796875e-05
+      },
+      {
+        "cohort_index": 175,
+        "rankings_equal": true,
+        "different_sequence_values": 32,
+        "different_transition_values": 86,
+        "max_sequence_difference_common": 1.1444091796875e-05,
+        "max_transition_difference_common": 1.0967254638671875e-05
+      },
+      {
+        "cohort_index": 176,
+        "rankings_equal": true,
+        "different_sequence_values": 43,
+        "different_transition_values": 86,
+        "max_sequence_difference_common": 1.71661376953125e-05,
+        "max_transition_difference_common": 1.0967254638671875e-05
+      },
+      {
+        "cohort_index": 177,
+        "rankings_equal": true,
+        "different_sequence_values": 38,
+        "different_transition_values": 78,
+        "max_sequence_difference_common": 1.33514404296875e-05,
+        "max_transition_difference_common": 1.33514404296875e-05
+      },
+      {
+        "cohort_index": 178,
+        "rankings_equal": true,
+        "different_sequence_values": 24,
+        "different_transition_values": 71,
+        "max_sequence_difference_common": 1.52587890625e-05,
+        "max_transition_difference_common": 9.298324584960938e-06
+      },
+      {
+        "cohort_index": 179,
+        "rankings_equal": true,
+        "different_sequence_values": 40,
+        "different_transition_values": 75,
+        "max_sequence_difference_common": 1.1444091796875e-05,
+        "max_transition_difference_common": 1.0967254638671875e-05
+      },
+      {
+        "cohort_index": 180,
+        "rankings_equal": true,
+        "different_sequence_values": 37,
+        "different_transition_values": 90,
+        "max_sequence_difference_common": 1.621246337890625e-05,
+        "max_transition_difference_common": 1.4960765838623047e-05
+      },
+      {
+        "cohort_index": 181,
+        "rankings_equal": true,
+        "different_sequence_values": 39,
+        "different_transition_values": 88,
+        "max_sequence_difference_common": 1.33514404296875e-05,
+        "max_transition_difference_common": 8.106231689453125e-06
+      },
+      {
+        "cohort_index": 182,
+        "rankings_equal": true,
+        "different_sequence_values": 28,
+        "different_transition_values": 52,
+        "max_sequence_difference_common": 2.384185791015625e-05,
+        "max_transition_difference_common": 1.4781951904296875e-05
+      },
+      {
+        "cohort_index": 183,
+        "rankings_equal": true,
+        "different_sequence_values": 23,
+        "different_transition_values": 83,
+        "max_sequence_difference_common": 7.62939453125e-06,
+        "max_transition_difference_common": 5.245208740234375e-06
+      },
+      {
+        "cohort_index": 184,
+        "rankings_equal": true,
+        "different_sequence_values": 42,
+        "different_transition_values": 94,
+        "max_sequence_difference_common": 2.6702880859375e-05,
+        "max_transition_difference_common": 1.5974044799804688e-05
+      },
+      {
+        "cohort_index": 185,
+        "rankings_equal": true,
+        "different_sequence_values": 46,
+        "different_transition_values": 88,
+        "max_sequence_difference_common": 1.430511474609375e-05,
+        "max_transition_difference_common": 8.821487426757812e-06
+      },
+      {
+        "cohort_index": 186,
+        "rankings_equal": true,
+        "different_sequence_values": 43,
+        "different_transition_values": 76,
+        "max_sequence_difference_common": 1.1444091796875e-05,
+        "max_transition_difference_common": 9.775161743164062e-06
+      },
+      {
+        "cohort_index": 187,
+        "rankings_equal": true,
+        "different_sequence_values": 43,
+        "different_transition_values": 96,
+        "max_sequence_difference_common": 1.621246337890625e-05,
+        "max_transition_difference_common": 8.940696716308594e-06
+      },
+      {
+        "cohort_index": 188,
+        "rankings_equal": true,
+        "different_sequence_values": 35,
+        "different_transition_values": 78,
+        "max_sequence_difference_common": 1.049041748046875e-05,
+        "max_transition_difference_common": 1.0132789611816406e-05
+      },
+      {
+        "cohort_index": 189,
+        "rankings_equal": true,
+        "different_sequence_values": 35,
+        "different_transition_values": 88,
+        "max_sequence_difference_common": 9.5367431640625e-06,
+        "max_transition_difference_common": 1.0013580322265625e-05
+      },
+      {
+        "cohort_index": 190,
+        "rankings_equal": true,
+        "different_sequence_values": 35,
+        "different_transition_values": 88,
+        "max_sequence_difference_common": 9.5367431640625e-06,
+        "max_transition_difference_common": 1.0013580322265625e-05
+      },
+      {
+        "cohort_index": 191,
+        "rankings_equal": true,
+        "different_sequence_values": 39,
+        "different_transition_values": 72,
+        "max_sequence_difference_common": 1.9073486328125e-05,
+        "max_transition_difference_common": 1.621246337890625e-05
+      },
+      {
+        "cohort_index": 192,
+        "rankings_equal": true,
+        "different_sequence_values": 28,
+        "different_transition_values": 64,
+        "max_sequence_difference_common": 1.1444091796875e-05,
+        "max_transition_difference_common": 6.4373016357421875e-06
+      },
+      {
+        "cohort_index": 193,
+        "rankings_equal": true,
+        "different_sequence_values": 37,
+        "different_transition_values": 88,
+        "max_sequence_difference_common": 1.9073486328125e-05,
+        "max_transition_difference_common": 1.1563301086425781e-05
+      },
+      {
+        "cohort_index": 194,
+        "rankings_equal": true,
+        "different_sequence_values": 44,
+        "different_transition_values": 90,
+        "max_sequence_difference_common": 1.430511474609375e-05,
+        "max_transition_difference_common": 1.1920928955078125e-05
+      },
+      {
+        "cohort_index": 195,
+        "rankings_equal": true,
+        "different_sequence_values": 42,
+        "different_transition_values": 94,
+        "max_sequence_difference_common": 2.09808349609375e-05,
+        "max_transition_difference_common": 1.1920928955078125e-05
+      },
+      {
+        "cohort_index": 196,
+        "rankings_equal": true,
+        "different_sequence_values": 38,
+        "different_transition_values": 64,
+        "max_sequence_difference_common": 1.52587890625e-05,
+        "max_transition_difference_common": 1.4543533325195312e-05
+      },
+      {
+        "cohort_index": 197,
+        "rankings_equal": true,
+        "different_sequence_values": 46,
+        "different_transition_values": 95,
+        "max_sequence_difference_common": 3.62396240234375e-05,
+        "max_transition_difference_common": 2.4557113647460938e-05
+      },
+      {
+        "cohort_index": 198,
+        "rankings_equal": true,
+        "different_sequence_values": 43,
+        "different_transition_values": 87,
+        "max_sequence_difference_common": 1.430511474609375e-05,
+        "max_transition_difference_common": 1.3113021850585938e-05
+      },
+      {
+        "cohort_index": 199,
+        "rankings_equal": true,
+        "different_sequence_values": 41,
+        "different_transition_values": 87,
+        "max_sequence_difference_common": 9.5367431640625e-06,
+        "max_transition_difference_common": 9.059906005859375e-06
+      },
+      {
+        "cohort_index": 200,
+        "rankings_equal": true,
+        "different_sequence_values": 27,
+        "different_transition_values": 58,
+        "max_sequence_difference_common": 1.049041748046875e-05,
+        "max_transition_difference_common": 1.049041748046875e-05
+      },
+      {
+        "cohort_index": 201,
+        "rankings_equal": true,
+        "different_sequence_values": 42,
+        "different_transition_values": 96,
+        "max_sequence_difference_common": 1.52587890625e-05,
+        "max_transition_difference_common": 1.239776611328125e-05
+      },
+      {
+        "cohort_index": 202,
+        "rankings_equal": true,
+        "different_sequence_values": 45,
+        "different_transition_values": 89,
+        "max_sequence_difference_common": 2.86102294921875e-05,
+        "max_transition_difference_common": 2.1219253540039062e-05
+      },
+      {
+        "cohort_index": 203,
+        "rankings_equal": true,
+        "different_sequence_values": 45,
+        "different_transition_values": 90,
+        "max_sequence_difference_common": 2.86102294921875e-05,
+        "max_transition_difference_common": 1.7642974853515625e-05
+      },
+      {
+        "cohort_index": 204,
+        "rankings_equal": true,
+        "different_sequence_values": 42,
+        "different_transition_values": 88,
+        "max_sequence_difference_common": 1.430511474609375e-05,
+        "max_transition_difference_common": 9.775161743164062e-06
+      },
+      {
+        "cohort_index": 205,
+        "rankings_equal": true,
+        "different_sequence_values": 39,
+        "different_transition_values": 85,
+        "max_sequence_difference_common": 1.1444091796875e-05,
+        "max_transition_difference_common": 1.049041748046875e-05
+      },
+      {
+        "cohort_index": 206,
+        "rankings_equal": true,
+        "different_sequence_values": 39,
+        "different_transition_values": 87,
+        "max_sequence_difference_common": 1.049041748046875e-05,
+        "max_transition_difference_common": 1.0609626770019531e-05
+      },
+      {
+        "cohort_index": 207,
+        "rankings_equal": true,
+        "different_sequence_values": 43,
+        "different_transition_values": 94,
+        "max_sequence_difference_common": 1.9073486328125e-05,
+        "max_transition_difference_common": 1.1444091796875e-05
+      },
+      {
+        "cohort_index": 208,
+        "rankings_equal": true,
+        "different_sequence_values": 40,
+        "different_transition_values": 93,
+        "max_sequence_difference_common": 1.1444091796875e-05,
+        "max_transition_difference_common": 8.344650268554688e-06
+      },
+      {
+        "cohort_index": 209,
+        "rankings_equal": true,
+        "different_sequence_values": 43,
+        "different_transition_values": 94,
+        "max_sequence_difference_common": 1.430511474609375e-05,
+        "max_transition_difference_common": 1.3113021850585938e-05
+      },
+      {
+        "cohort_index": 210,
+        "rankings_equal": true,
+        "different_sequence_values": 40,
+        "different_transition_values": 85,
+        "max_sequence_difference_common": 1.71661376953125e-05,
+        "max_transition_difference_common": 1.4066696166992188e-05
+      },
+      {
+        "cohort_index": 211,
+        "rankings_equal": true,
+        "different_sequence_values": 42,
+        "different_transition_values": 93,
+        "max_sequence_difference_common": 2.288818359375e-05,
+        "max_transition_difference_common": 1.6450881958007812e-05
+      },
+      {
+        "cohort_index": 212,
+        "rankings_equal": true,
+        "different_sequence_values": 29,
+        "different_transition_values": 71,
+        "max_sequence_difference_common": 7.62939453125e-06,
+        "max_transition_difference_common": 8.225440979003906e-06
+      },
+      {
+        "cohort_index": 213,
+        "rankings_equal": true,
+        "different_sequence_values": 45,
+        "different_transition_values": 90,
+        "max_sequence_difference_common": 1.71661376953125e-05,
+        "max_transition_difference_common": 1.2159347534179688e-05
+      },
+      {
+        "cohort_index": 214,
+        "rankings_equal": true,
+        "different_sequence_values": 28,
+        "different_transition_values": 60,
+        "max_sequence_difference_common": 9.5367431640625e-06,
+        "max_transition_difference_common": 5.841255187988281e-06
+      },
+      {
+        "cohort_index": 215,
+        "rankings_equal": true,
+        "different_sequence_values": 25,
+        "different_transition_values": 83,
+        "max_sequence_difference_common": 1.1444091796875e-05,
+        "max_transition_difference_common": 5.245208740234375e-06
+      },
+      {
+        "cohort_index": 216,
+        "rankings_equal": true,
+        "different_sequence_values": 37,
+        "different_transition_values": 65,
+        "max_sequence_difference_common": 8.106231689453125e-06,
+        "max_transition_difference_common": 8.344650268554688e-06
+      },
+      {
+        "cohort_index": 217,
+        "rankings_equal": true,
+        "different_sequence_values": 38,
+        "different_transition_values": 93,
+        "max_sequence_difference_common": 1.33514404296875e-05,
+        "max_transition_difference_common": 9.059906005859375e-06
+      },
+      {
+        "cohort_index": 218,
+        "rankings_equal": true,
+        "different_sequence_values": 44,
+        "different_transition_values": 94,
+        "max_sequence_difference_common": 2.384185791015625e-05,
+        "max_transition_difference_common": 1.919269561767578e-05
+      },
+      {
+        "cohort_index": 219,
+        "rankings_equal": true,
+        "different_sequence_values": 27,
+        "different_transition_values": 85,
+        "max_sequence_difference_common": 1.71661376953125e-05,
+        "max_transition_difference_common": 1.2636184692382812e-05
+      },
+      {
+        "cohort_index": 220,
+        "rankings_equal": true,
+        "different_sequence_values": 41,
+        "different_transition_values": 79,
+        "max_sequence_difference_common": 9.5367431640625e-06,
+        "max_transition_difference_common": 8.106231689453125e-06
+      },
+      {
+        "cohort_index": 221,
+        "rankings_equal": true,
+        "different_sequence_values": 31,
+        "different_transition_values": 61,
+        "max_sequence_difference_common": 6.67572021484375e-06,
+        "max_transition_difference_common": 6.079673767089844e-06
+      },
+      {
+        "cohort_index": 222,
+        "rankings_equal": true,
+        "different_sequence_values": 43,
+        "different_transition_values": 76,
+        "max_sequence_difference_common": 8.58306884765625e-06,
+        "max_transition_difference_common": 1.0013580322265625e-05
+      },
+      {
+        "cohort_index": 223,
+        "rankings_equal": true,
+        "different_sequence_values": 42,
+        "different_transition_values": 91,
+        "max_sequence_difference_common": 1.621246337890625e-05,
+        "max_transition_difference_common": 1.0013580322265625e-05
+      },
+      {
+        "cohort_index": 224,
+        "rankings_equal": true,
+        "different_sequence_values": 37,
+        "different_transition_values": 73,
+        "max_sequence_difference_common": 1.239776611328125e-05,
+        "max_transition_difference_common": 8.58306884765625e-06
+      },
+      {
+        "cohort_index": 225,
+        "rankings_equal": true,
+        "different_sequence_values": 40,
+        "different_transition_values": 81,
+        "max_sequence_difference_common": 2.1457672119140625e-05,
+        "max_transition_difference_common": 2.181529998779297e-05
+      },
+      {
+        "cohort_index": 226,
+        "rankings_equal": true,
+        "different_sequence_values": 26,
+        "different_transition_values": 69,
+        "max_sequence_difference_common": 6.67572021484375e-06,
+        "max_transition_difference_common": 6.020069122314453e-06
+      },
+      {
+        "cohort_index": 227,
+        "rankings_equal": true,
+        "different_sequence_values": 45,
+        "different_transition_values": 95,
+        "max_sequence_difference_common": 2.288818359375e-05,
+        "max_transition_difference_common": 1.33514404296875e-05
+      },
+      {
+        "cohort_index": 228,
+        "rankings_equal": true,
+        "different_sequence_values": 45,
+        "different_transition_values": 91,
+        "max_sequence_difference_common": 1.239776611328125e-05,
+        "max_transition_difference_common": 7.62939453125e-06
+      },
+      {
+        "cohort_index": 229,
+        "rankings_equal": true,
+        "different_sequence_values": 34,
+        "different_transition_values": 62,
+        "max_sequence_difference_common": 5.245208740234375e-06,
+        "max_transition_difference_common": 5.125999450683594e-06
+      },
+      {
+        "cohort_index": 230,
+        "rankings_equal": true,
+        "different_sequence_values": 37,
+        "different_transition_values": 72,
+        "max_sequence_difference_common": 9.5367431640625e-06,
+        "max_transition_difference_common": 9.894371032714844e-06
+      },
+      {
+        "cohort_index": 231,
+        "rankings_equal": true,
+        "different_sequence_values": 44,
+        "different_transition_values": 75,
+        "max_sequence_difference_common": 8.106231689453125e-06,
+        "max_transition_difference_common": 8.225440979003906e-06
+      },
+      {
+        "cohort_index": 232,
+        "rankings_equal": true,
+        "different_sequence_values": 44,
+        "different_transition_values": 90,
+        "max_sequence_difference_common": 1.239776611328125e-05,
+        "max_transition_difference_common": 8.106231689453125e-06
+      },
+      {
+        "cohort_index": 233,
+        "rankings_equal": true,
+        "different_sequence_values": 45,
+        "different_transition_values": 87,
+        "max_sequence_difference_common": 9.5367431640625e-06,
+        "max_transition_difference_common": 8.940696716308594e-06
+      },
+      {
+        "cohort_index": 234,
+        "rankings_equal": true,
+        "different_sequence_values": 27,
+        "different_transition_values": 71,
+        "max_sequence_difference_common": 6.67572021484375e-06,
+        "max_transition_difference_common": 6.5267086029052734e-06
+      },
+      {
+        "cohort_index": 235,
+        "rankings_equal": true,
+        "different_sequence_values": 28,
+        "different_transition_values": 57,
+        "max_sequence_difference_common": 1.1444091796875e-05,
+        "max_transition_difference_common": 7.867813110351562e-06
+      },
+      {
+        "cohort_index": 236,
+        "rankings_equal": true,
+        "different_sequence_values": 38,
+        "different_transition_values": 69,
+        "max_sequence_difference_common": 9.5367431640625e-06,
+        "max_transition_difference_common": 8.940696716308594e-06
+      },
+      {
+        "cohort_index": 237,
+        "rankings_equal": true,
+        "different_sequence_values": 40,
+        "different_transition_values": 81,
+        "max_sequence_difference_common": 1.71661376953125e-05,
+        "max_transition_difference_common": 1.1682510375976562e-05
+      },
+      {
+        "cohort_index": 238,
+        "rankings_equal": true,
+        "different_sequence_values": 47,
+        "different_transition_values": 90,
+        "max_sequence_difference_common": 1.33514404296875e-05,
+        "max_transition_difference_common": 1.2516975402832031e-05
+      },
+      {
+        "cohort_index": 239,
+        "rankings_equal": true,
+        "different_sequence_values": 21,
+        "different_transition_values": 60,
+        "max_sequence_difference_common": 7.62939453125e-06,
+        "max_transition_difference_common": 8.046627044677734e-06
+      },
+      {
+        "cohort_index": 240,
+        "rankings_equal": true,
+        "different_sequence_values": 28,
+        "different_transition_values": 77,
+        "max_sequence_difference_common": 1.52587890625e-05,
+        "max_transition_difference_common": 1.2874603271484375e-05
+      },
+      {
+        "cohort_index": 241,
+        "rankings_equal": true,
+        "different_sequence_values": 30,
+        "different_transition_values": 85,
+        "max_sequence_difference_common": 1.33514404296875e-05,
+        "max_transition_difference_common": 1.049041748046875e-05
+      },
+      {
+        "cohort_index": 242,
+        "rankings_equal": true,
+        "different_sequence_values": 30,
+        "different_transition_values": 85,
+        "max_sequence_difference_common": 1.33514404296875e-05,
+        "max_transition_difference_common": 1.049041748046875e-05
+      },
+      {
+        "cohort_index": 243,
+        "rankings_equal": true,
+        "different_sequence_values": 43,
+        "different_transition_values": 100,
+        "max_sequence_difference_common": 1.52587890625e-05,
+        "max_transition_difference_common": 1.3589859008789062e-05
+      },
+      {
+        "cohort_index": 244,
+        "rankings_equal": true,
+        "different_sequence_values": 37,
+        "different_transition_values": 70,
+        "max_sequence_difference_common": 1.33514404296875e-05,
+        "max_transition_difference_common": 8.404254913330078e-06
+      },
+      {
+        "cohort_index": 245,
+        "rankings_equal": true,
+        "different_sequence_values": 42,
+        "different_transition_values": 90,
+        "max_sequence_difference_common": 1.1444091796875e-05,
+        "max_transition_difference_common": 8.344650268554688e-06
+      },
+      {
+        "cohort_index": 246,
+        "rankings_equal": true,
+        "different_sequence_values": 39,
+        "different_transition_values": 79,
+        "max_sequence_difference_common": 1.1444091796875e-05,
+        "max_transition_difference_common": 1.1920928955078125e-05
+      },
+      {
+        "cohort_index": 247,
+        "rankings_equal": true,
+        "different_sequence_values": 34,
+        "different_transition_values": 67,
+        "max_sequence_difference_common": 9.5367431640625e-06,
+        "max_transition_difference_common": 9.059906005859375e-06
+      },
+      {
+        "cohort_index": 248,
+        "rankings_equal": true,
+        "different_sequence_values": 38,
+        "different_transition_values": 87,
+        "max_sequence_difference_common": 1.33514404296875e-05,
+        "max_transition_difference_common": 6.67572021484375e-06
+      },
+      {
+        "cohort_index": 249,
+        "rankings_equal": true,
+        "different_sequence_values": 33,
+        "different_transition_values": 71,
+        "max_sequence_difference_common": 1.33514404296875e-05,
+        "max_transition_difference_common": 1.621246337890625e-05
+      },
+      {
+        "cohort_index": 250,
+        "rankings_equal": true,
+        "different_sequence_values": 41,
+        "different_transition_values": 95,
+        "max_sequence_difference_common": 1.52587890625e-05,
+        "max_transition_difference_common": 1.0013580322265625e-05
+      },
+      {
+        "cohort_index": 251,
+        "rankings_equal": true,
+        "different_sequence_values": 18,
+        "different_transition_values": 46,
+        "max_sequence_difference_common": 4.76837158203125e-06,
+        "max_transition_difference_common": 5.245208740234375e-06
+      },
+      {
+        "cohort_index": 252,
+        "rankings_equal": true,
+        "different_sequence_values": 43,
+        "different_transition_values": 93,
+        "max_sequence_difference_common": 1.52587890625e-05,
+        "max_transition_difference_common": 1.1444091796875e-05
+      },
+      {
+        "cohort_index": 253,
+        "rankings_equal": true,
+        "different_sequence_values": 29,
+        "different_transition_values": 87,
+        "max_sequence_difference_common": 1.71661376953125e-05,
+        "max_transition_difference_common": 1.6450881958007812e-05
+      },
+      {
+        "cohort_index": 254,
+        "rankings_equal": true,
+        "different_sequence_values": 40,
+        "different_transition_values": 84,
+        "max_sequence_difference_common": 1.811981201171875e-05,
+        "max_transition_difference_common": 1.3589859008789062e-05
+      },
+      {
+        "cohort_index": 255,
+        "rankings_equal": true,
+        "different_sequence_values": 28,
+        "different_transition_values": 73,
+        "max_sequence_difference_common": 1.52587890625e-05,
+        "max_transition_difference_common": 9.059906005859375e-06
+      },
+      {
+        "cohort_index": 256,
+        "rankings_equal": true,
+        "different_sequence_values": 39,
+        "different_transition_values": 88,
+        "max_sequence_difference_common": 2.86102294921875e-05,
+        "max_transition_difference_common": 1.4781951904296875e-05
+      },
+      {
+        "cohort_index": 257,
+        "rankings_equal": true,
+        "different_sequence_values": 42,
+        "different_transition_values": 87,
+        "max_sequence_difference_common": 6.67572021484375e-06,
+        "max_transition_difference_common": 8.106231689453125e-06
+      },
+      {
+        "cohort_index": 258,
+        "rankings_equal": true,
+        "different_sequence_values": 43,
+        "different_transition_values": 95,
+        "max_sequence_difference_common": 9.5367431640625e-06,
+        "max_transition_difference_common": 1.0013580322265625e-05
+      },
+      {
+        "cohort_index": 259,
+        "rankings_equal": true,
+        "different_sequence_values": 38,
+        "different_transition_values": 72,
+        "max_sequence_difference_common": 1.33514404296875e-05,
+        "max_transition_difference_common": 7.271766662597656e-06
+      },
+      {
+        "cohort_index": 260,
+        "rankings_equal": true,
+        "different_sequence_values": 38,
+        "different_transition_values": 87,
+        "max_sequence_difference_common": 9.5367431640625e-06,
+        "max_transition_difference_common": 8.58306884765625e-06
+      },
+      {
+        "cohort_index": 261,
+        "rankings_equal": true,
+        "different_sequence_values": 24,
+        "different_transition_values": 65,
+        "max_sequence_difference_common": 4.76837158203125e-06,
+        "max_transition_difference_common": 4.351139068603516e-06
+      },
+      {
+        "cohort_index": 262,
+        "rankings_equal": true,
+        "different_sequence_values": 32,
+        "different_transition_values": 74,
+        "max_sequence_difference_common": 7.62939453125e-06,
+        "max_transition_difference_common": 1.0967254638671875e-05
+      },
+      {
+        "cohort_index": 263,
+        "rankings_equal": true,
+        "different_sequence_values": 21,
+        "different_transition_values": 59,
+        "max_sequence_difference_common": 3.814697265625e-06,
+        "max_transition_difference_common": 3.337860107421875e-06
+      },
+      {
+        "cohort_index": 264,
+        "rankings_equal": true,
+        "different_sequence_values": 28,
+        "different_transition_values": 80,
+        "max_sequence_difference_common": 1.1444091796875e-05,
+        "max_transition_difference_common": 5.7220458984375e-06
+      },
+      {
+        "cohort_index": 265,
+        "rankings_equal": true,
+        "different_sequence_values": 45,
+        "different_transition_values": 85,
+        "max_sequence_difference_common": 1.430511474609375e-05,
+        "max_transition_difference_common": 1.2874603271484375e-05
+      },
+      {
+        "cohort_index": 266,
+        "rankings_equal": true,
+        "different_sequence_values": 42,
+        "different_transition_values": 85,
+        "max_sequence_difference_common": 1.9073486328125e-05,
+        "max_transition_difference_common": 1.2874603271484375e-05
+      },
+      {
+        "cohort_index": 267,
+        "rankings_equal": true,
+        "different_sequence_values": 44,
+        "different_transition_values": 92,
+        "max_sequence_difference_common": 4.76837158203125e-05,
+        "max_transition_difference_common": 3.0279159545898438e-05
+      },
+      {
+        "cohort_index": 268,
+        "rankings_equal": true,
+        "different_sequence_values": 26,
+        "different_transition_values": 53,
+        "max_sequence_difference_common": 7.62939453125e-06,
+        "max_transition_difference_common": 7.867813110351562e-06
+      },
+      {
+        "cohort_index": 269,
+        "rankings_equal": true,
+        "different_sequence_values": 40,
+        "different_transition_values": 95,
+        "max_sequence_difference_common": 2.956390380859375e-05,
+        "max_transition_difference_common": 2.2411346435546875e-05
+      },
+      {
+        "cohort_index": 270,
+        "rankings_equal": true,
+        "different_sequence_values": 39,
+        "different_transition_values": 74,
+        "max_sequence_difference_common": 1.52587890625e-05,
+        "max_transition_difference_common": 1.4781951904296875e-05
+      },
+      {
+        "cohort_index": 271,
+        "rankings_equal": true,
+        "different_sequence_values": 44,
+        "different_transition_values": 93,
+        "max_sequence_difference_common": 1.430511474609375e-05,
+        "max_transition_difference_common": 1.1086463928222656e-05
+      },
+      {
+        "cohort_index": 272,
+        "rankings_equal": true,
+        "different_sequence_values": 43,
+        "different_transition_values": 83,
+        "max_sequence_difference_common": 1.1444091796875e-05,
+        "max_transition_difference_common": 1.1801719665527344e-05
+      },
+      {
+        "cohort_index": 273,
+        "rankings_equal": true,
+        "different_sequence_values": 21,
+        "different_transition_values": 50,
+        "max_sequence_difference_common": 5.7220458984375e-06,
+        "max_transition_difference_common": 7.62939453125e-06
+      },
+      {
+        "cohort_index": 274,
+        "rankings_equal": true,
+        "different_sequence_values": 43,
+        "different_transition_values": 93,
+        "max_sequence_difference_common": 1.33514404296875e-05,
+        "max_transition_difference_common": 8.58306884765625e-06
+      },
+      {
+        "cohort_index": 275,
+        "rankings_equal": true,
+        "different_sequence_values": 35,
+        "different_transition_values": 81,
+        "max_sequence_difference_common": 9.5367431640625e-06,
+        "max_transition_difference_common": 8.821487426757812e-06
+      },
+      {
+        "cohort_index": 276,
+        "rankings_equal": true,
+        "different_sequence_values": 42,
+        "different_transition_values": 90,
+        "max_sequence_difference_common": 9.5367431640625e-06,
+        "max_transition_difference_common": 1.2636184692382812e-05
+      },
+      {
+        "cohort_index": 277,
+        "rankings_equal": true,
+        "different_sequence_values": 41,
+        "different_transition_values": 86,
+        "max_sequence_difference_common": 9.5367431640625e-06,
+        "max_transition_difference_common": 9.5367431640625e-06
+      },
+      {
+        "cohort_index": 278,
+        "rankings_equal": true,
+        "different_sequence_values": 39,
+        "different_transition_values": 93,
+        "max_sequence_difference_common": 1.049041748046875e-05,
+        "max_transition_difference_common": 1.0967254638671875e-05
+      },
+      {
+        "cohort_index": 279,
+        "rankings_equal": true,
+        "different_sequence_values": 29,
+        "different_transition_values": 73,
+        "max_sequence_difference_common": 1.049041748046875e-05,
+        "max_transition_difference_common": 9.238719940185547e-06
+      },
+      {
+        "cohort_index": 280,
+        "rankings_equal": true,
+        "different_sequence_values": 47,
+        "different_transition_values": 89,
+        "max_sequence_difference_common": 2.288818359375e-05,
+        "max_transition_difference_common": 1.5854835510253906e-05
+      },
+      {
+        "cohort_index": 281,
+        "rankings_equal": true,
+        "different_sequence_values": 36,
+        "different_transition_values": 62,
+        "max_sequence_difference_common": 9.5367431640625e-06,
+        "max_transition_difference_common": 9.5367431640625e-06
+      },
+      {
+        "cohort_index": 282,
+        "rankings_equal": true,
+        "different_sequence_values": 37,
+        "different_transition_values": 74,
+        "max_sequence_difference_common": 9.5367431640625e-06,
+        "max_transition_difference_common": 9.059906005859375e-06
+      },
+      {
+        "cohort_index": 283,
+        "rankings_equal": true,
+        "different_sequence_values": 35,
+        "different_transition_values": 67,
+        "max_sequence_difference_common": 7.62939453125e-06,
+        "max_transition_difference_common": 5.4836273193359375e-06
+      },
+      {
+        "cohort_index": 284,
+        "rankings_equal": true,
+        "different_sequence_values": 40,
+        "different_transition_values": 83,
+        "max_sequence_difference_common": 8.58306884765625e-06,
+        "max_transition_difference_common": 6.9141387939453125e-06
+      },
+      {
+        "cohort_index": 285,
+        "rankings_equal": true,
+        "different_sequence_values": 44,
+        "different_transition_values": 96,
+        "max_sequence_difference_common": 2.288818359375e-05,
+        "max_transition_difference_common": 1.3828277587890625e-05
+      },
+      {
+        "cohort_index": 286,
+        "rankings_equal": true,
+        "different_sequence_values": 40,
+        "different_transition_values": 77,
+        "max_sequence_difference_common": 1.239776611328125e-05,
+        "max_transition_difference_common": 1.239776611328125e-05
+      },
+      {
+        "cohort_index": 287,
+        "rankings_equal": true,
+        "different_sequence_values": 45,
+        "different_transition_values": 91,
+        "max_sequence_difference_common": 1.1444091796875e-05,
+        "max_transition_difference_common": 8.106231689453125e-06
+      },
+      {
+        "cohort_index": 288,
+        "rankings_equal": true,
+        "different_sequence_values": 40,
+        "different_transition_values": 79,
+        "max_sequence_difference_common": 1.239776611328125e-05,
+        "max_transition_difference_common": 1.0013580322265625e-05
+      },
+      {
+        "cohort_index": 289,
+        "rankings_equal": true,
+        "different_sequence_values": 21,
+        "different_transition_values": 58,
+        "max_sequence_difference_common": 1.1444091796875e-05,
+        "max_transition_difference_common": 1.33514404296875e-05
+      },
+      {
+        "cohort_index": 290,
+        "rankings_equal": true,
+        "different_sequence_values": 43,
+        "different_transition_values": 88,
+        "max_sequence_difference_common": 2.765655517578125e-05,
+        "max_transition_difference_common": 1.5497207641601562e-05
+      },
+      {
+        "cohort_index": 291,
+        "rankings_equal": true,
+        "different_sequence_values": 42,
+        "different_transition_values": 87,
+        "max_sequence_difference_common": 1.049041748046875e-05,
+        "max_transition_difference_common": 1.0967254638671875e-05
+      },
+      {
+        "cohort_index": 292,
+        "rankings_equal": true,
+        "different_sequence_values": 40,
+        "different_transition_values": 95,
+        "max_sequence_difference_common": 1.1444091796875e-05,
+        "max_transition_difference_common": 1.0251998901367188e-05
+      },
+      {
+        "cohort_index": 293,
+        "rankings_equal": true,
+        "different_sequence_values": 21,
+        "different_transition_values": 59,
+        "max_sequence_difference_common": 7.62939453125e-06,
+        "max_transition_difference_common": 6.198883056640625e-06
+      },
+      {
+        "cohort_index": 294,
+        "rankings_equal": true,
+        "different_sequence_values": 39,
+        "different_transition_values": 89,
+        "max_sequence_difference_common": 9.5367431640625e-06,
+        "max_transition_difference_common": 1.0251998901367188e-05
+      },
+      {
+        "cohort_index": 295,
+        "rankings_equal": true,
+        "different_sequence_values": 40,
+        "different_transition_values": 93,
+        "max_sequence_difference_common": 1.52587890625e-05,
+        "max_transition_difference_common": 1.049041748046875e-05
+      },
+      {
+        "cohort_index": 296,
+        "rankings_equal": true,
+        "different_sequence_values": 25,
+        "different_transition_values": 83,
+        "max_sequence_difference_common": 1.1444091796875e-05,
+        "max_transition_difference_common": 5.245208740234375e-06
+      },
+      {
+        "cohort_index": 297,
+        "rankings_equal": true,
+        "different_sequence_values": 37,
+        "different_transition_values": 77,
+        "max_sequence_difference_common": 1.049041748046875e-05,
+        "max_transition_difference_common": 8.344650268554688e-06
+      },
+      {
+        "cohort_index": 298,
+        "rankings_equal": true,
+        "different_sequence_values": 45,
+        "different_transition_values": 90,
+        "max_sequence_difference_common": 1.1444091796875e-05,
+        "max_transition_difference_common": 6.9141387939453125e-06
+      },
+      {
+        "cohort_index": 299,
+        "rankings_equal": true,
+        "different_sequence_values": 37,
+        "different_transition_values": 70,
+        "max_sequence_difference_common": 1.239776611328125e-05,
+        "max_transition_difference_common": 1.1980533599853516e-05
+      },
+      {
+        "cohort_index": 300,
+        "rankings_equal": true,
+        "different_sequence_values": 43,
+        "different_transition_values": 93,
+        "max_sequence_difference_common": 1.430511474609375e-05,
+        "max_transition_difference_common": 1.1563301086425781e-05
+      },
+      {
+        "cohort_index": 301,
+        "rankings_equal": true,
+        "different_sequence_values": 49,
+        "different_transition_values": 97,
+        "max_sequence_difference_common": 1.71661376953125e-05,
+        "max_transition_difference_common": 1.1682510375976562e-05
+      },
+      {
+        "cohort_index": 302,
+        "rankings_equal": true,
+        "different_sequence_values": 32,
+        "different_transition_values": 60,
+        "max_sequence_difference_common": 5.245208740234375e-06,
+        "max_transition_difference_common": 5.9604644775390625e-06
+      },
+      {
+        "cohort_index": 303,
+        "rankings_equal": true,
+        "different_sequence_values": 43,
+        "different_transition_values": 88,
+        "max_sequence_difference_common": 1.33514404296875e-05,
+        "max_transition_difference_common": 9.298324584960938e-06
+      },
+      {
+        "cohort_index": 304,
+        "rankings_equal": true,
+        "different_sequence_values": 37,
+        "different_transition_values": 90,
+        "max_sequence_difference_common": 1.33514404296875e-05,
+        "max_transition_difference_common": 8.106231689453125e-06
+      },
+      {
+        "cohort_index": 305,
+        "rankings_equal": true,
+        "different_sequence_values": 36,
+        "different_transition_values": 80,
+        "max_sequence_difference_common": 1.1444091796875e-05,
+        "max_transition_difference_common": 1.1682510375976562e-05
+      },
+      {
+        "cohort_index": 306,
+        "rankings_equal": true,
+        "different_sequence_values": 27,
+        "different_transition_values": 62,
+        "max_sequence_difference_common": 6.67572021484375e-06,
+        "max_transition_difference_common": 6.9141387939453125e-06
+      },
+      {
+        "cohort_index": 307,
+        "rankings_equal": true,
+        "different_sequence_values": 36,
+        "different_transition_values": 76,
+        "max_sequence_difference_common": 1.33514404296875e-05,
+        "max_transition_difference_common": 1.239776611328125e-05
+      },
+      {
+        "cohort_index": 308,
+        "rankings_equal": true,
+        "different_sequence_values": 43,
+        "different_transition_values": 81,
+        "max_sequence_difference_common": 1.430511474609375e-05,
+        "max_transition_difference_common": 8.58306884765625e-06
+      },
+      {
+        "cohort_index": 309,
+        "rankings_equal": true,
+        "different_sequence_values": 40,
+        "different_transition_values": 93,
+        "max_sequence_difference_common": 9.5367431640625e-06,
+        "max_transition_difference_common": 7.62939453125e-06
+      },
+      {
+        "cohort_index": 310,
+        "rankings_equal": true,
+        "different_sequence_values": 39,
+        "different_transition_values": 92,
+        "max_sequence_difference_common": 1.049041748046875e-05,
+        "max_transition_difference_common": 1.0967254638671875e-05
+      },
+      {
+        "cohort_index": 311,
+        "rankings_equal": true,
+        "different_sequence_values": 42,
+        "different_transition_values": 83,
+        "max_sequence_difference_common": 5.340576171875e-05,
+        "max_transition_difference_common": 3.075599670410156e-05
+      },
+      {
+        "cohort_index": 312,
+        "rankings_equal": true,
+        "different_sequence_values": 36,
+        "different_transition_values": 85,
+        "max_sequence_difference_common": 7.62939453125e-06,
+        "max_transition_difference_common": 6.198883056640625e-06
+      },
+      {
+        "cohort_index": 313,
+        "rankings_equal": true,
+        "different_sequence_values": 36,
+        "different_transition_values": 94,
+        "max_sequence_difference_common": 1.33514404296875e-05,
+        "max_transition_difference_common": 8.344650268554688e-06
+      },
+      {
+        "cohort_index": 314,
+        "rankings_equal": true,
+        "different_sequence_values": 33,
+        "different_transition_values": 76,
+        "max_sequence_difference_common": 1.33514404296875e-05,
+        "max_transition_difference_common": 1.239776611328125e-05
+      },
+      {
+        "cohort_index": 315,
+        "rankings_equal": true,
+        "different_sequence_values": 21,
+        "different_transition_values": 70,
+        "max_sequence_difference_common": 9.5367431640625e-06,
+        "max_transition_difference_common": 9.417533874511719e-06
+      },
+      {
+        "cohort_index": 316,
+        "rankings_equal": true,
+        "different_sequence_values": 32,
+        "different_transition_values": 86,
+        "max_sequence_difference_common": 1.1444091796875e-05,
+        "max_transition_difference_common": 1.0967254638671875e-05
+      },
+      {
+        "cohort_index": 317,
+        "rankings_equal": true,
+        "different_sequence_values": 32,
+        "different_transition_values": 86,
+        "max_sequence_difference_common": 1.1444091796875e-05,
+        "max_transition_difference_common": 1.0967254638671875e-05
+      },
+      {
+        "cohort_index": 318,
+        "rankings_equal": true,
+        "different_sequence_values": 24,
+        "different_transition_values": 52,
+        "max_sequence_difference_common": 7.62939453125e-06,
+        "max_transition_difference_common": 7.867813110351562e-06
+      },
+      {
+        "cohort_index": 319,
+        "rankings_equal": true,
+        "different_sequence_values": 38,
+        "different_transition_values": 78,
+        "max_sequence_difference_common": 6.67572021484375e-06,
+        "max_transition_difference_common": 5.4836273193359375e-06
+      },
+      {
+        "cohort_index": 320,
+        "rankings_equal": true,
+        "different_sequence_values": 33,
+        "different_transition_values": 65,
+        "max_sequence_difference_common": 8.58306884765625e-06,
+        "max_transition_difference_common": 6.9141387939453125e-06
+      },
+      {
+        "cohort_index": 321,
+        "rankings_equal": true,
+        "different_sequence_values": 43,
+        "different_transition_values": 93,
+        "max_sequence_difference_common": 1.33514404296875e-05,
+        "max_transition_difference_common": 1.1205673217773438e-05
+      },
+      {
+        "cohort_index": 322,
+        "rankings_equal": true,
+        "different_sequence_values": 39,
+        "different_transition_values": 88,
+        "max_sequence_difference_common": 9.5367431640625e-06,
+        "max_transition_difference_common": 6.9141387939453125e-06
+      },
+      {
+        "cohort_index": 323,
+        "rankings_equal": true,
+        "different_sequence_values": 36,
+        "different_transition_values": 89,
+        "max_sequence_difference_common": 1.52587890625e-05,
+        "max_transition_difference_common": 1.0967254638671875e-05
+      },
+      {
+        "cohort_index": 324,
+        "rankings_equal": true,
+        "different_sequence_values": 18,
+        "different_transition_values": 43,
+        "max_sequence_difference_common": 9.5367431640625e-06,
+        "max_transition_difference_common": 7.510185241699219e-06
+      },
+      {
+        "cohort_index": 325,
+        "rankings_equal": true,
+        "different_sequence_values": 46,
+        "different_transition_values": 84,
+        "max_sequence_difference_common": 1.049041748046875e-05,
+        "max_transition_difference_common": 8.344650268554688e-06
+      },
+      {
+        "cohort_index": 326,
+        "rankings_equal": true,
+        "different_sequence_values": 43,
+        "different_transition_values": 91,
+        "max_sequence_difference_common": 3.24249267578125e-05,
+        "max_transition_difference_common": 1.9073486328125e-05
+      },
+      {
+        "cohort_index": 327,
+        "rankings_equal": true,
+        "different_sequence_values": 42,
+        "different_transition_values": 90,
+        "max_sequence_difference_common": 1.33514404296875e-05,
+        "max_transition_difference_common": 8.940696716308594e-06
+      },
+      {
+        "cohort_index": 328,
+        "rankings_equal": true,
+        "different_sequence_values": 43,
+        "different_transition_values": 91,
+        "max_sequence_difference_common": 2.86102294921875e-05,
+        "max_transition_difference_common": 1.7642974853515625e-05
+      },
+      {
+        "cohort_index": 329,
+        "rankings_equal": true,
+        "different_sequence_values": 36,
+        "different_transition_values": 79,
+        "max_sequence_difference_common": 7.62939453125e-06,
+        "max_transition_difference_common": 7.748603820800781e-06
+      },
+      {
+        "cohort_index": 330,
+        "rankings_equal": true,
+        "different_sequence_values": 41,
+        "different_transition_values": 92,
+        "max_sequence_difference_common": 1.1444091796875e-05,
+        "max_transition_difference_common": 1.0371208190917969e-05
+      },
+      {
+        "cohort_index": 331,
+        "rankings_equal": true,
+        "different_sequence_values": 42,
+        "different_transition_values": 89,
+        "max_sequence_difference_common": 1.1444091796875e-05,
+        "max_transition_difference_common": 1.1324882507324219e-05
+      },
+      {
+        "cohort_index": 332,
+        "rankings_equal": true,
+        "different_sequence_values": 39,
+        "different_transition_values": 87,
+        "max_sequence_difference_common": 2.09808349609375e-05,
+        "max_transition_difference_common": 1.4066696166992188e-05
+      },
+      {
+        "cohort_index": 333,
+        "rankings_equal": true,
+        "different_sequence_values": 36,
+        "different_transition_values": 76,
+        "max_sequence_difference_common": 8.58306884765625e-06,
+        "max_transition_difference_common": 7.867813110351562e-06
+      },
+      {
+        "cohort_index": 334,
+        "rankings_equal": true,
+        "different_sequence_values": 32,
+        "different_transition_values": 69,
+        "max_sequence_difference_common": 9.5367431640625e-06,
+        "max_transition_difference_common": 8.225440979003906e-06
+      },
+      {
+        "cohort_index": 335,
+        "rankings_equal": true,
+        "different_sequence_values": 37,
+        "different_transition_values": 89,
+        "max_sequence_difference_common": 2.002716064453125e-05,
+        "max_transition_difference_common": 1.3947486877441406e-05
+      },
+      {
+        "cohort_index": 336,
+        "rankings_equal": true,
+        "different_sequence_values": 20,
+        "different_transition_values": 61,
+        "max_sequence_difference_common": 4.76837158203125e-06,
+        "max_transition_difference_common": 5.9604644775390625e-06
+      },
+      {
+        "cohort_index": 337,
+        "rankings_equal": true,
+        "different_sequence_values": 40,
+        "different_transition_values": 92,
+        "max_sequence_difference_common": 2.002716064453125e-05,
+        "max_transition_difference_common": 1.4781951904296875e-05
+      },
+      {
+        "cohort_index": 338,
+        "rankings_equal": true,
+        "different_sequence_values": 25,
+        "different_transition_values": 83,
+        "max_sequence_difference_common": 1.1444091796875e-05,
+        "max_transition_difference_common": 5.245208740234375e-06
+      },
+      {
+        "cohort_index": 339,
+        "rankings_equal": true,
+        "different_sequence_values": 38,
+        "different_transition_values": 94,
+        "max_sequence_difference_common": 1.52587890625e-05,
+        "max_transition_difference_common": 1.0251998901367188e-05
+      },
+      {
+        "cohort_index": 340,
+        "rankings_equal": true,
+        "different_sequence_values": 46,
+        "different_transition_values": 95,
+        "max_sequence_difference_common": 1.1444091796875e-05,
+        "max_transition_difference_common": 1.239776611328125e-05
+      },
+      {
+        "cohort_index": 341,
+        "rankings_equal": true,
+        "different_sequence_values": 40,
+        "different_transition_values": 91,
+        "max_sequence_difference_common": 2.288818359375e-05,
+        "max_transition_difference_common": 1.9073486328125e-05
+      },
+      {
+        "cohort_index": 342,
+        "rankings_equal": true,
+        "different_sequence_values": 47,
+        "different_transition_values": 97,
+        "max_sequence_difference_common": 1.71661376953125e-05,
+        "max_transition_difference_common": 1.1444091796875e-05
+      },
+      {
+        "cohort_index": 343,
+        "rankings_equal": true,
+        "different_sequence_values": 37,
+        "different_transition_values": 93,
+        "max_sequence_difference_common": 9.5367431640625e-06,
+        "max_transition_difference_common": 8.344650268554688e-06
+      },
+      {
+        "cohort_index": 344,
+        "rankings_equal": true,
+        "different_sequence_values": 43,
+        "different_transition_values": 96,
+        "max_sequence_difference_common": 1.33514404296875e-05,
+        "max_transition_difference_common": 9.298324584960938e-06
+      },
+      {
+        "cohort_index": 345,
+        "rankings_equal": true,
+        "different_sequence_values": 45,
+        "different_transition_values": 81,
+        "max_sequence_difference_common": 1.049041748046875e-05,
+        "max_transition_difference_common": 8.463859558105469e-06
+      },
+      {
+        "cohort_index": 346,
+        "rankings_equal": true,
+        "different_sequence_values": 44,
+        "different_transition_values": 74,
+        "max_sequence_difference_common": 8.58306884765625e-06,
+        "max_transition_difference_common": 8.106231689453125e-06
+      },
+      {
+        "cohort_index": 347,
+        "rankings_equal": true,
+        "different_sequence_values": 47,
+        "different_transition_values": 92,
+        "max_sequence_difference_common": 1.621246337890625e-05,
+        "max_transition_difference_common": 8.821487426757812e-06
+      },
+      {
+        "cohort_index": 348,
+        "rankings_equal": true,
+        "different_sequence_values": 26,
+        "different_transition_values": 81,
+        "max_sequence_difference_common": 1.9073486328125e-05,
+        "max_transition_difference_common": 9.5367431640625e-06
+      },
+      {
+        "cohort_index": 349,
+        "rankings_equal": true,
+        "different_sequence_values": 26,
+        "different_transition_values": 81,
+        "max_sequence_difference_common": 1.9073486328125e-05,
+        "max_transition_difference_common": 9.5367431640625e-06
+      },
+      {
+        "cohort_index": 350,
+        "rankings_equal": true,
+        "different_sequence_values": 47,
+        "different_transition_values": 92,
+        "max_sequence_difference_common": 1.52587890625e-05,
+        "max_transition_difference_common": 1.0132789611816406e-05
+      },
+      {
+        "cohort_index": 351,
+        "rankings_equal": true,
+        "different_sequence_values": 42,
+        "different_transition_values": 97,
+        "max_sequence_difference_common": 1.1444091796875e-05,
+        "max_transition_difference_common": 9.298324584960938e-06
+      },
+      {
+        "cohort_index": 352,
+        "rankings_equal": true,
+        "different_sequence_values": 44,
+        "different_transition_values": 89,
+        "max_sequence_difference_common": 3.147125244140625e-05,
+        "max_transition_difference_common": 3.0279159545898438e-05
+      },
+      {
+        "cohort_index": 353,
+        "rankings_equal": true,
+        "different_sequence_values": 44,
+        "different_transition_values": 92,
+        "max_sequence_difference_common": 2.002716064453125e-05,
+        "max_transition_difference_common": 1.0728836059570312e-05
+      },
+      {
+        "cohort_index": 354,
+        "rankings_equal": true,
+        "different_sequence_values": 45,
+        "different_transition_values": 92,
+        "max_sequence_difference_common": 1.621246337890625e-05,
+        "max_transition_difference_common": 9.298324584960938e-06
+      },
+      {
+        "cohort_index": 355,
+        "rankings_equal": true,
+        "different_sequence_values": 42,
+        "different_transition_values": 88,
+        "max_sequence_difference_common": 1.239776611328125e-05,
+        "max_transition_difference_common": 1.0013580322265625e-05
+      },
+      {
+        "cohort_index": 356,
+        "rankings_equal": true,
+        "different_sequence_values": 31,
+        "different_transition_values": 72,
+        "max_sequence_difference_common": 9.5367431640625e-06,
+        "max_transition_difference_common": 9.775161743164062e-06
+      },
+      {
+        "cohort_index": 357,
+        "rankings_equal": true,
+        "different_sequence_values": 25,
+        "different_transition_values": 62,
+        "max_sequence_difference_common": 1.621246337890625e-05,
+        "max_transition_difference_common": 1.2159347534179688e-05
+      },
+      {
+        "cohort_index": 358,
+        "rankings_equal": true,
+        "different_sequence_values": 45,
+        "different_transition_values": 95,
+        "max_sequence_difference_common": 2.09808349609375e-05,
+        "max_transition_difference_common": 1.5735626220703125e-05
+      },
+      {
+        "cohort_index": 359,
+        "rankings_equal": true,
+        "different_sequence_values": 43,
+        "different_transition_values": 96,
+        "max_sequence_difference_common": 1.1444091796875e-05,
+        "max_transition_difference_common": 9.5367431640625e-06
+      },
+      {
+        "cohort_index": 360,
+        "rankings_equal": true,
+        "different_sequence_values": 30,
+        "different_transition_values": 72,
+        "max_sequence_difference_common": 2.288818359375e-05,
+        "max_transition_difference_common": 1.33514404296875e-05
+      },
+      {
+        "cohort_index": 361,
+        "rankings_equal": true,
+        "different_sequence_values": 42,
+        "different_transition_values": 89,
+        "max_sequence_difference_common": 1.049041748046875e-05,
+        "max_transition_difference_common": 1.1920928955078125e-05
+      },
+      {
+        "cohort_index": 362,
+        "rankings_equal": true,
+        "different_sequence_values": 24,
+        "different_transition_values": 58,
+        "max_sequence_difference_common": 6.67572021484375e-06,
+        "max_transition_difference_common": 7.510185241699219e-06
+      },
+      {
+        "cohort_index": 363,
+        "rankings_equal": true,
+        "different_sequence_values": 41,
+        "different_transition_values": 80,
+        "max_sequence_difference_common": 1.430511474609375e-05,
+        "max_transition_difference_common": 8.344650268554688e-06
+      },
+      {
+        "cohort_index": 364,
+        "rankings_equal": true,
+        "different_sequence_values": 41,
+        "different_transition_values": 91,
+        "max_sequence_difference_common": 9.5367431640625e-06,
+        "max_transition_difference_common": 9.5367431640625e-06
+      },
+      {
+        "cohort_index": 365,
+        "rankings_equal": true,
+        "different_sequence_values": 45,
+        "different_transition_values": 93,
+        "max_sequence_difference_common": 1.239776611328125e-05,
+        "max_transition_difference_common": 9.298324584960938e-06
+      },
+      {
+        "cohort_index": 366,
+        "rankings_equal": true,
+        "different_sequence_values": 41,
+        "different_transition_values": 89,
+        "max_sequence_difference_common": 1.52587890625e-05,
+        "max_transition_difference_common": 9.775161743164062e-06
+      },
+      {
+        "cohort_index": 367,
+        "rankings_equal": true,
+        "different_sequence_values": 42,
+        "different_transition_values": 96,
+        "max_sequence_difference_common": 9.5367431640625e-06,
+        "max_transition_difference_common": 1.043081283569336e-05
+      },
+      {
+        "cohort_index": 368,
+        "rankings_equal": true,
+        "different_sequence_values": 38,
+        "different_transition_values": 93,
+        "max_sequence_difference_common": 2.09808349609375e-05,
+        "max_transition_difference_common": 1.2159347534179688e-05
+      },
+      {
+        "cohort_index": 369,
+        "rankings_equal": true,
+        "different_sequence_values": 36,
+        "different_transition_values": 88,
+        "max_sequence_difference_common": 1.9073486328125e-05,
+        "max_transition_difference_common": 9.5367431640625e-06
+      },
+      {
+        "cohort_index": 370,
+        "rankings_equal": true,
+        "different_sequence_values": 45,
+        "different_transition_values": 96,
+        "max_sequence_difference_common": 1.430511474609375e-05,
+        "max_transition_difference_common": 1.0371208190917969e-05
+      },
+      {
+        "cohort_index": 371,
+        "rankings_equal": true,
+        "different_sequence_values": 33,
+        "different_transition_values": 69,
+        "max_sequence_difference_common": 9.5367431640625e-06,
+        "max_transition_difference_common": 9.059906005859375e-06
+      },
+      {
+        "cohort_index": 372,
+        "rankings_equal": true,
+        "different_sequence_values": 44,
+        "different_transition_values": 91,
+        "max_sequence_difference_common": 1.1444091796875e-05,
+        "max_transition_difference_common": 1.043081283569336e-05
+      },
+      {
+        "cohort_index": 373,
+        "rankings_equal": true,
+        "different_sequence_values": 33,
+        "different_transition_values": 86,
+        "max_sequence_difference_common": 3.719329833984375e-05,
+        "max_transition_difference_common": 2.09808349609375e-05
+      },
+      {
+        "cohort_index": 374,
+        "rankings_equal": true,
+        "different_sequence_values": 41,
+        "different_transition_values": 81,
+        "max_sequence_difference_common": 8.106231689453125e-06,
+        "max_transition_difference_common": 8.165836334228516e-06
+      },
+      {
+        "cohort_index": 375,
+        "rankings_equal": true,
+        "different_sequence_values": 15,
+        "different_transition_values": 48,
+        "max_sequence_difference_common": 7.62939453125e-06,
+        "max_transition_difference_common": 7.3909759521484375e-06
+      },
+      {
+        "cohort_index": 376,
+        "rankings_equal": true,
+        "different_sequence_values": 37,
+        "different_transition_values": 88,
+        "max_sequence_difference_common": 1.9073486328125e-05,
+        "max_transition_difference_common": 1.1563301086425781e-05
+      },
+      {
+        "cohort_index": 377,
+        "rankings_equal": true,
+        "different_sequence_values": 47,
+        "different_transition_values": 92,
+        "max_sequence_difference_common": 1.621246337890625e-05,
+        "max_transition_difference_common": 8.821487426757812e-06
+      },
+      {
+        "cohort_index": 378,
+        "rankings_equal": true,
+        "different_sequence_values": 41,
+        "different_transition_values": 85,
+        "max_sequence_difference_common": 1.1444091796875e-05,
+        "max_transition_difference_common": 1.0013580322265625e-05
+      },
+      {
+        "cohort_index": 379,
+        "rankings_equal": true,
+        "different_sequence_values": 40,
+        "different_transition_values": 91,
+        "max_sequence_difference_common": 1.430511474609375e-05,
+        "max_transition_difference_common": 1.2636184692382812e-05
+      },
+      {
+        "cohort_index": 380,
+        "rankings_equal": true,
+        "different_sequence_values": 40,
+        "different_transition_values": 85,
+        "max_sequence_difference_common": 1.1444091796875e-05,
+        "max_transition_difference_common": 1.1444091796875e-05
+      },
+      {
+        "cohort_index": 381,
+        "rankings_equal": true,
+        "different_sequence_values": 41,
+        "different_transition_values": 96,
+        "max_sequence_difference_common": 1.1444091796875e-05,
+        "max_transition_difference_common": 8.225440979003906e-06
+      },
+      {
+        "cohort_index": 382,
+        "rankings_equal": true,
+        "different_sequence_values": 33,
+        "different_transition_values": 88,
+        "max_sequence_difference_common": 9.5367431640625e-06,
+        "max_transition_difference_common": 9.179115295410156e-06
+      },
+      {
+        "cohort_index": 383,
+        "rankings_equal": true,
+        "different_sequence_values": 35,
+        "different_transition_values": 81,
+        "max_sequence_difference_common": 9.5367431640625e-06,
+        "max_transition_difference_common": 7.867813110351562e-06
+      },
+      {
+        "cohort_index": 384,
+        "rankings_equal": true,
+        "different_sequence_values": 37,
+        "different_transition_values": 85,
+        "max_sequence_difference_common": 1.9073486328125e-05,
+        "max_transition_difference_common": 1.1444091796875e-05
+      },
+      {
+        "cohort_index": 385,
+        "rankings_equal": true,
+        "different_sequence_values": 32,
+        "different_transition_values": 65,
+        "max_sequence_difference_common": 7.62939453125e-06,
+        "max_transition_difference_common": 7.033348083496094e-06
+      },
+      {
+        "cohort_index": 386,
+        "rankings_equal": true,
+        "different_sequence_values": 28,
+        "different_transition_values": 80,
+        "max_sequence_difference_common": 1.52587890625e-05,
+        "max_transition_difference_common": 1.1920928955078125e-05
+      },
+      {
+        "cohort_index": 387,
+        "rankings_equal": true,
+        "different_sequence_values": 28,
+        "different_transition_values": 70,
+        "max_sequence_difference_common": 1.1444091796875e-05,
+        "max_transition_difference_common": 8.58306884765625e-06
+      },
+      {
+        "cohort_index": 388,
+        "rankings_equal": true,
+        "different_sequence_values": 47,
+        "different_transition_values": 96,
+        "max_sequence_difference_common": 1.239776611328125e-05,
+        "max_transition_difference_common": 9.655952453613281e-06
+      },
+      {
+        "cohort_index": 389,
+        "rankings_equal": true,
+        "different_sequence_values": 36,
+        "different_transition_values": 64,
+        "max_sequence_difference_common": 1.049041748046875e-05,
+        "max_transition_difference_common": 1.0788440704345703e-05
+      },
+      {
+        "cohort_index": 390,
+        "rankings_equal": true,
+        "different_sequence_values": 35,
+        "different_transition_values": 62,
+        "max_sequence_difference_common": 1.1444091796875e-05,
+        "max_transition_difference_common": 8.821487426757812e-06
+      },
+      {
+        "cohort_index": 391,
+        "rankings_equal": true,
+        "different_sequence_values": 43,
+        "different_transition_values": 93,
+        "max_sequence_difference_common": 2.193450927734375e-05,
+        "max_transition_difference_common": 1.430511474609375e-05
+      },
+      {
+        "cohort_index": 392,
+        "rankings_equal": true,
+        "different_sequence_values": 16,
+        "different_transition_values": 54,
+        "max_sequence_difference_common": 1.1444091796875e-05,
+        "max_transition_difference_common": 5.841255187988281e-06
+      },
+      {
+        "cohort_index": 393,
+        "rankings_equal": true,
+        "different_sequence_values": 25,
+        "different_transition_values": 56,
+        "max_sequence_difference_common": 1.33514404296875e-05,
+        "max_transition_difference_common": 1.4662742614746094e-05
+      },
+      {
+        "cohort_index": 394,
+        "rankings_equal": true,
+        "different_sequence_values": 40,
+        "different_transition_values": 89,
+        "max_sequence_difference_common": 1.1444091796875e-05,
+        "max_transition_difference_common": 9.298324584960938e-06
+      },
+      {
+        "cohort_index": 395,
+        "rankings_equal": true,
+        "different_sequence_values": 44,
+        "different_transition_values": 96,
+        "max_sequence_difference_common": 1.239776611328125e-05,
+        "max_transition_difference_common": 1.0967254638671875e-05
+      },
+      {
+        "cohort_index": 396,
+        "rankings_equal": true,
+        "different_sequence_values": 29,
+        "different_transition_values": 66,
+        "max_sequence_difference_common": 1.049041748046875e-05,
+        "max_transition_difference_common": 9.775161743164062e-06
+      },
+      {
+        "cohort_index": 397,
+        "rankings_equal": true,
+        "different_sequence_values": 40,
+        "different_transition_values": 84,
+        "max_sequence_difference_common": 1.1444091796875e-05,
+        "max_transition_difference_common": 1.1920928955078125e-05
+      },
+      {
+        "cohort_index": 398,
+        "rankings_equal": true,
+        "different_sequence_values": 42,
+        "different_transition_values": 89,
+        "max_sequence_difference_common": 1.1444091796875e-05,
+        "max_transition_difference_common": 9.179115295410156e-06
+      },
+      {
+        "cohort_index": 399,
+        "rankings_equal": true,
+        "different_sequence_values": 37,
+        "different_transition_values": 90,
+        "max_sequence_difference_common": 1.9073486328125e-05,
+        "max_transition_difference_common": 1.4066696166992188e-05
+      },
+      {
+        "cohort_index": 400,
+        "rankings_equal": true,
+        "different_sequence_values": 35,
+        "different_transition_values": 85,
+        "max_sequence_difference_common": 1.52587890625e-05,
+        "max_transition_difference_common": 1.1920928955078125e-05
+      },
+      {
+        "cohort_index": 401,
+        "rankings_equal": true,
+        "different_sequence_values": 45,
+        "different_transition_values": 85,
+        "max_sequence_difference_common": 8.58306884765625e-06,
+        "max_transition_difference_common": 7.748603820800781e-06
+      },
+      {
+        "cohort_index": 402,
+        "rankings_equal": true,
+        "different_sequence_values": 38,
+        "different_transition_values": 76,
+        "max_sequence_difference_common": 1.1444091796875e-05,
+        "max_transition_difference_common": 7.62939453125e-06
+      },
+      {
+        "cohort_index": 403,
+        "rankings_equal": true,
+        "different_sequence_values": 32,
+        "different_transition_values": 78,
+        "max_sequence_difference_common": 9.5367431640625e-06,
+        "max_transition_difference_common": 9.5367431640625e-06
+      },
+      {
+        "cohort_index": 404,
+        "rankings_equal": true,
+        "different_sequence_values": 19,
+        "different_transition_values": 57,
+        "max_sequence_difference_common": 9.5367431640625e-06,
+        "max_transition_difference_common": 7.3909759521484375e-06
+      },
+      {
+        "cohort_index": 405,
+        "rankings_equal": true,
+        "different_sequence_values": 22,
+        "different_transition_values": 57,
+        "max_sequence_difference_common": 5.7220458984375e-06,
+        "max_transition_difference_common": 6.198883056640625e-06
+      },
+      {
+        "cohort_index": 406,
+        "rankings_equal": true,
+        "different_sequence_values": 44,
+        "different_transition_values": 82,
+        "max_sequence_difference_common": 1.33514404296875e-05,
+        "max_transition_difference_common": 1.0251998901367188e-05
+      },
+      {
+        "cohort_index": 407,
+        "rankings_equal": true,
+        "different_sequence_values": 43,
+        "different_transition_values": 90,
+        "max_sequence_difference_common": 1.71661376953125e-05,
+        "max_transition_difference_common": 1.5735626220703125e-05
+      },
+      {
+        "cohort_index": 408,
+        "rankings_equal": true,
+        "different_sequence_values": 43,
+        "different_transition_values": 75,
+        "max_sequence_difference_common": 6.67572021484375e-06,
+        "max_transition_difference_common": 6.4373016357421875e-06
+      },
+      {
+        "cohort_index": 409,
+        "rankings_equal": true,
+        "different_sequence_values": 39,
+        "different_transition_values": 83,
+        "max_sequence_difference_common": 1.049041748046875e-05,
+        "max_transition_difference_common": 9.179115295410156e-06
+      },
+      {
+        "cohort_index": 410,
+        "rankings_equal": true,
+        "different_sequence_values": 39,
+        "different_transition_values": 87,
+        "max_sequence_difference_common": 1.239776611328125e-05,
+        "max_transition_difference_common": 1.0251998901367188e-05
+      },
+      {
+        "cohort_index": 411,
+        "rankings_equal": true,
+        "different_sequence_values": 23,
+        "different_transition_values": 75,
+        "max_sequence_difference_common": 1.1444091796875e-05,
+        "max_transition_difference_common": 8.106231689453125e-06
+      },
+      {
+        "cohort_index": 412,
+        "rankings_equal": true,
+        "different_sequence_values": 41,
+        "different_transition_values": 90,
+        "max_sequence_difference_common": 1.33514404296875e-05,
+        "max_transition_difference_common": 1.1920928955078125e-05
+      },
+      {
+        "cohort_index": 413,
+        "rankings_equal": true,
+        "different_sequence_values": 39,
+        "different_transition_values": 90,
+        "max_sequence_difference_common": 1.1444091796875e-05,
+        "max_transition_difference_common": 9.5367431640625e-06
+      },
+      {
+        "cohort_index": 414,
+        "rankings_equal": true,
+        "different_sequence_values": 30,
+        "different_transition_values": 85,
+        "max_sequence_difference_common": 5.7220458984375e-06,
+        "max_transition_difference_common": 7.867813110351562e-06
+      },
+      {
+        "cohort_index": 415,
+        "rankings_equal": true,
+        "different_sequence_values": 40,
+        "different_transition_values": 89,
+        "max_sequence_difference_common": 1.33514404296875e-05,
+        "max_transition_difference_common": 7.68899917602539e-06
+      },
+      {
+        "cohort_index": 416,
+        "rankings_equal": true,
+        "different_sequence_values": 37,
+        "different_transition_values": 92,
+        "max_sequence_difference_common": 1.33514404296875e-05,
+        "max_transition_difference_common": 1.1444091796875e-05
+      },
+      {
+        "cohort_index": 417,
+        "rankings_equal": true,
+        "different_sequence_values": 39,
+        "different_transition_values": 69,
+        "max_sequence_difference_common": 9.5367431640625e-06,
+        "max_transition_difference_common": 1.239776611328125e-05
+      },
+      {
+        "cohort_index": 418,
+        "rankings_equal": true,
+        "different_sequence_values": 26,
+        "different_transition_values": 51,
+        "max_sequence_difference_common": 1.1444091796875e-05,
+        "max_transition_difference_common": 9.179115295410156e-06
+      },
+      {
+        "cohort_index": 419,
+        "rankings_equal": true,
+        "different_sequence_values": 43,
+        "different_transition_values": 95,
+        "max_sequence_difference_common": 1.33514404296875e-05,
+        "max_transition_difference_common": 1.1444091796875e-05
+      },
+      {
+        "cohort_index": 420,
+        "rankings_equal": true,
+        "different_sequence_values": 19,
+        "different_transition_values": 48,
+        "max_sequence_difference_common": 8.58306884765625e-06,
+        "max_transition_difference_common": 7.867813110351562e-06
+      },
+      {
+        "cohort_index": 421,
+        "rankings_equal": true,
+        "different_sequence_values": 28,
+        "different_transition_values": 62,
+        "max_sequence_difference_common": 1.52587890625e-05,
+        "max_transition_difference_common": 1.1682510375976562e-05
+      },
+      {
+        "cohort_index": 422,
+        "rankings_equal": true,
+        "different_sequence_values": 46,
+        "different_transition_values": 96,
+        "max_sequence_difference_common": 1.9073486328125e-05,
+        "max_transition_difference_common": 2.0265579223632812e-05
+      },
+      {
+        "cohort_index": 423,
+        "rankings_equal": true,
+        "different_sequence_values": 40,
+        "different_transition_values": 81,
+        "max_sequence_difference_common": 6.67572021484375e-06,
+        "max_transition_difference_common": 6.735324859619141e-06
+      },
+      {
+        "cohort_index": 424,
+        "rankings_equal": true,
+        "different_sequence_values": 32,
+        "different_transition_values": 63,
+        "max_sequence_difference_common": 1.239776611328125e-05,
+        "max_transition_difference_common": 9.775161743164062e-06
+      },
+      {
+        "cohort_index": 425,
+        "rankings_equal": true,
+        "different_sequence_values": 45,
+        "different_transition_values": 94,
+        "max_sequence_difference_common": 1.1444091796875e-05,
+        "max_transition_difference_common": 9.417533874511719e-06
+      },
+      {
+        "cohort_index": 426,
+        "rankings_equal": true,
+        "different_sequence_values": 32,
+        "different_transition_values": 74,
+        "max_sequence_difference_common": 7.62939453125e-06,
+        "max_transition_difference_common": 5.0067901611328125e-06
+      },
+      {
+        "cohort_index": 427,
+        "rankings_equal": true,
+        "different_sequence_values": 28,
+        "different_transition_values": 62,
+        "max_sequence_difference_common": 7.62939453125e-06,
+        "max_transition_difference_common": 5.304813385009766e-06
+      },
+      {
+        "cohort_index": 428,
+        "rankings_equal": true,
+        "different_sequence_values": 34,
+        "different_transition_values": 83,
+        "max_sequence_difference_common": 9.5367431640625e-06,
+        "max_transition_difference_common": 8.225440979003906e-06
+      },
+      {
+        "cohort_index": 429,
+        "rankings_equal": true,
+        "different_sequence_values": 39,
+        "different_transition_values": 85,
+        "max_sequence_difference_common": 1.621246337890625e-05,
+        "max_transition_difference_common": 1.6808509826660156e-05
+      },
+      {
+        "cohort_index": 430,
+        "rankings_equal": true,
+        "different_sequence_values": 33,
+        "different_transition_values": 86,
+        "max_sequence_difference_common": 3.719329833984375e-05,
+        "max_transition_difference_common": 2.09808349609375e-05
+      },
+      {
+        "cohort_index": 431,
+        "rankings_equal": true,
+        "different_sequence_values": 37,
+        "different_transition_values": 81,
+        "max_sequence_difference_common": 1.33514404296875e-05,
+        "max_transition_difference_common": 1.1920928955078125e-05
+      },
+      {
+        "cohort_index": 432,
+        "rankings_equal": true,
+        "different_sequence_values": 42,
+        "different_transition_values": 96,
+        "max_sequence_difference_common": 9.5367431640625e-06,
+        "max_transition_difference_common": 7.62939453125e-06
+      },
+      {
+        "cohort_index": 433,
+        "rankings_equal": true,
+        "different_sequence_values": 34,
+        "different_transition_values": 82,
+        "max_sequence_difference_common": 1.430511474609375e-05,
+        "max_transition_difference_common": 1.0013580322265625e-05
+      },
+      {
+        "cohort_index": 434,
+        "rankings_equal": true,
+        "different_sequence_values": 39,
+        "different_transition_values": 96,
+        "max_sequence_difference_common": 2.09808349609375e-05,
+        "max_transition_difference_common": 1.4066696166992188e-05
+      },
+      {
+        "cohort_index": 435,
+        "rankings_equal": true,
+        "different_sequence_values": 29,
+        "different_transition_values": 58,
+        "max_sequence_difference_common": 5.7220458984375e-06,
+        "max_transition_difference_common": 5.245208740234375e-06
+      },
+      {
+        "cohort_index": 436,
+        "rankings_equal": true,
+        "different_sequence_values": 43,
+        "different_transition_values": 96,
+        "max_sequence_difference_common": 2.09808349609375e-05,
+        "max_transition_difference_common": 1.9788742065429688e-05
+      },
+      {
+        "cohort_index": 437,
+        "rankings_equal": true,
+        "different_sequence_values": 26,
+        "different_transition_values": 84,
+        "max_sequence_difference_common": 1.9073486328125e-05,
+        "max_transition_difference_common": 9.059906005859375e-06
+      },
+      {
+        "cohort_index": 438,
+        "rankings_equal": true,
+        "different_sequence_values": 38,
+        "different_transition_values": 75,
+        "max_sequence_difference_common": 1.239776611328125e-05,
+        "max_transition_difference_common": 1.2636184692382812e-05
+      },
+      {
+        "cohort_index": 439,
+        "rankings_equal": true,
+        "different_sequence_values": 28,
+        "different_transition_values": 63,
+        "max_sequence_difference_common": 9.5367431640625e-06,
+        "max_transition_difference_common": 6.67572021484375e-06
+      },
+      {
+        "cohort_index": 440,
+        "rankings_equal": true,
+        "different_sequence_values": 35,
+        "different_transition_values": 87,
+        "max_sequence_difference_common": 1.1444091796875e-05,
+        "max_transition_difference_common": 1.049041748046875e-05
+      },
+      {
+        "cohort_index": 441,
+        "rankings_equal": true,
+        "different_sequence_values": 39,
+        "different_transition_values": 88,
+        "max_sequence_difference_common": 1.52587890625e-05,
+        "max_transition_difference_common": 1.4543533325195312e-05
+      },
+      {
+        "cohort_index": 442,
+        "rankings_equal": true,
+        "different_sequence_values": 32,
+        "different_transition_values": 69,
+        "max_sequence_difference_common": 1.71661376953125e-05,
+        "max_transition_difference_common": 1.0013580322265625e-05
+      },
+      {
+        "cohort_index": 443,
+        "rankings_equal": true,
+        "different_sequence_values": 43,
+        "different_transition_values": 91,
+        "max_sequence_difference_common": 1.621246337890625e-05,
+        "max_transition_difference_common": 1.0728836059570312e-05
+      },
+      {
+        "cohort_index": 444,
+        "rankings_equal": true,
+        "different_sequence_values": 45,
+        "different_transition_values": 95,
+        "max_sequence_difference_common": 2.09808349609375e-05,
+        "max_transition_difference_common": 1.33514404296875e-05
+      },
+      {
+        "cohort_index": 445,
+        "rankings_equal": true,
+        "different_sequence_values": 23,
+        "different_transition_values": 49,
+        "max_sequence_difference_common": 1.1444091796875e-05,
+        "max_transition_difference_common": 7.987022399902344e-06
+      },
+      {
+        "cohort_index": 446,
+        "rankings_equal": true,
+        "different_sequence_values": 41,
+        "different_transition_values": 92,
+        "max_sequence_difference_common": 2.288818359375e-05,
+        "max_transition_difference_common": 1.33514404296875e-05
+      },
+      {
+        "cohort_index": 447,
+        "rankings_equal": true,
+        "different_sequence_values": 26,
+        "different_transition_values": 65,
+        "max_sequence_difference_common": 9.5367431640625e-06,
+        "max_transition_difference_common": 7.867813110351562e-06
+      },
+      {
+        "cohort_index": 448,
+        "rankings_equal": true,
+        "different_sequence_values": 34,
+        "different_transition_values": 70,
+        "max_sequence_difference_common": 9.5367431640625e-06,
+        "max_transition_difference_common": 6.794929504394531e-06
+      },
+      {
+        "cohort_index": 449,
+        "rankings_equal": true,
+        "different_sequence_values": 35,
+        "different_transition_values": 81,
+        "max_sequence_difference_common": 7.62939453125e-06,
+        "max_transition_difference_common": 9.059906005859375e-06
+      },
+      {
+        "cohort_index": 450,
+        "rankings_equal": true,
+        "different_sequence_values": 45,
+        "different_transition_values": 94,
+        "max_sequence_difference_common": 1.049041748046875e-05,
+        "max_transition_difference_common": 1.0967254638671875e-05
+      },
+      {
+        "cohort_index": 451,
+        "rankings_equal": true,
+        "different_sequence_values": 42,
+        "different_transition_values": 94,
+        "max_sequence_difference_common": 1.621246337890625e-05,
+        "max_transition_difference_common": 1.1444091796875e-05
+      },
+      {
+        "cohort_index": 452,
+        "rankings_equal": true,
+        "different_sequence_values": 20,
+        "different_transition_values": 60,
+        "max_sequence_difference_common": 1.71661376953125e-05,
+        "max_transition_difference_common": 1.0251998901367188e-05
+      },
+      {
+        "cohort_index": 453,
+        "rankings_equal": true,
+        "different_sequence_values": 34,
+        "different_transition_values": 67,
+        "max_sequence_difference_common": 5.7220458984375e-06,
+        "max_transition_difference_common": 5.9604644775390625e-06
+      },
+      {
+        "cohort_index": 454,
+        "rankings_equal": true,
+        "different_sequence_values": 27,
+        "different_transition_values": 59,
+        "max_sequence_difference_common": 1.33514404296875e-05,
+        "max_transition_difference_common": 1.0013580322265625e-05
+      },
+      {
+        "cohort_index": 455,
+        "rankings_equal": true,
+        "different_sequence_values": 42,
+        "different_transition_values": 85,
+        "max_sequence_difference_common": 1.811981201171875e-05,
+        "max_transition_difference_common": 1.239776611328125e-05
+      },
+      {
+        "cohort_index": 456,
+        "rankings_equal": true,
+        "different_sequence_values": 42,
+        "different_transition_values": 89,
+        "max_sequence_difference_common": 1.430511474609375e-05,
+        "max_transition_difference_common": 9.179115295410156e-06
+      },
+      {
+        "cohort_index": 457,
+        "rankings_equal": true,
+        "different_sequence_values": 32,
+        "different_transition_values": 78,
+        "max_sequence_difference_common": 7.62939453125e-06,
+        "max_transition_difference_common": 7.867813110351562e-06
+      },
+      {
+        "cohort_index": 458,
+        "rankings_equal": true,
+        "different_sequence_values": 31,
+        "different_transition_values": 82,
+        "max_sequence_difference_common": 5.340576171875e-05,
+        "max_transition_difference_common": 3.0279159545898438e-05
+      },
+      {
+        "cohort_index": 459,
+        "rankings_equal": true,
+        "different_sequence_values": 42,
+        "different_transition_values": 89,
+        "max_sequence_difference_common": 9.5367431640625e-06,
+        "max_transition_difference_common": 8.58306884765625e-06
+      },
+      {
+        "cohort_index": 460,
+        "rankings_equal": true,
+        "different_sequence_values": 41,
+        "different_transition_values": 82,
+        "max_sequence_difference_common": 9.5367431640625e-06,
+        "max_transition_difference_common": 8.58306884765625e-06
+      },
+      {
+        "cohort_index": 461,
+        "rankings_equal": true,
+        "different_sequence_values": 22,
+        "different_transition_values": 51,
+        "max_sequence_difference_common": 8.58306884765625e-06,
+        "max_transition_difference_common": 4.76837158203125e-06
+      },
+      {
+        "cohort_index": 462,
+        "rankings_equal": true,
+        "different_sequence_values": 42,
+        "different_transition_values": 76,
+        "max_sequence_difference_common": 1.0967254638671875e-05,
+        "max_transition_difference_common": 1.0848045349121094e-05
+      },
+      {
+        "cohort_index": 463,
+        "rankings_equal": true,
+        "different_sequence_values": 38,
+        "different_transition_values": 65,
+        "max_sequence_difference_common": 1.049041748046875e-05,
+        "max_transition_difference_common": 8.106231689453125e-06
+      },
+      {
+        "cohort_index": 464,
+        "rankings_equal": true,
+        "different_sequence_values": 42,
+        "different_transition_values": 89,
+        "max_sequence_difference_common": 1.9073486328125e-05,
+        "max_transition_difference_common": 1.811981201171875e-05
+      },
+      {
+        "cohort_index": 465,
+        "rankings_equal": true,
+        "different_sequence_values": 42,
+        "different_transition_values": 90,
+        "max_sequence_difference_common": 2.002716064453125e-05,
+        "max_transition_difference_common": 1.150369644165039e-05
+      },
+      {
+        "cohort_index": 466,
+        "rankings_equal": true,
+        "different_sequence_values": 42,
+        "different_transition_values": 84,
+        "max_sequence_difference_common": 1.33514404296875e-05,
+        "max_transition_difference_common": 1.0728836059570312e-05
+      },
+      {
+        "cohort_index": 467,
+        "rankings_equal": true,
+        "different_sequence_values": 43,
+        "different_transition_values": 81,
+        "max_sequence_difference_common": 1.1444091796875e-05,
+        "max_transition_difference_common": 7.510185241699219e-06
+      },
+      {
+        "cohort_index": 468,
+        "rankings_equal": true,
+        "different_sequence_values": 37,
+        "different_transition_values": 92,
+        "max_sequence_difference_common": 1.33514404296875e-05,
+        "max_transition_difference_common": 1.0251998901367188e-05
+      },
+      {
+        "cohort_index": 469,
+        "rankings_equal": true,
+        "different_sequence_values": 42,
+        "different_transition_values": 85,
+        "max_sequence_difference_common": 1.1444091796875e-05,
+        "max_transition_difference_common": 1.0013580322265625e-05
+      },
+      {
+        "cohort_index": 470,
+        "rankings_equal": true,
+        "different_sequence_values": 38,
+        "different_transition_values": 94,
+        "max_sequence_difference_common": 3.4332275390625e-05,
+        "max_transition_difference_common": 2.1696090698242188e-05
+      },
+      {
+        "cohort_index": 471,
+        "rankings_equal": true,
+        "different_sequence_values": 44,
+        "different_transition_values": 89,
+        "max_sequence_difference_common": 1.430511474609375e-05,
+        "max_transition_difference_common": 1.1444091796875e-05
+      },
+      {
+        "cohort_index": 472,
+        "rankings_equal": true,
+        "different_sequence_values": 29,
+        "different_transition_values": 71,
+        "max_sequence_difference_common": 7.62939453125e-06,
+        "max_transition_difference_common": 7.62939453125e-06
+      },
+      {
+        "cohort_index": 473,
+        "rankings_equal": true,
+        "different_sequence_values": 45,
+        "different_transition_values": 87,
+        "max_sequence_difference_common": 7.62939453125e-06,
+        "max_transition_difference_common": 9.775161743164062e-06
+      },
+      {
+        "cohort_index": 474,
+        "rankings_equal": true,
+        "different_sequence_values": 41,
+        "different_transition_values": 94,
+        "max_sequence_difference_common": 1.33514404296875e-05,
+        "max_transition_difference_common": 1.3470649719238281e-05
+      },
+      {
+        "cohort_index": 475,
+        "rankings_equal": true,
+        "different_sequence_values": 39,
+        "different_transition_values": 69,
+        "max_sequence_difference_common": 8.58306884765625e-06,
+        "max_transition_difference_common": 7.748603820800781e-06
+      },
+      {
+        "cohort_index": 476,
+        "rankings_equal": true,
+        "different_sequence_values": 39,
+        "different_transition_values": 92,
+        "max_sequence_difference_common": 1.811981201171875e-05,
+        "max_transition_difference_common": 1.7642974853515625e-05
+      },
+      {
+        "cohort_index": 477,
+        "rankings_equal": true,
+        "different_sequence_values": 37,
+        "different_transition_values": 90,
+        "max_sequence_difference_common": 2.09808349609375e-05,
+        "max_transition_difference_common": 1.2874603271484375e-05
+      },
+      {
+        "cohort_index": 478,
+        "rankings_equal": true,
+        "different_sequence_values": 32,
+        "different_transition_values": 86,
+        "max_sequence_difference_common": 1.1444091796875e-05,
+        "max_transition_difference_common": 1.0967254638671875e-05
+      },
+      {
+        "cohort_index": 479,
+        "rankings_equal": true,
+        "different_sequence_values": 42,
+        "different_transition_values": 73,
+        "max_sequence_difference_common": 1.811981201171875e-05,
+        "max_transition_difference_common": 1.71661376953125e-05
+      },
+      {
+        "cohort_index": 480,
+        "rankings_equal": true,
+        "different_sequence_values": 44,
+        "different_transition_values": 90,
+        "max_sequence_difference_common": 2.193450927734375e-05,
+        "max_transition_difference_common": 1.5020370483398438e-05
+      },
+      {
+        "cohort_index": 481,
+        "rankings_equal": true,
+        "different_sequence_values": 23,
+        "different_transition_values": 75,
+        "max_sequence_difference_common": 1.1444091796875e-05,
+        "max_transition_difference_common": 8.58306884765625e-06
+      },
+      {
+        "cohort_index": 482,
+        "rankings_equal": true,
+        "different_sequence_values": 37,
+        "different_transition_values": 83,
+        "max_sequence_difference_common": 1.33514404296875e-05,
+        "max_transition_difference_common": 1.1682510375976562e-05
+      },
+      {
+        "cohort_index": 483,
+        "rankings_equal": true,
+        "different_sequence_values": 27,
+        "different_transition_values": 59,
+        "max_sequence_difference_common": 1.239776611328125e-05,
+        "max_transition_difference_common": 1.239776611328125e-05
+      },
+      {
+        "cohort_index": 484,
+        "rankings_equal": true,
+        "different_sequence_values": 47,
+        "different_transition_values": 97,
+        "max_sequence_difference_common": 2.193450927734375e-05,
+        "max_transition_difference_common": 1.0967254638671875e-05
+      },
+      {
+        "cohort_index": 485,
+        "rankings_equal": true,
+        "different_sequence_values": 28,
+        "different_transition_values": 47,
+        "max_sequence_difference_common": 1.430511474609375e-05,
+        "max_transition_difference_common": 9.775161743164062e-06
+      },
+      {
+        "cohort_index": 486,
+        "rankings_equal": true,
+        "different_sequence_values": 27,
+        "different_transition_values": 48,
+        "max_sequence_difference_common": 1.71661376953125e-05,
+        "max_transition_difference_common": 1.621246337890625e-05
+      },
+      {
+        "cohort_index": 487,
+        "rankings_equal": true,
+        "different_sequence_values": 17,
+        "different_transition_values": 53,
+        "max_sequence_difference_common": 7.62939453125e-06,
+        "max_transition_difference_common": 6.198883056640625e-06
+      },
+      {
+        "cohort_index": 488,
+        "rankings_equal": true,
+        "different_sequence_values": 40,
+        "different_transition_values": 83,
+        "max_sequence_difference_common": 1.811981201171875e-05,
+        "max_transition_difference_common": 1.0013580322265625e-05
+      },
+      {
+        "cohort_index": 489,
+        "rankings_equal": true,
+        "different_sequence_values": 40,
+        "different_transition_values": 91,
+        "max_sequence_difference_common": 1.239776611328125e-05,
+        "max_transition_difference_common": 1.1801719665527344e-05
+      },
+      {
+        "cohort_index": 490,
+        "rankings_equal": true,
+        "different_sequence_values": 29,
+        "different_transition_values": 57,
+        "max_sequence_difference_common": 6.67572021484375e-06,
+        "max_transition_difference_common": 6.67572021484375e-06
+      },
+      {
+        "cohort_index": 491,
+        "rankings_equal": true,
+        "different_sequence_values": 38,
+        "different_transition_values": 81,
+        "max_sequence_difference_common": 1.239776611328125e-05,
+        "max_transition_difference_common": 9.5367431640625e-06
+      },
+      {
+        "cohort_index": 492,
+        "rankings_equal": true,
+        "different_sequence_values": 30,
+        "different_transition_values": 86,
+        "max_sequence_difference_common": 9.5367431640625e-06,
+        "max_transition_difference_common": 7.62939453125e-06
+      },
+      {
+        "cohort_index": 493,
+        "rankings_equal": true,
+        "different_sequence_values": 35,
+        "different_transition_values": 87,
+        "max_sequence_difference_common": 1.430511474609375e-05,
+        "max_transition_difference_common": 9.5367431640625e-06
+      },
+      {
+        "cohort_index": 494,
+        "rankings_equal": true,
+        "different_sequence_values": 39,
+        "different_transition_values": 87,
+        "max_sequence_difference_common": 1.430511474609375e-05,
+        "max_transition_difference_common": 1.1920928955078125e-05
+      },
+      {
+        "cohort_index": 495,
+        "rankings_equal": true,
+        "different_sequence_values": 40,
+        "different_transition_values": 92,
+        "max_sequence_difference_common": 7.62939453125e-06,
+        "max_transition_difference_common": 7.3909759521484375e-06
+      },
+      {
+        "cohort_index": 496,
+        "rankings_equal": true,
+        "different_sequence_values": 36,
+        "different_transition_values": 84,
+        "max_sequence_difference_common": 9.5367431640625e-06,
+        "max_transition_difference_common": 7.62939453125e-06
+      },
+      {
+        "cohort_index": 497,
+        "rankings_equal": true,
+        "different_sequence_values": 25,
+        "different_transition_values": 83,
+        "max_sequence_difference_common": 1.1444091796875e-05,
+        "max_transition_difference_common": 5.245208740234375e-06
+      },
+      {
+        "cohort_index": 498,
+        "rankings_equal": true,
+        "different_sequence_values": 37,
+        "different_transition_values": 95,
+        "max_sequence_difference_common": 1.1444091796875e-05,
+        "max_transition_difference_common": 1.239776611328125e-05
+      },
+      {
+        "cohort_index": 499,
+        "rankings_equal": true,
+        "different_sequence_values": 35,
+        "different_transition_values": 74,
+        "max_sequence_difference_common": 1.430511474609375e-05,
+        "max_transition_difference_common": 1.3113021850585938e-05
+      }
+    ]
+  },
+  "historical_gqa_check": {
+    "users": 500,
+    "matching_rank_lists": 500,
+    "matching_rank_positions": 25000,
+    "matching_sequence_vectors": 500,
+    "matching_transition_arrays": 500,
+    "matching_sequence_values_in_rank_order": 25000,
+    "matching_transition_values_in_rank_order": 125000,
+    "max_sequence_difference_common": 0.0,
+    "max_transition_difference_common": 0.0,
+    "mismatches": []
+  },
+  "same_candidate_sets": 500,
+  "same_top1": 500,
+  "changed_rank_lists": [],
+  "sequence_score_absolute_difference_common": {
+    "n": 25000,
+    "median": 1.9073486328125e-06,
+    "p95": 8.58306884765625e-06,
+    "max": 5.340576171875e-05,
+    "exact_zeros": 6506,
+    "at_most_1e_5": 24213,
+    "at_most_1e_4": 25000
+  },
+  "transition_difference_by_step_common": {
+    "SID1": {
+      "n": 25000,
+      "median": 0.0,
+      "p95": 0.0,
+      "max": 0.0,
+      "exact_zeros": 25000,
+      "at_most_1e_5": 25000,
+      "at_most_1e_4": 25000,
+      "matching_float32_bits": 25000
+    },
+    "SID2": {
+      "n": 25000,
+      "median": 0.0,
+      "p95": 0.0,
+      "max": 0.0,
+      "exact_zeros": 25000,
+      "at_most_1e_5": 25000,
+      "at_most_1e_4": 25000,
+      "matching_float32_bits": 25000
+    },
+    "SID3": {
+      "n": 25000,
+      "median": 0.0,
+      "p95": 0.0,
+      "max": 0.0,
+      "exact_zeros": 25000,
+      "at_most_1e_5": 25000,
+      "at_most_1e_4": 25000,
+      "matching_float32_bits": 25000
+    },
+    "newline": {
+      "n": 25000,
+      "median": 1.430511474609375e-06,
+      "p95": 6.4373016357421875e-06,
+      "max": 3.0279159545898438e-05,
+      "exact_zeros": 2474,
+      "at_most_1e_5": 24762,
+      "at_most_1e_4": 25000,
+      "matching_float32_bits": 2474
+    },
+    "EOS": {
+      "n": 25000,
+      "median": 4.172325134277344e-07,
+      "p95": 5.245208740234375e-06,
+      "max": 3.075599670410156e-05,
+      "exact_zeros": 6694,
+      "at_most_1e_5": 24831,
+      "at_most_1e_4": 25000,
+      "matching_float32_bits": 6694
+    }
+  },
+  "full_five_token_score_sums_match": {
+    "gqa": 25000,
+    "combined_suffix": 25000
+  },
+  "metrics": {
+    "gqa": {
+      "1": {
+        "hits": 29,
+        "ndcg": 0.058
+      },
+      "5": {
+        "hits": 44,
+        "ndcg": 0.07129850627636905
+      },
+      "10": {
+        "hits": 57,
+        "ndcg": 0.0795951243201907
+      },
+      "20": {
+        "hits": 70,
+        "ndcg": 0.08641497877403183
+      },
+      "50": {
+        "hits": 100,
+        "ndcg": 0.09804438357603994
+      }
+    },
+    "combined_suffix": {
+      "1": {
+        "hits": 29,
+        "ndcg": 0.058
+      },
+      "5": {
+        "hits": 44,
+        "ndcg": 0.07129850627636905
+      },
+      "10": {
+        "hits": 57,
+        "ndcg": 0.0795951243201907
+      },
+      "20": {
+        "hits": 70,
+        "ndcg": 0.08641497877403183
+      },
+      "50": {
+        "hits": 100,
+        "ndcg": 0.09804438357603994
+      }
+    }
+  },
+  "first_variant_counts": {
+    "gqa": 250,
+    "combined_suffix": 250
+  },
+  "latency_by_length": {
+    "76": {
+      "gqa": {
+        "n": 109,
+        "median_ms": 131.76249712705612,
+        "p95_ms": 132.88670554757118,
+        "min_ms": 129.5739710330963,
+        "max_ms": 133.61826166510582,
+        "mean_ms": 131.6776526151994
+      },
+      "combined_suffix": {
+        "n": 109,
+        "median_ms": 126.7324760556221,
+        "p95_ms": 128.42524349689484,
+        "min_ms": 124.67044964432716,
+        "max_ms": 129.15422394871712,
+        "mean_ms": 126.72077915673957
+      }
+    },
+    "81": {
+      "gqa": {
+        "n": 39,
+        "median_ms": 133.0062709748745,
+        "p95_ms": 134.1759204864502,
+        "min_ms": 130.4992064833641,
+        "max_ms": 134.8992884159088,
+        "mean_ms": 132.8634879527948
+      },
+      "combined_suffix": {
+        "n": 39,
+        "median_ms": 127.34006717801094,
+        "p95_ms": 128.5278059542179,
+        "min_ms": 125.35156309604645,
+        "max_ms": 129.21377643942833,
+        "mean_ms": 127.390584980066
+      }
+    },
+    "86": {
+      "gqa": {
+        "n": 69,
+        "median_ms": 133.87077674269676,
+        "p95_ms": 135.54298356175423,
+        "min_ms": 131.16436079144478,
+        "max_ms": 136.08895614743233,
+        "mean_ms": 133.81070411507633
+      },
+      "combined_suffix": {
+        "n": 69,
+        "median_ms": 128.84747609496117,
+        "p95_ms": 130.00716045498848,
+        "min_ms": 127.12765112519264,
+        "max_ms": 130.68483024835587,
+        "mean_ms": 128.8040294919325
+      }
+    },
+    "91": {
+      "gqa": {
+        "n": 85,
+        "median_ms": 134.24218446016312,
+        "p95_ms": 135.64501106739044,
+        "min_ms": 131.78585842251778,
+        "max_ms": 137.57456466555595,
+        "mean_ms": 134.21368695357268
+      },
+      "combined_suffix": {
+        "n": 85,
+        "median_ms": 129.19464334845543,
+        "p95_ms": 130.559840798378,
+        "min_ms": 127.09950655698776,
+        "max_ms": 131.843451410532,
+        "mean_ms": 129.1738969438216
+      }
+    },
+    "96": {
+      "gqa": {
+        "n": 58,
+        "median_ms": 137.4757755547762,
+        "p95_ms": 138.5378571227193,
+        "min_ms": 135.24621725082397,
+        "max_ms": 139.12395015358925,
+        "mean_ms": 137.47566636523294
+      },
+      "combined_suffix": {
+        "n": 58,
+        "median_ms": 132.19437934458256,
+        "p95_ms": 133.5174972191453,
+        "min_ms": 130.37365302443504,
+        "max_ms": 134.40989330410957,
+        "mean_ms": 132.18028637869605
+      }
+    },
+    "101": {
+      "gqa": {
+        "n": 42,
+        "median_ms": 140.06263948976994,
+        "p95_ms": 141.39756299555302,
+        "min_ms": 137.74917647242546,
+        "max_ms": 142.5492838025093,
+        "mean_ms": 139.96055127964132
+      },
+      "combined_suffix": {
+        "n": 42,
+        "median_ms": 134.84004139900208,
+        "p95_ms": 136.39054149389267,
+        "min_ms": 132.9657919704914,
+        "max_ms": 138.41936737298965,
+        "mean_ms": 134.8256269203765
+      }
+    },
+    "106": {
+      "gqa": {
+        "n": 24,
+        "median_ms": 140.54342545568943,
+        "p95_ms": 142.06554889678955,
+        "min_ms": 139.09437879920006,
+        "max_ms": 142.4362249672413,
+        "mean_ms": 140.632389113307
+      },
+      "combined_suffix": {
+        "n": 24,
+        "median_ms": 135.3542972356081,
+        "p95_ms": 136.34400889277458,
+        "min_ms": 133.96406173706055,
+        "max_ms": 136.44210621714592,
+        "mean_ms": 135.34569895515838
+      }
+    },
+    "111": {
+      "gqa": {
+        "n": 18,
+        "median_ms": 141.30733907222748,
+        "p95_ms": 142.22682137042284,
+        "min_ms": 140.12432470917702,
+        "max_ms": 142.7433118224144,
+        "mean_ms": 141.36301705406774
+      },
+      "combined_suffix": {
+        "n": 18,
+        "median_ms": 136.09564490616322,
+        "p95_ms": 137.32047900557518,
+        "min_ms": 134.45062190294266,
+        "max_ms": 138.05009052157402,
+        "mean_ms": 136.08639438947043
+      }
+    },
+    "116": {
+      "gqa": {
+        "n": 13,
+        "median_ms": 142.2332525253296,
+        "p95_ms": 143.2000793516636,
+        "min_ms": 140.10615646839142,
+        "max_ms": 143.53756606578827,
+        "mean_ms": 141.87776985076758
+      },
+      "combined_suffix": {
+        "n": 13,
+        "median_ms": 136.64128258824348,
+        "p95_ms": 137.74809539318085,
+        "min_ms": 135.11674106121063,
+        "max_ms": 137.77272030711174,
+        "mean_ms": 136.59017876936838
+      }
+    },
+    "121": {
+      "gqa": {
+        "n": 43,
+        "median_ms": 142.7462100982666,
+        "p95_ms": 143.43429915606976,
+        "min_ms": 140.13011753559113,
+        "max_ms": 144.38050240278244,
+        "mean_ms": 142.48118835479715
+      },
+      "combined_suffix": {
+        "n": 43,
+        "median_ms": 137.44186609983444,
+        "p95_ms": 139.18875120580196,
+        "min_ms": 135.03727689385414,
+        "max_ms": 139.48972895741463,
+        "mean_ms": 137.34925148445507
+      }
+    }
+  },
+  "latency_by_first_variant": {
+    "gqa": {
+      "gqa": {
+        "n": 250,
+        "median_ms": 134.36338678002357,
+        "p95_ms": 142.48610772192478,
+        "min_ms": 129.5739710330963,
+        "max_ms": 143.60836520791054,
+        "mean_ms": 135.59461078047752
+      },
+      "combined_suffix": {
+        "n": 250,
+        "median_ms": 129.24600951373577,
+        "p95_ms": 137.24545873701572,
+        "min_ms": 124.67044964432716,
+        "max_ms": 138.69736716151237,
+        "mean_ms": 130.53921465575695
+      }
+    },
+    "combined_suffix": {
+      "gqa": {
+        "n": 250,
+        "median_ms": 134.68090631067753,
+        "p95_ms": 142.72344671189785,
+        "min_ms": 130.35976141691208,
+        "max_ms": 144.38050240278244,
+        "mean_ms": 136.07894000411034
+      },
+      "combined_suffix": {
+        "n": 250,
+        "median_ms": 129.45798225700855,
+        "p95_ms": 137.45656497776508,
+        "min_ms": 125.09407475590706,
+        "max_ms": 139.48972895741463,
+        "mean_ms": 130.88771322369576
+      }
+    }
+  },
+  "latency_by_100_user_block": {
+    "0": {
+      "gqa": {
+        "n": 100,
+        "median_ms": 134.0911891311407,
+        "p95_ms": 142.37657617777586,
+        "min_ms": 130.07142767310143,
+        "max_ms": 143.28180626034737,
+        "mean_ms": 135.63758503645658
+      },
+      "combined_suffix": {
+        "n": 100,
+        "median_ms": 129.63115610182285,
+        "p95_ms": 136.51004396378994,
+        "min_ms": 124.73293021321297,
+        "max_ms": 137.888316065073,
+        "mean_ms": 130.49071237444878
+      }
+    },
+    "1": {
+      "gqa": {
+        "n": 100,
+        "median_ms": 133.97883251309395,
+        "p95_ms": 141.948813945055,
+        "min_ms": 129.5739710330963,
+        "max_ms": 143.00303161144257,
+        "mean_ms": 135.3065363690257
+      },
+      "combined_suffix": {
+        "n": 100,
+        "median_ms": 128.68080474436283,
+        "p95_ms": 136.45491395145655,
+        "min_ms": 124.67044964432716,
+        "max_ms": 139.24334943294525,
+        "mean_ms": 130.20103711634874
+      }
+    },
+    "2": {
+      "gqa": {
+        "n": 100,
+        "median_ms": 134.2481505125761,
+        "p95_ms": 142.52037424594164,
+        "min_ms": 130.2689127624035,
+        "max_ms": 143.53756606578827,
+        "mean_ms": 135.71916364133358
+      },
+      "combined_suffix": {
+        "n": 100,
+        "median_ms": 129.20169904828072,
+        "p95_ms": 137.49932758510113,
+        "min_ms": 125.37526339292526,
+        "max_ms": 138.36636394262314,
+        "mean_ms": 130.57596381753683
+      }
+    },
+    "3": {
+      "gqa": {
+        "n": 100,
+        "median_ms": 134.50341671705246,
+        "p95_ms": 142.389427870512,
+        "min_ms": 130.48159703612328,
+        "max_ms": 143.35961639881134,
+        "mean_ms": 135.77930554747581
+      },
+      "combined_suffix": {
+        "n": 100,
+        "median_ms": 129.36704233288765,
+        "p95_ms": 137.17305660247803,
+        "min_ms": 126.31167098879814,
+        "max_ms": 138.36317136883736,
+        "mean_ms": 130.67263763397932
+      }
+    },
+    "4": {
+      "gqa": {
+        "n": 100,
+        "median_ms": 134.9546480923891,
+        "p95_ms": 143.17626524716616,
+        "min_ms": 131.00659847259521,
+        "max_ms": 144.38050240278244,
+        "mean_ms": 136.74128636717796
+      },
+      "combined_suffix": {
+        "n": 100,
+        "median_ms": 130.1008891314268,
+        "p95_ms": 138.42856120318174,
+        "min_ms": 126.43277645111084,
+        "max_ms": 139.48972895741463,
+        "mean_ms": 131.6269687563181
+      }
+    }
+  },
+  "slowest_25_lengths": {
+    "gqa": {
+      "121": 22,
+      "116": 2,
+      "111": 1
+    },
+    "combined_suffix": {
+      "121": 21,
+      "101": 1,
+      "111": 1,
+      "116": 2
+    }
+  },
+  "attention_validation": {
+    "explicit_offset_causal_oracle_max_abs": 5.551115123125783e-16,
+    "future_token_isolation_exact": true,
+    "newline_self_attention_present": true,
+    "dtype": "float64",
+    "device": "cuda",
+    "query_heads": 12,
+    "kv_heads": 2
+  },
+  "compile_timing": {
+    "setup_and_warmup_wall_s": 258.5449885763228,
+    "wrapper_creation_s": 1.2533150389790535,
+    "per_variant": {
+      "gqa": {
+        "warmup_request_seconds": 139.10214141756296,
+        "compiler_frontend_backend_seconds": 135.792492298,
+        "backend_seconds": 109.18129548430443,
+        "first_request_including_compile_s": 136.4997766315937
+      },
+      "combined_suffix": {
+        "warmup_request_seconds": 117.25709866732359,
+        "compiler_frontend_backend_seconds": 114.20846608599999,
+        "backend_seconds": 93.74202437698841,
+        "first_request_including_compile_s": 114.75139738619328
+      }
+    },
+    "note": "These timings overlap; do not add nested rows. Fresh per-run caches, shared by both compiled variants. GQA warms first; combined-suffix compiler cost is incremental after GQA compilation, not an independent cold-start measurement. Setup includes both variants and stability sweeps. Excludes model loading, input preparation, and Slurm queue time. No compile time is part of inference latency."
+  },
+  "successful_graphs": 3,
+  "expected_restarts": 3,
+  "measurement_compilations": 0,
+  "scope": "One paired request per frozen user on one A6000 allocation. All samples and any mismatches retained. Exact float32 score bits checked independently; integrity pass does not imply all outputs equal."
+}
