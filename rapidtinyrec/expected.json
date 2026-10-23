@@ -1,0 +1,25 @@
+{
+  "repo_id": "kkknight/MiniOneRec",
+  "revision": "365a03fc6601ed36abd69cc9a0a59025a3d31cdc",
+  "num_users": 500,
+  "users_sha256": "f78097bfedff69f5928a8ccbe39d5a96e07f7e9dd4616209953cf4f51408f487",
+  "release_sha256": {
+    "Office_ckpt/added_tokens.json": "682f42f571bea18c1fa3f4dd8161b0696a5ef802e716d21669742c7f9e678f1e",
+    "Office_ckpt/config.json": "c2b98b1986dc97a0ee19f6216fc2f7a13f70a78954d5a5957b9d308e35ab56cd",
+    "Office_ckpt/generation_config.json": "55b2b4462aedccc5858edd8d7aa0fa7aebf8a3bf9245f9a095ddeba8a9a1650a",
+    "Office_ckpt/merges.txt": "8831e4f1a044471340f7c0a83d7bd71306a5b867e95fd870f74d0c5308a904d5",
+    "Office_ckpt/model.safetensors": "69cddd1c19244e6925fcdc073fb54622f1367f749e193949f9456592f6d437fd",
+    "Office_ckpt/special_tokens_map.json": "a36726f7fe394c1324021cac4a9ee3ad6c4f6285c0d98721f9b0b95888ec9905",
+    "Office_ckpt/tokenizer.json": "727f175c5ff824b7cfa45c8577e293b356b255b215a504834c4451298bd5c50a",
+    "Office_ckpt/tokenizer_config.json": "8b398f3d12a0d462c5cc583e5db6fe70c1c30d4df1e0830d1957397a2d972564",
+    "Office_ckpt/vocab.json": "ca10d7e9fb3ed18575dd1e277a2579c16d108e32f27439684afa0e10b1440910",
+    "Amazon/test/Office_Products_5_2016-10-2018-11.csv": "c1967034e197a7837a8962f2556efaabc12eb5bb84e1fdc79cd0accbce71add5",
+    "Amazon/info/Office_Products_5_2016-10-2018-11.txt": "7e8bae0a051a377713364b9e669590f86feb869fc269157c64b2189c0f4bcfa4"
+  },
+  "upstream_source_revision": "526306229326013a7ca46f5b2d8f55ea669aa159",
+  "source_sha256": {
+    "shared_prefill.py": "ada528219c8f11ea54ff55db463c4c390e8e7073b60ae6fda01ce47f23665baa",
+    "source/data.py": "85edcb6b1e7d1124c204bbdcb312d70903920b3cb5f00bc3fc1414f3df03b555",
+    "source/LogitProcessor.py": "13ab33ff0ed3f769370478a86624499ccc0f8813de9d63e3dc4e2fa25ec59eb8"
+  }
+}
