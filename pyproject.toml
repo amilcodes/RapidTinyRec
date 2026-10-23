@@ -1,0 +1,26 @@
+[build-system]
+requires = ["setuptools>=77"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "rapidtinyrec"
+version = "0.1.0"
+description = "Faster beam-search inference for MiniOneRec, with reproducible latency and ranking checks."
+requires-python = ">=3.11"
+readme = "README.md"
+license = "Apache-2.0"
+authors = [{name = "Amil Agrawal"}]
+dependencies = [
+    "torch==2.14.0", "transformers==4.55.4", "tokenizers==0.21.4",
+    "huggingface-hub==0.34.4", "safetensors==0.8.0", "numpy==2.4.6",
+    "pandas==2.3.3", "requests==2.32.5", "tqdm==4.67.1",
+]
+
+[project.urls]
+Repository = "https://github.com/amilcodes/RapidTinyRec"
+
+[tool.setuptools.packages.find]
+include = ["rapidtinyrec*"]
+
+[tool.setuptools.package-data]
+rapidtinyrec = ["expected.json", "requirements.txt"]
