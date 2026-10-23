@@ -1,0 +1,66 @@
+{
+  "snapshot_date": "2026-10-23T05:40:59.300995+00:00",
+  "note": "Experiment hashes identify original frozen sources. Published hashes include relative imports, portable paths, FP32 defaults and removal of cluster-specific launch metadata. Vendor sources and core model math are unchanged.",
+  "files": {
+    "benchmark.py": {
+      "experiment_sha256": "fa03b0e1863f1a35d7bcb5708d88930c21998d91be42f93f178e368333c759ff",
+      "published_sha256": "1a90a2440a6b01926779a6582c19b3d1f4ea436375c6dfb7e6b69b7f8aa614c6"
+    },
+    "shared_prefill.py": {
+      "experiment_sha256": "ada528219c8f11ea54ff55db463c4c390e8e7073b60ae6fda01ce47f23665baa",
+      "published_sha256": "ada528219c8f11ea54ff55db463c4c390e8e7073b60ae6fda01ce47f23665baa"
+    },
+    "prepare_release.py": {
+      "experiment_sha256": "4acc2a194035a81552033ae9cd2da5d929666f795e4488a3afeb6aef7f58ce79",
+      "published_sha256": "d3f783a92316289386ee43cc484289115f7c4d89685db9c556fdfa972af85be7"
+    },
+    "expected.json": {
+      "experiment_sha256": "fca32f80a6c8f85ca40c071b6579e1770e4b5058ad330f23570c987cfdadbe1e",
+      "published_sha256": "fca32f80a6c8f85ca40c071b6579e1770e4b5058ad330f23570c987cfdadbe1e"
+    },
+    "requirements.txt": {
+      "experiment_sha256": "5976ae1ce277513a5df2f83713791f5fddd22bc8e34def280406f52a7954ec23",
+      "published_sha256": "5976ae1ce277513a5df2f83713791f5fddd22bc8e34def280406f52a7954ec23"
+    },
+    "source/data.py": {
+      "experiment_sha256": "85edcb6b1e7d1124c204bbdcb312d70903920b3cb5f00bc3fc1414f3df03b555",
+      "published_sha256": "85edcb6b1e7d1124c204bbdcb312d70903920b3cb5f00bc3fc1414f3df03b555"
+    },
+    "source/LogitProcessor.py": {
+      "experiment_sha256": "13ab33ff0ed3f769370478a86624499ccc0f8813de9d63e3dc4e2fa25ec59eb8",
+      "published_sha256": "13ab33ff0ed3f769370478a86624499ccc0f8813de9d63e3dc4e2fa25ec59eb8"
+    },
+    "bulk_constraints.py": {
+      "experiment_sha256": "791e9bab01413da823f6e07d48fab864f1bb70f6bd830ac534c341b4ef6d81ee",
+      "published_sha256": "aa9b40445fdb45572f5adff31ba9dfca7f5fe03d367fb0975cee694b6ba838ec"
+    },
+    "gpu_constraints.py": {
+      "experiment_sha256": "0a5e903b7251c067456377c7f09f569ccdbbf6f2c456b6a4b072d3a2f26f710c",
+      "published_sha256": "0a5e903b7251c067456377c7f09f569ccdbbf6f2c456b6a4b072d3a2f26f710c"
+    },
+    "validate_gpu_constraints.py": {
+      "experiment_sha256": "00b24a12698545eeed7c5f872b35c70696b0067d1aefa3aa1e19dd7bd4980a37",
+      "published_sha256": "45fea3b3ce38fcc24837efc64ef7ffdfe6ac96371124b24242e2d8890ec08867"
+    },
+    "compiled_forward.py": {
+      "experiment_sha256": "98c35f16f01a007ffc5896264b7c190bf8bf6da7c4cae153f1a8f98b4f6d125f",
+      "published_sha256": "98c35f16f01a007ffc5896264b7c190bf8bf6da7c4cae153f1a8f98b4f6d125f"
+    },
+    "benchmark_gqa.py": {
+      "experiment_sha256": "4ed5df18283f73af91b3083fcacd411ca013c0d07710a363b4eed4b5568b70f7",
+      "published_sha256": "5175532144b38989138c9a87c003de9189800184ec642383971e05b56fbb8ab0"
+    },
+    "gqa_benchmark_protocol.py": {
+      "experiment_sha256": "b2495bd756ffd0efc9f42753e8ccb7e4beabf928072e6bbcc54230ed710688d2",
+      "published_sha256": "b2495bd756ffd0efc9f42753e8ccb7e4beabf928072e6bbcc54230ed710688d2"
+    },
+    "profile_shared.py": {
+      "experiment_sha256": "cbf71a5dc6da7c8885f88b514c4c47581c17db403c46395ac3bb04702c38e903",
+      "published_sha256": "c7ad8afbe06d3bdd4faf692d28def678f759c6d786ec452232cffc1807acc7af"
+    },
+    "profile_compiled.py": {
+      "experiment_sha256": "c2bfd31259a7f575f8da7f9dd925d6ae4afac8faba3f7b25fcaf62bd4ff3db6e",
+      "published_sha256": "60b4ede2ec386ba1434c4f0c5ad030e9e36553da62a2536e88e4d5558a14fb75"
+    }
+  }
+}

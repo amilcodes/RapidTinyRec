@@ -1,0 +1,66 @@
+{
+  "experiment": "native-gqa",
+  "experiment_date": "2026-10-23T05:40:59.300995+00:00",
+  "hardware": "NVIDIA RTX A6000",
+  "dtype": "float32",
+  "users": 500,
+  "beams": 50,
+  "cohort_sha256": "f78097bfedff69f5928a8ccbe39d5a96e07f7e9dd4616209953cf4f51408f487",
+  "original_manifest_sha256": "503ba174a92cde0028fb6a9ad1742fc2bd5f61651ef9eb9d217f1b69990e5bcc",
+  "versions": {
+    "torch": "2.14.0+cu126",
+    "transformers": "4.55.4",
+    "tokenizers": "0.21.4"
+  },
+  "cuda_runtime": "12.6",
+  "control": "compiled",
+  "candidate": "compiled_gqa",
+  "latency_ms": {
+    "eager": {
+      "median": 179.99028228223324,
+      "p95": 185.58028070256114
+    },
+    "compiled": {
+      "median": 174.4176298379898,
+      "p95": 188.19750351831317
+    },
+    "compiled_gqa": {
+      "median": 159.6870142966509,
+      "p95": 169.78324130177498
+    }
+  },
+  "matching_rank_lists": 500,
+  "matching_rank_positions": 25000,
+  "matching_sequence_values": 25000,
+  "matching_transition_values": 125000,
+  "max_sequence_difference": 0,
+  "max_transition_difference": 0,
+  "evidence": "Derived from all original per-request records; no requests or outliers removed.",
+  "requests_sha256": "bec38d77ed2d5c2287126c8db8790c55447405b769cf123e79128dca19fadb71",
+  "compilation": {
+    "setup_and_warmup_wall_s": 320.88940467499197,
+    "wrapper_creation_s": 0.6894225720316172,
+    "per_variant": {
+      "eager": {
+        "warmup_request_seconds": 4.546356784179807,
+        "compiler_frontend_backend_seconds": 0.0,
+        "backend_seconds": 0,
+        "first_request_including_compile_s": 2.6931992042809725
+      },
+      "compiled": {
+        "warmup_request_seconds": 191.93694797344506,
+        "compiler_frontend_backend_seconds": 187.966823271,
+        "backend_seconds": 151.6374681442976,
+        "first_request_including_compile_s": 188.78008540906012
+      },
+      "compiled_gqa": {
+        "warmup_request_seconds": 122.34244170226157,
+        "compiler_frontend_backend_seconds": 118.94544434,
+        "backend_seconds": 96.71614277735353,
+        "first_request_including_compile_s": 119.47484331578016
+      }
+    },
+    "note": "These timings overlap; do not add nested rows. Fresh per-run caches, shared by both compiled variants. Original compilation warms first; the GQA compiler cost is incremental after original compilation, not an independent cold-start measurement. Setup includes all three variants and stability sweeps. Excludes model loading, input preparation, and Slurm queue time. No compile time is part of inference latency."
+  },
+  "median_reduction_percent": 8.445600112225836
+}
