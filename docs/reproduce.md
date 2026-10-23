@@ -36,6 +36,12 @@ python -m rapidtinyrec.run gpu --release-root releases/office --output-root resu
 python -m rapidtinyrec.run compiled --release-root releases/office --output-root results/compiled
 python -m rapidtinyrec.run gqa --release-root releases/office \
   --reference-results results/compiled/compile_forward_500_users --output-root results/gqa
+python -m rapidtinyrec.run decode-pilot --release-root releases/office \
+  --reference-results results/gqa/gqa_500_users --output-root results/replay-pilot \
+  --direct-reorder --repeats 6
+python -m rapidtinyrec.run decode-pilot --release-root releases/office \
+  --reference-results results/gqa/gqa_500_users --output-root results/replay-full \
+  --direct-reorder --full-cohort --repeats 1
 ```
 
 `compiled` and `gqa` each create a fresh compiler-cache directory before importing
@@ -48,6 +54,19 @@ Every mode produces `summary.json` and supports the standalone `audit` command
 with its respective `*_500_users` result directory. The GQA output also includes
 `compile_timing.json`. To inspect CLI options directly, run e.g.
 `python -m rapidtinyrec.benchmark_gqa --help`.
+
+Replay has a separate provenance/bit audit. Preserve the submitted source and
+run record, then run:
+
+```bash
+python -m rapidtinyrec.audit_decode_pilot results/replay-full/decode_replay_500 \
+  --historical results/gqa/gqa_500_users \
+  --snapshot frozen-source/rapidtinyrec --run-record run-record.json \
+  --output results/replay-full/audit.json
+```
+
+Run the bounded pilot before the full cohort. The full run warms all 40 graph
+shapes and checks memory before measurement. [Protocol and record format](decode-replay.md).
 
 ## Profile
 

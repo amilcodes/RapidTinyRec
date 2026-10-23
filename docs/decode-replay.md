@@ -3,7 +3,8 @@
 This branch tests whether CUDA graph replay reduces the launch cost of the
 compiled native-GQA decoder. Staged replay produced almost no aggregate gain.
 Direct beam gathers into graph input buffers improved the four-user pilot by
-3.77% at median latency. Full-cohort confirmation is pending.
+3.77% at median latency. The full 500-user confirmation below preserves every
+rank and score bit, with a 3.96% median reduction.
 
 The first A6000 pilot stopped during warmup, before capture or measured requests:
 Hugging Face passed `inputs_embeds=None` and the argument validator rejected the
@@ -161,4 +162,37 @@ and warms one representative of every length before freezing all 40 graphs.
 Warmup must stay below 40 GiB allocated and 46 GiB reserved; memory failure is a
 failed experiment. All three variants save 25,000 positions and sequence scores
 plus 125,000 transition scores each, with source hashes and independent audits.
-That full-cohort result is still pending; no full500 replay claim yet.
+The full run completed and passed its independent audit.
+
+## Full 500-user result
+
+| Path | Median, ms | p95, ms |
+| :--- | ---: | ---: |
+| Compiled GQA | 136.508 | 144.643 |
+| Staged replay | 134.942 | 143.908 |
+| Direct-reorder replay | 131.101 | 138.838 |
+
+Direct reorder reduces median/p95 by 3.96%/4.01% versus compiled GQA and
+2.85%/3.52% versus staged replay. Every user is faster than both controls. Both
+metrics improve across all ten history lengths, all six execution orders and
+all five 100-user time blocks. All 500 rank lists, 25,000 rank positions, 25,000
+sequence scores and 125,000 transition scores match both controls and historical
+compiled GQA bit for bit. Maximum sequence/transition deltas are zero. These
+are measured guarantees on this cohort, not proofs for arbitrary requests.
+
+Setup/warmup is 145.488 s; nested backend compilation is 104.440 s and graph
+preparation is 3.965 s. All 40 graphs were frozen before timing. No compilation
+or capture occurred during inference. The three paths share one model, compiler
+and graph pool in the paired allocation; setup is not three independent cold
+starts. Previous allocations' absolute latencies are not additional gains.
+
+The memory cost is substantial: 10.68 GiB in graph input buffers, 29.16 GiB
+allocated and 34.90 GiB reserved in total. The next candidate is shared input
+storage across mutually exclusive exact-length graphs; that has not been
+implemented or validated. It must retain each graph’s contiguous shape/stride
+contract and borrowed-output lifetime before any memory saving is claimed.
+Physical prefix sharing remains a later experiment.
+
+[All 500 samples, independent audit and source hashes](../benchmarks/results/decode-replay)
+include all three variants and order/block breakdowns. Earlier failures and
+regressions remain above. This branch remains a draft experiment.
