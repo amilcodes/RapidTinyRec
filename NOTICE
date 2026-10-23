@@ -1,0 +1,11 @@
+RapidTinyRec
+Copyright 2026 Amil Agrawal
+
+Includes unmodified data.py and LogitProcessor.py from MiniOneRec:
+https://github.com/AkaliKong/MiniOneRec
+Revision: 526306229326013a7ca46f5b2d8f55ea669aa159
+Licensed under Apache License 2.0 (see LICENSE).
+
+The model checkpoint, tokenizer and Amazon data are downloaded separately
+from kkknight/MiniOneRec and remain subject to their respective terms.
+RapidTinyRec is an independent inference project, not an official MiniOneRec release.
