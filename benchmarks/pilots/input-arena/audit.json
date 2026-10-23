@@ -1,0 +1,235 @@
+{
+  "integrity_audit_passed": true,
+  "unique_users": 4,
+  "paired_requests": 24,
+  "cohort_sha256": "f78097bfedff69f5928a8ccbe39d5a96e07f7e9dd4616209953cf4f51408f487",
+  "comparison": {
+    "requests": 24,
+    "rank_positions": 1200,
+    "sequence_values": 1200,
+    "transition_values": 6000,
+    "matching_rank_lists": 24,
+    "matching_rank_positions": 1200,
+    "matching_sequence_vectors": 24,
+    "matching_transition_arrays": 24,
+    "matching_sequence_values": 1200,
+    "matching_transition_values": 6000,
+    "max_sequence_difference_common": 0.0,
+    "max_transition_difference_common": 0.0
+  },
+  "historical_comparisons": {
+    "direct_replay": {
+      "requests": 24,
+      "rank_positions": 1200,
+      "sequence_values": 1200,
+      "transition_values": 6000,
+      "matching_rank_lists": 24,
+      "matching_rank_positions": 1200,
+      "matching_sequence_vectors": 24,
+      "matching_transition_arrays": 24,
+      "matching_sequence_values": 1200,
+      "matching_transition_values": 6000,
+      "max_sequence_difference_common": 0.0,
+      "max_transition_difference_common": 0.0
+    },
+    "arena_replay": {
+      "requests": 24,
+      "rank_positions": 1200,
+      "sequence_values": 1200,
+      "transition_values": 6000,
+      "matching_rank_lists": 24,
+      "matching_rank_positions": 1200,
+      "matching_sequence_vectors": 24,
+      "matching_transition_arrays": 24,
+      "matching_sequence_values": 1200,
+      "matching_transition_values": 6000,
+      "max_sequence_difference_common": 0.0,
+      "max_transition_difference_common": 0.0
+    }
+  },
+  "latency_ms": {
+    "direct_replay": {
+      "n": 24,
+      "median_ms": 145.34756541252136,
+      "p95_ms": 152.72065373137593
+    },
+    "arena_replay": {
+      "n": 24,
+      "median_ms": 145.46538423746824,
+      "p95_ms": 152.25398624315858
+    }
+  },
+  "reductions_percent": {
+    "median_ms": -0.08106006083590245,
+    "p95_ms": 0.3055693364423351
+  },
+  "latency_by_length_ms": {
+    "76": {
+      "direct_replay": {
+        "n": 12,
+        "median_ms": 139.39212169498205,
+        "p95_ms": 141.34021382778883
+      },
+      "arena_replay": {
+        "n": 12,
+        "median_ms": 139.73138481378555,
+        "p95_ms": 140.9915467724204
+      }
+    },
+    "121": {
+      "direct_replay": {
+        "n": 12,
+        "median_ms": 150.6471037864685,
+        "p95_ms": 152.81306561082602
+      },
+      "arena_replay": {
+        "n": 12,
+        "median_ms": 150.03823768347502,
+        "p95_ms": 152.57574571296573
+      }
+    }
+  },
+  "latency_by_half_ms": {
+    "0": {
+      "direct_replay": {
+        "n": 12,
+        "median_ms": 145.6066844984889,
+        "p95_ms": 152.54450039938092
+      },
+      "arena_replay": {
+        "n": 12,
+        "median_ms": 145.46538423746824,
+        "p95_ms": 152.21871742978692
+      }
+    },
+    "1": {
+      "direct_replay": {
+        "n": 12,
+        "median_ms": 145.34756541252136,
+        "p95_ms": 151.9250763580203
+      },
+      "arena_replay": {
+        "n": 12,
+        "median_ms": 145.1266873627901,
+        "p95_ms": 151.93287674337626
+      }
+    }
+  },
+  "phases": [
+    {
+      "phase": 0,
+      "variant": "direct_replay",
+      "latency_ms": {
+        "n": 12,
+        "median_ms": 145.6066844984889,
+        "p95_ms": 152.54450039938092
+      },
+      "memory": {
+        "allocated_bytes": 11596812800,
+        "reserved_bytes": 13660848128,
+        "peak_allocated_bytes": 12523271680,
+        "peak_reserved_bytes": 13660848128
+      },
+      "setup_memory": {
+        "allocated_bytes": 11596812800,
+        "reserved_bytes": 13660848128,
+        "peak_allocated_bytes": 12876827136,
+        "peak_reserved_bytes": 13660848128
+      },
+      "unique_input_storage_bytes": 2293766464,
+      "logical_input_bytes": 2293766464,
+      "setup_s": 134.2659101691097,
+      "backend_compile_s": 104.20539321191609,
+      "capture_and_warmup_s": 0.8482316974550486,
+      "measurement_compilations": 0,
+      "measurement_captures": 0
+    },
+    {
+      "phase": 1,
+      "variant": "arena_replay",
+      "latency_ms": {
+        "n": 12,
+        "median_ms": 145.46538423746824,
+        "p95_ms": 152.21871742978692
+      },
+      "memory": {
+        "allocated_bytes": 9656742400,
+        "reserved_bytes": 11500781568,
+        "peak_allocated_bytes": 10575722496,
+        "peak_reserved_bytes": 11500781568
+      },
+      "setup_memory": {
+        "allocated_bytes": 9656742400,
+        "reserved_bytes": 11500781568,
+        "peak_allocated_bytes": 10931255296,
+        "peak_reserved_bytes": 11500781568
+      },
+      "unique_input_storage_bytes": 355539264,
+      "logical_input_bytes": 2293766464,
+      "setup_s": 133.12829696387053,
+      "backend_compile_s": 102.96726551279426,
+      "capture_and_warmup_s": 0.8444782868027687,
+      "measurement_compilations": 0,
+      "measurement_captures": 0
+    },
+    {
+      "phase": 2,
+      "variant": "arena_replay",
+      "latency_ms": {
+        "n": 12,
+        "median_ms": 145.1266873627901,
+        "p95_ms": 151.93287674337626
+      },
+      "memory": {
+        "allocated_bytes": 9656742400,
+        "reserved_bytes": 11500781568,
+        "peak_allocated_bytes": 10575722496,
+        "peak_reserved_bytes": 11500781568
+      },
+      "setup_memory": {
+        "allocated_bytes": 9656742400,
+        "reserved_bytes": 11500781568,
+        "peak_allocated_bytes": 10931255296,
+        "peak_reserved_bytes": 11500781568
+      },
+      "unique_input_storage_bytes": 355539264,
+      "logical_input_bytes": 2293766464,
+      "setup_s": 132.87973871827126,
+      "backend_compile_s": 102.70507999323308,
+      "capture_and_warmup_s": 0.8373760059475899,
+      "measurement_compilations": 0,
+      "measurement_captures": 0
+    },
+    {
+      "phase": 3,
+      "variant": "direct_replay",
+      "latency_ms": {
+        "n": 12,
+        "median_ms": 145.34756541252136,
+        "p95_ms": 151.9250763580203
+      },
+      "memory": {
+        "allocated_bytes": 11596812800,
+        "reserved_bytes": 13660848128,
+        "peak_allocated_bytes": 12523271680,
+        "peak_reserved_bytes": 13660848128
+      },
+      "setup_memory": {
+        "allocated_bytes": 11596812800,
+        "reserved_bytes": 13660848128,
+        "peak_allocated_bytes": 12876827136,
+        "peak_reserved_bytes": 13660848128
+      },
+      "unique_input_storage_bytes": 2293766464,
+      "logical_input_bytes": 2293766464,
+      "setup_s": 136.17286024987698,
+      "backend_compile_s": 105.65551442652941,
+      "capture_and_warmup_s": 0.8420058451592922,
+      "measurement_compilations": 0,
+      "measurement_captures": 0
+    }
+  ],
+  "snapshot_files_verified": 35,
+  "audit_script_sha256": "a351e222eead05acdc762b5a64791dd579d3c50e4b8b55a79f4d1ad70eb6e983",
+  "note": "Memory is isolated per fresh process; latency is paired by user/repeat across ABBA phases, not interleaved requests. One allocation does not establish run-to-run variance. Setup timings are nested; do not add. Integrity passing alone does not imply bit equality."
+}
