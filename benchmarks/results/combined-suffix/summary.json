@@ -16,7 +16,7 @@
   "cuda_runtime": "12.6",
   "control": "gqa",
   "candidate": "combined_suffix",
-  "requests_sha256": "0a00db3ed840da09762dfd94cd2446f4ec9d22b5ab23db451027b2e3589179db",
+  "requests_sha256": "a73e2eb2b516ed81273620ad802bd0e921b68d6dfd16088a390edb9e644014d6",
   "latency_ms": {
     "gqa": {
       "median": 134.52261686325073,
