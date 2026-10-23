@@ -32,11 +32,12 @@ Latency describes isolated requests across users, not concurrent serving through
 | Batched → GPU constraints | 167.792 → 160.766 | 169.247 → 163.028 | 0 |
 | Eager → initial compilation | 175.161 → 171.704 | 180.492 → 185.022 | 0.000116348 |
 | Initial compilation → native GQA | 174.418 → 159.687 | 188.198 → 169.783 | 0 |
+| Native GQA → combined suffix | 134.523 → 129.310 | 142.701 → 137.443 | 0.000053406 |
 
 Each comparison preserved 500/500 full rank lists and 25,000/25,000 ranked
 positions. Batched constraints, GPU lookup and GQA also preserved all 25,000
 sequence scores and 125,000 transition scores bit for bit against their controls.
-Shared prefill and compilation introduce floating-point rounding differences.
+Shared prefill, compilation and combined suffix scoring introduce floating-point rounding differences.
 These are measured equivalence results on this cohort, not proofs for other inputs.
 
 The GQA run also measured an eager control: **179.990 ms median / 185.580 ms p95**.
@@ -52,6 +53,15 @@ In the three-way run, original compilation took 187.967 s in the compiler;
 GQA added 118.945 s with the same process/cache already warm. Total setup and
 warmup took 320.889 s. These nested timings must not be summed. No compilation
 occurred during measurement; unexpected recompilation raises an error.
+
+Combining suffix forwards reduced median/p95 by **3.87% / 3.68%** against the
+same-allocation GQA control. All 500 requests became faster, including each
+history-length group and both pair orders. Only 6,506/25,000 sequence scores and
+84,168/125,000 transition scores remain bit-identical. SID1–3 scores are unchanged;
+newline/EOS account for all differences. Hit@10 and Hit@50 are unchanged. See
+[the suffix experiment](combined-suffix.md) for the full score and timing audit.
+The control also ran faster than in the prior allocation; that cross-run change
+is not attributed to the suffix optimization.
 
 ## Evidence
 

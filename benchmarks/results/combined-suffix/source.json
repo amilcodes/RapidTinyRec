@@ -1,6 +1,6 @@
 {
   "snapshot_date": "2026-10-23T07:38:19.352607+00:00",
-  "status": "CPU functional tests passed; 500-user A6000 comparison pending. No performance claim.",
+  "status": "500-user A6000 comparison audited: all ranks identical; newline/EOS scores have rounding differences.",
   "files": {
     "combined_suffix.py": {
       "experiment_sha256": "7a9cebc947fe1659dd253322c935b44d64ea7c4bb91fa99d59caa808a82634f1",

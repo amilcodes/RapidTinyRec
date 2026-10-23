@@ -1,0 +1,60 @@
+{
+  "experiment": "combined-suffix",
+  "experiment_date": "2026-10-23T07:38:19.352607+00:00",
+  "hardware": "NVIDIA RTX A6000",
+  "dtype": "float32",
+  "tf32": false,
+  "users": 500,
+  "beams": 50,
+  "cohort_sha256": "f78097bfedff69f5928a8ccbe39d5a96e07f7e9dd4616209953cf4f51408f487",
+  "original_manifest_sha256": "5fc75b30cc0cc560f2df91dfe875b8be221d05aa90bf80d95502369d9fbd6835",
+  "versions": {
+    "torch": "2.14.0+cu126",
+    "transformers": "4.55.4",
+    "tokenizers": "0.21.4"
+  },
+  "cuda_runtime": "12.6",
+  "control": "gqa",
+  "candidate": "combined_suffix",
+  "requests_sha256": "0a00db3ed840da09762dfd94cd2446f4ec9d22b5ab23db451027b2e3589179db",
+  "latency_ms": {
+    "gqa": {
+      "median": 134.52261686325073,
+      "p95": 142.70137436687946
+    },
+    "combined_suffix": {
+      "median": 129.31026332080364,
+      "p95": 137.4432023614645
+    }
+  },
+  "matching_rank_lists": 500,
+  "evidence": "All 500 original requests retained; compact fingerprints omit user identifiers and histories.",
+  "score_note": "All rank positions match. Sequence/transition scores are NOT bit-identical; differences are confined to newline/EOS.",
+  "cross_run_note": "The control itself is faster than in the earlier allocation. Only this paired 3.87% median reduction is attributed to combining suffix forwards.",
+  "median_reduction_percent": 3.874704242295346,
+  "p95_reduction_percent": 3.6847381664989576,
+  "compilation": {
+    "setup_and_warmup_wall_s": 258.5449885763228,
+    "wrapper_creation_s": 1.2533150389790535,
+    "per_variant": {
+      "gqa": {
+        "warmup_request_seconds": 139.10214141756296,
+        "compiler_frontend_backend_seconds": 135.792492298,
+        "backend_seconds": 109.18129548430443,
+        "first_request_including_compile_s": 136.4997766315937
+      },
+      "combined_suffix": {
+        "warmup_request_seconds": 117.25709866732359,
+        "compiler_frontend_backend_seconds": 114.20846608599999,
+        "backend_seconds": 93.74202437698841,
+        "first_request_including_compile_s": 114.75139738619328
+      }
+    },
+    "note": "These timings overlap; do not add nested rows. Fresh per-run caches, shared by both compiled variants. GQA warms first; combined-suffix compiler cost is incremental after GQA compilation, not an independent cold-start measurement. Setup includes both variants and stability sweeps. Excludes model loading, input preparation, and Slurm queue time. No compile time is part of inference latency."
+  },
+  "matching_rank_positions": 25000,
+  "matching_sequence_values": 6506,
+  "matching_transition_values": 84168,
+  "max_sequence_difference": 5.340576171875e-05,
+  "max_transition_difference": 3.075599670410156e-05
+}
