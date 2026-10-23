@@ -10,6 +10,7 @@ from transformers import GenerationConfig, LogitsProcessorList, Qwen2Config, Qwe
 
 from rapidtinyrec.decode_replay import ReplayBuffers, ReplayOutput, cache_from_pairs, cache_pairs, signature
 from rapidtinyrec.direct_reorder import ReorderIntoReplay
+from rapidtinyrec.input_arena import SharedInputArena
 from rapidtinyrec.gpu_constraints import GpuSidConstraintTables, GpuSidConstrainedLogitsProcessor
 from rapidtinyrec.shared_prefill import PrefillOnce
 from test_decode_replay import example
@@ -47,7 +48,7 @@ class DirectReorderTests(unittest.TestCase):
             direct.reorder(result, parents)
 
     @torch.inference_mode()
-    def test_three_way_real_generation_and_repeated_buffer_reuse(self):
+    def test_real_generation_with_independent_and_shared_inputs(self):
         torch.set_num_threads(1)
         torch.manual_seed(1062)
         model = Qwen2ForCausalLM(Qwen2Config(vocab_size=512, hidden_size=32, intermediate_size=64,
@@ -60,10 +61,15 @@ class DirectReorderTests(unittest.TestCase):
         original = model.forward
         pool = SimpleNamespace(entries={})
         direct = ReorderIntoReplay(pool)
+        arena = SharedInputArena(14)
+        arena_pool = SimpleNamespace(entries={})
+        arena_direct = ReorderIntoReplay(arena_pool)
         for request in range(3):
             for history in ([1,7+request,8,1,2,3], [1,7+request,8,9,10,11,12,13,1,2,3]):
                 results = []
-                for variant in ('eager', 'staged', 'direct'):
+                for variant in ('eager', 'staged', 'direct', 'arena_staged', 'arena_direct'):
+                    active_pool = arena_pool if variant.startswith('arena') else pool
+                    active_direct = arena_direct if variant.startswith('arena') else direct
                     calls = []
                     @functools.wraps(original)
                     def forward(*a, **kw):
@@ -72,16 +78,16 @@ class DirectReorderTests(unittest.TestCase):
                         kw['attention_mask'] = {'full_attention': None}
                         if variant != 'eager' and kw['past_key_values'].get_seq_length():
                             key = signature(kw)
-                            if key not in pool.entries:
-                                pool.entries[key] = (ReplayBuffers(kw), None, None)
-                            buffers = pool.entries[key][0]
+                            if key not in active_pool.entries:
+                                active_pool.entries[key] = (ReplayBuffers(kw, arena if variant.startswith('arena') else None), None, None)
+                            buffers = active_pool.entries[key][0]
                             buffers.load(kw)
                             return ReplayOutput(original(**buffers.kwargs())).fresh()
                         return original(**kw)
                     x = torch.tensor([history])
-                    before = direct.report()
+                    before = active_direct.report()
                     with patch.object(model, 'forward', forward), PrefillOnce(model, 50), \
-                            (direct.install(model) if variant == 'direct' else contextlib.nullcontext()):
+                            (active_direct.install(model) if variant in ('direct','arena_direct') else contextlib.nullcontext()):
                         output = model.generate(x, attention_mask=torch.ones_like(x), generation_config=cfg,
                             logits_processor=LogitsProcessorList([GpuSidConstrainedLogitsProcessor(tables)]),
                             return_dict_in_generate=True, output_scores=True)
@@ -92,9 +98,9 @@ class DirectReorderTests(unittest.TestCase):
                     self.assertEqual(tuple(transitions.shape), (50,5))
                     results.append((output.sequences, output.sequences_scores.float().view(torch.int32),
                                     transitions.float().view(torch.int32)))
-                    if variant == 'direct':
-                        self.assertEqual(direct.direct_calls-before['direct_calls'], 4)
-                        self.assertEqual(direct.fallback_calls-before['fallback_calls'], 1)
+                    if variant in ('direct','arena_direct'):
+                        self.assertEqual(active_direct.direct_calls-before['direct_calls'], 4)
+                        self.assertEqual(active_direct.fallback_calls-before['fallback_calls'], 1)
                 for candidate in results[1:]:
                     self.assertTrue(all(torch.equal(a,b) for a,b in zip(results[0],candidate)))
 
