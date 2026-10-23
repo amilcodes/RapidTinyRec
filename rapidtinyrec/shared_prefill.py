@@ -12,10 +12,11 @@ from transformers.cache_utils import DynamicCache
 
 
 class PrefillOnce:
-    def __init__(self, model, num_beams, on_prefill=None):
+    def __init__(self, model, num_beams, on_prefill=None, cache_expander=None):
         self.model = model
         self.num_beams = num_beams
         self.on_prefill = on_prefill
+        self.cache_expander = cache_expander
         self.used = False
 
     def __enter__(self):
@@ -53,7 +54,10 @@ class PrefillOnce:
             output = self.original(**single)
             if self.on_prefill:
                 self.on_prefill('before_expansion', output.past_key_values)
-            output.past_key_values.batch_repeat_interleave(self.num_beams)
+            if self.cache_expander is None:
+                output.past_key_values.batch_repeat_interleave(self.num_beams)
+            else:
+                output.past_key_values = self.cache_expander(output.past_key_values, self.num_beams)
             output.logits = output.logits.repeat_interleave(self.num_beams, dim=0)
             if self.on_prefill:
                 self.on_prefill('after_expansion', output.past_key_values)
