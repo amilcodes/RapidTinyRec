@@ -1,8 +1,10 @@
 """Short/long-history A6000 pilot; no 500-user performance claim."""
 import argparse
 import collections
+import contextlib
 import functools
 import hashlib
+import itertools
 import json
 from pathlib import Path
 import time
@@ -23,8 +25,13 @@ def main():
     ap.add_argument('--output-root',type=Path,required=True)
     ap.add_argument('--repeats',type=int,default=8)
     ap.add_argument('--profile',action='store_true',help='Profile only after all uninstrumented measurements')
+    ap.add_argument('--direct-reorder',action='store_true',help='Add a third, paired direct-KV-reorder variant')
     args=ap.parse_args()
     assert args.repeats>=2 and args.repeats%2==0
+    assert not (args.profile and args.direct_reorder), 'Use the existing two-way diagnostic separately'
+    if args.direct_reorder:
+        assert args.repeats%6==0, 'Balance all six three-way execution orders'
+    variants=('compiled_gqa','replay','direct_replay') if args.direct_reorder else ('compiled_gqa','replay')
     assert torch.cuda.is_available() and torch.cuda.device_count()==1
     assert torch.cuda.get_device_name(0)=='NVIDIA RTX A6000'
     torch.manual_seed(42);torch.set_num_threads(4)
@@ -65,15 +72,22 @@ def main():
         'cohort_sha256':expected['users_sha256'],'reference_manifest_sha256':reference['manifest_sha256'],
         'versions':{n:b.importlib.metadata.version(n) for n in ['torch','transformers','tokenizers']},
         'profile_after_measurement':args.profile,
+        'variants':variants,
         'sha256':{n:b.digest(b.ROOT/n) for n in ['pilot_decode_replay.py','decode_replay.py','compiled_forward.py','shared_prefill.py','gpu_constraints.py','expected.json']+
-            (['profile_decode_replay.py','profile_shared.py'] if args.profile else [])},
-        'protocol':'FP32 beam50. Same compiled GQA forward on both sides. CUDA synchronization around each request. Prefill, staging copies, graph replay, constraints and beam cache reordering included. Compilation, capture, warmup and output extraction excluded. Alternate order for every repeat.'}
+            (['profile_decode_replay.py','profile_shared.py'] if args.profile else [])+
+            (['direct_reorder.py'] if args.direct_reorder else [])},
+        'protocol':'FP32 beam50. Same compiled GQA forward for all variants. CUDA synchronization around each request. Prefill, staging copies, graph replay, constraints and beam cache reordering included. Compilation, capture, warmup and output extraction excluded. Balanced two-way alternation or all six three-way orders.'}
     b.save(out/'manifest.json',manifest)
     compiler=CompiledForward(model,out,b.announce)
     pool=DecodeReplayPool(compiler.compiled,max_graphs=8)
+    if args.direct_reorder:
+        from .direct_reorder import ReorderIntoReplay
+        direct=ReorderIntoReplay(pool)
+    else:
+        direct=None
 
     @torch.inference_mode()
-    def generate(user,replay):
+    def generate(user,replay,direct_reorder=False):
         calls=0
         @functools.wraps(compiler.eager)
         def forward(*a,**kw):
@@ -88,7 +102,8 @@ def main():
         cfg=b.GenerationConfig(max_new_tokens=8,length_penalty=0.,num_beams=50,num_return_sequences=50,
             pad_token_id=tok.eos_token_id,eos_token_id=tok.eos_token_id,bos_token_id=tok.bos_token_id,
             do_sample=False,top_k=None,top_p=None,use_cache=True)
-        with patch.object(model,'forward',forward),b.PrefillOnce(model,50):
+        with patch.object(model,'forward',forward),b.PrefillOnce(model,50), \
+                (direct.install(model) if direct_reorder else contextlib.nullcontext()):
             output=model.generate(inputs[user['cohort_index']],attention_mask=masks[user['cohort_index']],
                 generation_config=cfg,return_dict_in_generate=True,output_scores=True,
                 logits_processor=b.LogitsProcessorList([GpuSidConstrainedLogitsProcessor(tables)]))
@@ -103,30 +118,31 @@ def main():
     setup_started=time.perf_counter()
     warm_outputs={}
     for user in users:
-        for variant in ('compiled_gqa','replay'):
+        for variant in variants:
             torch.cuda.synchronize();started=time.perf_counter()
-            output=generate(user,variant=='replay')
+            output=generate(user,variant!='compiled_gqa',variant=='direct_replay')
             torch.cuda.synchronize();elapsed=time.perf_counter()-started
             warm_outputs[(user['cohort_index'],variant)]=unpack(output,user)
             del output
             compiler.add_warmup({'variant':variant,'elapsed_s':elapsed,'prompt_tokens':user['prompt_tokens']})
     for user in users:
-        for variant in ('compiled_gqa','replay'):
-            output=generate(user,variant=='replay')
+        for variant in variants:
+            output=generate(user,variant!='compiled_gqa',variant=='direct_replay')
             assert unpack(output,user)==warm_outputs[(user['cohort_index'],variant)],'Warmup instability'
             del output
     torch.cuda.synchronize()
     pool.freeze();compiler.freeze()
     b.save(out/'setup.json',{'combined_setup_and_warmup_s':time.perf_counter()-setup_started,'replay':pool.report(),
+        'direct_reorder':direct.report() if direct else None,
         'note':'Replay preparation includes warmup calls that can compile. Timings are nested and must not be added. All setup is excluded from measured requests.'})
     rows=[]
     for repeat in range(args.repeats):
         for user in users:
-            order=('compiled_gqa','replay') if repeat%2==0 else ('replay','compiled_gqa')
+            order=list(itertools.permutations(variants))[repeat%6] if direct else (variants if repeat%2==0 else tuple(reversed(variants)))
             runs={}
             for variant in order:
                 torch.cuda.synchronize();started=time.perf_counter()
-                output=generate(user,variant=='replay')
+                output=generate(user,variant!='compiled_gqa',variant=='direct_replay')
                 torch.cuda.synchronize();elapsed=time.perf_counter()-started
                 raw=unpack(output,user);del output
                 assert raw==warm_outputs[(user['cohort_index'],variant)],'Replay or control drifted'
@@ -134,6 +150,7 @@ def main():
             old=json.loads((args.reference_results/'users'/f"{user['cohort_index']:04d}.json").read_text())
             row={'repeat':repeat,'cohort_index':user['cohort_index'],'prompt_tokens':user['prompt_tokens'],
                 'order':order,'runs':runs,'comparison':b.compare(runs['compiled_gqa'],runs['replay']),
+                'comparisons':{v:b.compare(runs['compiled_gqa'],runs[v]) for v in variants[1:]},
                 'historical_control':b.compare(old['runs']['compiled_gqa'],runs['compiled_gqa'])}
             rows.append(row);b.save(out/'requests.json',rows)
             b.announce({'stage':'measured','repeat':repeat,'cohort_index':user['cohort_index'],
@@ -141,13 +158,14 @@ def main():
                 'scores_equal':row['comparison']['sequence_scores_equal_in_rank_order']})
     compiler.finish()
     summary={'complete':True,'scope':manifest['scope'],'measured_pairs':len(rows),
-        'latency':{v:b.distribution([r['runs'][v]['elapsed_s'] for r in rows]) for v in ('compiled_gqa','replay')},
+        'latency':{v:b.distribution([r['runs'][v]['elapsed_s'] for r in rows]) for v in variants},
         'matching_rank_lists':sum(r['comparison']['ranked_tokens_equal'] for r in rows),
         'matching_sequence_vectors':sum(r['comparison']['sequence_scores_equal_in_rank_order'] for r in rows),
         'matching_transition_arrays':sum(r['comparison']['transition_scores_equal_in_rank_order'] for r in rows),
         'replay':pool.report(),'allocated_bytes':torch.cuda.memory_allocated(),'reserved_bytes':torch.cuda.memory_reserved(),
+        'direct_reorder':direct.report() if direct else None,
         'latency_by_length':{str(length):{v:b.distribution([r['runs'][v]['elapsed_s'] for r in rows if r['prompt_tokens']==length])
-            for v in ('compiled_gqa','replay')} for length in (lengths[0],lengths[-1])}}
+            for v in variants} for length in (lengths[0],lengths[-1])}}
     b.save(out/'summary.json',summary);b.announce(summary)
     if args.profile:
         from .profile_decode_replay import profile

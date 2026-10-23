@@ -92,7 +92,10 @@ class ReplayBuffers:
         # batch copies or fuse reordering with input staging if they dominate.
         for destination,source in zip(self.pairs,cache_pairs(kwargs['past_key_values'])):
             for target,value in zip(destination,source):
-                target.copy_(value)
+                # Direct beam reordering can already have filled this exact
+                # tensor. Identity is deliberately stricter than data_ptr().
+                if target is not value:
+                    target.copy_(value)
 
     def num_bytes(self):
         tensors=list(self.tensors.values())+[x for p in self.pairs for x in p]

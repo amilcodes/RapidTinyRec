@@ -119,3 +119,18 @@ concurrent serving, shared-prefix storage or variable-length graph padding.
 
 The capture/warmup and persistent-tensor protocol follows the
 [PyTorch CUDA graph guidance](https://docs.pytorch.org/docs/2.14/notes/cuda.html#cuda-graphs).
+
+## Direct-reorder candidate
+
+`--direct-reorder --repeats 6` adds a third variant to the pilot and balances all
+six execution orders. It gathers each beam's selected parent directly into the
+next graph's existing KV input tensors. The returned DynamicCache is immediately
+correct; the next forward copies token/position metadata but skips identical KV
+tensor objects. The last unused cache and uncaptured warmup shapes retain ordinary
+reordering. Duplicate-parent gathers use distinct source/destination storage;
+overlapping storage is rejected. The hook restores the model on exit.
+
+This candidate is unmeasured. Its CPU checks cover the actual constrained HF loop
+on both history lengths, repeated requests, duplicate parents, exact outputs,
+no extra KV copy, and hook restoration. The A6000 pilot compares compiled GQA,
+staged replay and direct reorder before any full500 decision.
