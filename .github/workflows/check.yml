@@ -16,6 +16,7 @@ jobs:
       - run: python -m unittest discover -s tests -p test_audit_decode_pilot.py -v
       - run: python -m unittest discover -s tests -p test_prefix_profile_audit.py -v
       - run: python -m unittest discover -s tests -p test_folded_profile_audit.py -v
+      - run: python -m unittest discover -s tests -p test_folded_profile_evidence.py -v
       - run: python -m rapidtinyrec.audit_decode_pilot --help
       - run: python -m rapidtinyrec.audit_input_arena --help
       - run: python -m rapidtinyrec.audit_shared_prefix --help

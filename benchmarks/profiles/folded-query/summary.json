@@ -1,0 +1,1662 @@
+{
+  "scope": "Six sweeps of ten history-length representatives; not the frozen500 distribution",
+  "requests": 60,
+  "representatives": 10,
+  "latency_ms": {
+    "median": 117.42033809423447,
+    "p95": 120.38211040198803
+  },
+  "requests_sha256": "6b85a758a622a90052cd65ac5f51ac0b445daead20626418224f24fce69740ba",
+  "exactness_passed": true,
+  "comparisons": {
+    "uninstrumented": {
+      "requests": 60,
+      "rank_positions": 3000,
+      "sequence_values": 3000,
+      "transition_values": 15000,
+      "matching_rank_lists": 60,
+      "matching_rank_positions": 3000,
+      "matching_sequence_vectors": 60,
+      "matching_transition_arrays": 60,
+      "matching_sequence_values": 3000,
+      "matching_transition_values": 15000,
+      "max_sequence_difference_common": 0.0,
+      "max_transition_difference_common": 0.0
+    },
+    "light_profiles": {
+      "requests": 30,
+      "rank_positions": 1500,
+      "sequence_values": 1500,
+      "transition_values": 7500,
+      "matching_rank_lists": 30,
+      "matching_rank_positions": 1500,
+      "matching_sequence_vectors": 30,
+      "matching_transition_arrays": 30,
+      "matching_sequence_values": 1500,
+      "matching_transition_values": 7500,
+      "max_sequence_difference_common": 0.0,
+      "max_transition_difference_common": 0.0
+    },
+    "torch_profiles": {
+      "requests": 6,
+      "rank_positions": 300,
+      "sequence_values": 300,
+      "transition_values": 1500,
+      "matching_rank_lists": 6,
+      "matching_rank_positions": 300,
+      "matching_sequence_vectors": 6,
+      "matching_transition_arrays": 6,
+      "matching_sequence_values": 300,
+      "matching_transition_values": 1500,
+      "max_sequence_difference_common": 0.0,
+      "max_transition_difference_common": 0.0
+    },
+    "diagnostic_warmup": {
+      "requests": 10,
+      "rank_positions": 500,
+      "sequence_values": 500,
+      "transition_values": 2500,
+      "matching_rank_lists": 10,
+      "matching_rank_positions": 500,
+      "matching_sequence_vectors": 10,
+      "matching_transition_arrays": 10,
+      "matching_sequence_values": 500,
+      "matching_transition_values": 2500,
+      "max_sequence_difference_common": 0.0,
+      "max_transition_difference_common": 0.0
+    },
+    "warmup": {
+      "requests": 30,
+      "rank_positions": 1500,
+      "sequence_values": 1500,
+      "transition_values": 7500,
+      "matching_rank_lists": 30,
+      "matching_rank_positions": 1500,
+      "matching_sequence_vectors": 30,
+      "matching_transition_arrays": 30,
+      "matching_sequence_values": 1500,
+      "matching_transition_values": 7500,
+      "max_sequence_difference_common": 0.0,
+      "max_transition_difference_common": 0.0
+    }
+  },
+  "matmul_attribution": [
+    {
+      "prompt_tokens": 76,
+      "mode": "replay",
+      "groups": [
+        {
+          "stage": "compiled_prefill",
+          "role": "mlp_gate_or_up",
+          "gpu_ms": 11.276111999999983,
+          "gpu_activity_count": 112,
+          "shapes": [
+            {
+              "operation": "aten::mm",
+              "input_dims": [
+                [
+                  76,
+                  1536
+                ],
+                [
+                  1536,
+                  8960
+                ],
+                [
+                  76,
+                  8960
+                ]
+              ],
+              "gpu_activity_count": 112,
+              "gpu_ms": 11.276111999999983
+            }
+          ]
+        },
+        {
+          "stage": "compiled_prefill",
+          "role": "mlp_down",
+          "gpu_ms": 4.852835999999999,
+          "gpu_activity_count": 56,
+          "shapes": [
+            {
+              "operation": "aten::mm",
+              "input_dims": [
+                [
+                  76,
+                  8960
+                ],
+                [
+                  8960,
+                  1536
+                ],
+                [
+                  76,
+                  1536
+                ]
+              ],
+              "gpu_activity_count": 56,
+              "gpu_ms": 4.852835999999999
+            }
+          ]
+        },
+        {
+          "stage": "compiled_prefill",
+          "role": "query_or_output_projection",
+          "gpu_ms": 2.108801,
+          "gpu_activity_count": 112,
+          "shapes": [
+            {
+              "operation": "aten::mm",
+              "input_dims": [
+                [
+                  76,
+                  1536
+                ],
+                [
+                  1536,
+                  1536
+                ],
+                [
+                  76,
+                  1536
+                ]
+              ],
+              "gpu_activity_count": 56,
+              "gpu_ms": 1.090718
+            },
+            {
+              "operation": "aten::addmm",
+              "input_dims": [
+                [
+                  1536
+                ],
+                [
+                  76,
+                  1536
+                ],
+                [
+                  1536,
+                  1536
+                ],
+                [],
+                [],
+                [
+                  76,
+                  1536
+                ]
+              ],
+              "gpu_activity_count": 56,
+              "gpu_ms": 1.018083
+            }
+          ]
+        },
+        {
+          "stage": "compiled_prefill",
+          "role": "full_vocabulary_projection",
+          "gpu_ms": 1.322242,
+          "gpu_activity_count": 1,
+          "shapes": [
+            {
+              "operation": "aten::mm",
+              "input_dims": [
+                [
+                  1,
+                  1536
+                ],
+                [
+                  1536,
+                  152265
+                ],
+                [
+                  1,
+                  152265
+                ]
+              ],
+              "gpu_activity_count": 1,
+              "gpu_ms": 1.322242
+            }
+          ]
+        },
+        {
+          "stage": "compiled_prefill",
+          "role": "key_or_value_projection",
+          "gpu_ms": 0.8024359999999997,
+          "gpu_activity_count": 112,
+          "shapes": [
+            {
+              "operation": "aten::addmm",
+              "input_dims": [
+                [
+                  256
+                ],
+                [
+                  76,
+                  1536
+                ],
+                [
+                  1536,
+                  256
+                ],
+                [],
+                [],
+                [
+                  76,
+                  256
+                ]
+              ],
+              "gpu_activity_count": 112,
+              "gpu_ms": 0.8024359999999997
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "prompt_tokens": 101,
+      "mode": "replay",
+      "groups": [
+        {
+          "stage": "compiled_prefill",
+          "role": "mlp_gate_or_up",
+          "gpu_ms": 11.955889999999993,
+          "gpu_activity_count": 112,
+          "shapes": [
+            {
+              "operation": "aten::mm",
+              "input_dims": [
+                [
+                  101,
+                  1536
+                ],
+                [
+                  1536,
+                  8960
+                ],
+                [
+                  101,
+                  8960
+                ]
+              ],
+              "gpu_activity_count": 112,
+              "gpu_ms": 11.955889999999993
+            }
+          ]
+        },
+        {
+          "stage": "compiled_prefill",
+          "role": "mlp_down",
+          "gpu_ms": 6.28491,
+          "gpu_activity_count": 56,
+          "shapes": [
+            {
+              "operation": "aten::mm",
+              "input_dims": [
+                [
+                  101,
+                  8960
+                ],
+                [
+                  8960,
+                  1536
+                ],
+                [
+                  101,
+                  1536
+                ]
+              ],
+              "gpu_activity_count": 56,
+              "gpu_ms": 6.28491
+            }
+          ]
+        },
+        {
+          "stage": "compiled_prefill",
+          "role": "query_or_output_projection",
+          "gpu_ms": 2.4877450000000003,
+          "gpu_activity_count": 112,
+          "shapes": [
+            {
+              "operation": "aten::addmm",
+              "input_dims": [
+                [
+                  1536
+                ],
+                [
+                  101,
+                  1536
+                ],
+                [
+                  1536,
+                  1536
+                ],
+                [],
+                [],
+                [
+                  101,
+                  1536
+                ]
+              ],
+              "gpu_activity_count": 56,
+              "gpu_ms": 1.3562560000000004
+            },
+            {
+              "operation": "aten::mm",
+              "input_dims": [
+                [
+                  101,
+                  1536
+                ],
+                [
+                  1536,
+                  1536
+                ],
+                [
+                  101,
+                  1536
+                ]
+              ],
+              "gpu_activity_count": 56,
+              "gpu_ms": 1.1314890000000002
+            }
+          ]
+        },
+        {
+          "stage": "compiled_prefill",
+          "role": "key_or_value_projection",
+          "gpu_ms": 2.268649000000001,
+          "gpu_activity_count": 112,
+          "shapes": [
+            {
+              "operation": "aten::addmm",
+              "input_dims": [
+                [
+                  256
+                ],
+                [
+                  101,
+                  1536
+                ],
+                [
+                  1536,
+                  256
+                ],
+                [],
+                [],
+                [
+                  101,
+                  256
+                ]
+              ],
+              "gpu_activity_count": 112,
+              "gpu_ms": 2.268649000000001
+            }
+          ]
+        },
+        {
+          "stage": "compiled_prefill",
+          "role": "full_vocabulary_projection",
+          "gpu_ms": 1.32141,
+          "gpu_activity_count": 1,
+          "shapes": [
+            {
+              "operation": "aten::mm",
+              "input_dims": [
+                [
+                  1,
+                  1536
+                ],
+                [
+                  1536,
+                  152265
+                ],
+                [
+                  1,
+                  152265
+                ]
+              ],
+              "gpu_activity_count": 1,
+              "gpu_ms": 1.32141
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "prompt_tokens": 121,
+      "mode": "replay",
+      "groups": [
+        {
+          "stage": "compiled_prefill",
+          "role": "mlp_gate_or_up",
+          "gpu_ms": 12.435928999999996,
+          "gpu_activity_count": 112,
+          "shapes": [
+            {
+              "operation": "aten::mm",
+              "input_dims": [
+                [
+                  121,
+                  1536
+                ],
+                [
+                  1536,
+                  8960
+                ],
+                [
+                  121,
+                  8960
+                ]
+              ],
+              "gpu_activity_count": 112,
+              "gpu_ms": 12.435928999999996
+            }
+          ]
+        },
+        {
+          "stage": "compiled_prefill",
+          "role": "mlp_down",
+          "gpu_ms": 6.578065999999999,
+          "gpu_activity_count": 56,
+          "shapes": [
+            {
+              "operation": "aten::mm",
+              "input_dims": [
+                [
+                  121,
+                  8960
+                ],
+                [
+                  8960,
+                  1536
+                ],
+                [
+                  121,
+                  1536
+                ]
+              ],
+              "gpu_activity_count": 56,
+              "gpu_ms": 6.578065999999999
+            }
+          ]
+        },
+        {
+          "stage": "compiled_prefill",
+          "role": "query_or_output_projection",
+          "gpu_ms": 2.656550000000001,
+          "gpu_activity_count": 112,
+          "shapes": [
+            {
+              "operation": "aten::addmm",
+              "input_dims": [
+                [
+                  1536
+                ],
+                [
+                  121,
+                  1536
+                ],
+                [
+                  1536,
+                  1536
+                ],
+                [],
+                [],
+                [
+                  121,
+                  1536
+                ]
+              ],
+              "gpu_activity_count": 56,
+              "gpu_ms": 1.4292460000000007
+            },
+            {
+              "operation": "aten::mm",
+              "input_dims": [
+                [
+                  121,
+                  1536
+                ],
+                [
+                  1536,
+                  1536
+                ],
+                [
+                  121,
+                  1536
+                ]
+              ],
+              "gpu_activity_count": 56,
+              "gpu_ms": 1.2273040000000004
+            }
+          ]
+        },
+        {
+          "stage": "compiled_prefill",
+          "role": "key_or_value_projection",
+          "gpu_ms": 2.4184970000000026,
+          "gpu_activity_count": 112,
+          "shapes": [
+            {
+              "operation": "aten::addmm",
+              "input_dims": [
+                [
+                  256
+                ],
+                [
+                  121,
+                  1536
+                ],
+                [
+                  1536,
+                  256
+                ],
+                [],
+                [],
+                [
+                  121,
+                  256
+                ]
+              ],
+              "gpu_activity_count": 112,
+              "gpu_ms": 2.4184970000000026
+            }
+          ]
+        },
+        {
+          "stage": "compiled_prefill",
+          "role": "full_vocabulary_projection",
+          "gpu_ms": 1.3245799999999999,
+          "gpu_activity_count": 1,
+          "shapes": [
+            {
+              "operation": "aten::mm",
+              "input_dims": [
+                [
+                  1,
+                  1536
+                ],
+                [
+                  1536,
+                  152265
+                ],
+                [
+                  1,
+                  152265
+                ]
+              ],
+              "gpu_activity_count": 1,
+              "gpu_ms": 1.3245799999999999
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "prompt_tokens": 76,
+      "mode": "diagnostic",
+      "groups": [
+        {
+          "stage": "diagnostic_decode",
+          "role": "mlp_gate_or_up",
+          "gpu_ms": 27.78766599999992,
+          "gpu_activity_count": 448,
+          "shapes": [
+            {
+              "operation": "aten::mm",
+              "input_dims": [
+                [
+                  50,
+                  1536
+                ],
+                [
+                  1536,
+                  8960
+                ],
+                [
+                  50,
+                  8960
+                ]
+              ],
+              "gpu_activity_count": 448,
+              "gpu_ms": 27.78766599999992
+            }
+          ]
+        },
+        {
+          "stage": "diagnostic_decode",
+          "role": "mlp_down",
+          "gpu_ms": 14.553510000000006,
+          "gpu_activity_count": 224,
+          "shapes": [
+            {
+              "operation": "aten::mm",
+              "input_dims": [
+                [
+                  50,
+                  8960
+                ],
+                [
+                  8960,
+                  1536
+                ],
+                [
+                  50,
+                  1536
+                ]
+              ],
+              "gpu_activity_count": 224,
+              "gpu_ms": 14.553510000000006
+            }
+          ]
+        },
+        {
+          "stage": "compiled_prefill",
+          "role": "mlp_gate_or_up",
+          "gpu_ms": 11.266264999999988,
+          "gpu_activity_count": 112,
+          "shapes": [
+            {
+              "operation": "aten::mm",
+              "input_dims": [
+                [
+                  76,
+                  1536
+                ],
+                [
+                  1536,
+                  8960
+                ],
+                [
+                  76,
+                  8960
+                ]
+              ],
+              "gpu_activity_count": 112,
+              "gpu_ms": 11.266264999999988
+            }
+          ]
+        },
+        {
+          "stage": "diagnostic_decode",
+          "role": "full_vocabulary_projection",
+          "gpu_ms": 11.012825000000001,
+          "gpu_activity_count": 4,
+          "shapes": [
+            {
+              "operation": "aten::mm",
+              "input_dims": [
+                [
+                  50,
+                  1536
+                ],
+                [
+                  1536,
+                  152265
+                ],
+                [
+                  50,
+                  152265
+                ]
+              ],
+              "gpu_activity_count": 4,
+              "gpu_ms": 11.012825000000001
+            }
+          ]
+        },
+        {
+          "stage": "diagnostic_decode",
+          "role": "query_or_output_projection",
+          "gpu_ms": 6.67784,
+          "gpu_activity_count": 448,
+          "shapes": [
+            {
+              "operation": "aten::mm",
+              "input_dims": [
+                [
+                  50,
+                  1536
+                ],
+                [
+                  1536,
+                  1536
+                ],
+                [
+                  50,
+                  1536
+                ]
+              ],
+              "gpu_activity_count": 224,
+              "gpu_ms": 3.4077529999999974
+            },
+            {
+              "operation": "aten::addmm",
+              "input_dims": [
+                [
+                  1536
+                ],
+                [
+                  50,
+                  1536
+                ],
+                [
+                  1536,
+                  1536
+                ],
+                [],
+                [],
+                [
+                  50,
+                  1536
+                ]
+              ],
+              "gpu_activity_count": 224,
+              "gpu_ms": 3.270087000000003
+            }
+          ]
+        },
+        {
+          "stage": "compiled_prefill",
+          "role": "mlp_down",
+          "gpu_ms": 4.8238449999999995,
+          "gpu_activity_count": 56,
+          "shapes": [
+            {
+              "operation": "aten::mm",
+              "input_dims": [
+                [
+                  76,
+                  8960
+                ],
+                [
+                  8960,
+                  1536
+                ],
+                [
+                  76,
+                  1536
+                ]
+              ],
+              "gpu_activity_count": 56,
+              "gpu_ms": 4.8238449999999995
+            }
+          ]
+        },
+        {
+          "stage": "diagnostic_decode",
+          "role": "key_or_value_projection",
+          "gpu_ms": 2.4802210000000007,
+          "gpu_activity_count": 448,
+          "shapes": [
+            {
+              "operation": "aten::addmm",
+              "input_dims": [
+                [
+                  256
+                ],
+                [
+                  50,
+                  1536
+                ],
+                [
+                  1536,
+                  256
+                ],
+                [],
+                [],
+                [
+                  50,
+                  256
+                ]
+              ],
+              "gpu_activity_count": 448,
+              "gpu_ms": 2.4802210000000007
+            }
+          ]
+        },
+        {
+          "stage": "compiled_prefill",
+          "role": "query_or_output_projection",
+          "gpu_ms": 2.1012569999999995,
+          "gpu_activity_count": 112,
+          "shapes": [
+            {
+              "operation": "aten::mm",
+              "input_dims": [
+                [
+                  76,
+                  1536
+                ],
+                [
+                  1536,
+                  1536
+                ],
+                [
+                  76,
+                  1536
+                ]
+              ],
+              "gpu_activity_count": 56,
+              "gpu_ms": 1.0883919999999996
+            },
+            {
+              "operation": "aten::addmm",
+              "input_dims": [
+                [
+                  1536
+                ],
+                [
+                  76,
+                  1536
+                ],
+                [
+                  1536,
+                  1536
+                ],
+                [],
+                [],
+                [
+                  76,
+                  1536
+                ]
+              ],
+              "gpu_activity_count": 56,
+              "gpu_ms": 1.012865
+            }
+          ]
+        },
+        {
+          "stage": "compiled_prefill",
+          "role": "full_vocabulary_projection",
+          "gpu_ms": 1.3215709999999998,
+          "gpu_activity_count": 1,
+          "shapes": [
+            {
+              "operation": "aten::mm",
+              "input_dims": [
+                [
+                  1,
+                  1536
+                ],
+                [
+                  1536,
+                  152265
+                ],
+                [
+                  1,
+                  152265
+                ]
+              ],
+              "gpu_activity_count": 1,
+              "gpu_ms": 1.3215709999999998
+            }
+          ]
+        },
+        {
+          "stage": "compiled_prefill",
+          "role": "key_or_value_projection",
+          "gpu_ms": 0.7990090000000001,
+          "gpu_activity_count": 112,
+          "shapes": [
+            {
+              "operation": "aten::addmm",
+              "input_dims": [
+                [
+                  256
+                ],
+                [
+                  76,
+                  1536
+                ],
+                [
+                  1536,
+                  256
+                ],
+                [],
+                [],
+                [
+                  76,
+                  256
+                ]
+              ],
+              "gpu_activity_count": 112,
+              "gpu_ms": 0.7990090000000001
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "prompt_tokens": 101,
+      "mode": "diagnostic",
+      "groups": [
+        {
+          "stage": "diagnostic_decode",
+          "role": "mlp_gate_or_up",
+          "gpu_ms": 27.93312499999993,
+          "gpu_activity_count": 448,
+          "shapes": [
+            {
+              "operation": "aten::mm",
+              "input_dims": [
+                [
+                  50,
+                  1536
+                ],
+                [
+                  1536,
+                  8960
+                ],
+                [
+                  50,
+                  8960
+                ]
+              ],
+              "gpu_activity_count": 448,
+              "gpu_ms": 27.93312499999993
+            }
+          ]
+        },
+        {
+          "stage": "diagnostic_decode",
+          "role": "mlp_down",
+          "gpu_ms": 14.849760000000002,
+          "gpu_activity_count": 224,
+          "shapes": [
+            {
+              "operation": "aten::mm",
+              "input_dims": [
+                [
+                  50,
+                  8960
+                ],
+                [
+                  8960,
+                  1536
+                ],
+                [
+                  50,
+                  1536
+                ]
+              ],
+              "gpu_activity_count": 224,
+              "gpu_ms": 14.849760000000002
+            }
+          ]
+        },
+        {
+          "stage": "compiled_prefill",
+          "role": "mlp_gate_or_up",
+          "gpu_ms": 12.141820999999993,
+          "gpu_activity_count": 112,
+          "shapes": [
+            {
+              "operation": "aten::mm",
+              "input_dims": [
+                [
+                  101,
+                  1536
+                ],
+                [
+                  1536,
+                  8960
+                ],
+                [
+                  101,
+                  8960
+                ]
+              ],
+              "gpu_activity_count": 112,
+              "gpu_ms": 12.141820999999993
+            }
+          ]
+        },
+        {
+          "stage": "diagnostic_decode",
+          "role": "full_vocabulary_projection",
+          "gpu_ms": 11.094524,
+          "gpu_activity_count": 4,
+          "shapes": [
+            {
+              "operation": "aten::mm",
+              "input_dims": [
+                [
+                  50,
+                  1536
+                ],
+                [
+                  1536,
+                  152265
+                ],
+                [
+                  50,
+                  152265
+                ]
+              ],
+              "gpu_activity_count": 4,
+              "gpu_ms": 11.094524
+            }
+          ]
+        },
+        {
+          "stage": "diagnostic_decode",
+          "role": "query_or_output_projection",
+          "gpu_ms": 6.993256999999996,
+          "gpu_activity_count": 448,
+          "shapes": [
+            {
+              "operation": "aten::mm",
+              "input_dims": [
+                [
+                  50,
+                  1536
+                ],
+                [
+                  1536,
+                  1536
+                ],
+                [
+                  50,
+                  1536
+                ]
+              ],
+              "gpu_activity_count": 224,
+              "gpu_ms": 3.5479969999999987
+            },
+            {
+              "operation": "aten::addmm",
+              "input_dims": [
+                [
+                  1536
+                ],
+                [
+                  50,
+                  1536
+                ],
+                [
+                  1536,
+                  1536
+                ],
+                [],
+                [],
+                [
+                  50,
+                  1536
+                ]
+              ],
+              "gpu_activity_count": 224,
+              "gpu_ms": 3.445259999999997
+            }
+          ]
+        },
+        {
+          "stage": "compiled_prefill",
+          "role": "mlp_down",
+          "gpu_ms": 6.477938000000003,
+          "gpu_activity_count": 56,
+          "shapes": [
+            {
+              "operation": "aten::mm",
+              "input_dims": [
+                [
+                  101,
+                  8960
+                ],
+                [
+                  8960,
+                  1536
+                ],
+                [
+                  101,
+                  1536
+                ]
+              ],
+              "gpu_activity_count": 56,
+              "gpu_ms": 6.477938000000003
+            }
+          ]
+        },
+        {
+          "stage": "diagnostic_decode",
+          "role": "key_or_value_projection",
+          "gpu_ms": 2.6208129999999934,
+          "gpu_activity_count": 448,
+          "shapes": [
+            {
+              "operation": "aten::addmm",
+              "input_dims": [
+                [
+                  256
+                ],
+                [
+                  50,
+                  1536
+                ],
+                [
+                  1536,
+                  256
+                ],
+                [],
+                [],
+                [
+                  50,
+                  256
+                ]
+              ],
+              "gpu_activity_count": 448,
+              "gpu_ms": 2.6208129999999934
+            }
+          ]
+        },
+        {
+          "stage": "compiled_prefill",
+          "role": "query_or_output_projection",
+          "gpu_ms": 2.5581470000000004,
+          "gpu_activity_count": 112,
+          "shapes": [
+            {
+              "operation": "aten::addmm",
+              "input_dims": [
+                [
+                  1536
+                ],
+                [
+                  101,
+                  1536
+                ],
+                [
+                  1536,
+                  1536
+                ],
+                [],
+                [],
+                [
+                  101,
+                  1536
+                ]
+              ],
+              "gpu_activity_count": 56,
+              "gpu_ms": 1.3949430000000003
+            },
+            {
+              "operation": "aten::mm",
+              "input_dims": [
+                [
+                  101,
+                  1536
+                ],
+                [
+                  1536,
+                  1536
+                ],
+                [
+                  101,
+                  1536
+                ]
+              ],
+              "gpu_activity_count": 56,
+              "gpu_ms": 1.1632040000000001
+            }
+          ]
+        },
+        {
+          "stage": "compiled_prefill",
+          "role": "key_or_value_projection",
+          "gpu_ms": 2.3857630000000016,
+          "gpu_activity_count": 112,
+          "shapes": [
+            {
+              "operation": "aten::addmm",
+              "input_dims": [
+                [
+                  256
+                ],
+                [
+                  101,
+                  1536
+                ],
+                [
+                  1536,
+                  256
+                ],
+                [],
+                [],
+                [
+                  101,
+                  256
+                ]
+              ],
+              "gpu_activity_count": 112,
+              "gpu_ms": 2.3857630000000016
+            }
+          ]
+        },
+        {
+          "stage": "compiled_prefill",
+          "role": "full_vocabulary_projection",
+          "gpu_ms": 1.321059,
+          "gpu_activity_count": 1,
+          "shapes": [
+            {
+              "operation": "aten::mm",
+              "input_dims": [
+                [
+                  1,
+                  1536
+                ],
+                [
+                  1536,
+                  152265
+                ],
+                [
+                  1,
+                  152265
+                ]
+              ],
+              "gpu_activity_count": 1,
+              "gpu_ms": 1.321059
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "prompt_tokens": 121,
+      "mode": "diagnostic",
+      "groups": [
+        {
+          "stage": "diagnostic_decode",
+          "role": "mlp_gate_or_up",
+          "gpu_ms": 27.856621999999913,
+          "gpu_activity_count": 448,
+          "shapes": [
+            {
+              "operation": "aten::mm",
+              "input_dims": [
+                [
+                  50,
+                  1536
+                ],
+                [
+                  1536,
+                  8960
+                ],
+                [
+                  50,
+                  8960
+                ]
+              ],
+              "gpu_activity_count": 448,
+              "gpu_ms": 27.856621999999913
+            }
+          ]
+        },
+        {
+          "stage": "diagnostic_decode",
+          "role": "mlp_down",
+          "gpu_ms": 14.785509000000012,
+          "gpu_activity_count": 224,
+          "shapes": [
+            {
+              "operation": "aten::mm",
+              "input_dims": [
+                [
+                  50,
+                  8960
+                ],
+                [
+                  8960,
+                  1536
+                ],
+                [
+                  50,
+                  1536
+                ]
+              ],
+              "gpu_activity_count": 224,
+              "gpu_ms": 14.785509000000012
+            }
+          ]
+        },
+        {
+          "stage": "compiled_prefill",
+          "role": "mlp_gate_or_up",
+          "gpu_ms": 12.442331999999988,
+          "gpu_activity_count": 112,
+          "shapes": [
+            {
+              "operation": "aten::mm",
+              "input_dims": [
+                [
+                  121,
+                  1536
+                ],
+                [
+                  1536,
+                  8960
+                ],
+                [
+                  121,
+                  8960
+                ]
+              ],
+              "gpu_activity_count": 112,
+              "gpu_ms": 12.442331999999988
+            }
+          ]
+        },
+        {
+          "stage": "diagnostic_decode",
+          "role": "full_vocabulary_projection",
+          "gpu_ms": 11.216378,
+          "gpu_activity_count": 4,
+          "shapes": [
+            {
+              "operation": "aten::mm",
+              "input_dims": [
+                [
+                  50,
+                  1536
+                ],
+                [
+                  1536,
+                  152265
+                ],
+                [
+                  50,
+                  152265
+                ]
+              ],
+              "gpu_activity_count": 4,
+              "gpu_ms": 11.216378
+            }
+          ]
+        },
+        {
+          "stage": "diagnostic_decode",
+          "role": "query_or_output_projection",
+          "gpu_ms": 6.953320999999997,
+          "gpu_activity_count": 448,
+          "shapes": [
+            {
+              "operation": "aten::mm",
+              "input_dims": [
+                [
+                  50,
+                  1536
+                ],
+                [
+                  1536,
+                  1536
+                ],
+                [
+                  50,
+                  1536
+                ]
+              ],
+              "gpu_activity_count": 224,
+              "gpu_ms": 3.5231369999999993
+            },
+            {
+              "operation": "aten::addmm",
+              "input_dims": [
+                [
+                  1536
+                ],
+                [
+                  50,
+                  1536
+                ],
+                [
+                  1536,
+                  1536
+                ],
+                [],
+                [],
+                [
+                  50,
+                  1536
+                ]
+              ],
+              "gpu_activity_count": 224,
+              "gpu_ms": 3.430183999999998
+            }
+          ]
+        },
+        {
+          "stage": "compiled_prefill",
+          "role": "mlp_down",
+          "gpu_ms": 6.5827699999999965,
+          "gpu_activity_count": 56,
+          "shapes": [
+            {
+              "operation": "aten::mm",
+              "input_dims": [
+                [
+                  121,
+                  8960
+                ],
+                [
+                  8960,
+                  1536
+                ],
+                [
+                  121,
+                  1536
+                ]
+              ],
+              "gpu_activity_count": 56,
+              "gpu_ms": 6.5827699999999965
+            }
+          ]
+        },
+        {
+          "stage": "compiled_prefill",
+          "role": "query_or_output_projection",
+          "gpu_ms": 2.6570330000000015,
+          "gpu_activity_count": 112,
+          "shapes": [
+            {
+              "operation": "aten::addmm",
+              "input_dims": [
+                [
+                  1536
+                ],
+                [
+                  121,
+                  1536
+                ],
+                [
+                  1536,
+                  1536
+                ],
+                [],
+                [],
+                [
+                  121,
+                  1536
+                ]
+              ],
+              "gpu_activity_count": 56,
+              "gpu_ms": 1.427108000000001
+            },
+            {
+              "operation": "aten::mm",
+              "input_dims": [
+                [
+                  121,
+                  1536
+                ],
+                [
+                  1536,
+                  1536
+                ],
+                [
+                  121,
+                  1536
+                ]
+              ],
+              "gpu_activity_count": 56,
+              "gpu_ms": 1.2299250000000006
+            }
+          ]
+        },
+        {
+          "stage": "diagnostic_decode",
+          "role": "key_or_value_projection",
+          "gpu_ms": 2.6069259999999943,
+          "gpu_activity_count": 448,
+          "shapes": [
+            {
+              "operation": "aten::addmm",
+              "input_dims": [
+                [
+                  256
+                ],
+                [
+                  50,
+                  1536
+                ],
+                [
+                  1536,
+                  256
+                ],
+                [],
+                [],
+                [
+                  50,
+                  256
+                ]
+              ],
+              "gpu_activity_count": 448,
+              "gpu_ms": 2.6069259999999943
+            }
+          ]
+        },
+        {
+          "stage": "compiled_prefill",
+          "role": "key_or_value_projection",
+          "gpu_ms": 2.4174100000000025,
+          "gpu_activity_count": 112,
+          "shapes": [
+            {
+              "operation": "aten::addmm",
+              "input_dims": [
+                [
+                  256
+                ],
+                [
+                  121,
+                  1536
+                ],
+                [
+                  1536,
+                  256
+                ],
+                [],
+                [],
+                [
+                  121,
+                  256
+                ]
+              ],
+              "gpu_activity_count": 112,
+              "gpu_ms": 2.4174100000000025
+            }
+          ]
+        },
+        {
+          "stage": "compiled_prefill",
+          "role": "full_vocabulary_projection",
+          "gpu_ms": 1.324707,
+          "gpu_activity_count": 1,
+          "shapes": [
+            {
+              "operation": "aten::mm",
+              "input_dims": [
+                [
+                  1,
+                  1536
+                ],
+                [
+                  1536,
+                  152265
+                ],
+                [
+                  1,
+                  152265
+                ]
+              ],
+              "gpu_activity_count": 1,
+              "gpu_ms": 1.324707
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "replay_gpu_ms": {
+    "76": {
+      "kernel_sum": 100.746879,
+      "activity_union": 101.82787426757812,
+      "instrumented_wall": 129.956179,
+      "prefill": 21.649537,
+      "decode": 72.006451,
+      "categories": {
+        "matrix_multiplication": 83.32055899999997,
+        "attention": 5.094632000000001,
+        "softmax": 1.818466,
+        "fused_cat_layout_rope": 2.851283000000001,
+        "other": 5.440291999999997,
+        "gpu_memcpy": 0.983908,
+        "silu_elementwise": 0.7885160000000001,
+        "normalization": 0.934021,
+        "gpu_memset": 0.21497900000000014,
+        "copy_or_cat": 0.3089,
+        "other_triton": 0.16582600000000006,
+        "indexing": 0.024384000000000003
+      }
+    },
+    "101": {
+      "kernel_sum": 105.624757,
+      "activity_union": 106.73213330078126,
+      "instrumented_wall": 128.616616,
+      "prefill": 25.838318,
+      "decode": 72.790022,
+      "categories": {
+        "matrix_multiplication": 86.98593599999995,
+        "attention": 5.712425999999996,
+        "fused_cat_layout_rope": 3.330727,
+        "softmax": 1.8141770000000002,
+        "other": 5.407303,
+        "gpu_memcpy": 0.9825370000000001,
+        "silu_elementwise": 0.905793,
+        "normalization": 0.9729659999999999,
+        "gpu_memset": 0.26032900000000014,
+        "copy_or_cat": 0.30697500000000005,
+        "other_triton": 0.164423,
+        "indexing": 0.024031
+      }
+    },
+    "121": {
+      "kernel_sum": 107.365001,
+      "activity_union": 108.51292578125,
+      "instrumented_wall": 128.563319,
+      "prefill": 27.146427,
+      "decode": 73.204149,
+      "categories": {
+        "matrix_multiplication": 87.90429500000002,
+        "attention": 5.924687000000003,
+        "fused_cat_layout_rope": 3.715585000000001,
+        "softmax": 1.817891,
+        "other": 5.457299999999995,
+        "gpu_memcpy": 0.9846119999999998,
+        "silu_elementwise": 1.0121980000000002,
+        "normalization": 1.027483,
+        "gpu_memset": 0.2959960000000003,
+        "copy_or_cat": 0.3140489999999999,
+        "other_triton": 0.16709999999999997,
+        "indexing": 0.024413
+      }
+    }
+  }
+}
