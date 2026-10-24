@@ -1,0 +1,27 @@
+{
+  "experiment": "packed-mlp",
+  "run_id": "packed-mlp-pilot-20261024T135738Z-d85533e2a0f0",
+  "job_id": "7893602",
+  "status": "CANCELLED_BEFORE_START_AT_RESEARCH_DEADLINE",
+  "research_window_utc": [
+    "2026-10-24T09:40:00Z",
+    "2026-10-24T15:40:00Z"
+  ],
+  "submitted_at_utc": "2026-10-24T13:57:38.971959+00:00",
+  "job_elapsed": "00:00:00",
+  "measured_requests": 0,
+  "completed_phases": 0,
+  "source_integrity_passed": true,
+  "snapshot_files_verified": 56,
+  "measurement_audit_passed": false,
+  "measurement_audit_exit_code": 1,
+  "measurement_audit_reason": "No outputs/phase_0/manifest.json: job never started.",
+  "exactness_passed": null,
+  "latency_ms": null,
+  "gpu_memory": null,
+  "setup_s": null,
+  "full500_submitted": false,
+  "cpu_validation": "46 CPU/evidence tests and CLI checks passed CI40100234692.",
+  "reason": "Pilot remained queued until six-hour deadline. Cancellation was filtered to PENDING state at the Slurm controller; no running allocation was interrupted.",
+  "scope": "Unrun experiment; not a numerical rejection, latency regression, passing pilot, or completed 500-user comparison."
+}
