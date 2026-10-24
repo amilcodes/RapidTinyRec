@@ -99,8 +99,11 @@ and capture; phase 3 has no final capture counters or memory peaks. Compiler
 and graph preparation intervals overlap within setup and must not be added.
 
 [Partial samples, exact comparisons and source/output hashes](../benchmarks/failures/shared-prefix-full-timeout)
-are retained. No replacement was submitted. Finishing the comparison requires
-a fresh, longer bounded allocation with the same source and four-phase method.
+are retained. A fresh 30-minute comparison is submitted as job 7877196, run
+`prefix-full-long-20261024T014547Z-70b2d358b259`, on the regular GPU queue.
+Its 41 submitted files are identical to source `735a73b`; only allocation
+partition/QoS and wall time differ. All 500 users and the four-phase method
+remain unchanged. The full paired result is pending.
 
 ## Implementation and protocol
 
