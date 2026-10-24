@@ -1,0 +1,420 @@
+{
+  "integrity_audit_passed": true,
+  "unique_users": 4,
+  "paired_requests": 24,
+  "cohort_sha256": "f78097bfedff69f5928a8ccbe39d5a96e07f7e9dd4616209953cf4f51408f487",
+  "comparison": {
+    "requests": 24,
+    "rank_positions": 1200,
+    "sequence_values": 1200,
+    "transition_values": 6000,
+    "matching_rank_lists": 24,
+    "matching_rank_positions": 1200,
+    "matching_sequence_vectors": 24,
+    "matching_transition_arrays": 24,
+    "matching_sequence_values": 1200,
+    "matching_transition_values": 6000,
+    "max_sequence_difference_common": 0.0,
+    "max_transition_difference_common": 0.0
+  },
+  "historical_comparisons": {
+    "prefix_replay": {
+      "requests": 24,
+      "rank_positions": 1200,
+      "sequence_values": 1200,
+      "transition_values": 6000,
+      "matching_rank_lists": 24,
+      "matching_rank_positions": 1200,
+      "matching_sequence_vectors": 24,
+      "matching_transition_arrays": 24,
+      "matching_sequence_values": 1200,
+      "matching_transition_values": 6000,
+      "max_sequence_difference_common": 0.0,
+      "max_transition_difference_common": 0.0
+    },
+    "folded_prefix_replay": {
+      "requests": 24,
+      "rank_positions": 1200,
+      "sequence_values": 1200,
+      "transition_values": 6000,
+      "matching_rank_lists": 24,
+      "matching_rank_positions": 1200,
+      "matching_sequence_vectors": 24,
+      "matching_transition_arrays": 24,
+      "matching_sequence_values": 1200,
+      "matching_transition_values": 6000,
+      "max_sequence_difference_common": 0.0,
+      "max_transition_difference_common": 0.0
+    }
+  },
+  "latency_ms": {
+    "prefix_replay": {
+      "n": 24,
+      "median_ms": 128.48679907619953,
+      "p95_ms": 133.9264377951622
+    },
+    "folded_prefix_replay": {
+      "n": 24,
+      "median_ms": 115.5792698264122,
+      "p95_ms": 118.97572837769985
+    }
+  },
+  "reductions_percent": {
+    "median_ms": 10.04580185870494,
+    "p95_ms": 11.163374210198263
+  },
+  "latency_by_length_ms": {
+    "76": {
+      "prefix_replay": {
+        "n": 12,
+        "median_ms": 124.9699778854847,
+        "p95_ms": 125.49111358821392
+      },
+      "folded_prefix_replay": {
+        "n": 12,
+        "median_ms": 112.40283213555813,
+        "p95_ms": 113.4300135076046
+      }
+    },
+    "121": {
+      "prefix_replay": {
+        "n": 12,
+        "median_ms": 133.06046836078167,
+        "p95_ms": 134.17285401374102
+      },
+      "folded_prefix_replay": {
+        "n": 12,
+        "median_ms": 118.46474930644035,
+        "p95_ms": 119.10975333303213
+      }
+    }
+  },
+  "latency_by_half_ms": {
+    "0": {
+      "prefix_replay": {
+        "n": 12,
+        "median_ms": 128.59577499330044,
+        "p95_ms": 133.58522485941648
+      },
+      "folded_prefix_replay": {
+        "n": 12,
+        "median_ms": 115.43878726661205,
+        "p95_ms": 119.10975333303213
+      }
+    },
+    "1": {
+      "prefix_replay": {
+        "n": 12,
+        "median_ms": 128.3919643610716,
+        "p95_ms": 134.17285401374102
+      },
+      "folded_prefix_replay": {
+        "n": 12,
+        "median_ms": 115.5792698264122,
+        "p95_ms": 118.76848172396421
+      }
+    }
+  },
+  "phases": [
+    {
+      "phase": 0,
+      "variant": "prefix_replay",
+      "latency_ms": {
+        "n": 12,
+        "median_ms": 128.59577499330044,
+        "p95_ms": 133.58522485941648
+      },
+      "memory": {
+        "allocated_bytes": 6595040256,
+        "reserved_bytes": 7964983296,
+        "peak_allocated_bytes": 6911101440,
+        "peak_reserved_bytes": 7964983296
+      },
+      "compiler_artifacts_reused": false,
+      "setup_memory": {
+        "allocated_bytes": 6595040256,
+        "reserved_bytes": 7964983296,
+        "peak_allocated_bytes": 8411338752,
+        "peak_reserved_bytes": 9219080192
+      },
+      "unique_input_storage_bytes": 15546688,
+      "logical_input_bytes": 79599936,
+      "physical_prefix": {
+        "requests_loaded": 20,
+        "prefix_bytes_copied": 112967680,
+        "prefix_capacity_bytes": 6938624,
+        "suffix_capacity_bytes": 8601600,
+        "max_prefix_tokens": 121,
+        "max_suffix_tokens": 3,
+        "physical_prefix_batch": 1,
+        "suffix_batch": 50,
+        "attention_materialization": "Temporary dense exact-length K/V per layer; unchanged SDPA"
+      },
+      "direct_reorder": {
+        "direct_calls": 80,
+        "fallback_calls": 20,
+        "suffix_bytes_written": 344064000,
+        "prefix_bytes_reordered": 0
+      },
+      "warmup_comparison": {
+        "requests": 4,
+        "rank_positions": 200,
+        "sequence_values": 200,
+        "transition_values": 1000,
+        "matching_rank_lists": 4,
+        "matching_rank_positions": 200,
+        "matching_sequence_vectors": 4,
+        "matching_transition_arrays": 4,
+        "matching_sequence_values": 200,
+        "matching_transition_values": 1000,
+        "max_sequence_difference_common": 0.0,
+        "max_transition_difference_common": 0.0
+      },
+      "warmup_historical_comparison": {
+        "requests": 12,
+        "rank_positions": 600,
+        "sequence_values": 600,
+        "transition_values": 3000,
+        "matching_rank_lists": 12,
+        "matching_rank_positions": 600,
+        "matching_sequence_vectors": 12,
+        "matching_transition_arrays": 12,
+        "matching_sequence_values": 600,
+        "matching_transition_values": 3000,
+        "max_sequence_difference_common": 0.0,
+        "max_transition_difference_common": 0.0
+      },
+      "setup_s": 344.39778357744217,
+      "backend_compile_s": 267.5529426410794,
+      "capture_and_warmup_s": 208.9469700306654,
+      "measurement_compilations": 0,
+      "measurement_captures": 0
+    },
+    {
+      "phase": 1,
+      "variant": "folded_prefix_replay",
+      "latency_ms": {
+        "n": 12,
+        "median_ms": 115.43878726661205,
+        "p95_ms": 119.10975333303213
+      },
+      "memory": {
+        "allocated_bytes": 6595040256,
+        "reserved_bytes": 7964983296,
+        "peak_allocated_bytes": 6911101440,
+        "peak_reserved_bytes": 7964983296
+      },
+      "compiler_artifacts_reused": false,
+      "setup_memory": {
+        "allocated_bytes": 6595040256,
+        "reserved_bytes": 7964983296,
+        "peak_allocated_bytes": 8411338752,
+        "peak_reserved_bytes": 9219080192
+      },
+      "unique_input_storage_bytes": 15546688,
+      "logical_input_bytes": 79599936,
+      "physical_prefix": {
+        "requests_loaded": 20,
+        "prefix_bytes_copied": 112967680,
+        "prefix_capacity_bytes": 6938624,
+        "suffix_capacity_bytes": 8601600,
+        "max_prefix_tokens": 121,
+        "max_suffix_tokens": 3,
+        "physical_prefix_batch": 1,
+        "suffix_batch": 50,
+        "attention_materialization": "Temporary dense exact-length K/V per layer; unchanged SDPA"
+      },
+      "direct_reorder": {
+        "direct_calls": 80,
+        "fallback_calls": 20,
+        "suffix_bytes_written": 344064000,
+        "prefix_bytes_reordered": 0
+      },
+      "warmup_comparison": {
+        "requests": 4,
+        "rank_positions": 200,
+        "sequence_values": 200,
+        "transition_values": 1000,
+        "matching_rank_lists": 4,
+        "matching_rank_positions": 200,
+        "matching_sequence_vectors": 4,
+        "matching_transition_arrays": 4,
+        "matching_sequence_values": 200,
+        "matching_transition_values": 1000,
+        "max_sequence_difference_common": 0.0,
+        "max_transition_difference_common": 0.0
+      },
+      "warmup_historical_comparison": {
+        "requests": 12,
+        "rank_positions": 600,
+        "sequence_values": 600,
+        "transition_values": 3000,
+        "matching_rank_lists": 12,
+        "matching_rank_positions": 600,
+        "matching_sequence_vectors": 12,
+        "matching_transition_arrays": 12,
+        "matching_sequence_values": 600,
+        "matching_transition_values": 3000,
+        "max_sequence_difference_common": 0.0,
+        "max_transition_difference_common": 0.0
+      },
+      "setup_s": 360.28898778930306,
+      "backend_compile_s": 273.8718963712454,
+      "capture_and_warmup_s": 223.0480809994042,
+      "measurement_compilations": 0,
+      "measurement_captures": 0
+    },
+    {
+      "phase": 2,
+      "variant": "folded_prefix_replay",
+      "latency_ms": {
+        "n": 12,
+        "median_ms": 115.5792698264122,
+        "p95_ms": 118.76848172396421
+      },
+      "memory": {
+        "allocated_bytes": 6595040256,
+        "reserved_bytes": 8225030144,
+        "peak_allocated_bytes": 6916948480,
+        "peak_reserved_bytes": 8225030144
+      },
+      "compiler_artifacts_reused": true,
+      "setup_memory": {
+        "allocated_bytes": 6595040256,
+        "reserved_bytes": 8225030144,
+        "peak_allocated_bytes": 7529849856,
+        "peak_reserved_bytes": 8225030144
+      },
+      "unique_input_storage_bytes": 15546688,
+      "logical_input_bytes": 79599936,
+      "physical_prefix": {
+        "requests_loaded": 20,
+        "prefix_bytes_copied": 112967680,
+        "prefix_capacity_bytes": 6938624,
+        "suffix_capacity_bytes": 8601600,
+        "max_prefix_tokens": 121,
+        "max_suffix_tokens": 3,
+        "physical_prefix_batch": 1,
+        "suffix_batch": 50,
+        "attention_materialization": "Temporary dense exact-length K/V per layer; unchanged SDPA"
+      },
+      "direct_reorder": {
+        "direct_calls": 80,
+        "fallback_calls": 20,
+        "suffix_bytes_written": 344064000,
+        "prefix_bytes_reordered": 0
+      },
+      "warmup_comparison": {
+        "requests": 4,
+        "rank_positions": 200,
+        "sequence_values": 200,
+        "transition_values": 1000,
+        "matching_rank_lists": 4,
+        "matching_rank_positions": 200,
+        "matching_sequence_vectors": 4,
+        "matching_transition_arrays": 4,
+        "matching_sequence_values": 200,
+        "matching_transition_values": 1000,
+        "max_sequence_difference_common": 0.0,
+        "max_transition_difference_common": 0.0
+      },
+      "warmup_historical_comparison": {
+        "requests": 12,
+        "rank_positions": 600,
+        "sequence_values": 600,
+        "transition_values": 3000,
+        "matching_rank_lists": 12,
+        "matching_rank_positions": 600,
+        "matching_sequence_vectors": 12,
+        "matching_transition_arrays": 12,
+        "matching_sequence_values": 600,
+        "matching_transition_values": 3000,
+        "max_sequence_difference_common": 0.0,
+        "max_transition_difference_common": 0.0
+      },
+      "setup_s": 151.52307442203164,
+      "backend_compile_s": 69.83354352414608,
+      "capture_and_warmup_s": 86.14372341707349,
+      "measurement_compilations": 0,
+      "measurement_captures": 0
+    },
+    {
+      "phase": 3,
+      "variant": "prefix_replay",
+      "latency_ms": {
+        "n": 12,
+        "median_ms": 128.3919643610716,
+        "p95_ms": 134.17285401374102
+      },
+      "memory": {
+        "allocated_bytes": 6595040256,
+        "reserved_bytes": 8225030144,
+        "peak_allocated_bytes": 6916948480,
+        "peak_reserved_bytes": 8225030144
+      },
+      "compiler_artifacts_reused": true,
+      "setup_memory": {
+        "allocated_bytes": 6595040256,
+        "reserved_bytes": 8225030144,
+        "peak_allocated_bytes": 7529849856,
+        "peak_reserved_bytes": 8225030144
+      },
+      "unique_input_storage_bytes": 15546688,
+      "logical_input_bytes": 79599936,
+      "physical_prefix": {
+        "requests_loaded": 20,
+        "prefix_bytes_copied": 112967680,
+        "prefix_capacity_bytes": 6938624,
+        "suffix_capacity_bytes": 8601600,
+        "max_prefix_tokens": 121,
+        "max_suffix_tokens": 3,
+        "physical_prefix_batch": 1,
+        "suffix_batch": 50,
+        "attention_materialization": "Temporary dense exact-length K/V per layer; unchanged SDPA"
+      },
+      "direct_reorder": {
+        "direct_calls": 80,
+        "fallback_calls": 20,
+        "suffix_bytes_written": 344064000,
+        "prefix_bytes_reordered": 0
+      },
+      "warmup_comparison": {
+        "requests": 4,
+        "rank_positions": 200,
+        "sequence_values": 200,
+        "transition_values": 1000,
+        "matching_rank_lists": 4,
+        "matching_rank_positions": 200,
+        "matching_sequence_vectors": 4,
+        "matching_transition_arrays": 4,
+        "matching_sequence_values": 200,
+        "matching_transition_values": 1000,
+        "max_sequence_difference_common": 0.0,
+        "max_transition_difference_common": 0.0
+      },
+      "warmup_historical_comparison": {
+        "requests": 12,
+        "rank_positions": 600,
+        "sequence_values": 600,
+        "transition_values": 3000,
+        "matching_rank_lists": 12,
+        "matching_rank_positions": 600,
+        "matching_sequence_vectors": 12,
+        "matching_transition_arrays": 12,
+        "matching_sequence_values": 600,
+        "matching_transition_values": 3000,
+        "max_sequence_difference_common": 0.0,
+        "max_transition_difference_common": 0.0
+      },
+      "setup_s": 142.69164606183767,
+      "backend_compile_s": 66.44335335493088,
+      "capture_and_warmup_s": 79.69884860888124,
+      "measurement_compilations": 0,
+      "measurement_captures": 0
+    }
+  ],
+  "snapshot_files_verified": 49,
+  "audit_script_sha256": "9258af9fdc59d847fe830bed7d792e56c4845b148228bc7b0d62d138366effe4",
+  "note": "Memory is isolated per fresh process; latency is paired by user/repeat across ABBA phases, not interleaved requests. One allocation does not establish run-to-run variance. Setup timings are nested; do not add. Integrity passing alone does not imply bit equality.",
+  "exactness_passed": true
+}
