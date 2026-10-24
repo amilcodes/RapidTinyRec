@@ -133,7 +133,8 @@ def audit(root,historical,snapshot,run_record):
                 scopes=row['scopes'];counts=collections.Counter(s['name'] for s in scopes)
                 assert counts['compiled_prefill']==counts['prefix_copy']==counts['final_unused_cache_reorder']==1
                 assert counts['graph_decode']==counts['replay_input_staging']==counts['suffix_reorder']==4
-                assert counts['vocabulary_log_softmax']==5
+                # HF normalizes once and the pinned constraint processor again.
+                assert counts['vocabulary_log_softmax']==10
                 request=next(s for s in scopes if s['name']=='request')
                 assert math.isclose(sum(s['exclusive_wall_ms'] for s in scopes),request['wall_ms'],abs_tol=1e-6)
                 totals=collections.defaultdict(float)
