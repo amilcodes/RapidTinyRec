@@ -1,8 +1,8 @@
 # Fold query heads into attention rows
 
-The four-user A6000 pilot cuts median latency by 10.05% and p95 by 11.16%,
-with identical FP32 rankings and scores. Allocated memory is unchanged.
-The 500-user comparison is submitted; these are pilot results only.
+On the frozen 500-user A6000 cohort, folding query heads cuts median latency
+by 9.71% and p95 by 10.28%, with identical FP32 rankings and scores.
+Allocated memory is unchanged; setup takes longer. The experiment remains unmerged.
 
 The shared-prefix profile measures native decode attention at 16.9–19.2 ms per
 request, compared with 2.5–3.3 ms for the entire fused cat/layout/RoPE category.
@@ -27,7 +27,85 @@ probabilities and both full-vocabulary normalizations. This is not a custom
 shared-prefix attention kernel. The context patches SDPA process-wide and belongs
 in an isolated inference worker.
 
-## Validation
+## 500-user comparison
+
+Job `7882772`, run `folded-full-20261024T040658Z-73d312250079`, completed in
+20m50s on one RTX A6000. All 49 submitted source files are identical to the
+passing pilot, measured commit `af2c05dae10a6b107616da964eb2a1360eb5cde1`.
+The independent integrity and exactness audits both pass.
+
+| Measurement | Native GQA + physical prefix | Folded query heads |
+|---|---:|---:|
+| Median latency | 127.198 ms | 114.841 ms |
+| p95 latency | 133.628 ms | 119.898 ms |
+| Allocated GPU memory | 7.485 GiB | 7.485 GiB |
+| Reserved GPU memory | 9.313–9.779 GiB | 9.313–9.779 GiB |
+| Peak allocated during inference | 7.779–7.784 GiB | 7.779–7.784 GiB |
+| Peak reserved during inference | 9.313–9.779 GiB | 9.313–9.779 GiB |
+| Peak allocated during setup | 8.206–8.211 GiB | 8.206–8.211 GiB |
+| Peak reserved during setup | 9.779–9.838 GiB | 9.779–9.838 GiB |
+| Logical graph-input bytes | 397,999,680 | 397,999,680 |
+| Unique graph-input bytes | 15,572,544 | 15,572,544 |
+
+All **500/500 full rank lists**, **25,000/25,000 rank positions**,
+**25,000/25,000 sequence FP32 values** (800,000 bits) and
+**125,000/125,000 transition FP32 values** (4,000,000 bits) match the paired
+control. Maximum sequence and transition differences are zero. Both variants
+also match historical compiled GQA, including every one of the 120 saved warmup
+outputs. Repeat stability and input/output ownership checks pass. Each phase
+freezes 40 exact graphs, with zero measured compilation or capture.
+
+All 500 paired requests improve by 10.100–15.703 ms; the median paired change
+is −12.661 ms. No request or length group regresses. The reductions above compare
+the distributions' median and p95, not the median of paired differences.
+
+| History tokens | Users | Native median / p95, ms | Folded median / p95, ms |
+|---|---:|---:|---:|
+| 76 | 109 | 125.355 / 126.957 | 113.196 / 114.679 |
+| 81 | 39 | 125.623 / 127.309 | 113.655 / 115.096 |
+| 86 | 69 | 126.349 / 127.990 | 114.224 / 115.611 |
+| 91 | 85 | 126.715 / 128.156 | 114.496 / 116.086 |
+| 96 | 58 | 129.729 / 131.462 | 116.373 / 117.716 |
+| 101 | 42 | 132.086 / 134.162 | 118.507 / 119.821 |
+| 106 | 24 | 131.993 / 133.227 | 118.684 / 120.319 |
+| 111 | 18 | 132.068 / 133.721 | 118.766 / 119.998 |
+| 116 | 13 | 132.536 / 133.965 | 119.351 / 120.796 |
+| 121 | 43 | 133.060 / 134.802 | 119.494 / 120.831 |
+
+The even-index half (250 users) changes from 127.079/133.758 to
+114.939/120.289 ms median/p95. The odd-index half changes from
+127.263/133.501 to 114.760/119.571 ms. Memory is isolated in four fresh processes;
+latency pairs users across ABBA phases. This is one allocation, not adjacent
+request interleaving or an estimate of run-to-run variance.
+
+Both variants retain 6,938,624 bytes of prefix capacity, 8,601,600 bytes of
+suffix capacity and 32,320 bytes of graph metadata. Logical input bytes count
+every graph's views; unique bytes count their shared backing storage once.
+The native attention implementation still uses temporary dense K/V per layer.
+This change saves latency, not memory, and does not implement a shared-prefix
+attention kernel.
+
+| Phase | Compiler artifacts | Setup | Nested backend compilation | Nested graph preparation/warmup |
+|---|---|---:|---:|---:|
+| 0: native, even users | Cold | 346.870 s | 266.446 s | 211.119 s |
+| 1: folded, even users | Cold | 369.764 s | 279.153 s | 226.210 s |
+| 2: folded, odd users | Reused from phase 1 | 157.549 s | 71.368 s | 88.071 s |
+| 3: native, odd users | Reused from phase 0 | 148.152 s | 66.305 s | 82.279 s |
+
+The candidate adds 22.895 s to cold setup and 9.397 s with disk artifacts reused.
+All setup, compilation, graph preparation and warmup are excluded from inference;
+their nested intervals overlap and must not be added. Every phase reloads the
+model, allocates GPU memory and captures graphs independently.
+
+Evidence: [summary](../benchmarks/results/folded-query-heads/summary.json),
+[independent audit](../benchmarks/results/folded-query-heads/audit.json),
+[all 500 paired timings and output hashes](../benchmarks/results/folded-query-heads/requests.csv),
+[source and artifact hashes](../benchmarks/results/folded-query-heads/source.json).
+The profile motivated the head packing; this benchmark measures end-to-end
+latency and does not separately measure the new attention kernel's duration.
+Exactness is established for this checkpoint, cohort and environment only.
+
+## Pilot
 
 Pilot job `7880867` completed in 18m18s on one RTX A6000. Measured source:
 `af2c05dae10a6b107616da964eb2a1360eb5cde1`. Independent integrity and exactness
@@ -73,8 +151,7 @@ Evidence: [summary](../benchmarks/pilots/folded-query-heads/summary.json),
 [independent audit](../benchmarks/pilots/folded-query-heads/audit.json),
 [paired timings and output hashes](../benchmarks/pilots/folded-query-heads/requests.csv),
 [source and artifact hashes](../benchmarks/pilots/folded-query-heads/source.json).
-The identical-source full run is job `7882772`,
-`folded-full-20261024T040658Z-73d312250079`. Its results are pending.
+The full comparison above uses the identical submitted source.
 
 ## Protocol
 
@@ -86,8 +163,8 @@ The A6000 pilot uses four users at the shortest and longest histories, six paire
 trials, eight warmed graphs, and four isolated processes in native/folded/folded/
 native order. Each process has fresh model/GPU allocations. Phases0/1 start with
 cold compiler artifacts; phases2/3 reuse same-variant disk artifacts but capture
-fresh graphs. The planned full comparison uses the frozen500 users split by
-even/odd cohort index and warms all40 shapes per phase. Both jobs are bounded at
+fresh graphs. The full comparison uses the frozen 500 users split by
+even/odd cohort index and warms all 40 shapes per phase. Both jobs were bounded at
 30 minutes, with the full run gated on a passing pilot and useful measured gain.
 
 Dense-layout warmups use each phase's attention implementation. They are labeled

@@ -90,3 +90,9 @@ The [physical-prefix protocol](shared-prefix.md) compares shared inputs against
 one stored history KV row per layer. Run its pilot first, then all four full
 phases in one 30-minute A6000 allocation; the completed comparison took 16m07s.
 The full audit requires all 500 paired controls and never accepts partial output.
+
+The [folded-query protocol](folded-query-heads.md) compares native GQA against
+packing its single-token query heads into rows. Both use physical-prefix storage.
+Use the four-phase pilot before the frozen 500-user run; the latter completed
+in 20m50s within one 30-minute A6000 allocation. The audit checks every FP32 bit
+against both the paired control and historical GQA, with setup excluded.

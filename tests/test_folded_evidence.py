@@ -11,18 +11,28 @@ ROOT = Path(__file__).resolve().parents[1]
 
 class FoldedEvidenceTests(unittest.TestCase):
     def test_pilot_pairs_exactness_and_latency(self):
-        root = ROOT / 'benchmarks/pilots/folded-query-heads'
+        self._check_pairs(ROOT / 'benchmarks/pilots/folded-query-heads', 24, 4, 6)
+
+    def test_full_pairs_exactness_and_latency(self):
+        self._check_pairs(ROOT / 'benchmarks/results/folded-query-heads', 500, 500, 1)
+
+    def _check_pairs(self, root, requests, users, repeats):
         summary = json.loads((root / 'summary.json').read_text())
         audit = json.loads((root / 'audit.json').read_text())
         with (root / 'requests.csv').open() as stream:
             rows = list(csv.DictReader(stream))
-        self.assertEqual(len(rows), 24)
-        self.assertEqual(len({r['cohort_index'] for r in rows}), 4)
-        self.assertEqual(summary['paired_requests'], 24)
-        self.assertEqual(summary['users'], 4)
+        self.assertEqual(len(rows), requests)
+        self.assertEqual(len({r['cohort_index'] for r in rows}), users)
+        self.assertEqual(summary['paired_requests'], requests)
+        self.assertEqual(summary['users'], users)
         for index in {r['cohort_index'] for r in rows}:
             group = [r for r in rows if r['cohort_index'] == index]
-            self.assertEqual({r['repeat'] for r in group}, {str(i) for i in range(6)})
+            self.assertEqual({r['repeat'] for r in group}, {str(i) for i in range(repeats)})
+        if users == 500:
+            self.assertEqual([int(r['cohort_index']) for r in rows], list(range(500)))
+            for row in rows:
+                phases = ('0', '1') if int(row['cohort_index']) % 2 == 0 else ('3', '2')
+                self.assertEqual((row['prefix_replay_phase'], row['folded_prefix_replay_phase']), phases)
         self.assertTrue(audit['integrity_audit_passed'])
         self.assertTrue(audit['exactness_passed'])
         self.assertEqual(summary['exactness_passed'], audit['exactness_passed'])
@@ -33,7 +43,7 @@ class FoldedEvidenceTests(unittest.TestCase):
             self.assertEqual(statistics.quantiles(values, n=100, method='inclusive')[94], expected['p95'])
         left, right = summary['control'], summary['candidate']
         comparisons = [audit['comparison'], *audit['historical_comparisons'].values()]
-        for field, count in [('rank_positions', 1200), ('sequence_values', 1200), ('transition_values', 6000)]:
+        for field, count in [('rank_positions', requests * 50), ('sequence_values', requests * 50), ('transition_values', requests * 250)]:
             total = sum(int(row['matching_' + field]) for row in rows)
             self.assertEqual(total, count)
             self.assertEqual(total, summary['matching_' + field])
@@ -54,8 +64,12 @@ class FoldedEvidenceTests(unittest.TestCase):
                 for field in ('rank_positions', 'sequence_values', 'transition_values'):
                     self.assertEqual(phase[key][field], phase[key]['matching_' + field])
 
-    def test_pilot_evidence_and_source_hashes(self):
-        root = ROOT / 'benchmarks/pilots/folded-query-heads'
+    def test_evidence_and_source_hashes(self):
+        for category in ('pilots', 'results'):
+            with self.subTest(category=category):
+                self._check_hashes(ROOT / 'benchmarks' / category / 'folded-query-heads')
+
+    def _check_hashes(self, root):
         source = json.loads((root / 'source.json').read_text())
         summary = json.loads((root / 'summary.json').read_text())
         self.assertEqual(hashlib.sha256((root / 'requests.csv').read_bytes()).hexdigest(), summary['requests_sha256'])
