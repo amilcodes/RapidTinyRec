@@ -18,6 +18,7 @@ jobs:
       - run: python -m rapidtinyrec.audit_input_arena --help
       - run: python -m rapidtinyrec.audit_shared_prefix --help
       - run: python -m rapidtinyrec.audit_prefix_profile --help
+      - run: python -m rapidtinyrec.audit_folded_prefix --help
   decoding:
     runs-on: ubuntu-latest
     steps:
