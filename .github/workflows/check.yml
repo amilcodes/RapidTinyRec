@@ -23,6 +23,7 @@ jobs:
       - run: python -m rapidtinyrec.audit_prefix_profile --help
       - run: python -m rapidtinyrec.audit_folded_prefix --help
       - run: python -m rapidtinyrec.audit_folded_profile --help
+      - run: python -m rapidtinyrec.audit_packed_mlp --help
   decoding:
     runs-on: ubuntu-latest
     steps:
@@ -36,4 +37,5 @@ jobs:
       - run: python -m rapidtinyrec.benchmark --help
       - run: python -m rapidtinyrec.benchmark_gqa --help
       - run: python -m rapidtinyrec.benchmark_folded_profile --help
+      - run: python -m rapidtinyrec.benchmark_packed_mlp --help
       - run: python -m rapidtinyrec.pilot_decode_replay --help
