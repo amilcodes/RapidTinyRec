@@ -1,11 +1,96 @@
 # Physical shared-prefix cache
 
-The complete four-user A6000 pilot preserves all ranking and score bits while
-reducing allocated memory by about 31.7% and median/p95 latency by 2.47%/2.41%.
-The 500-user confirmation timed out during its final control phase. The candidate
-finished all 500 and matches historical GQA exactly, but only 357 paired controls
-were saved. The complete paired comparison remains unverified; both timeouts
-are retained below.
+On the frozen 500-user FP32 A6000 comparison, storing the history once per
+layer preserves every ranking and score bit, reduces allocated GPU memory
+by 59.2–60.2%, and reduces median/p95 latency by 2.00%/2.87% against shared
+inputs. Cold setup is slower. Both earlier timeouts remain documented below.
+
+## Completed 500-user comparison
+
+Job 7877196 completed all four phases in 16m07s, within the 30-minute allocation.
+Run `prefix-full-long-20261024T014547Z-70b2d358b259` used source
+`735a73b838b5032adb0b05e13db168d2acacb9fc`, identical to the passing pilot and
+previous timed-out full run. The immutable 41-file snapshot and all raw outputs
+are retained; [500 paired samples, independent audit and source/output hashes](../benchmarks/results/shared-prefix)
+are published. This is a separate paired comparison; do not multiply its gain
+by gains from other runs.
+
+All 500 complete rank lists and 25,000 rank positions match. All 25,000 sequence
+FP32 values (800,000 bits) and 125,000 transition values (4,000,000 bits) match
+exactly, with maximum numerical deltas of zero. Both variants also match
+historical compiled GQA exactly. Mixed-length warmup repeats, storage ownership
+and physical-prefix accounting pass. Each phase freezes 40 graphs; measured
+compilation and capture counts are zero.
+
+| Full cohort | Shared inputs | Shared prefix |
+| :--- | ---: | ---: |
+| Median | 129.278 ms | 126.697 ms |
+| p95 | 137.210 ms | 133.267 ms |
+| End-of-phase allocated GPU memory | 18.366–18.783 GiB | 7.485 GiB |
+| Reserved GPU memory | 22.668–22.945 GiB | 9.313–9.779 GiB |
+| Peak allocated during inference | 19.639–19.648 GiB | 7.779–7.784 GiB |
+| Peak reserved during inference | 22.668–22.945 GiB | 9.313–9.779 GiB |
+| Logical graph-input bytes | 11,468,832,320 (10.681 GiB) | 397,999,680 (0.371 GiB) |
+| Unique graph-input bytes | 355,565,120 (0.331 GiB) | 15,572,544 (0.0145 GiB) |
+
+Memory ranges preserve the different isolated processes. The final control
+phase's end-of-measurement allocation is lower than its setup allocation;
+peak memory is reported separately. Persistent prefix capacity is 6,938,624
+bytes, suffix capacity 8,601,600 bytes, and the remaining 32,320 input bytes
+are metadata for 40 graphs. The prefix has one row per layer, the suffix has
+50 rows, and no prefix bytes are reordered. These input figures exclude
+weights, graph outputs and temporary dense attention tensors; total GPU
+memory above includes those allocations.
+
+Median and p95 improve at all ten lengths and in both cohort halves. Individual
+paired requests are not uniformly faster: 490 improve and 10 regress, with a
+maximum regression of 1.059 ms (cohort index 415). The 508.953 ms control outlier
+at index 57 is retained, along with its 133.149 ms candidate result. The run does
+not establish the cause of that outlier or run-to-run variance.
+
+| History tokens / half | Users | Shared-input median | Prefix median | Shared-input p95 | Prefix p95 |
+| :--- | ---: | ---: | ---: | ---: | ---: |
+| 76 | 109 | 126.520 | 124.987 | 128.046 | 126.732 |
+| 81 | 39 | 127.294 | 125.239 | 128.992 | 126.807 |
+| 86 | 69 | 128.558 | 125.940 | 130.169 | 127.704 |
+| 91 | 85 | 128.822 | 126.266 | 130.487 | 127.941 |
+| 96 | 58 | 132.317 | 129.362 | 133.564 | 130.957 |
+| 101 | 42 | 135.020 | 131.758 | 136.444 | 133.427 |
+| 106 | 24 | 135.393 | 131.929 | 136.789 | 132.881 |
+| 111 | 18 | 135.900 | 131.831 | 138.001 | 133.603 |
+| 116 | 13 | 136.274 | 131.999 | 137.378 | 133.560 |
+| 121 | 43 | 137.209 | 132.447 | 138.776 | 134.616 |
+| Even half | 250 | 129.293 | 126.715 | 137.543 | 133.582 |
+| Odd half | 250 | 129.273 | 126.644 | 136.969 | 132.567 |
+
+Latencies are milliseconds. Four fresh processes run shared inputs / prefix /
+prefix / shared inputs, pairing even/odd cohort halves across phases. They do
+not alternate adjacent requests or measure concurrent serving.
+
+| Phase | Disk compiler artifacts | Setup/warmup | Backend compilation, nested | Graph preparation, nested |
+| :--- | :--- | ---: | ---: | ---: |
+| 0: Shared inputs | Cold | 139.682 s | 102.745 s | 3.776 s |
+| 1: Shared prefix | Cold | 349.860 s | 269.598 s | 212.250 s |
+| 2: Shared prefix | Reused | 148.810 s | 67.259 s | 82.608 s |
+| 3: Shared inputs | Reused | 69.836 s | 32.953 s | 3.929 s |
+
+Setup/warmup excludes model loading; both are outside inference. Graph
+preparation includes forward warmup that can trigger backend compilation, so
+those columns overlap and must not be added. Phases 2/3 reuse same-variant disk
+artifacts from phases 1/0, while all model loading, GPU allocations and graph
+captures are fresh. Cold setup rises 139.682 → 349.860 s; artifact-reuse setup
+is 69.836 → 148.810 s. The empty, one-token and longer suffixes require distinct
+compiler specializations. This setup penalty and the two earlier timeout
+failures are retained, rather than folded into an inference speedup.
+
+| Phase | Allocated after measurement | Reserved after measurement | Inference peak allocated | Setup peak allocated | Setup peak reserved |
+| :--- | ---: | ---: | ---: | ---: | ---: |
+| 0 | 18.783 | 22.668 | 19.639 | 19.971 | 22.668 |
+| 1 | 7.485 | 9.779 | 7.779 | 8.206 | 9.779 |
+| 2 | 7.485 | 9.313 | 7.784 | 8.211 | 9.838 |
+| 3 | 18.366 | 22.945 | 19.648 | 19.979 | 22.945 |
+
+Memory is GiB; inference peak reserved equals the reserved column in each phase.
 
 ## Completed pilot
 
@@ -103,7 +188,7 @@ are retained. A fresh 30-minute comparison is submitted as job 7877196, run
 `prefix-full-long-20261024T014547Z-70b2d358b259`, on the regular GPU queue.
 Its 41 submitted files are identical to source `735a73b`; only allocation
 partition/QoS and wall time differ. All 500 users and the four-phase method
-remain unchanged. The full paired result is pending.
+remain unchanged. The complete result is reported at the top of this document; the failed run remains separate.
 
 ## Implementation and protocol
 
