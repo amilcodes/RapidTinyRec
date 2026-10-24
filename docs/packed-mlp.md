@@ -13,7 +13,13 @@ Setup begins after model loading and includes weight packing, compiler work, gra
 The independent auditor is `python -m rapidtinyrec.audit_packed_mlp`; it saves comparisons and explicitly returns nonzero for any output bit mismatch. CPU math tests allow tolerance only for functional validation; they do not establish GPU score equality. No GPU result or speedup is claimed yet.
 
 
-## Window closeout: pilot never started
+## Authorized pilot resubmission
+
+Following the six-hour closeout, the user authorized resubmitting this candidate and monitoring through the queue until it runs. Job `7907979`, run `packed-mlp-pilot-20261024T215118Z-533138a5b479`, was submitted on October 24, 2026 at 17:51 America/New_York (21:51 UTC). Its initial state is PENDING for scheduler priority. All 56 submitted files match the cancelled pilot's frozen hashes and the candidate source remains `9b94664b1800260674d63a26cdc33eb5a4cb5370`; no benchmark or resource setting changed.
+
+This authorization covers the single bounded A6000 pilot and one conditional comparison on the same frozen 500 users. The former research deadline does not apply to this resubmission. Monitoring continues through queue delays. Full500 remains gated on complete exact rankings and FP32 scores, historical equality, repeated stability, storage ownership, and useful end-to-end latency improvement with p95 inspected explicitly. No new GPU result is claimed at submission. The earlier unrun records and closeout report remain historical evidence.
+
+## Previous window closeout: pilot never started
 
 Job `7893602`, run `packed-mlp-pilot-20261024T135738Z-d85533e2a0f0`, remained queued until the six-hour research deadline on October 24. It was cancelled while PENDING, with zero compute time. No GPU latency, score equality, setup, or memory result exists, and no full500 run was submitted. This is an unrun candidate; all 46 CPU/evidence checks passed at source `9b94664b1800260674d63a26cdc33eb5a4cb5370`.
 
