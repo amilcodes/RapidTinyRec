@@ -85,3 +85,8 @@ Profiler timings are not the 500-user benchmark numbers.
 
 The [input-arena protocol](input-arena.md) compares direct reorder against shared
 input storage in isolated processes, with separate memory and setup measurements.
+
+The [physical-prefix protocol](shared-prefix.md) compares shared inputs against
+one stored history KV row per layer. Run its pilot first, then all four full
+phases in one 30-minute A6000 allocation; the completed comparison took 16m07s.
+The full audit requires all 500 paired controls and never accepts partial output.

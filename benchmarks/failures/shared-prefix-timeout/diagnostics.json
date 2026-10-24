@@ -1,0 +1,128 @@
+{
+  "run_id": "prefix-pilot-20261023T175603Z-432c963c11ce",
+  "job_id": "7859244",
+  "status": "TIMEOUT after15m13; phase3 missing summary. Full audit failed as required.",
+  "full_pilot_passed": false,
+  "completed_phases": [
+    0,
+    1,
+    2
+  ],
+  "snapshot_files_verified": 41,
+  "partial_pair_count": 12,
+  "partial_comparison": {
+    "requests": 12,
+    "rank_positions": 600,
+    "sequence_values": 600,
+    "transition_values": 3000,
+    "matching_rank_lists": 12,
+    "matching_rank_positions": 600,
+    "matching_sequence_vectors": 12,
+    "matching_transition_arrays": 12,
+    "matching_sequence_values": 600,
+    "matching_transition_values": 3000,
+    "max_sequence_difference_common": 0.0,
+    "max_transition_difference_common": 0.0
+  },
+  "partial_latency_ms": {
+    "arena_replay": {
+      "n": 12,
+      "median_ms": 132.30450078845024,
+      "p95_ms": 138.36414106190205
+    },
+    "prefix_replay": {
+      "n": 12,
+      "median_ms": 128.27016413211823,
+      "p95_ms": 133.8318981230259
+    }
+  },
+  "historical_comparisons": {
+    "0": {
+      "requests": 12,
+      "rank_positions": 600,
+      "sequence_values": 600,
+      "transition_values": 3000,
+      "matching_rank_lists": 12,
+      "matching_rank_positions": 600,
+      "matching_sequence_vectors": 12,
+      "matching_transition_arrays": 12,
+      "matching_sequence_values": 600,
+      "matching_transition_values": 3000,
+      "max_sequence_difference_common": 0.0,
+      "max_transition_difference_common": 0.0
+    },
+    "1": {
+      "requests": 12,
+      "rank_positions": 600,
+      "sequence_values": 600,
+      "transition_values": 3000,
+      "matching_rank_lists": 12,
+      "matching_rank_positions": 600,
+      "matching_sequence_vectors": 12,
+      "matching_transition_arrays": 12,
+      "matching_sequence_values": 600,
+      "matching_transition_values": 3000,
+      "max_sequence_difference_common": 0.0,
+      "max_transition_difference_common": 0.0
+    },
+    "2": {
+      "requests": 12,
+      "rank_positions": 600,
+      "sequence_values": 600,
+      "transition_values": 3000,
+      "matching_rank_lists": 12,
+      "matching_rank_positions": 600,
+      "matching_sequence_vectors": 12,
+      "matching_transition_arrays": 12,
+      "matching_sequence_values": 600,
+      "matching_transition_values": 3000,
+      "max_sequence_difference_common": 0.0,
+      "max_transition_difference_common": 0.0
+    }
+  },
+  "phases": [
+    {
+      "phase": 0,
+      "memory": {
+        "allocated_bytes": 9656742400,
+        "reserved_bytes": 11500781568,
+        "peak_allocated_bytes": 10575722496,
+        "peak_reserved_bytes": 11500781568
+      },
+      "setup_s": 134.9407067708671,
+      "backend_compile_s": 104.06486126407981,
+      "capture_and_warmup_s": 0.7651988640427589,
+      "measurement_compilations": 0,
+      "measurement_captures": 0
+    },
+    {
+      "phase": 1,
+      "memory": {
+        "allocated_bytes": 6595040256,
+        "reserved_bytes": 7964983296,
+        "peak_allocated_bytes": 6911101440,
+        "peak_reserved_bytes": 7964983296
+      },
+      "setup_s": 341.915420781821,
+      "backend_compile_s": 267.3743003346026,
+      "capture_and_warmup_s": 207.93507983908057,
+      "measurement_compilations": 0,
+      "measurement_captures": 0
+    },
+    {
+      "phase": 2,
+      "memory": {
+        "allocated_bytes": 6595040256,
+        "reserved_bytes": 7964983296,
+        "peak_allocated_bytes": 6911101440,
+        "peak_reserved_bytes": 7964983296
+      },
+      "setup_s": 339.3681638725102,
+      "backend_compile_s": 265.1685667783022,
+      "capture_and_warmup_s": 207.50025246292353,
+      "measurement_compilations": 0,
+      "measurement_captures": 0
+    }
+  ],
+  "limitations": "Only first half has paired controls: four users, three trials. Second half lacks control. Not a completed ABBA pilot; not eligible for full run."
+}

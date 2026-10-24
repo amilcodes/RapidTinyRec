@@ -35,6 +35,7 @@ Replay cycles all six three-way orders across the cohort (83 or 84 users per ord
 | Initial compilation → native GQA | 174.418 → 159.687 | 188.198 → 169.783 | 0 |
 | Native GQA → replay with direct KV reorder | 136.508 → 131.101 | 144.643 → 138.838 | 0 |
 | Direct reorder → shared graph input storage | 130.052 → 130.240 | 137.956 → 138.305 | 0 |
+| Shared inputs → physical shared-prefix KV | 129.278 → 126.697 | 137.210 → 133.267 | 0 |
 
 Each comparison preserved 500/500 full rank lists and 25,000/25,000 ranked
 positions. Batched constraints, GPU lookup and GQA also preserved all 25,000
@@ -81,6 +82,24 @@ halves, with every shape warmed per process. Memory is isolated, and latency is
 paired by user across phases. This is not adjacent request alternation or a
 run-to-run variability study. Cold setup/warmup is 136.887–138.923 s per phase;
 all compilation/capture is excluded. [Full memory and setup record](input-arena.md).
+
+A separate physical-prefix comparison stores one history KV row per layer and
+reorders only beam suffixes. All 25,000 rank positions and sequence values,
+and 125,000 transition values, match the shared-input control and historical
+GQA bit for bit (maximum deltas zero). Median/p95 fall 2.00%/2.87%, improving
+at all ten lengths and in both halves. Ten individual requests regress by at
+most 1.059 ms; the 508.953 ms control outlier is retained.
+
+Across the isolated phases, allocated memory falls 18.366–18.783 → 7.485 GiB,
+reserved memory 22.668–22.945 → 9.313–9.779 GiB, and inference peak allocated
+19.639–19.648 → 7.779–7.784 GiB. Forty graphs share 0.0145 GiB unique inputs,
+compared with 0.331 GiB for the control. Native GQA still receives temporary
+dense exact-length K/V; this is not a shared-prefix attention kernel. Cold
+setup/warmup rises 139.682 → 349.860 s; with disk artifacts reused, setup is
+69.836 → 148.810 s. All processes and GPU allocations are fresh. Compiler and
+graph preparation timings overlap within setup and remain outside inference.
+The four-phase ABBA run completed in 16m07s. Both earlier 15-minute timeouts
+and their incomplete outputs are retained. [Full record](shared-prefix.md).
 
 ## Evidence
 
