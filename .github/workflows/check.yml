@@ -11,6 +11,10 @@ jobs:
         with:
           python-version: '3.11'
       - run: python -m compileall -q rapidtinyrec
+      - run: python -m unittest discover -s tests -p test_fp32_backend.py -v
+      - run: python -m unittest discover -s tests -p test_fp32_backend_build_evidence.py -v
+      - run: python -m unittest discover -s tests -p test_fp32_backend_evidence.py -v
+      - run: python -m rapidtinyrec.audit_fp32_backend --help
       - run: python -m unittest discover -s tests -p test_evidence.py -v
       - run: python -m unittest discover -s tests -p test_folded_evidence.py -v
       - run: python -m unittest discover -s tests -p test_audit_decode_pilot.py -v
@@ -33,6 +37,7 @@ jobs:
       - run: pip install torch==2.14.0 --index-url https://download.pytorch.org/whl/cpu
       - run: pip install -e .
       - run: python -m unittest discover -s tests -v
+      - run: python -m rapidtinyrec.diagnose_fp32_backend --help
       - run: python -m rapidtinyrec.benchmark --help
       - run: python -m rapidtinyrec.benchmark_gqa --help
       - run: python -m rapidtinyrec.benchmark_folded_profile --help

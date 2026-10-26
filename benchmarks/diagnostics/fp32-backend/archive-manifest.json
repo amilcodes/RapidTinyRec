@@ -1,0 +1,1630 @@
+{
+  "archives": [
+    {
+      "path": "evidence-001.tar.gz",
+      "bytes": 42055622,
+      "sha256": "4ddf89a576630f97dc9be58b2dc2428eeab977976e4f5fec1a0ffb9a99a7813a",
+      "files": 160
+    },
+    {
+      "path": "evidence-002.tar.gz",
+      "bytes": 39094937,
+      "sha256": "a7f1f855ce37bbf354b48d4fde5e5bf63fce9c98abe605f94727ee675a61e814",
+      "files": 40
+    },
+    {
+      "path": "evidence-003.tar.gz",
+      "bytes": 39095636,
+      "sha256": "ca29ed6bb3b26000089f4a51d3c857a82c3617e0f584dffd822cb4c6f5f22819",
+      "files": 40
+    },
+    {
+      "path": "evidence-004.tar.gz",
+      "bytes": 21076319,
+      "sha256": "6bdf48e746c8af757694c8a2a6c6a71479d68e05ca58f2ce7b89d1f1895ba1ca",
+      "files": 80
+    }
+  ],
+  "files": {
+    "audit.json": {
+      "bytes": 640950,
+      "sha256": "d693da29d151d2a54bc895b8b4e55064484a3fec64fca7b45a5150484d2e8204",
+      "archive": "evidence-001.tar.gz"
+    },
+    "build-identity/github-compare.json": {
+      "bytes": 22310,
+      "sha256": "58bb9452736c30bdde2f422faf46adaef3ec7b75bbd51cb1721eaa5396cb9adb",
+      "archive": "evidence-001.tar.gz"
+    },
+    "build-identity/installed-source/aten/src/ATen/Context.cpp": {
+      "bytes": 31834,
+      "sha256": "e2b56a99a018e274f6b584c9c86c88140d5e4743000d1dd9e6aff4da4e559da3",
+      "archive": "evidence-001.tar.gz"
+    },
+    "build-identity/installed-source/aten/src/ATen/cuda/CUDABlas.cpp": {
+      "bytes": 97546,
+      "sha256": "1d81d9e5e68ba45636e8635cb8e7905f24044e1f4eb1449ed26be505be6bbcee",
+      "archive": "evidence-001.tar.gz"
+    },
+    "build-identity/installed-source/aten/src/ATen/cuda/detail/CublasLtUtils.h": {
+      "bytes": 10994,
+      "sha256": "ebedfaef84f6e8a7442ee2df50709b328b442ff118a38fd798d64e9a73ba129e",
+      "archive": "evidence-001.tar.gz"
+    },
+    "build-identity/installed-source/aten/src/ATen/native/cuda/Blas.cpp": {
+      "bytes": 45184,
+      "sha256": "237271bb965e49ac3f12f950609181f8c2d95a9afd646b4da362505e3044203a",
+      "archive": "evidence-001.tar.gz"
+    },
+    "build-identity/installed-source/torch/backends/cuda/__init__.py": {
+      "bytes": 26347,
+      "sha256": "aa36a537f1fbea9292069b7b8cce52a5ef4c5f354b73165448a1ca9ab116d81e",
+      "archive": "evidence-001.tar.gz"
+    },
+    "build-identity/proof.json": {
+      "bytes": 2789,
+      "sha256": "b4ab653ac772fab48de362808e08d53bda079cfcf320109f71cffa6711acef87",
+      "archive": "evidence-001.tar.gz"
+    },
+    "export_fp32_backend.py": {
+      "bytes": 12388,
+      "sha256": "16872a22bb8c8d73625b4bf2f23305f93f3863531a5ef374cd78d5364f67d3d2",
+      "archive": "evidence-001.tar.gz"
+    },
+    "prior-startup-failure/published/README.md": {
+      "bytes": 1304,
+      "sha256": "de8842760c6e7762342472f182585c8e0ec5ae4afdf7600aa6e9d89f47fdf253",
+      "archive": "evidence-001.tar.gz"
+    },
+    "prior-startup-failure/published/archive-manifest.json": {
+      "bytes": 14928,
+      "sha256": "845cbfd6119710b911e91fa9333122d55bf49bac8e968086f6fcab7de2f2dc03",
+      "archive": "evidence-001.tar.gz"
+    },
+    "prior-startup-failure/published/evidence-001.tar.gz": {
+      "bytes": 175649,
+      "sha256": "4634824b098f2dd859f9c7532c79cea0b0c49d52b62def3e5a76a4b3da93a972",
+      "archive": "evidence-001.tar.gz"
+    },
+    "prior-startup-failure/published/source.json": {
+      "bytes": 5551,
+      "sha256": "d1289107d62ea0bfcfe4a43873e02fc36e0d48f2abf05a46e516e3cb122022af",
+      "archive": "evidence-001.tar.gz"
+    },
+    "prior-startup-failure/published/summary.json": {
+      "bytes": 1957,
+      "sha256": "dd1c24e876186da469489bc2ea4c9f6e000e1057219892fb207e77d00756331b",
+      "archive": "evidence-001.tar.gz"
+    },
+    "prior-startup-failure/status.json": {
+      "bytes": 6114,
+      "sha256": "b842afd8e1fbbedcfd3bc7f578c1b1813dba1840773d954a2638aee68ff643cf",
+      "archive": "evidence-001.tar.gz"
+    },
+    "raw/job-id": {
+      "bytes": 8,
+      "sha256": "50218d3082963c339c067cf3596a2fa61df9a0f8bc3b4c67aa5e1821fd40835f",
+      "archive": "evidence-001.tar.gz"
+    },
+    "raw/job.sh": {
+      "bytes": 970,
+      "sha256": "880280e39311eb9cc084c2e00fc79e272cff95151dc2f6dd7dac51f8bfde81fa",
+      "archive": "evidence-001.tar.gz"
+    },
+    "raw/logs/stderr.log": {
+      "bytes": 7005,
+      "sha256": "27056ea89934c9d82ac06feb10a39eb6341891884cc0154ef26bba740f7eb718",
+      "archive": "evidence-001.tar.gz"
+    },
+    "raw/logs/stdout.log": {
+      "bytes": 844,
+      "sha256": "2c67927b7cc1bab21d302d5f676d6d0e06310c467519dbe2c21590cd3dff9ac5",
+      "archive": "evidence-001.tar.gz"
+    },
+    "raw/outputs/diagnosis/diagnosis.json": {
+      "bytes": 1110665,
+      "sha256": "50123a3e2cd9293a6632e6e4fbc677be6f9d4be382fa3c759fb7b5ab2700e852",
+      "archive": "evidence-001.tar.gz"
+    },
+    "raw/outputs/diagnosis/dispatch-u1-l0-cublas-cublas.log": {
+      "bytes": 8595,
+      "sha256": "f9980af05cb790ecb323650659d1e17d3957dbf2174b83c9bc7ab5456a1329b4",
+      "archive": "evidence-001.tar.gz"
+    },
+    "raw/outputs/diagnosis/dispatch-u1-l0-cublas-cublaslt.log": {
+      "bytes": 4796,
+      "sha256": "eeb33048512e26b801c150f54cdca4b930d8547fac5c102608fec54392b30de1",
+      "archive": "evidence-001.tar.gz"
+    },
+    "raw/outputs/diagnosis/dispatch-u1-l0-cublas.json": {
+      "bytes": 25086,
+      "sha256": "35332c2dfb3b432f28a0c13aa1184bb5f9838bcbcfdb99c63a5408ec944b46d8",
+      "archive": "evidence-001.tar.gz"
+    },
+    "raw/outputs/diagnosis/dispatch-u1-l0-cublaslt-cublaslt.log": {
+      "bytes": 10842,
+      "sha256": "cc75dfe4dcf5dc9e0e7815e2c4eab5a437c40b4c5fff60af194d68ca555f150e",
+      "archive": "evidence-001.tar.gz"
+    },
+    "raw/outputs/diagnosis/dispatch-u1-l0-cublaslt.json": {
+      "bytes": 24351,
+      "sha256": "9d896973fae519bf1b77f1b37c535e302d8d7c1275dbe25185c49d3d4c821d40",
+      "archive": "evidence-001.tar.gz"
+    },
+    "raw/outputs/diagnosis/dispatch-u1-l0-default-cublas.log": {
+      "bytes": 8595,
+      "sha256": "c6dc6b26b1ea0b399c97677d936423540ac63c15e7ee2044eb7f7f56df05dc68",
+      "archive": "evidence-001.tar.gz"
+    },
+    "raw/outputs/diagnosis/dispatch-u1-l0-default-cublaslt.log": {
+      "bytes": 4796,
+      "sha256": "13d2f36dff24b87c6574162bb69e9967b2a236c3ac7f200f4549a1f94afe793b",
+      "archive": "evidence-001.tar.gz"
+    },
+    "raw/outputs/diagnosis/dispatch-u1-l0-default.json": {
+      "bytes": 24967,
+      "sha256": "f998aac49d671c14a62b362f5abf7e3bda834f63010ce285a0fbe4febb2e32dd",
+      "archive": "evidence-001.tar.gz"
+    },
+    "raw/outputs/diagnosis/dispatch-u1-l13-cublas-cublas.log": {
+      "bytes": 8595,
+      "sha256": "8b7f26581ffd2d40c06be7fde952dcbf92a4ecda919ded50331f15945aaf671c",
+      "archive": "evidence-001.tar.gz"
+    },
+    "raw/outputs/diagnosis/dispatch-u1-l13-cublas-cublaslt.log": {
+      "bytes": 4796,
+      "sha256": "ac35aa2bd75819401c9d00358f9dbd9b347299db3de28dc86bf047d28870de18",
+      "archive": "evidence-001.tar.gz"
+    },
+    "raw/outputs/diagnosis/dispatch-u1-l13-cublas.json": {
+      "bytes": 25142,
+      "sha256": "0f697bce1f3fe75cbb9630174ad0a3d9722339cfc3a77fa1a142e5cdc5b3beec",
+      "archive": "evidence-001.tar.gz"
+    },
+    "raw/outputs/diagnosis/dispatch-u1-l13-cublaslt-cublaslt.log": {
+      "bytes": 10842,
+      "sha256": "1712ce537713a816cfe06304403408c0c7779d9b9cea5eb5658157ca86a98f06",
+      "archive": "evidence-001.tar.gz"
+    },
+    "raw/outputs/diagnosis/dispatch-u1-l13-cublaslt.json": {
+      "bytes": 24374,
+      "sha256": "093fb52d07d6f7cfba77e13256c3376b2b35daf38c7a4477a21cad07859fc75a",
+      "archive": "evidence-001.tar.gz"
+    },
+    "raw/outputs/diagnosis/dispatch-u1-l13-default-cublas.log": {
+      "bytes": 8595,
+      "sha256": "7bda03f2a900c701f379b327c3fd06d04a6589bc8afd47caf1d309a2839d8006",
+      "archive": "evidence-001.tar.gz"
+    },
+    "raw/outputs/diagnosis/dispatch-u1-l13-default-cublaslt.log": {
+      "bytes": 4796,
+      "sha256": "5eeefe6c0900dfb21aeb446225beb4d574ffb65181566ed0b9e735db20e969ca",
+      "archive": "evidence-001.tar.gz"
+    },
+    "raw/outputs/diagnosis/dispatch-u1-l13-default.json": {
+      "bytes": 25157,
+      "sha256": "f5e2c049af485eb6c63a51ad373ab4cb258c957a7443f7c258dfb76ced0a215f",
+      "archive": "evidence-001.tar.gz"
+    },
+    "raw/outputs/diagnosis/dispatch-u1-l27-cublas-cublas.log": {
+      "bytes": 8595,
+      "sha256": "462802b5f7e38707c963321f29da43afa1f655d5ae2bcf6e8afe1ce7b0ee21da",
+      "archive": "evidence-001.tar.gz"
+    },
+    "raw/outputs/diagnosis/dispatch-u1-l27-cublas-cublaslt.log": {
+      "bytes": 4796,
+      "sha256": "ee137f8d8b3a105124f95b45d994f0dff1771b65d9bab0358bdbb19e67a3761c",
+      "archive": "evidence-001.tar.gz"
+    },
+    "raw/outputs/diagnosis/dispatch-u1-l27-cublas.json": {
+      "bytes": 25155,
+      "sha256": "ac3469f10d0f12413919d7aecbf319ee0fd0fa3298e00b9a941bf1f6c1de5b4a",
+      "archive": "evidence-001.tar.gz"
+    },
+    "raw/outputs/diagnosis/dispatch-u1-l27-cublaslt-cublaslt.log": {
+      "bytes": 10842,
+      "sha256": "744b926674e9ed63a31f72ed152b60e51bd791eb07256ecaacf7ea7f55c2a593",
+      "archive": "evidence-001.tar.gz"
+    },
+    "raw/outputs/diagnosis/dispatch-u1-l27-cublaslt.json": {
+      "bytes": 24374,
+      "sha256": "054c8077740ab2dfc3b55736ac46331f7e9c2c66af964b170b709598ad61c075",
+      "archive": "evidence-001.tar.gz"
+    },
+    "raw/outputs/diagnosis/dispatch-u1-l27-default-cublas.log": {
+      "bytes": 8595,
+      "sha256": "c17988c78bcfa89f5aa8b7941df31ab7c2a4dcfc683909e602b1dea86d798bff",
+      "archive": "evidence-001.tar.gz"
+    },
+    "raw/outputs/diagnosis/dispatch-u1-l27-default-cublaslt.log": {
+      "bytes": 4796,
+      "sha256": "4737786316e2690d9ae55c5758cf35f1f090a348460e923289366c3df514a7b6",
+      "archive": "evidence-001.tar.gz"
+    },
+    "raw/outputs/diagnosis/dispatch-u1-l27-default.json": {
+      "bytes": 25144,
+      "sha256": "2cb13208355d44580d5e0fb7ae0642e2ef6480393dbdd42bfc0b6662111e1641",
+      "archive": "evidence-001.tar.gz"
+    },
+    "raw/outputs/diagnosis/dispatch-u10-l0-cublas-cublas.log": {
+      "bytes": 8595,
+      "sha256": "85921cffbd0c9ba3dbb55c5e8718229ff860061a14050e16afe274cce21aa9ea",
+      "archive": "evidence-001.tar.gz"
+    },
+    "raw/outputs/diagnosis/dispatch-u10-l0-cublas-cublaslt.log": {
+      "bytes": 4796,
+      "sha256": "5f93d521956a5ae7adc145ffb9f78107636b4a106cca46e72d6e740bf02bc091",
+      "archive": "evidence-001.tar.gz"
+    },
+    "raw/outputs/diagnosis/dispatch-u10-l0-cublas.json": {
+      "bytes": 25221,
+      "sha256": "7ecc306efa0963f475a22ba42d706e1b045f7bd2f8250964dc0c10002c972ca2",
+      "archive": "evidence-001.tar.gz"
+    },
+    "raw/outputs/diagnosis/dispatch-u10-l0-cublaslt-cublaslt.log": {
+      "bytes": 10842,
+      "sha256": "fb344e2dcf415a63f587176b6b3b0dfacb795a5f5381190321b556036a3b6a90",
+      "archive": "evidence-001.tar.gz"
+    },
+    "raw/outputs/diagnosis/dispatch-u10-l0-cublaslt.json": {
+      "bytes": 24454,
+      "sha256": "ffa3af42dafea641270b12283cc0a41d259733294980f54df06577669150cd6e",
+      "archive": "evidence-001.tar.gz"
+    },
+    "raw/outputs/diagnosis/dispatch-u10-l0-default-cublas.log": {
+      "bytes": 8595,
+      "sha256": "6b19afaaa8ba1fd408d6f94034189a04bfcb5094c7b495da8982cc8f59910da4",
+      "archive": "evidence-001.tar.gz"
+    },
+    "raw/outputs/diagnosis/dispatch-u10-l0-default-cublaslt.log": {
+      "bytes": 4796,
+      "sha256": "9ca7323b321a9210896f33d1e414b02d4c9d2841431203d8d9e0b06510dbd7c4",
+      "archive": "evidence-001.tar.gz"
+    },
+    "raw/outputs/diagnosis/dispatch-u10-l0-default.json": {
+      "bytes": 25211,
+      "sha256": "1476538e514bd56058442bb456074933edbdb0807e9ffd91f50798e68f349045",
+      "archive": "evidence-001.tar.gz"
+    },
+    "raw/outputs/diagnosis/dispatch-u10-l13-cublas-cublas.log": {
+      "bytes": 8595,
+      "sha256": "a2370151dc37528dea942df7ee048435e4544c8dd98aaf5978c13483359fde4e",
+      "archive": "evidence-001.tar.gz"
+    },
+    "raw/outputs/diagnosis/dispatch-u10-l13-cublas-cublaslt.log": {
+      "bytes": 4796,
+      "sha256": "8cf7df429884bea4c993c6f45d3c61ac88ff43b54bf065ef64d4dc0d73cac128",
+      "archive": "evidence-001.tar.gz"
+    },
+    "raw/outputs/diagnosis/dispatch-u10-l13-cublas.json": {
+      "bytes": 25223,
+      "sha256": "5288d72cd69ad7a8718208e0eeff866ca82a8a4ea54582dafdca7d9281d0733d",
+      "archive": "evidence-001.tar.gz"
+    },
+    "raw/outputs/diagnosis/dispatch-u10-l13-cublaslt-cublaslt.log": {
+      "bytes": 10842,
+      "sha256": "3104adc8fe13983ab4fe1c5afcb00c4e9be992493f078d83bd2b77065e0fb105",
+      "archive": "evidence-001.tar.gz"
+    },
+    "raw/outputs/diagnosis/dispatch-u10-l13-cublaslt.json": {
+      "bytes": 24468,
+      "sha256": "bfacf1b2583269d3ee4070147bf2e715a60cb0122588c9af1d26553747bd9501",
+      "archive": "evidence-001.tar.gz"
+    },
+    "raw/outputs/diagnosis/dispatch-u10-l13-default-cublas.log": {
+      "bytes": 8595,
+      "sha256": "fb5f42f59c4dcd60cdd975567f39e8dcd7b63e6c92ab15a05d2732ae5d3462da",
+      "archive": "evidence-001.tar.gz"
+    },
+    "raw/outputs/diagnosis/dispatch-u10-l13-default-cublaslt.log": {
+      "bytes": 4796,
+      "sha256": "f586c16535efb16d34375c440a6db3f404a81bd49a09308e0306b16aa9523b86",
+      "archive": "evidence-001.tar.gz"
+    },
+    "raw/outputs/diagnosis/dispatch-u10-l13-default.json": {
+      "bytes": 25238,
+      "sha256": "2f205641cf599bb9ebca1e27ebc8e4e9dc4b03722c550defc184d88bd22f48a0",
+      "archive": "evidence-001.tar.gz"
+    },
+    "raw/outputs/diagnosis/dispatch-u10-l27-cublas-cublas.log": {
+      "bytes": 8595,
+      "sha256": "912f95957a7e97ed955e2fe28df552da1e8dbce4ce40e6868ef0a94fbcd99d84",
+      "archive": "evidence-001.tar.gz"
+    },
+    "raw/outputs/diagnosis/dispatch-u10-l27-cublas-cublaslt.log": {
+      "bytes": 4796,
+      "sha256": "e3bf27f058bf615f872af98c49f13385e32bf1f2530ab689b8abe5fd7c0d6b80",
+      "archive": "evidence-001.tar.gz"
+    },
+    "raw/outputs/diagnosis/dispatch-u10-l27-cublas.json": {
+      "bytes": 25223,
+      "sha256": "e43ebe7572167b16756c1624a2a612a35f2b4cbfefd67c40dabf669fbc4c0ac9",
+      "archive": "evidence-001.tar.gz"
+    },
+    "raw/outputs/diagnosis/dispatch-u10-l27-cublaslt-cublaslt.log": {
+      "bytes": 10842,
+      "sha256": "b945a99946bb32ccf5bcc60b437ba674b4ccee2eb67d80dc9ecdfc46751469a6",
+      "archive": "evidence-001.tar.gz"
+    },
+    "raw/outputs/diagnosis/dispatch-u10-l27-cublaslt.json": {
+      "bytes": 24442,
+      "sha256": "703411dc813cb4d872b6c40a0dcf09f2d3d7a8eeffe5271c913217a540fdfce0",
+      "archive": "evidence-001.tar.gz"
+    },
+    "raw/outputs/diagnosis/dispatch-u10-l27-default-cublas.log": {
+      "bytes": 8595,
+      "sha256": "3fa4358e24f22e0916b702375877c5dd592d8298b73805955496161f77a25cd0",
+      "archive": "evidence-001.tar.gz"
+    },
+    "raw/outputs/diagnosis/dispatch-u10-l27-default-cublaslt.log": {
+      "bytes": 4796,
+      "sha256": "72546240410a5bdb73e1a03782271eba73a932f6dbc1f227f4aab740a30c20e7",
+      "archive": "evidence-001.tar.gz"
+    },
+    "raw/outputs/diagnosis/dispatch-u10-l27-default.json": {
+      "bytes": 25236,
+      "sha256": "6cf5bfd38a0922871210f07213803f4d84fed59c7bee50ca9b262bcf16f7ec98",
+      "archive": "evidence-001.tar.gz"
+    },
+    "raw/outputs/diagnosis/dispatch-u2-l0-cublas-cublas.log": {
+      "bytes": 8595,
+      "sha256": "7fe0ff9a0ba34d9cf0f2cca38b42d7c966e317d65174565ec70c7972ed6b71d5",
+      "archive": "evidence-001.tar.gz"
+    },
+    "raw/outputs/diagnosis/dispatch-u2-l0-cublas-cublaslt.log": {
+      "bytes": 4796,
+      "sha256": "500415cef1640577a384e6226ce909cce8aaf258c27de63ac6fa50a3443f913b",
+      "archive": "evidence-001.tar.gz"
+    },
+    "raw/outputs/diagnosis/dispatch-u2-l0-cublas.json": {
+      "bytes": 25141,
+      "sha256": "4d9f46967b4d12f33e78022072ead76b02a6d89e1c1d561b2800340421fd8e97",
+      "archive": "evidence-001.tar.gz"
+    },
+    "raw/outputs/diagnosis/dispatch-u2-l0-cublaslt-cublaslt.log": {
+      "bytes": 10842,
+      "sha256": "d7f1f364925023a2eba3cb89781d74fefcb84786baaf460a8e0cf30496ec4f45",
+      "archive": "evidence-001.tar.gz"
+    },
+    "raw/outputs/diagnosis/dispatch-u2-l0-cublaslt.json": {
+      "bytes": 24375,
+      "sha256": "1de3a01f90e15161389fdedfed4b2a7bb09105e12d33a9920d6e43d588f8b64b",
+      "archive": "evidence-001.tar.gz"
+    },
+    "raw/outputs/diagnosis/dispatch-u2-l0-default-cublas.log": {
+      "bytes": 8595,
+      "sha256": "d1329601ca1e3141c37b42e8135dacec5a26a031d2edc192b38d11815e762054",
+      "archive": "evidence-001.tar.gz"
+    },
+    "raw/outputs/diagnosis/dispatch-u2-l0-default-cublaslt.log": {
+      "bytes": 4796,
+      "sha256": "3e84e8235746d92050c1f7b4c4d6a89db6573170f95da04c418cdb287f4ff888",
+      "archive": "evidence-001.tar.gz"
+    },
+    "raw/outputs/diagnosis/dispatch-u2-l0-default.json": {
+      "bytes": 25155,
+      "sha256": "0188476887af9211958a7eeabdddb4515515abf6848cb780c06fdc2767c381db",
+      "archive": "evidence-001.tar.gz"
+    },
+    "raw/outputs/diagnosis/dispatch-u2-l13-cublas-cublas.log": {
+      "bytes": 8595,
+      "sha256": "9ad9af7f781500aad3427de7cd03c2ebdee98055bbeff5fb4121e1b74f832c39",
+      "archive": "evidence-001.tar.gz"
+    },
+    "raw/outputs/diagnosis/dispatch-u2-l13-cublas-cublaslt.log": {
+      "bytes": 4796,
+      "sha256": "1a3acaeb074ed9ce88404596b2262c92f7dda40c91044eda178c19acf7202c89",
+      "archive": "evidence-001.tar.gz"
+    },
+    "raw/outputs/diagnosis/dispatch-u2-l13-cublas.json": {
+      "bytes": 25155,
+      "sha256": "be7f1e87376daa664db5d1b538a8096906c099564f49b4d9ade945aff0c23ef0",
+      "archive": "evidence-001.tar.gz"
+    },
+    "raw/outputs/diagnosis/dispatch-u2-l13-cublaslt-cublaslt.log": {
+      "bytes": 10842,
+      "sha256": "7e776327b00e7d1cd70584c8398a31a7b3e4ac359c80f4baa0e39ad70818d4f1",
+      "archive": "evidence-001.tar.gz"
+    },
+    "raw/outputs/diagnosis/dispatch-u2-l13-cublaslt.json": {
+      "bytes": 24374,
+      "sha256": "edde960610359e8e47faf5c4119fa76113cb2b0915ded49deb13bfe21fd656ad",
+      "archive": "evidence-001.tar.gz"
+    },
+    "raw/outputs/diagnosis/dispatch-u2-l13-default-cublas.log": {
+      "bytes": 8595,
+      "sha256": "46160936175995e9ac1817ae083a0a2733e1b6e5b9d47f6e0f6f3bde88ee912a",
+      "archive": "evidence-001.tar.gz"
+    },
+    "raw/outputs/diagnosis/dispatch-u2-l13-default-cublaslt.log": {
+      "bytes": 4796,
+      "sha256": "f19c09828be0a2e63f73006f565c0230725d590a5677927f57b55b098f15e0cc",
+      "archive": "evidence-001.tar.gz"
+    },
+    "raw/outputs/diagnosis/dispatch-u2-l13-default.json": {
+      "bytes": 25155,
+      "sha256": "9e8718ff373a6fc3070aa2969bc43d2b0e3614916bec823d373841b95bed7da0",
+      "archive": "evidence-001.tar.gz"
+    },
+    "raw/outputs/diagnosis/dispatch-u2-l27-cublas-cublas.log": {
+      "bytes": 8595,
+      "sha256": "df3dfefc10ca297b6dbf1fb8d3d4ab1a05ff61092cfa01d9108f92864e226a73",
+      "archive": "evidence-001.tar.gz"
+    },
+    "raw/outputs/diagnosis/dispatch-u2-l27-cublas-cublaslt.log": {
+      "bytes": 4796,
+      "sha256": "79257ed45514bf0a29063a3a7f0adfe4605b69baa03699105c8dd435d68d5f87",
+      "archive": "evidence-001.tar.gz"
+    },
+    "raw/outputs/diagnosis/dispatch-u2-l27-cublas.json": {
+      "bytes": 25142,
+      "sha256": "d14e2d68bb74b62b6f0d57fd9698b8e58e3a493b74647401f97caf32b2636144",
+      "archive": "evidence-001.tar.gz"
+    },
+    "raw/outputs/diagnosis/dispatch-u2-l27-cublaslt-cublaslt.log": {
+      "bytes": 10842,
+      "sha256": "44fc610dd1f964d65a95ed9f5d820123e348ab2654f46170a31f141c69e01899",
+      "archive": "evidence-001.tar.gz"
+    },
+    "raw/outputs/diagnosis/dispatch-u2-l27-cublaslt.json": {
+      "bytes": 24377,
+      "sha256": "9305f06bb434b2fd31ae7aee52d7676b1384c761a5eeac6852335ddfbaa7ea1c",
+      "archive": "evidence-001.tar.gz"
+    },
+    "raw/outputs/diagnosis/dispatch-u2-l27-default-cublas.log": {
+      "bytes": 8595,
+      "sha256": "af7fce42a0688dea31e3a9e2f0efee3ca55bb5d8e298bbcb7d5b78642619b692",
+      "archive": "evidence-001.tar.gz"
+    },
+    "raw/outputs/diagnosis/dispatch-u2-l27-default-cublaslt.log": {
+      "bytes": 4796,
+      "sha256": "c413e05d60520c32cd5c2be2ed5d922d4393dfa5ed75578332ba04805dc5f12d",
+      "archive": "evidence-001.tar.gz"
+    },
+    "raw/outputs/diagnosis/dispatch-u2-l27-default.json": {
+      "bytes": 25144,
+      "sha256": "941976960712070c7d520aa71cd4c5e78efae2c95d42817e9ba80830b2ca0574",
+      "archive": "evidence-001.tar.gz"
+    },
+    "raw/outputs/diagnosis/dispatch-u6-l0-cublas-cublas.log": {
+      "bytes": 8595,
+      "sha256": "c882c06139dbc98ef470240c3bbd0cdada69dd7921ed753ef0fa30bfcee62e31",
+      "archive": "evidence-001.tar.gz"
+    },
+    "raw/outputs/diagnosis/dispatch-u6-l0-cublas-cublaslt.log": {
+      "bytes": 4796,
+      "sha256": "80dfd40358a5523311db71e318bfa33a896e1481214f4e69d4f0e7b23d39192a",
+      "archive": "evidence-001.tar.gz"
+    },
+    "raw/outputs/diagnosis/dispatch-u6-l0-cublas.json": {
+      "bytes": 25175,
+      "sha256": "4c380261083587b4c93e90ae2cd8cb65549e61af423df2c99ca04b5958b1d58c",
+      "archive": "evidence-001.tar.gz"
+    },
+    "raw/outputs/diagnosis/dispatch-u6-l0-cublaslt-cublaslt.log": {
+      "bytes": 10842,
+      "sha256": "d94e9131b5786bbac9ff6bd08813bb1ab6495a8fc5e15f63515da725d2cc2aa5",
+      "archive": "evidence-001.tar.gz"
+    },
+    "raw/outputs/diagnosis/dispatch-u6-l0-cublaslt.json": {
+      "bytes": 24440,
+      "sha256": "208976868fab099c595af287c79cfee65a17e9bcdcbaa866b0373bd0826b5fdb",
+      "archive": "evidence-001.tar.gz"
+    },
+    "raw/outputs/diagnosis/dispatch-u6-l0-default-cublas.log": {
+      "bytes": 8595,
+      "sha256": "ea6a9556bb351c8061626e42c40e86d176759930863ef7aefd1e5f45b0c7b4af",
+      "archive": "evidence-001.tar.gz"
+    },
+    "raw/outputs/diagnosis/dispatch-u6-l0-default-cublaslt.log": {
+      "bytes": 4796,
+      "sha256": "3de70e672c45a48948389ad9aaa16376e0257c2a4434a27f9cd734c6d255cb3b",
+      "archive": "evidence-001.tar.gz"
+    },
+    "raw/outputs/diagnosis/dispatch-u6-l0-default.json": {
+      "bytes": 25178,
+      "sha256": "632480d7250f7d041d82b6d9bbf860b098e4ce82833d38f9e1a86712b390a5dd",
+      "archive": "evidence-001.tar.gz"
+    },
+    "raw/outputs/diagnosis/dispatch-u6-l13-cublas-cublas.log": {
+      "bytes": 8595,
+      "sha256": "86ade42e89195051c8aa4af885160204a02506723da8baa8b18a6d72c05ca6d7",
+      "archive": "evidence-001.tar.gz"
+    },
+    "raw/outputs/diagnosis/dispatch-u6-l13-cublas-cublaslt.log": {
+      "bytes": 4796,
+      "sha256": "fbd79ff96e825bf09ef79500782fd4f4358c22545366f47e0a1d6df821ad9bce",
+      "archive": "evidence-001.tar.gz"
+    },
+    "raw/outputs/diagnosis/dispatch-u6-l13-cublas.json": {
+      "bytes": 25209,
+      "sha256": "6bdbc1da69eb2b96fdc8e8fcbbf271afb5a8e7816a5ddaf27a2d38e5daa539e3",
+      "archive": "evidence-001.tar.gz"
+    },
+    "raw/outputs/diagnosis/dispatch-u6-l13-cublaslt-cublaslt.log": {
+      "bytes": 10842,
+      "sha256": "86c4898e8644a5d4f5b905f69d7c3a294ccd39ae6fd52c6bbcec562d0fef72ca",
+      "archive": "evidence-001.tar.gz"
+    },
+    "raw/outputs/diagnosis/dispatch-u6-l13-cublaslt.json": {
+      "bytes": 24456,
+      "sha256": "5a012de0fbffa849d4c7043a4108d6534557d5fb9bfc8cecfa048aef4e29d9b4",
+      "archive": "evidence-001.tar.gz"
+    },
+    "raw/outputs/diagnosis/dispatch-u6-l13-default-cublas.log": {
+      "bytes": 8595,
+      "sha256": "0b068a4c3edbed7a088d44dd5b19319238705e2cce53f005ae517bed784ae859",
+      "archive": "evidence-001.tar.gz"
+    },
+    "raw/outputs/diagnosis/dispatch-u6-l13-default-cublaslt.log": {
+      "bytes": 4796,
+      "sha256": "80a389ff67edc7d971f83de3bf7453c23ba5133e6e18abf7273f7952b69d2daa",
+      "archive": "evidence-001.tar.gz"
+    },
+    "raw/outputs/diagnosis/dispatch-u6-l13-default.json": {
+      "bytes": 25223,
+      "sha256": "bfaa0f7ad6d53ddd4d4c8750a9d9c5e0b42300402add246a1b5361012f3de7e0",
+      "archive": "evidence-001.tar.gz"
+    },
+    "raw/outputs/diagnosis/dispatch-u6-l27-cublas-cublas.log": {
+      "bytes": 8595,
+      "sha256": "63e4b89b7e604e145844d521bd731d1646f2c0ed3317ce57ab1405af916b5392",
+      "archive": "evidence-001.tar.gz"
+    },
+    "raw/outputs/diagnosis/dispatch-u6-l27-cublas-cublaslt.log": {
+      "bytes": 4796,
+      "sha256": "b32d8e75d2df46ecff9e827f633e161fa51f9f1a15dc0a63701d1200ae79e81e",
+      "archive": "evidence-001.tar.gz"
+    },
+    "raw/outputs/diagnosis/dispatch-u6-l27-cublas.json": {
+      "bytes": 25209,
+      "sha256": "c8fe688c3a213b5e44258d40f792367e31d8b1ca4d2e098f201a8307c56860b5",
+      "archive": "evidence-001.tar.gz"
+    },
+    "raw/outputs/diagnosis/dispatch-u6-l27-cublaslt-cublaslt.log": {
+      "bytes": 10842,
+      "sha256": "dc446ec237d304983a4fc86f78cbc23a7b2c414f0432ee882e6e702953a31388",
+      "archive": "evidence-001.tar.gz"
+    },
+    "raw/outputs/diagnosis/dispatch-u6-l27-cublaslt.json": {
+      "bytes": 24441,
+      "sha256": "ca3d57492a250128c508e62a2a4728b7af5bab7767fff8db7ff1c0751c48bbf6",
+      "archive": "evidence-001.tar.gz"
+    },
+    "raw/outputs/diagnosis/dispatch-u6-l27-default-cublas.log": {
+      "bytes": 8595,
+      "sha256": "860f78651cfd2641ecd75c9e88b494fdb53b60aa421bd89eda32eced8ad7a5e0",
+      "archive": "evidence-001.tar.gz"
+    },
+    "raw/outputs/diagnosis/dispatch-u6-l27-default-cublaslt.log": {
+      "bytes": 4796,
+      "sha256": "11be86ab107b0f4c9118472367d91935438e768b940f2ec70e8f6656f2393bea",
+      "archive": "evidence-001.tar.gz"
+    },
+    "raw/outputs/diagnosis/dispatch-u6-l27-default.json": {
+      "bytes": 25210,
+      "sha256": "045b4c9b1138ee85631297f2a5da8cf203dfe29d9312898af3e1cec944fd9f7c",
+      "archive": "evidence-001.tar.gz"
+    },
+    "raw/outputs/diagnosis/tensors/003e92e64d928b21cac0be5b366c45d75b819f39c3cd1c66be8fc9aae61d68dd.f32.gz": {
+      "bytes": 1689998,
+      "sha256": "f20380d11e814060cca8b9351e90e84952fc274e05703910d76c8650186b4992",
+      "archive": "evidence-001.tar.gz"
+    },
+    "raw/outputs/diagnosis/tensors/00a1faf9e9ee3b4cc5bb7c0f751788c40e9fb1129fea5889bbc0530e05ca65f8.f32.gz": {
+      "bytes": 284977,
+      "sha256": "2fc2212a7d9ff73969a537b00d80a36627ef187c480e606c34488a57b1f71f32",
+      "archive": "evidence-001.tar.gz"
+    },
+    "raw/outputs/diagnosis/tensors/04a60dd154356e137ff9477dfcfff5058061cf3af6f9cbe7eb14b9ac2cd253f6.f32.gz": {
+      "bytes": 284780,
+      "sha256": "0c22e1d36a09041d96c7926661c0d58d7c7fda96d95e62d9c62b5f130f673b6d",
+      "archive": "evidence-001.tar.gz"
+    },
+    "raw/outputs/diagnosis/tensors/07b7d24afff00b0feca691f930037fa16fb2dffe388db01090a454906188f7c2.f32.gz": {
+      "bytes": 1652596,
+      "sha256": "8206d8979f93823c1929063ecc108b60e8da703e3b764fba303e6c6fe4340cf0",
+      "archive": "evidence-001.tar.gz"
+    },
+    "raw/outputs/diagnosis/tensors/08d7ae3facb9b14946781e11d8d6df0f72149fabc79712d08ca9fc0e8c4bb8dd.f32.gz": {
+      "bytes": 285818,
+      "sha256": "90b3eb5d9e5445db645e442b9be3dc2f6e826bee2c744996c449928173fc9ebd",
+      "archive": "evidence-001.tar.gz"
+    },
+    "raw/outputs/diagnosis/tensors/096d2ded69ae20b1eb8f3d7e4809f5b8858e8f65f950a5ca3824587e99a278d9.f32.gz": {
+      "bytes": 1689856,
+      "sha256": "d41ce7b4a1c627f176c8c18ef6535d3eaa52ebac54870efb1bdd5f6ab6cd923b",
+      "archive": "evidence-001.tar.gz"
+    },
+    "raw/outputs/diagnosis/tensors/0bf86e26a760bb55a6f6d93e44218d82becfe32cd0a2e87616fc0de4f92698ed.f32.gz": {
+      "bytes": 1659970,
+      "sha256": "c23c5bba9bdcbc1a2b5ffc311528c04fcfe0dc617881e6db61d2361487cf470c",
+      "archive": "evidence-001.tar.gz"
+    },
+    "raw/outputs/diagnosis/tensors/0c338d876f40df5939631822150475b4cffc324b3d6c18bd614e1f10a57a3a98.f32.gz": {
+      "bytes": 285215,
+      "sha256": "dc2e5391c9b78d24c56ae827965ed457c2e5b1ae397b0501d5eb341d0fd310ae",
+      "archive": "evidence-001.tar.gz"
+    },
+    "raw/outputs/diagnosis/tensors/0dd9c156640e5e95508bdb1b4ece94360cf1fbc0618a7fb8c3dba767bee6d4c2.f32.gz": {
+      "bytes": 1660803,
+      "sha256": "10a48d613b1dabf483009a23b23cb2e388bb2a3dcbcc7ad4c319b094ab44a1d4",
+      "archive": "evidence-001.tar.gz"
+    },
+    "raw/outputs/diagnosis/tensors/10d098cfcf7349c6e45334af255d0547cb1ca936e3919905c677d00c096c0657.f32.gz": {
+      "bytes": 284504,
+      "sha256": "b5728d6b17ecbfcdb379b4c57e243ef7c57e882d28a82fbeb1672a1a7bdc2bff",
+      "archive": "evidence-001.tar.gz"
+    },
+    "raw/outputs/diagnosis/tensors/10f3e66ee8228afa3c006660569a3c481ab3dc1f985614777985472170acad19.f32.gz": {
+      "bytes": 1689897,
+      "sha256": "8c813c4bd818b63e6d56fed28827dcdc474c9bab932644239aafa0e527e89b05",
+      "archive": "evidence-001.tar.gz"
+    },
+    "raw/outputs/diagnosis/tensors/117bcd79b9afd98475f20887ec2435dda6730ab2d05fa8cc9d148d6edcabf48b.f32.gz": {
+      "bytes": 285838,
+      "sha256": "a92e0346b39e165ee7e4773d3a54d8adb3179d50466a623d0ad7b85dae1ca411",
+      "archive": "evidence-001.tar.gz"
+    },
+    "raw/outputs/diagnosis/tensors/13cfce6b5072d2770223e5600ef33e7c71907cdd6799f4bd50194d274910a6ac.f32.gz": {
+      "bytes": 284777,
+      "sha256": "3f06e770e143e1a27efe960b3d95d820dcc813977a46932a3675191dfa2ef59d",
+      "archive": "evidence-001.tar.gz"
+    },
+    "raw/outputs/diagnosis/tensors/149161899f8d2a1eb75898985b95e1f1c7f101d50752774da4d5c001869ee562.f32.gz": {
+      "bytes": 1684013,
+      "sha256": "78a08bfaa746d5e3ea24df47b68c3a0841b88d64d7e1733e8788d9c111f85313",
+      "archive": "evidence-001.tar.gz"
+    },
+    "raw/outputs/diagnosis/tensors/15ef7874956da455049ed636d66a76f645e39801f6b90a1a3cea9f26682476da.f32.gz": {
+      "bytes": 285514,
+      "sha256": "dd302e2b7337f05c36283dbd26cbb883d86a9c4d16957d50538d190ffee9e024",
+      "archive": "evidence-001.tar.gz"
+    },
+    "raw/outputs/diagnosis/tensors/186460c84c4c7cf0adc909c9a7e298dfa0e806d02815a40b1c9c0c823f616300.f32.gz": {
+      "bytes": 285087,
+      "sha256": "a98c780db47c72455c1995256333a68c1d2d66340355c8fd6a5afd67a9852689",
+      "archive": "evidence-001.tar.gz"
+    },
+    "raw/outputs/diagnosis/tensors/18f53dce84d7f60c63dfb22616998cc00875cd438b7247dab12b62cf5e21d035.f32.gz": {
+      "bytes": 1660451,
+      "sha256": "a4e8e2e07c8bcb3d42d3c9d9dd05f60aeafee4bc0957379e5ae51a5352b27893",
+      "archive": "evidence-001.tar.gz"
+    },
+    "raw/outputs/diagnosis/tensors/1c338573ca98d3ab90a953e8646ea4e5d633296532a26f716e50e4bd20318f63.f32.gz": {
+      "bytes": 284968,
+      "sha256": "3d291daafa597d447ef654a595aa52802dbe79e8d0defbfd6f4d0c7123722b30",
+      "archive": "evidence-001.tar.gz"
+    },
+    "raw/outputs/diagnosis/tensors/1d63822bb5314cd227df8ddd45e19ca611e86b9397add9b459df11b6cffadd43.f32.gz": {
+      "bytes": 1689956,
+      "sha256": "7e34a826f86191209ada53935a26a832c4554e9d9ee3127111ee91ddff73cb66",
+      "archive": "evidence-001.tar.gz"
+    },
+    "raw/outputs/diagnosis/tensors/1f9aa462dc4e4da490973f8bdd1db677d8e44dcfe5420735e8e78012932ea8e1.f32.gz": {
+      "bytes": 1655633,
+      "sha256": "9d34cf560a869229129652fd3c3caacd2a351deb7a88a719d49ab59f766ac24d",
+      "archive": "evidence-001.tar.gz"
+    },
+    "raw/outputs/diagnosis/tensors/2046a8e70a134bf3a4ebd87321522a15635135695cff720773b0891205771de5.f32.gz": {
+      "bytes": 1657905,
+      "sha256": "9d449b5916ee0ce5c099a2fb3884d2ba4508456164e72c533b48e84d05af1670",
+      "archive": "evidence-001.tar.gz"
+    },
+    "raw/outputs/diagnosis/tensors/213c798564e9740856e50d274f6cc875aa6f75be9f363537cf9b2e5fc8914cca.f32.gz": {
+      "bytes": 285151,
+      "sha256": "b56dd05dd050d5c5f3411a9df94c0958043645e0a0da6a758384899062285ed6",
+      "archive": "evidence-001.tar.gz"
+    },
+    "raw/outputs/diagnosis/tensors/24a9997d43efb819fdd05072eeb4942d1fc8c92024149084452b0a6816163f6b.f32.gz": {
+      "bytes": 1650674,
+      "sha256": "8d536f139f71e33c15d521d47ea324f107cb72ebf31dbd728cab85c5e843bb20",
+      "archive": "evidence-001.tar.gz"
+    },
+    "raw/outputs/diagnosis/tensors/25721f572b7950e589ffad130bd30d33bb3ef031ed3f8de744c104bb27c3aaf4.f32.gz": {
+      "bytes": 1683970,
+      "sha256": "2e3234d5519a40cd975c23f788fafc667ce493c1fe7ce2c5de0d2dc8dc87b7f4",
+      "archive": "evidence-001.tar.gz"
+    },
+    "raw/outputs/diagnosis/tensors/266cf06694f9ee51aaca04261726bae3d6bd7590181568482ed1d413969fbf29.f32.gz": {
+      "bytes": 1655709,
+      "sha256": "280e79954dd0e1882eeef4d3b9496b822e40b7d0c700a962e0e134ff78a4bf65",
+      "archive": "evidence-001.tar.gz"
+    },
+    "raw/outputs/diagnosis/tensors/26dd6922ed816905ac09c409613d1308a049e14d4967b176189d6dbb3831e398.f32.gz": {
+      "bytes": 1659891,
+      "sha256": "235371819c1621ce86c3dc4c894cc05a91b3b366c7c176778fcb62850e5707f7",
+      "archive": "evidence-001.tar.gz"
+    },
+    "raw/outputs/diagnosis/tensors/28d334d9675dd15627bac6c79501d70beb3a02d4443f352783b6c75771e8c739.f32.gz": {
+      "bytes": 1682152,
+      "sha256": "e27c6fc9e12dcc157eab6718c908a4e743b8ed8d8835490d95a5ea12c1cc60d6",
+      "archive": "evidence-001.tar.gz"
+    },
+    "raw/outputs/diagnosis/tensors/2d2155b450dd887e68dfc255884b98a36d9502fa8e00e43bed080df53c7adbf0.f32.gz": {
+      "bytes": 286159,
+      "sha256": "b903d401c642757736c930cbebcfdea19a56b362aeda3c26846b0a6068ed4935",
+      "archive": "evidence-001.tar.gz"
+    },
+    "raw/outputs/diagnosis/tensors/2d4b00fc1bfe3cdace27e84fd8bdffaadadc8c339dee14532e7e4313ce13ced7.f32.gz": {
+      "bytes": 284795,
+      "sha256": "058062a1b2cdb83dae69c5e0cf690366b612dc20d978ff9259e529908b6260da",
+      "archive": "evidence-001.tar.gz"
+    },
+    "raw/outputs/diagnosis/tensors/2f55fd5d950fda23af61bfd992b9ce661dfcce5435eb843afb06250dd32be61d.f32.gz": {
+      "bytes": 285543,
+      "sha256": "cc09688ce79781caa636a564e886c32663e2f2720d6cca776aefe4659e526628",
+      "archive": "evidence-001.tar.gz"
+    },
+    "raw/outputs/diagnosis/tensors/342f7b3e877e8cb0710f6750f003598eaf288661fa77baf0cd84b9afa46d12ca.f32.gz": {
+      "bytes": 286131,
+      "sha256": "19f929526d9297c074bdf5f6acb34549b5e09c61044af47199dcf78122fa8afc",
+      "archive": "evidence-001.tar.gz"
+    },
+    "raw/outputs/diagnosis/tensors/35c183f87efe033b017f40aec6c375a85b8259e210910c2d160d25c19040342f.f32.gz": {
+      "bytes": 1650329,
+      "sha256": "6c182e2c845d5ef6fe34ebeacc68b8e1aec3b0e70502fe9bf2bea357686692e6",
+      "archive": "evidence-001.tar.gz"
+    },
+    "raw/outputs/diagnosis/tensors/361656e9e2219b2035bcdd56b484549b3d053c4644c5aabebbe20406a9008e56.f32.gz": {
+      "bytes": 1663550,
+      "sha256": "79642d4799c8ccfc27f714ee940f176bdc6eb8a470a6005f0bf69776abc07651",
+      "archive": "evidence-001.tar.gz"
+    },
+    "raw/outputs/diagnosis/tensors/36acbbac32827f5780e6526e9409ce4a2a6891925525aa686b37d74669177189.f32.gz": {
+      "bytes": 284963,
+      "sha256": "db6f14b44ce58da6302bcb3ef29af480a31f238a0305bf79c7ecf7376652c14c",
+      "archive": "evidence-001.tar.gz"
+    },
+    "raw/outputs/diagnosis/tensors/36f69fe6013948272df42a0cd87fbc43609348e722422b21b04904d159948dfc.f32.gz": {
+      "bytes": 284807,
+      "sha256": "3c30bd2000a109bed2c2f61dbb61a1508c004fc55b611d5e1f275155b886bfae",
+      "archive": "evidence-001.tar.gz"
+    },
+    "raw/outputs/diagnosis/tensors/37bfc74bc55ee9a76bcbbdc5e73399d81891781752be237559796da5496dec5b.f32.gz": {
+      "bytes": 1663740,
+      "sha256": "dbc68e3557a5b48e5ff918991a455dd21b0635741135f0ae36e5561c74e2b718",
+      "archive": "evidence-001.tar.gz"
+    },
+    "raw/outputs/diagnosis/tensors/3a89376b8a3d3153cd69ae2ad91119eab9f24b1f58e4325e5bb7416138aecc18.f32.gz": {
+      "bytes": 1663382,
+      "sha256": "acf6bd6555707d1b7fb6f9ac79d430871aa16688f2f27aa3ae287d5e6b8373e6",
+      "archive": "evidence-001.tar.gz"
+    },
+    "raw/outputs/diagnosis/tensors/3dc93b77482f4e8c10dcd364e1037d80b488cb1e57a9a9985a3cea58024d9ca1.f32.gz": {
+      "bytes": 285645,
+      "sha256": "d4eee29e9f35d29f76f50e2c47c667d48b1a4bc2c781e2ece8466a09c818cee3",
+      "archive": "evidence-001.tar.gz"
+    },
+    "raw/outputs/diagnosis/tensors/3e31f72c73759e393bd47458e1a5bbce84bd22d440953e624145576ab18cdeb9.f32.gz": {
+      "bytes": 286308,
+      "sha256": "906b8f32dd22b11157256982f5a0b39ad5c944310ea5b6e424cb706d0c5fc9b6",
+      "archive": "evidence-001.tar.gz"
+    },
+    "raw/outputs/diagnosis/tensors/3faa76aab789d493633468406b48190002f4a3d71b3b65ad9432dfb87ca16678.f32.gz": {
+      "bytes": 286332,
+      "sha256": "2e3f509b18d3daca6bd434914933d877fe8601222968f6cd3ba83e469016707e",
+      "archive": "evidence-001.tar.gz"
+    },
+    "raw/outputs/diagnosis/tensors/438f0bd032f6ad2b7a4bf0931a8bccd3422c7e8ffac766a9f09563ccd7719427.f32.gz": {
+      "bytes": 1653736,
+      "sha256": "5d6c74ff8a1721fc3b0b46eb229fc1eb8e624fc5318491b87eca98df7faac4f7",
+      "archive": "evidence-001.tar.gz"
+    },
+    "raw/outputs/diagnosis/tensors/471713ca83d7c3d9bb3d54a3265f84c588a6507fa85e2f81edc07973d35e2dd3.f32.gz": {
+      "bytes": 285216,
+      "sha256": "2a42385b7c1660f186954b530608c56bc0be0abfd5df3194d512b94b129fb7d6",
+      "archive": "evidence-001.tar.gz"
+    },
+    "raw/outputs/diagnosis/tensors/47c1c1aa642676f58be30ccbe467ebba167972b403bc9afba5517e67160c73e9.f32.gz": {
+      "bytes": 285664,
+      "sha256": "b9190919035734991eaf9eefd5217317da2f215a0f0b06ce88b8a3aac3554493",
+      "archive": "evidence-001.tar.gz"
+    },
+    "raw/outputs/diagnosis/tensors/4beb0f7c3fd739e404a35ba44b760c7120525bd6d9cc2c6d9f04fcc9c76620e5.f32.gz": {
+      "bytes": 285241,
+      "sha256": "daa27279762154577978dd173c11ebcea8a4dd2e913db09a60c46fbe7e1e1796",
+      "archive": "evidence-001.tar.gz"
+    },
+    "raw/outputs/diagnosis/tensors/4e5df13b510a8e32e3d271bfeab826b8908aedf9807c03520b160e1b61d0bfd1.f32.gz": {
+      "bytes": 285378,
+      "sha256": "0e161a1d4ed416dc86b625445f8d29cebd6340746915f66766f519ef9c514155",
+      "archive": "evidence-002.tar.gz"
+    },
+    "raw/outputs/diagnosis/tensors/4f29839f4282bc0bd65eb15226e3130e55c3e8642d4364b956e53f9e26bb9d8f.f32.gz": {
+      "bytes": 1650778,
+      "sha256": "73656cb4f16b3b62a7eed5b96b6d331024536facb915155d0e8f52c56724b710",
+      "archive": "evidence-002.tar.gz"
+    },
+    "raw/outputs/diagnosis/tensors/4f6053035362bc9404eec22fae3c7d6d72fab4d043ebe1e2128984d6b507807d.f32.gz": {
+      "bytes": 1663972,
+      "sha256": "5d071927bf4d8350322a855b24f577be9bd3d4ec5551d4bcdd74e15092a45e20",
+      "archive": "evidence-002.tar.gz"
+    },
+    "raw/outputs/diagnosis/tensors/518f294610d4499872d6f1d386f60c6a8d59652af1c1832c10e13c8da9835182.f32.gz": {
+      "bytes": 284831,
+      "sha256": "6784eb3314568bc8c5226e5a0b0678aab293508f5af469e27e447d82e73c9685",
+      "archive": "evidence-002.tar.gz"
+    },
+    "raw/outputs/diagnosis/tensors/51d2bbc60c241795e4ff245f0397086199a7c96b8432b9d90ca1cff66de1c4ef.f32.gz": {
+      "bytes": 285415,
+      "sha256": "1cac17a107c808f7b49b24b2ad97890b02777b4caf7ef0aed17e3ee3b0b756fe",
+      "archive": "evidence-002.tar.gz"
+    },
+    "raw/outputs/diagnosis/tensors/51da658d1f1bd1e8294417170a0c8865c5de9486ceb723b2cef85766da852a59.f32.gz": {
+      "bytes": 1689800,
+      "sha256": "b5c66a2cb208c1e045902a175b665cfcb36c30de8d4476513954f7ce762ba08e",
+      "archive": "evidence-002.tar.gz"
+    },
+    "raw/outputs/diagnosis/tensors/52e62653780e02cb72fa65ab610e82a3bc52766bd7b22e627033c5b50c34a803.f32.gz": {
+      "bytes": 1663877,
+      "sha256": "259361c3815a5f3821f6bc47d7ef826e92e283155cfaf29de6b1f85cac45b5f7",
+      "archive": "evidence-002.tar.gz"
+    },
+    "raw/outputs/diagnosis/tensors/53006c2e00805e8c5a93533e0ac0f25fddb31825accc4a9a19284f52eeba908c.f32.gz": {
+      "bytes": 1660531,
+      "sha256": "4d5d30f48e77f5248811a654a189d9959c6332d1a2be40bc644f6339544ea3bd",
+      "archive": "evidence-002.tar.gz"
+    },
+    "raw/outputs/diagnosis/tensors/533a1c157a97990b88b324f3ae4806dedc9c85a5257f73aee978fd3e3beb6cf4.f32.gz": {
+      "bytes": 1685203,
+      "sha256": "9b609554f379733f02a673c26e39abf789fb70cf47612fe79da156e840bcb71f",
+      "archive": "evidence-002.tar.gz"
+    },
+    "raw/outputs/diagnosis/tensors/54b4a6759cc685cdf990b03d86ed59ffca99addaccd97eec401eb011852214d7.f32.gz": {
+      "bytes": 1663480,
+      "sha256": "65788981583477bd45da707410d03f244e765efcffb52468f341e56159634219",
+      "archive": "evidence-002.tar.gz"
+    },
+    "raw/outputs/diagnosis/tensors/56451b170ee5d961621056214e9aa1ffc7808a4bf9ea7c989cc24ceffe86bee0.f32.gz": {
+      "bytes": 1659999,
+      "sha256": "d61f90522afc5a1730c55be259f246acf95615cc60a2e03d0cb752e51189da7c",
+      "archive": "evidence-002.tar.gz"
+    },
+    "raw/outputs/diagnosis/tensors/5aa536b04888cc4eee9d737c171a8f512100720df346a0afb25f0b6d496b0bab.f32.gz": {
+      "bytes": 284803,
+      "sha256": "f90709c48ef4cdbd9ab7896fc686c69bc1901e864dae0ca3473ab2c93f1fefee",
+      "archive": "evidence-002.tar.gz"
+    },
+    "raw/outputs/diagnosis/tensors/5c415d10a5c46138a24899a664fdc10716ebcda46724d70c556ad2a6d31ccea7.f32.gz": {
+      "bytes": 285577,
+      "sha256": "53c7d6834e5bcbfabb9bbd4250a6e4ad943bde56ce83ea99b80e6e377d86e07b",
+      "archive": "evidence-002.tar.gz"
+    },
+    "raw/outputs/diagnosis/tensors/5e834d2d2a5538a7240878a772e81a8ef10bd4dadc33228ecccbe4b24d6d79b8.f32.gz": {
+      "bytes": 1689717,
+      "sha256": "8bb1fe97a1fba0d8a245e7c912e230c048cd27265072744720f3713b78ed85b4",
+      "archive": "evidence-002.tar.gz"
+    },
+    "raw/outputs/diagnosis/tensors/5faae253e4b7d648bf463c2676a7119979e7cb4cab175638545f36a249f4bbb9.f32.gz": {
+      "bytes": 1653716,
+      "sha256": "fa889c287064ca3579ba6aea30463ee90a444c7a4f422a730d97affd2eadb83f",
+      "archive": "evidence-002.tar.gz"
+    },
+    "raw/outputs/diagnosis/tensors/6083fa99b3beca5c186f7b5bc4393debac2e87ff45ff1def8c2c480503f51a5f.f32.gz": {
+      "bytes": 284873,
+      "sha256": "3805d30123f7569851b64c33cee1320c6c8184f174a8d2c191ef8c8431d894da",
+      "archive": "evidence-002.tar.gz"
+    },
+    "raw/outputs/diagnosis/tensors/60b70ce31daa46dd3492eafc712d22d9eb62155fcafa8ef5d1115bd9dbb1d918.f32.gz": {
+      "bytes": 1682094,
+      "sha256": "9cf62e2449fcecf586d31793d30fc0328b680cf2157b9c6bb5d41839f785c1be",
+      "archive": "evidence-002.tar.gz"
+    },
+    "raw/outputs/diagnosis/tensors/6555c28ff313887d42ef9d0b8a5716f86abb8a00055da9cd6cc346f4459a6d58.f32.gz": {
+      "bytes": 1663529,
+      "sha256": "d6fdd49a2c2b4cc50895b81a7474c356c278880984141db24bed6080a58485e6",
+      "archive": "evidence-002.tar.gz"
+    },
+    "raw/outputs/diagnosis/tensors/65afe6be909abd0c240dc46b0a0563d03fdecd95049d1a37b78fbd91bdd2dc16.f32.gz": {
+      "bytes": 1663280,
+      "sha256": "29d0b7af269360744d2c2da3a9f43588f0707bed747388a51edf3a77c6ae60cc",
+      "archive": "evidence-002.tar.gz"
+    },
+    "raw/outputs/diagnosis/tensors/684413d12885180500caa72ab9a47b5899461ca6b991ceb8c0cb33f2c4b90847.f32.gz": {
+      "bytes": 285892,
+      "sha256": "c8cad454fd105f5bec6e52409a9ac59d74324bb2a61f3d2faac0f6731aac6148",
+      "archive": "evidence-002.tar.gz"
+    },
+    "raw/outputs/diagnosis/tensors/6a83fd10fa945d136a4606be8e47ba642c900a72d00a0256a8479f20bbffa7f1.f32.gz": {
+      "bytes": 1663823,
+      "sha256": "f0eb87e0cde0bd76e8a0aac55ada1c4f969d971b2519e78dca4ff79401077b67",
+      "archive": "evidence-002.tar.gz"
+    },
+    "raw/outputs/diagnosis/tensors/6b70751aa75c9e72f6fecb4cb0b2db33f2d08e8ab661578651c6307dfc42896d.f32.gz": {
+      "bytes": 286148,
+      "sha256": "092531b93bac8f69d2f684681095cf4af328883b044c5bf4d88f3848207ab951",
+      "archive": "evidence-002.tar.gz"
+    },
+    "raw/outputs/diagnosis/tensors/6e3d34e405f95de4f6b8e15728e2c98e67c4c2c69ff6554721e99e449e8ab3bb.f32.gz": {
+      "bytes": 284967,
+      "sha256": "4b1722b68d20d6c964f6ea429d58fb06d47710090c3507f0c18e503c478d2bdd",
+      "archive": "evidence-002.tar.gz"
+    },
+    "raw/outputs/diagnosis/tensors/70136e616227cabc60ad55bc385184904570da2c7ceedb77d97b3bf0d2d00dde.f32.gz": {
+      "bytes": 285410,
+      "sha256": "28b621e81daa48d5fe0472bdd50ee33cdf27fcd8b1988253897dc9d8401ad5ed",
+      "archive": "evidence-002.tar.gz"
+    },
+    "raw/outputs/diagnosis/tensors/7529e4841441d3bdd68dd9b97f377ea696c1719898ee00bd9acf6e70804e8499.f32.gz": {
+      "bytes": 286118,
+      "sha256": "d3399e2683f775ee0f190226a9185d4561e394790682377e8a0b4fe2c34fef98",
+      "archive": "evidence-002.tar.gz"
+    },
+    "raw/outputs/diagnosis/tensors/75413a384185903e61514aa36fab930a705b4d1868bc3c804c15653d3d2e3179.f32.gz": {
+      "bytes": 1660372,
+      "sha256": "ba3612a054f787c0293a654f57647ec5fee405f8c3e4f0ac700793b802b541d6",
+      "archive": "evidence-002.tar.gz"
+    },
+    "raw/outputs/diagnosis/tensors/777739373039ba1116a6de3c30f02e3e8490f8842c89d0a4a52aa2ada8f15d07.f32.gz": {
+      "bytes": 285254,
+      "sha256": "bd823131e36655d176e6373ffd149cbe864b424de2467fb05d01fdb8f0e080a2",
+      "archive": "evidence-002.tar.gz"
+    },
+    "raw/outputs/diagnosis/tensors/7a92be02088e8fde5162af7d9fa54ee6785c2dbd7e79d2a8288bf98e2b7964af.f32.gz": {
+      "bytes": 1663417,
+      "sha256": "3203b3045f932964a83ec50634f1d8c47e33d4d75240e0f78e671fb8a9f04ad7",
+      "archive": "evidence-002.tar.gz"
+    },
+    "raw/outputs/diagnosis/tensors/7d3ec7cc60548a8c13cf55bca19a2b5c834e2ed060a8ee95017e677601fad56a.f32.gz": {
+      "bytes": 1682018,
+      "sha256": "d5c879869bc6efeeb9e88a1da607ccf6b893166b923124a71783f02428719f51",
+      "archive": "evidence-002.tar.gz"
+    },
+    "raw/outputs/diagnosis/tensors/822ca728978bc484eeada69b7b007fca944de04595df30b33180c41ea5caf753.f32.gz": {
+      "bytes": 285064,
+      "sha256": "1b1595995276c91f07943ac7ce35fe32054a97fd6c80e2fc46cd289782311d51",
+      "archive": "evidence-002.tar.gz"
+    },
+    "raw/outputs/diagnosis/tensors/82a919051872934ed4a99583e149b5c5079925c60dda9e3a623a48df4a16844f.f32.gz": {
+      "bytes": 285344,
+      "sha256": "b781864a18c0dfdb6177229b13bc15828b638bfadd2928e7c770ad0b8ca061f9",
+      "archive": "evidence-002.tar.gz"
+    },
+    "raw/outputs/diagnosis/tensors/87f77e05e2bcbebb821df0cdcd22b14fc7269af16483bfaa1f1cb299df0557c7.f32.gz": {
+      "bytes": 284796,
+      "sha256": "56c401378d40618369c088bbc4aa9f373a45a9b97213af18acc10f2759bc5120",
+      "archive": "evidence-002.tar.gz"
+    },
+    "raw/outputs/diagnosis/tensors/8839926de3dae8e3c8ef6f360085fabb7d3eb54fa67ffa1d574d3d99b82ad67f.f32.gz": {
+      "bytes": 285909,
+      "sha256": "91087e7bbd5b6fe934d2da71e6e07ae7144cd39e1879627fd472c9fcd3727596",
+      "archive": "evidence-002.tar.gz"
+    },
+    "raw/outputs/diagnosis/tensors/88775706302a05ade8610a9246b2ccc59dcab7073f4dfe58cb52ba2eb4608741.f32.gz": {
+      "bytes": 1660369,
+      "sha256": "b7406972bee51354e7bfebca91c2459f9d4889f16938bc474812f2775b42d529",
+      "archive": "evidence-002.tar.gz"
+    },
+    "raw/outputs/diagnosis/tensors/8b92d57f283dcd67f09b35e50bb3e9b1f2c0e5876ee352737e7db655fbe8a089.f32.gz": {
+      "bytes": 285220,
+      "sha256": "f7a222e794fec602d4df7fb512cb3432bafc01d3ad874bc54a04cca70adf3202",
+      "archive": "evidence-002.tar.gz"
+    },
+    "raw/outputs/diagnosis/tensors/8f8deb07dae77c3552e0df0d658c2afada03ef0562ff429fe830d0dc6aff3a5d.f32.gz": {
+      "bytes": 1685329,
+      "sha256": "1aa76365e9d49bd1b6e1f7b7d78260bba0de3a96a89d8a20c89d52d955b434d7",
+      "archive": "evidence-002.tar.gz"
+    },
+    "raw/outputs/diagnosis/tensors/90a3fa9b93c4d8e26cd95698ae835f9e08b3ac5f89909792507126211668f8f5.f32.gz": {
+      "bytes": 1660161,
+      "sha256": "b6eea6c581369fed965a169b88c2711a2cc23c65720d4eeb5f744c7fff1322ed",
+      "archive": "evidence-002.tar.gz"
+    },
+    "raw/outputs/diagnosis/tensors/919719bb446018cc82a92fca9beb5aa783c9f499df89bd8a3a13075d7a81c59a.f32.gz": {
+      "bytes": 285218,
+      "sha256": "e68fca48b9971cf931be30523600c5cd3e419526b26e1c56238576955fbd797f",
+      "archive": "evidence-002.tar.gz"
+    },
+    "raw/outputs/diagnosis/tensors/9225da6a859475f0c6e08316e33ab16e117d1936fd8345999caf11d35ee15045.f32.gz": {
+      "bytes": 286281,
+      "sha256": "0fd83df410d5fa9b7672b595234d6914c22d21348a4d15e9e251d163509eb017",
+      "archive": "evidence-002.tar.gz"
+    },
+    "raw/outputs/diagnosis/tensors/937263fc55ed510d90dcee81411bb462916071f6a3ec538769e78d8b00e55925.f32.gz": {
+      "bytes": 284506,
+      "sha256": "a611c66e05a34cc0a3747b9c15572f1409832fa787fa06ec5aa86b130df62330",
+      "archive": "evidence-002.tar.gz"
+    },
+    "raw/outputs/diagnosis/tensors/9795fa5e305da3243ceb775517c216c8332108ad92f886f80016e7b6a0a81666.f32.gz": {
+      "bytes": 1660775,
+      "sha256": "47c8f3e168c62a496db33e8ad440e08d4b725bc486cc887facadc73579fe356e",
+      "archive": "evidence-003.tar.gz"
+    },
+    "raw/outputs/diagnosis/tensors/9ca656e65d09f24bd985f6774c32978b98545488230dbc8f6d9bf982268b5d76.f32.gz": {
+      "bytes": 1682843,
+      "sha256": "7ea6e95105ed168e3f49774520c9fae125f3420fc5ba98c397d6f269d9a93464",
+      "archive": "evidence-003.tar.gz"
+    },
+    "raw/outputs/diagnosis/tensors/9eb8f02c4ea2af76a3d05845666606c3ac06e2033be3f1b57ad7583e8cc2e000.f32.gz": {
+      "bytes": 285241,
+      "sha256": "f769007361ad7613ede0a40d2d35cd6b3a0c649e4c12bc82faea2ab7a35a796d",
+      "archive": "evidence-003.tar.gz"
+    },
+    "raw/outputs/diagnosis/tensors/9fd2155e830d4b526ec7ea8e899a93e46b8ff1cf41246e6c6c5aa6ca51d13e34.f32.gz": {
+      "bytes": 1659344,
+      "sha256": "46adc5a3ca1adfecfb0d7cbd6c08c8b918abc884de12f9799102375eea93981e",
+      "archive": "evidence-003.tar.gz"
+    },
+    "raw/outputs/diagnosis/tensors/a11982e9c4520499e5560bae58e48a0954b9c3d9b0add41201a4e02abbb7b031.f32.gz": {
+      "bytes": 1663848,
+      "sha256": "e2616eaa0a055fb951aedce6fc6ee3319908bbeaa652b0d8ee97fe46f2f39f9f",
+      "archive": "evidence-003.tar.gz"
+    },
+    "raw/outputs/diagnosis/tensors/a13637936b22707caceeca763d92196330da16998aa8ecf17588c2cbd2cb1319.f32.gz": {
+      "bytes": 1689835,
+      "sha256": "d293e54e9db26c573f4b624ac079bcb0006cad1b4c1e2b73f62b491b0144b609",
+      "archive": "evidence-003.tar.gz"
+    },
+    "raw/outputs/diagnosis/tensors/a26390b81bdae1e59edfbe9151555518c249bec472ac59d56b3166e851650beb.f32.gz": {
+      "bytes": 1684856,
+      "sha256": "54e2c79fd906812c1506719c78a1512c08e418bac8d16c53cac018c06e3a4738",
+      "archive": "evidence-003.tar.gz"
+    },
+    "raw/outputs/diagnosis/tensors/a2cdf4987ccbd451ee28ac52a77700ea76beffc2cabb7f9d8c5c8e1466d36315.f32.gz": {
+      "bytes": 285531,
+      "sha256": "866e0fd6c5f305969fda98a4fe5cce08b894234efdc61c4e7192895e91d65623",
+      "archive": "evidence-003.tar.gz"
+    },
+    "raw/outputs/diagnosis/tensors/a3e373b81c18ad95917535cc3f74a2be2f94b001f5ca9eeb488fa209ecde1498.f32.gz": {
+      "bytes": 1663945,
+      "sha256": "d0a335f02f0a155c0f65ea34cf32408f97a57e055ab7e509bb20eb451792187d",
+      "archive": "evidence-003.tar.gz"
+    },
+    "raw/outputs/diagnosis/tensors/a53937db05a8f344574761d52381c975e8059a48bc4f07a0227989ace53cc10e.f32.gz": {
+      "bytes": 1657913,
+      "sha256": "0331014703db7d264dcbaeff4be55b05ccfc42c13d4d549962da7cccd9578bee",
+      "archive": "evidence-003.tar.gz"
+    },
+    "raw/outputs/diagnosis/tensors/a83deb0869a634b05401e1c4c6fafeb1b7d4fcfedd94577cab28549188cfca2e.f32.gz": {
+      "bytes": 285131,
+      "sha256": "615766e935713cf64f257dd5a413b53117adb001cc599a5133a98876866f4b26",
+      "archive": "evidence-003.tar.gz"
+    },
+    "raw/outputs/diagnosis/tensors/ad61082f12e8ba8c6973462ebcfb81b1dfb2232d3fb5aa1559b3ad26dd87e6f6.f32.gz": {
+      "bytes": 285241,
+      "sha256": "97bc5622868020dc727e9d0886a118708523cfa74faddec616db8be2845021bc",
+      "archive": "evidence-003.tar.gz"
+    },
+    "raw/outputs/diagnosis/tensors/af9381f8285456b51ce5673d3036cc95341d085c05d11a2fe09cf724255ce7cb.f32.gz": {
+      "bytes": 284763,
+      "sha256": "93fdcdabd75121dbf933bd6a3d9950604aaa6565653c4a8e67712b9f5f48100b",
+      "archive": "evidence-003.tar.gz"
+    },
+    "raw/outputs/diagnosis/tensors/af98a687ae534f5b2dd3b25143d01c0af14751ac56dea4ff0f9841a186df8744.f32.gz": {
+      "bytes": 285123,
+      "sha256": "0b7daa6b1baee270ee8d7677becd6f85202bc5ffc9748b506e4e1e5ced3b8c14",
+      "archive": "evidence-003.tar.gz"
+    },
+    "raw/outputs/diagnosis/tensors/b0bc54046253bb95cb9e9425a1b7811757b81957d6fc836b821a69070d8897ac.f32.gz": {
+      "bytes": 1685353,
+      "sha256": "00261e5f506b9cfca0739446198e1a328a1b7adc78dd12219e32e4b55ce1a0a6",
+      "archive": "evidence-003.tar.gz"
+    },
+    "raw/outputs/diagnosis/tensors/b240900d878e9c6c286d1227d6b62ae925fe65cc977ecb71bc943e64ba713175.f32.gz": {
+      "bytes": 286312,
+      "sha256": "7c30bc891faaf009c80bfcb54f4c4b32f40f8016805f85624a724e9a4f8fd70d",
+      "archive": "evidence-003.tar.gz"
+    },
+    "raw/outputs/diagnosis/tensors/b61e631e3661ffa0cc95f26df1f23d2bf8c7a127c3c8815a115d3e74b8e91f8d.f32.gz": {
+      "bytes": 285145,
+      "sha256": "4bc702b1b1d5e7e7ffb863965ba312ff92db4f2229c9ecdf2df01899ee3a35cf",
+      "archive": "evidence-003.tar.gz"
+    },
+    "raw/outputs/diagnosis/tensors/b755366c31cddc1e387ed20f2c8cd580b9190a5b73d2016a5f93d96e920b9929.f32.gz": {
+      "bytes": 1684847,
+      "sha256": "babdc653d8104a7f6243780d8a01bded06be7f243411d32ef23bc5f7658b07cb",
+      "archive": "evidence-003.tar.gz"
+    },
+    "raw/outputs/diagnosis/tensors/b86882d624a8a8d038301ccd583a17bc7a2e6230ff9c2f19fed54763cb6d58d5.f32.gz": {
+      "bytes": 285712,
+      "sha256": "bed740cf3ecf4ab93cd590ab82e434397b401639c8f3b723b409bed789cc4ec4",
+      "archive": "evidence-003.tar.gz"
+    },
+    "raw/outputs/diagnosis/tensors/b8a0be1b0bedf5120c74fb21384d71ed7e498a9917d9582cdef8164b51718341.f32.gz": {
+      "bytes": 1689741,
+      "sha256": "b27a770255a817673a67573c4c64d76f3d9341c8f4cc1ec9857e5982a8759e91",
+      "archive": "evidence-003.tar.gz"
+    },
+    "raw/outputs/diagnosis/tensors/ba89ecff556de53a0cd7ffb083d8681cea5335a423c89aa58f9199d75dadecb4.f32.gz": {
+      "bytes": 285687,
+      "sha256": "5562bece297a11a4e199ca76b8742d13afaff315d1ff0043675c5c7ab3d39dbf",
+      "archive": "evidence-003.tar.gz"
+    },
+    "raw/outputs/diagnosis/tensors/bc9d100bed94fc78ef9988479d8af6b0185cc6b2596043b858e7de43ab2c35e8.f32.gz": {
+      "bytes": 1682874,
+      "sha256": "129310be4581cad6d9b12ecc10ef22d7b71013052b71da8e5afb40bad3600fb7",
+      "archive": "evidence-003.tar.gz"
+    },
+    "raw/outputs/diagnosis/tensors/bd6ddd0f249a0be8814aa2299ff9791039e0b9c6518d6d56ea33136aac9ab0be.f32.gz": {
+      "bytes": 1663986,
+      "sha256": "dea4514c303c543c0a0ddaa7183968702fdc895ae22b56e2352bb244bfd76ace",
+      "archive": "evidence-003.tar.gz"
+    },
+    "raw/outputs/diagnosis/tensors/bdd6d5b67bf4ece26f7cde6ef56f4d84f184d21bff04b33e5c56b164a030d78d.f32.gz": {
+      "bytes": 1650719,
+      "sha256": "10df40df84e170c9f2df8adb9451da4b54f2ce09d193a1e4c51f5e239ef0faad",
+      "archive": "evidence-003.tar.gz"
+    },
+    "raw/outputs/diagnosis/tensors/c4dd406e641cfe28dfcfa56f29d2a965aa69ef84e8b7d46943d25d988ab0f770.f32.gz": {
+      "bytes": 285064,
+      "sha256": "b343986052c9f0f4c3e78e1eb24c64179bb7e0f72b02ceb5b07a924b41ac8041",
+      "archive": "evidence-003.tar.gz"
+    },
+    "raw/outputs/diagnosis/tensors/c535cdcea15c91dddac5f44c1898b4d643317757fc526c460e337a1dd3601e7c.f32.gz": {
+      "bytes": 1650681,
+      "sha256": "3615b78beb78da75e952829ddaa8cff1e667c47726de881f87adb48a19d50520",
+      "archive": "evidence-003.tar.gz"
+    },
+    "raw/outputs/diagnosis/tensors/c667b8ce953fd7cbf1e20916eb91719ec1d700799b1bd394f4df557721734cf8.f32.gz": {
+      "bytes": 285839,
+      "sha256": "fdfcfe341b53e89792c9c9b6675fb13701f2a9dd98a71d9602c90155ae39246a",
+      "archive": "evidence-003.tar.gz"
+    },
+    "raw/outputs/diagnosis/tensors/c74fe9ba82283212e8464c20f307c1eb127511d88503785af3eb8a0a971abb80.f32.gz": {
+      "bytes": 284740,
+      "sha256": "6dc5bc6dc07aca81f00bad5731e3ad7e483e3b0133a9c651dc8245673aa96483",
+      "archive": "evidence-003.tar.gz"
+    },
+    "raw/outputs/diagnosis/tensors/c7a9e343600676723d23b8db39a095e4482b81cf67ecb6033ab0739d8aa2c79f.f32.gz": {
+      "bytes": 1659871,
+      "sha256": "5c3266b74d9d97c85176b1c76d4162aa08bcd5a0f53c22319ed54d590da4d05f",
+      "archive": "evidence-003.tar.gz"
+    },
+    "raw/outputs/diagnosis/tensors/c848f25dd536e06111f15728f52f272e49d9203415ec52df598c0298e0dc2ab8.f32.gz": {
+      "bytes": 284989,
+      "sha256": "dedb167d66e4acddbb8cb9a117bfb880519800c027f2a885ac7859d00b2fe96e",
+      "archive": "evidence-003.tar.gz"
+    },
+    "raw/outputs/diagnosis/tensors/c94d002706d003010c8ab47cb4824126d32a8ea2ecc05ae96b9577b31aeaee91.f32.gz": {
+      "bytes": 285346,
+      "sha256": "ac4d3bb4777a02d9dd88515ec0e649dd4a8d3c096f09370e0ffc645da68219d8",
+      "archive": "evidence-003.tar.gz"
+    },
+    "raw/outputs/diagnosis/tensors/ccc5c22fa64d48631bba46c41df1a0366b8669cc5b37b34f277f066f7472ed0b.f32.gz": {
+      "bytes": 285114,
+      "sha256": "99cc99b7afc6ebec8444b81b367f1f3378c86733e8aa5a8998562b6ff774de7a",
+      "archive": "evidence-003.tar.gz"
+    },
+    "raw/outputs/diagnosis/tensors/cea4df81a950df7fe2c633d495fc46bfd3eeaa9cb079df285c5ad1d4d9963f6d.f32.gz": {
+      "bytes": 1659943,
+      "sha256": "088c57a9060d3e25443e07335b98bb62ff8f9b0200f6e2e91f6ef7799221af52",
+      "archive": "evidence-003.tar.gz"
+    },
+    "raw/outputs/diagnosis/tensors/cfbab4911db2c6f5de8b54219b8791ecc76ad26ca4bd405175cc3d3f3ddd8c0b.f32.gz": {
+      "bytes": 285220,
+      "sha256": "e0e846f31554d641414d52f09cd80fc49f0baeb9734e694fc8f287895a24cbf2",
+      "archive": "evidence-003.tar.gz"
+    },
+    "raw/outputs/diagnosis/tensors/d134ac99da6462b64dd03cff7feef79819fd35a2b9349291018c1c03cbc93dd8.f32.gz": {
+      "bytes": 1652644,
+      "sha256": "73f7f6e4a13d9dc54df6175179e85c40e578e36765633364787d7fe4359502eb",
+      "archive": "evidence-003.tar.gz"
+    },
+    "raw/outputs/diagnosis/tensors/d8f465208e6fbbb28e6c7e345603a033d42f5a738a6fd52e3874e6ef38e5e237.f32.gz": {
+      "bytes": 285217,
+      "sha256": "278fe4d2b40844c33734479dcad75fe68970147c16f14df28116e112f25e7a76",
+      "archive": "evidence-003.tar.gz"
+    },
+    "raw/outputs/diagnosis/tensors/dac56dd0be51caf5d16ff6f8967b1fa987d8369ee6adfe26a0eed2ad27f732ee.f32.gz": {
+      "bytes": 1659407,
+      "sha256": "7f4b28de6473038b701bdf05b797f6124a2e8ce3e4d3688af046d2802aa4e39e",
+      "archive": "evidence-003.tar.gz"
+    },
+    "raw/outputs/diagnosis/tensors/dc83b4a3f6d5717d6fda41f3db94f6ae03ece1f229629cd42fb21ed8878778b4.f32.gz": {
+      "bytes": 1663814,
+      "sha256": "ccd8dcbce996f43b129d169353c2e490d3ed3aa6e1dd26cad99dc8e9f9467b95",
+      "archive": "evidence-003.tar.gz"
+    },
+    "raw/outputs/diagnosis/tensors/ddcf59d3d3d08970fd91e82be85e69739a9610e3d71f20e8ad743dde11732ad5.f32.gz": {
+      "bytes": 284726,
+      "sha256": "9ae2fcf41b626ca8ca913e8fbe9d7de34eb48f836bb2d8c81837f1af53337324",
+      "archive": "evidence-003.tar.gz"
+    },
+    "raw/outputs/diagnosis/tensors/df4952dfa7c1a00a742375726df012760c44e6294b1f3bfe2bd79c65c05355eb.f32.gz": {
+      "bytes": 285803,
+      "sha256": "c6200cdf45e5c8e4eae798ff6015fe47ea89cd8dd86faedf8a443280f967514f",
+      "archive": "evidence-003.tar.gz"
+    },
+    "raw/outputs/diagnosis/tensors/e03a4ef9974d264d751962c092c68bf5d1da58c772aa00a72553d357453ee179.f32.gz": {
+      "bytes": 285579,
+      "sha256": "962df6f3be96d4323efce5dd6512d6a245f9b477a28733bdbf57d74518f878e2",
+      "archive": "evidence-004.tar.gz"
+    },
+    "raw/outputs/diagnosis/tensors/e1043b9c1f692f6dc11da8b9a74fb65ee5baf5eace215346a37898f7c028bda5.f32.gz": {
+      "bytes": 1685009,
+      "sha256": "c9bc491750befc9c1cb8462a982116f398d43d39e2edb744b3aa293180346f36",
+      "archive": "evidence-004.tar.gz"
+    },
+    "raw/outputs/diagnosis/tensors/e235604445de42ed80fd2eaba66900d2b51316fea39b8df2b891ca8174b108dd.f32.gz": {
+      "bytes": 1685103,
+      "sha256": "e7c56c8361edf65add43ea6edb68542658885ad70ccdf50dd0ac9a937107daf1",
+      "archive": "evidence-004.tar.gz"
+    },
+    "raw/outputs/diagnosis/tensors/e533c15c088eabb95949828456398a0d32931df8ccfbc5a8abc8db3c33704da8.f32.gz": {
+      "bytes": 1685009,
+      "sha256": "45d4e106ec51cc3066c732450ee4d3e30702c3c33a664b7dcb012964f11c14f9",
+      "archive": "evidence-004.tar.gz"
+    },
+    "raw/outputs/diagnosis/tensors/e586139e1efdba82b5b75d320112105dbab86facd16aa8cbd13dfe138cb9c617.f32.gz": {
+      "bytes": 1656276,
+      "sha256": "28b3bfa3f0802ef3e3bd6bfec12c24a4e5f918a7b30ea5b1bf6cd5c79802aec1",
+      "archive": "evidence-004.tar.gz"
+    },
+    "raw/outputs/diagnosis/tensors/e5cebe948a5fd8b85c915512136cd84c7939c442c50e4f4eb080c9eebef8b03e.f32.gz": {
+      "bytes": 1650292,
+      "sha256": "0371bc50d018fd05bbc40031a15c2d4185e5e25fb9be186f41f27a2badb8a778",
+      "archive": "evidence-004.tar.gz"
+    },
+    "raw/outputs/diagnosis/tensors/e9c3dc58f5c3fc49e0d22a5d4647eb9ec0b6182a47377644c7f53e09fc894967.f32.gz": {
+      "bytes": 285691,
+      "sha256": "b3e4f37bd48fa8ef2825a5d3e54becc71273fce18aa31b9c1ae9a47e5a960d19",
+      "archive": "evidence-004.tar.gz"
+    },
+    "raw/outputs/diagnosis/tensors/ebe3d9aeb9d9025afc5db34a14a5a7d934157e61d6635490f83a49e4e7cd7b8c.f32.gz": {
+      "bytes": 1656296,
+      "sha256": "6ca7b11723dd09f607eeadd91fece5425da1622219510529003148020a4596a8",
+      "archive": "evidence-004.tar.gz"
+    },
+    "raw/outputs/diagnosis/tensors/ed975829a3bbd92bab06dc16e1e6e30a8dd261aead3b7fb2e34d836c8a45d408.f32.gz": {
+      "bytes": 1663547,
+      "sha256": "5c876cc45177357e238956530d3582b14d34ba606ab207882ec282a085079bee",
+      "archive": "evidence-004.tar.gz"
+    },
+    "raw/outputs/diagnosis/tensors/eeece98bc2eb3e8f62e8772e29635c817b8668db58e9e03562269e469ca053d8.f32.gz": {
+      "bytes": 284815,
+      "sha256": "c9b4e5fddce03e781bb6376721943dd25bf7b82a2ad1b52dc33cb05641695263",
+      "archive": "evidence-004.tar.gz"
+    },
+    "raw/outputs/diagnosis/tensors/f1c84fbd794ecf09e37ef408585bb45e69333966378b56a6c03596662d26137f.f32.gz": {
+      "bytes": 285385,
+      "sha256": "ca035e06426ad2b7b0d11ebb832dc04b2381a9b37f0ac93904fae918e3e428c5",
+      "archive": "evidence-004.tar.gz"
+    },
+    "raw/outputs/diagnosis/tensors/f54e67ef43b4c5342aa939dfbc22cb24d452ab46c8a1f2d906b066e73b58f815.f32.gz": {
+      "bytes": 284994,
+      "sha256": "8497649e6a04619375aac7e57cf5fd098f2acc68cdbe6f908331e548bcc28cea",
+      "archive": "evidence-004.tar.gz"
+    },
+    "raw/outputs/diagnosis/tensors/f6225802d6d1ba892fed8a7e5969ec458fba3bf6606d2a66a683046815f0ad51.f32.gz": {
+      "bytes": 285663,
+      "sha256": "d58c0f752cb5b6e2c7ff7dec043ef11173be87dd268b8ec881e17f76ed45887f",
+      "archive": "evidence-004.tar.gz"
+    },
+    "raw/outputs/diagnosis/tensors/f6c6070ebcacbe0c2a8af57360fd0cd2b23b4be6dea82bf40a0fd694cd182a3e.f32.gz": {
+      "bytes": 1663341,
+      "sha256": "b2eb103dd3e09b2f8438f55738faa6795a840acfbb4138083f7052dbbc127948",
+      "archive": "evidence-004.tar.gz"
+    },
+    "raw/outputs/diagnosis/tensors/f6db53805672241195609d2a2a965fc02e13517ffe680b885fb6e5412aef58ee.f32.gz": {
+      "bytes": 1660154,
+      "sha256": "4fa4aa8c3dc5d8302c05979f935d40d002e2c8995f598ebb7766601f38b06b25",
+      "archive": "evidence-004.tar.gz"
+    },
+    "raw/outputs/diagnosis/tensors/f755934038f7b0fa55dd6fe92de3bc4582f3fb12d4fb6f937f03e4767ae9d44d.f32.gz": {
+      "bytes": 285520,
+      "sha256": "fcc52c98fcd3fd79a338800500e8aec08da5e435b07c2702feb035a296691dcc",
+      "archive": "evidence-004.tar.gz"
+    },
+    "raw/outputs/diagnosis/tensors/f80f54bc4d0b39c0b82fc8dd037215f738336816701403cf09f14ee6fe98dbe1.f32.gz": {
+      "bytes": 1659914,
+      "sha256": "66df32d57554e803f1863bc28b7729ca22c11a646d13977fc9fc33f673896a52",
+      "archive": "evidence-004.tar.gz"
+    },
+    "raw/outputs/diagnosis/tensors/f886277518ed8682162db792dc2cd6344dbdb6bb34ff37de1bf682f49f8e76b4.f32.gz": {
+      "bytes": 285215,
+      "sha256": "447909cefd5b681a59c75811e5620b37b4f0d1a64bc754c8b817fa4a4ac4e2e2",
+      "archive": "evidence-004.tar.gz"
+    },
+    "raw/outputs/diagnosis/tensors/f93cd76c1efbf3c441a40294429afede07baa49f7d4b5393e4c88a3c64b46464.f32.gz": {
+      "bytes": 1682126,
+      "sha256": "3fca1b3c576f3177b81ed81703ada8166c2e8bf9e1ebc6bfbd634ed02349f310",
+      "archive": "evidence-004.tar.gz"
+    },
+    "raw/outputs/diagnosis/tensors/f9eefcbce019bb68267211324aae40c5dd5d7e369e29a4be533c4dc37c1da6ad.f32.gz": {
+      "bytes": 285212,
+      "sha256": "6fbcb3882735438c2c3b0f31da7f30362e10ee692c26a7ab749951ea0a66faef",
+      "archive": "evidence-004.tar.gz"
+    },
+    "raw/source-manifest.json": {
+      "bytes": 7770,
+      "sha256": "ecfae665d721f3bf8ec7b27201a5804ff94e466698ada327a07becbe18fb4de5",
+      "archive": "evidence-004.tar.gz"
+    },
+    "reproduce.json": {
+      "bytes": 1292,
+      "sha256": "87c191c78fcde127a2cb0bed408b9bcaeb07bc374333870dbf65d01c4a1e98b2",
+      "archive": "evidence-004.tar.gz"
+    },
+    "review/rapidtinyrec_fp32_backend_retry1_audit.stderr": {
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "archive": "evidence-004.tar.gz"
+    },
+    "review/rapidtinyrec_fp32_backend_retry1_audit.stdout": {
+      "bytes": 237,
+      "sha256": "707c8ebb6cc102db3e22abf34277b782af229876b91784a28e2126ae10ea4c89",
+      "archive": "evidence-004.tar.gz"
+    },
+    "review/rapidtinyrec_fp32_backend_retry1_independent_review.json": {
+      "bytes": 28428,
+      "sha256": "faa2f75dd878f9e7b57442e1b2b13d8bd1611b60d9c7b313fe7c4d5cd229db9c",
+      "archive": "evidence-004.tar.gz"
+    },
+    "review/rapidtinyrec_fp32_backend_retry1_raw_manifest.json": {
+      "bytes": 52531,
+      "sha256": "5dc0effdb39e6deaba1ea0bf2617a2882f88693556ac1bdf315895207a0f7a55",
+      "archive": "evidence-004.tar.gz"
+    },
+    "review/rapidtinyrec_fp32_backend_retry1_source_ci.log": {
+      "bytes": 142800,
+      "sha256": "968410bef8c7416f671abbebdf734296c55354a773540378b4277f875a482bac",
+      "archive": "evidence-004.tar.gz"
+    },
+    "review/review_fp32_backend.py": {
+      "bytes": 7562,
+      "sha256": "903eec0797a03471f44146f912c625aaf22a704dbbca86b7d65791d70a566b15",
+      "archive": "evidence-004.tar.gz"
+    },
+    "run-record.json": {
+      "bytes": 7776,
+      "sha256": "1a0d50e35b386e1b24681bb6bb638988be705a4d38d41438e46546d0585b826a",
+      "archive": "evidence-004.tar.gz"
+    },
+    "source-snapshot/.submission-config.json": {
+      "bytes": 698,
+      "sha256": "db7d37886a8741761e1e3308db7d5e71e1452b10fd8f5c828f574e6cf91eed77",
+      "archive": "evidence-004.tar.gz"
+    },
+    "source-snapshot/jobs/fp32-backend.sh": {
+      "bytes": 546,
+      "sha256": "be239ea58c8e451c651c0685a9edd4e828ed8464eaf0c3ba6b9ac4e403a798cc",
+      "archive": "evidence-004.tar.gz"
+    },
+    "source-snapshot/oscar.fp32-backend.json": {
+      "bytes": 698,
+      "sha256": "db7d37886a8741761e1e3308db7d5e71e1452b10fd8f5c828f574e6cf91eed77",
+      "archive": "evidence-004.tar.gz"
+    },
+    "source-snapshot/rapidtinyrec/__init__.py": {
+      "bytes": 96,
+      "sha256": "b199f072828413c59c95580d6aa7f16b01636f44653870c1d4a86da3b197c762",
+      "archive": "evidence-004.tar.gz"
+    },
+    "source-snapshot/rapidtinyrec/audit.py": {
+      "bytes": 5184,
+      "sha256": "baadb1b535f9bcfe3020c7bd7ba4156398e93e9077a0d094f029406b68e10ed7",
+      "archive": "evidence-004.tar.gz"
+    },
+    "source-snapshot/rapidtinyrec/audit_decode_pilot.py": {
+      "bytes": 13920,
+      "sha256": "3f90d7ebdd8c39ea1d8a013f261ca4439ea9c5b759160bd74c987743655d8399",
+      "archive": "evidence-004.tar.gz"
+    },
+    "source-snapshot/rapidtinyrec/audit_folded_prefix.py": {
+      "bytes": 13064,
+      "sha256": "9258af9fdc59d847fe830bed7d792e56c4845b148228bc7b0d62d138366effe4",
+      "archive": "evidence-004.tar.gz"
+    },
+    "source-snapshot/rapidtinyrec/audit_folded_profile.py": {
+      "bytes": 14781,
+      "sha256": "3fd09798db667990eadca66809bfae8dbd19064615793095411f193df1619495",
+      "archive": "evidence-004.tar.gz"
+    },
+    "source-snapshot/rapidtinyrec/audit_fp32_backend.py": {
+      "bytes": 12514,
+      "sha256": "1c92f4273a75dec831ecaab380afa68d1bba871f75bb0523823a83dcfda69e09",
+      "archive": "evidence-004.tar.gz"
+    },
+    "source-snapshot/rapidtinyrec/audit_input_arena.py": {
+      "bytes": 9379,
+      "sha256": "a351e222eead05acdc762b5a64791dd579d3c50e4b8b55a79f4d1ad70eb6e983",
+      "archive": "evidence-004.tar.gz"
+    },
+    "source-snapshot/rapidtinyrec/audit_prefix_profile.py": {
+      "bytes": 12793,
+      "sha256": "dd95bd1e80598df70d05e6ae70349cf9dc7febb8516eca21a146e90b99c078e2",
+      "archive": "evidence-004.tar.gz"
+    },
+    "source-snapshot/rapidtinyrec/audit_replay_profile.py": {
+      "bytes": 7338,
+      "sha256": "df1f67d02f0c8a3ef8ae8022cf4106b45bf3e3f792b81631748581a450f6b39f",
+      "archive": "evidence-004.tar.gz"
+    },
+    "source-snapshot/rapidtinyrec/audit_results.py": {
+      "bytes": 8370,
+      "sha256": "0cce231b214cfcd38e888286eadab7592ca0606e10a6c552352a686602d001a4",
+      "archive": "evidence-004.tar.gz"
+    },
+    "source-snapshot/rapidtinyrec/audit_shared_prefix.py": {
+      "bytes": 12298,
+      "sha256": "2f5908f94e21b8d93ef44aaaea0bd393ddf0898f27a1c1747f4ec5cd15b1b88c",
+      "archive": "evidence-004.tar.gz"
+    },
+    "source-snapshot/rapidtinyrec/benchmark.py": {
+      "bytes": 23663,
+      "sha256": "1a90a2440a6b01926779a6582c19b3d1f4ea436375c6dfb7e6b69b7f8aa614c6",
+      "archive": "evidence-004.tar.gz"
+    },
+    "source-snapshot/rapidtinyrec/benchmark_folded_prefix.py": {
+      "bytes": 13257,
+      "sha256": "47925842d794afa854f3f6b0e12c47656346d61eaec1b719d327e9776c170190",
+      "archive": "evidence-004.tar.gz"
+    },
+    "source-snapshot/rapidtinyrec/benchmark_folded_profile.py": {
+      "bytes": 11937,
+      "sha256": "68bd51c52c302794b534825b26072031390526e1de41b50382fe2c39e4fd1377",
+      "archive": "evidence-004.tar.gz"
+    },
+    "source-snapshot/rapidtinyrec/benchmark_gqa.py": {
+      "bytes": 15576,
+      "sha256": "5175532144b38989138c9a87c003de9189800184ec642383971e05b56fbb8ab0",
+      "archive": "evidence-004.tar.gz"
+    },
+    "source-snapshot/rapidtinyrec/benchmark_input_arena.py": {
+      "bytes": 10495,
+      "sha256": "4666df2dce59a13f81a5d73b105400c89b70cd45975583d4a091a4c50aa5a624",
+      "archive": "evidence-004.tar.gz"
+    },
+    "source-snapshot/rapidtinyrec/benchmark_shared_prefix.py": {
+      "bytes": 13722,
+      "sha256": "ac8a36a50f80f04a2d5bb3013b0d79009baa0c7e9fbfec5d769252a6a7260f4f",
+      "archive": "evidence-004.tar.gz"
+    },
+    "source-snapshot/rapidtinyrec/bulk_constraints.py": {
+      "bytes": 1455,
+      "sha256": "aa9b40445fdb45572f5adff31ba9dfca7f5fe03d367fb0975cee694b6ba838ec",
+      "archive": "evidence-004.tar.gz"
+    },
+    "source-snapshot/rapidtinyrec/compiled_forward.py": {
+      "bytes": 6637,
+      "sha256": "98c35f16f01a007ffc5896264b7c190bf8bf6da7c4cae153f1a8f98b4f6d125f",
+      "archive": "evidence-004.tar.gz"
+    },
+    "source-snapshot/rapidtinyrec/decode_replay.py": {
+      "bytes": 9335,
+      "sha256": "82c0dc0a615d6fd6f83d942c13912e261ccd4f1a3cf52cdb79d14f24f2f8b53f",
+      "archive": "evidence-004.tar.gz"
+    },
+    "source-snapshot/rapidtinyrec/diagnose_fp32_backend.py": {
+      "bytes": 18644,
+      "sha256": "642a2c8231c2cd5d37d3387f2ea4cf3fd7b88cf6668e2e11a83c30405116bd6b",
+      "archive": "evidence-004.tar.gz"
+    },
+    "source-snapshot/rapidtinyrec/direct_reorder.py": {
+      "bytes": 3712,
+      "sha256": "954dc6adef4c125d4d384b1e37ce116088c7a05ed74e6699f959555bfa5db11e",
+      "archive": "evidence-004.tar.gz"
+    },
+    "source-snapshot/rapidtinyrec/expected.json": {
+      "bytes": 1798,
+      "sha256": "fca32f80a6c8f85ca40c071b6579e1770e4b5058ad330f23570c987cfdadbe1e",
+      "archive": "evidence-004.tar.gz"
+    },
+    "source-snapshot/rapidtinyrec/folded_attention.py": {
+      "bytes": 1805,
+      "sha256": "3af11f5563a1f520f85731b23328fa08a3bfeefeaff6ae2331fa6c97c659b441",
+      "archive": "evidence-004.tar.gz"
+    },
+    "source-snapshot/rapidtinyrec/fp32_backend_probe.py": {
+      "bytes": 1391,
+      "sha256": "4e8b4659afb120580967e29a06997e12ede70305fab9e6bab03140da088c0e99",
+      "archive": "evidence-004.tar.gz"
+    },
+    "source-snapshot/rapidtinyrec/gpu_constraints.py": {
+      "bytes": 5461,
+      "sha256": "0a5e903b7251c067456377c7f09f569ccdbbf6f2c456b6a4b072d3a2f26f710c",
+      "archive": "evidence-004.tar.gz"
+    },
+    "source-snapshot/rapidtinyrec/gqa_benchmark_protocol.py": {
+      "bytes": 2100,
+      "sha256": "b2495bd756ffd0efc9f42753e8ccb7e4beabf928072e6bbcc54230ed710688d2",
+      "archive": "evidence-004.tar.gz"
+    },
+    "source-snapshot/rapidtinyrec/input_arena.py": {
+      "bytes": 2080,
+      "sha256": "d8631c73344d956b076c0a10de0fc0736095d3f5ff21de8f42c03293c5dea3f1",
+      "archive": "evidence-004.tar.gz"
+    },
+    "source-snapshot/rapidtinyrec/pilot_decode_replay.py": {
+      "bytes": 13148,
+      "sha256": "9b09986bb7f138dbcbe8c43d4ab9be84f6d5539f19b14074f6c5536d27482716",
+      "archive": "evidence-004.tar.gz"
+    },
+    "source-snapshot/rapidtinyrec/prefix_prefill.py": {
+      "bytes": 3350,
+      "sha256": "fe66809e94986e5adc1b72c93b77097f5cd37d886f81dd0d1b1963b56e03cc90",
+      "archive": "evidence-004.tar.gz"
+    },
+    "source-snapshot/rapidtinyrec/prefix_replay.py": {
+      "bytes": 6349,
+      "sha256": "11f776c6789ac014282010831ddca0a432aeca9491c1181fb888d9b03af7f4cb",
+      "archive": "evidence-004.tar.gz"
+    },
+    "source-snapshot/rapidtinyrec/prepare_release.py": {
+      "bytes": 1307,
+      "sha256": "d3f783a92316289386ee43cc484289115f7c4d89685db9c556fdfa972af85be7",
+      "archive": "evidence-004.tar.gz"
+    },
+    "source-snapshot/rapidtinyrec/profile_compiled.py": {
+      "bytes": 16994,
+      "sha256": "60b4ede2ec386ba1434c4f0c5ad030e9e36553da62a2536e88e4d5558a14fb75",
+      "archive": "evidence-004.tar.gz"
+    },
+    "source-snapshot/rapidtinyrec/profile_decode_replay.py": {
+      "bytes": 6539,
+      "sha256": "b40cb860156ffa0c6fc538a47b7674e569ba23b84b73c5e2f0cd0cf9f5b4f477",
+      "archive": "evidence-004.tar.gz"
+    },
+    "source-snapshot/rapidtinyrec/profile_prefix.py": {
+      "bytes": 9445,
+      "sha256": "090e8649e23c848e64cb26bdfb9f84537ab51934b247a49df1aa0077eb92eba7",
+      "archive": "evidence-004.tar.gz"
+    },
+    "source-snapshot/rapidtinyrec/profile_shared.py": {
+      "bytes": 17419,
+      "sha256": "c7ad8afbe06d3bdd4faf692d28def678f759c6d786ec452232cffc1807acc7af",
+      "archive": "evidence-004.tar.gz"
+    },
+    "source-snapshot/rapidtinyrec/requirements.txt": {
+      "bytes": 140,
+      "sha256": "5976ae1ce277513a5df2f83713791f5fddd22bc8e34def280406f52a7954ec23",
+      "archive": "evidence-004.tar.gz"
+    },
+    "source-snapshot/rapidtinyrec/run.py": {
+      "bytes": 1502,
+      "sha256": "543a4129e8b21a20a1a8681ee7bea82ff50ea044d10b4be0fc4b44bf1975466d",
+      "archive": "evidence-004.tar.gz"
+    },
+    "source-snapshot/rapidtinyrec/shared_prefill.py": {
+      "bytes": 3104,
+      "sha256": "ada528219c8f11ea54ff55db463c4c390e8e7073b60ae6fda01ce47f23665baa",
+      "archive": "evidence-004.tar.gz"
+    },
+    "source-snapshot/rapidtinyrec/shared_prefix.py": {
+      "bytes": 6384,
+      "sha256": "5479370d129466574376c62a81125909b1673bca76ff3d257ee915443dbcfd9f",
+      "archive": "evidence-004.tar.gz"
+    },
+    "source-snapshot/rapidtinyrec/source/LogitProcessor.py": {
+      "bytes": 2985,
+      "sha256": "13ab33ff0ed3f769370478a86624499ccc0f8813de9d63e3dc4e2fa25ec59eb8",
+      "archive": "evidence-004.tar.gz"
+    },
+    "source-snapshot/rapidtinyrec/source/__init__.py": {
+      "bytes": 69,
+      "sha256": "d72e9591bbafb1089e30f86ba31f1c9994dbfdbdcee8f3daa838c52a5f5ec801",
+      "archive": "evidence-004.tar.gz"
+    },
+    "source-snapshot/rapidtinyrec/source/data.py": {
+      "bytes": 74953,
+      "sha256": "85edcb6b1e7d1124c204bbdcb312d70903920b3cb5f00bc3fc1414f3df03b555",
+      "archive": "evidence-004.tar.gz"
+    },
+    "source-snapshot/rapidtinyrec/validate_gpu_constraints.py": {
+      "bytes": 3435,
+      "sha256": "45fea3b3ce38fcc24837efc64ef7ffdfe6ac96371124b24242e2d8890ec08867",
+      "archive": "evidence-004.tar.gz"
+    },
+    "source-snapshot/source-provenance.json": {
+      "bytes": 5422,
+      "sha256": "7ff4fd3c29c15fb52cf08dd730f72aa1e51776f58497f37b5d55ce772907ef4f",
+      "archive": "evidence-004.tar.gz"
+    },
+    "status.json": {
+      "bytes": 7018,
+      "sha256": "3046ab98bac25e2be017ee22bfc495dde36820039bbbd0765ccfb86cc5d6c1e1",
+      "archive": "evidence-004.tar.gz"
+    },
+    "submit_fp32_backend_retry1.py": {
+      "bytes": 9320,
+      "sha256": "4f6d67bc36e68f95f389ef34af3cc1db50bf0aff1d721106c9ba8212d4bd886a",
+      "archive": "evidence-004.tar.gz"
+    },
+    "test_fp32_backend_export.py": {
+      "bytes": 5810,
+      "sha256": "f1b31d5f1902d4bf48d18adccc6ad5384ef9c8e8eaef117f29f8a27d9aee3dd8",
+      "archive": "evidence-004.tar.gz"
+    }
+  }
+}
