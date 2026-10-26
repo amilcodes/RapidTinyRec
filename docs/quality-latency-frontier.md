@@ -1,10 +1,16 @@
 # Quality–latency research track
 
-## Completed setup diagnostic, October26
+## Complete paired pilot passed, October26
+
+The complete four-phase pilot finished in18m17s and passed its frozen fidelity, stability, ownership, dispatch, validity and performance gates. Paired median/p95 generation latency fell **115.576/118.961 → 82.957/83.655ms** (28.22%/29.68% lower), with gains across both lengths and both halves. Candidate scores differ and one user list changes; all four users have unchanged Hit/NDCG/MRR. Four users do not establish quality parity or noninferiority. The result supports designing a separately frozen full500 review, with no automatic submission or promotion.
+
+[Complete paired evidence, memory, uncertainty and538-member archive](../benchmarks/precision-paired-staged-pilot/README.md). The original timeout and TF32-only diagnostic remain preserved below; their earlier next actions are historical.
+
+## Historical setup diagnostic, October26
 
 The separately frozen TF32-only diagnostic completed in9m22s and passed its audit. Cold/reuse setup took357.409/152.681seconds; all1200ranks,1200sequencevalues,6000transitions and ancestry match preserved TF32 outputs exactly. Ownership/stability, actual graph-linked dispatch and hashed log recovery pass. [Complete setup evidence and limitations](../benchmarks/diagnostics/precision-setup-feasibility/README.md) includes310verified archived members.
 
-This establishes setup feasibility only. There is no paired FP32 control, new quality estimate or causal logging claim; full500/promotion/noninferiority remain false. Next review and freeze a complete paired pilot with conservative budget and one-time guard. No new job submitted. Earlier preparation descriptions below are historical.
+This establishes setup feasibility only. There is no paired FP32 control, new quality estimate or causal logging claim; full500/promotion/noninferiority remain false. The later complete paired pilot is reported above. Its eligibility is separate from this diagnostic. Earlier preparation descriptions below are historical.
 
 The user explicitly authorized investigating large inference gains even when
 numerical outputs differ, provided recommendation quality is unchanged or only
@@ -271,7 +277,7 @@ one-time submission guard and passed publication CI must be recorded. Review the
 resulting budget before designing any later complete paired pilot.
 
 
-### Complete paired pilot preparation
+### Historical complete paired pilot preparation
 
 A distinct four-user FP32/TF32/TF32/FP32 pilot is being prepared after the successful setup diagnostic. The frozen [design](../benchmarks/preparation/quality-frontier/precision-paired-staged-protocol.json) plans 1500 seconds of child work under the existing 1620-second deadline, leaving nominal cleanup time within the 30-minute allocation. Repaired-logging FP32 setup remains unmeasured; this is a planning estimate, not a completion guarantee.
 
