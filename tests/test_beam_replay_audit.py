@@ -51,6 +51,22 @@ def fixture():
 
 
 class BeamAuditTests(unittest.TestCase):
+    def test_synthetic_initial_slice_stride_is_source_specific(self):
+        probe=report()
+        for event in probe['events']:
+            if event['method']==FINISHED and event['step']==0:
+                for item in event['signature']:
+                    if item[0] in ('sequences','beam_indices'):
+                        item[3][0] *= 2
+        audit_report(probe,[76,121],synthetic_probe=True)
+        with self.assertRaises(AssertionError):audit_report(probe,[76,121])
+        with self.assertRaises(AssertionError):audit_report(report(),[76,121],synthetic_probe=True)
+        for name,axis in [('sequences',0),('sequences',1),('beam_indices',0),('beam_indices',2)]:
+            changed=copy.deepcopy(probe)
+            item=next(x for x in changed['events'][1]['signature'] if x[0]==name)
+            item[3][axis] += 1
+            with self.assertRaises(AssertionError):audit_report(changed,[76,121],synthetic_probe=True)
+
     def test_pinned_shapes_scalar_steps_storage_and_captures(self):
         audit_report(report(),[76,121])
         for mutate in (

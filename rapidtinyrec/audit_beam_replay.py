@@ -202,6 +202,7 @@ def audit(root,historical,snapshot,run_record,token_map_path):
         'latency_by_length_ms':{str(n):latency([r for r in paired if r['prompt_tokens']==n],VARIANTS) for n in lengths},
         'latency_by_half_ms':{str(h):latency([r for r in paired if (r['cohort_index']%2 if full else r['repeat']//3)==h],VARIANTS) for h in (0,1)},
         'phases':phases,'snapshot_files_verified':len(record['files']),'audit_script_sha256':digest(Path(__file__)),
+        'audit_helpers_sha256':digest(Path(__file__).with_name('audit_beam_helpers.py')),
         'note':'Memory is isolated per fresh process; latency is paired by user/repeat across ABBA phases, not interleaved requests. One allocation does not establish run-to-run variance. Setup timings are nested; do not add. Integrity passing alone does not imply bit equality.'}
 
 

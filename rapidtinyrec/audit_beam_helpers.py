@@ -52,7 +52,7 @@ def storage_bytes(spec):
     return sum(math.prod(shape)*SIZES[dtype] for shape,dtype in spec)
 
 
-def audit_report(r, lengths, penalty=0., early=False):
+def audit_report(r, lengths, penalty=0., early=False, *, synthetic_probe=False):
     expected = {(m,n,s) for m in METHODS for n in lengths for s in range(5)}
     assert r['graphs'] == len(expected) and r['frozen'] and r['disjoint_step_storage']
     assert not r['active_request'] and r['aborted_requests'] == 0
@@ -69,6 +69,13 @@ def audit_report(r, lengths, penalty=0., early=False):
                 shape,stride,dtype,device=value
                 assert device=='cuda:0'
                 expected_stride=[math.prod(shape[i+1:]) for i in range(len(shape))]
+                # inputs() starts finished state from [:, :50].clone() of a
+                # 100-candidate tensor. clone preserves its singleton batch
+                # stride. Later recurrent state and generation use canonical
+                # strides. Validate this exact source-derived layout, not an
+                # arbitrary singleton-stride exemption.
+                if synthetic_probe and method==FINISHED and step==0 and name in ('sequences','beam_indices'):
+                    expected_stride[0] *= 2
                 assert stride==expected_stride
         scalars={x[0]:x[2] for x in e['signature'] if x[1]!='tensor'}
         want=dict(num_beams=50)
@@ -148,7 +155,7 @@ def audit_probe(probe,raw_path):
     assert [r['scenario'] for r in probe['reports']]==list(SCENARIOS)
     for item in probe['reports']:
         r=item['replay'];s=item['scenario']
-        audit_report(r,[76,121],1.2 if s=='penalty' else 0.,s=='finished_flags')
+        audit_report(r,[76,121],1.2 if s=='penalty' else 0.,s=='finished_flags',synthetic_probe=True)
         assert r['requests']==4 and r['replays']==40
         assert r['staged_bytes']==2*r['input_logical_bytes']
     return dict(exact=passed,**totals)
