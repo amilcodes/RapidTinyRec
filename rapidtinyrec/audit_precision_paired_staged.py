@@ -13,6 +13,14 @@ def validate_provenance(root, snapshot, record):
     assert record['profile'] == PROFILE
     assert record['resources']['command'] == ['bash', 'jobs/precision-paired-staged.sh']
     assert record['resources']['constraint'] == 'ampere'
+    config_name = 'oscar.precision-paired-staged.json'
+    config_path = snapshot.parent / config_name
+    assert record['sha256'][config_name] == digest(config_path)
+    config = read(config_path)
+    assert config['project'] == record['project'] == 'rapidtinyrec-precision-paired-staged'
+    assert config['ssh_target'] == record['ssh_target'] == 'aagraw73@sshcampus.ccv.brown.edu'
+    assert config['remote_root'] == '/oscar/scratch/aagraw73/agent-runs'
+    assert config['profiles'] == {PROFILE: record['resources']}
     protocol_path = snapshot.parent / PROTOCOL
     assert record['sha256'][PROTOCOL] == PROTOCOL_SHA256 == digest(protocol_path)
     protocol = load_protocol(protocol_path)

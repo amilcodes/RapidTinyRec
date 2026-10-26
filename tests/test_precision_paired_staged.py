@@ -149,6 +149,11 @@ class ProvenanceBindingTests(FourPhaseRecoveryTests):
                      'resources':{**protocol['resources'],'command':['bash','jobs/precision-paired-staged.sh']},
                      'sha256':{'rapidtinyrec/'+p.name:hashlib.sha256(p.read_bytes()).hexdigest()
                                for p in (ROOT/'rapidtinyrec').glob('*.py')}}
+        self.record.update(project='rapidtinyrec-precision-paired-staged',ssh_target='aagraw73@sshcampus.ccv.brown.edu')
+        config=self.snapshot.parent/'oscar.precision-paired-staged.json'
+        save_record(config,dict(project=self.record['project'],ssh_target=self.record['ssh_target'],
+            remote_root='/oscar/scratch/aagraw73/agent-runs',profiles={self.record['profile']:self.record['resources']}))
+        self.record['sha256'][config.name]=hashlib.sha256(config.read_bytes()).hexdigest()
         self.record['sha256'][PROTOCOL]=PROTOCOL_SHA256
         self.record['sha256']['jobs/precision-paired-staged.sh']=hashlib.sha256(script.read_bytes()).hexdigest()
 
@@ -158,7 +163,9 @@ class ProvenanceBindingTests(FourPhaseRecoveryTests):
         self.assertIn('Office_ckpt/model.safetensors',result['release_sha256'])
 
     def test_wrong_resources_command_protocol_and_auditor_source_fail(self):
-        changes=[lambda x:x['resources'].update(gpus=2),
+        changes=[lambda x:x.update(project='wrong-project'),
+                 lambda x:x['sha256'].update({'oscar.precision-paired-staged.json':'0'*64}),
+                 lambda x:x['resources'].update(gpus=2),
                  lambda x:x['resources'].update(time='01:00:00'),
                  lambda x:x['resources'].update(command=['bash','jobs/precision-setup.sh']),
                  lambda x:x['sha256'].update({PROTOCOL:'0'*64}),
