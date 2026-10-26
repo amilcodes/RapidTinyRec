@@ -5,7 +5,7 @@ BACKENDS = ('default', 'cublas', 'cublaslt')
 USERS = (1, 2, 6, 10)
 LAYERS = (0, 13, 27)
 ROLES = ('gate', 'up', 'down')
-TORCH_COMMIT = '2b3ec34829036a65cd9d1398ea72a0167dc37470'
+TORCH_COMMIT = '08187d9e0fba026dc8217405802ab5381dc88d90'
 
 
 @contextmanager

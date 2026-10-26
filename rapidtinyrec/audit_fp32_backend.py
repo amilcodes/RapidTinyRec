@@ -13,7 +13,7 @@ import sys
 BACKENDS = ('default', 'cublas', 'cublaslt')
 ROLES = ('gate', 'up', 'down')
 CASES = [(u,l) for u in (1,2,6,10) for l in (0,13,27)]
-COMMIT = '2b3ec34829036a65cd9d1398ea72a0167dc37470'
+COMMIT = '08187d9e0fba026dc8217405802ab5381dc88d90'
 
 
 def sha(data): return hashlib.sha256(data).hexdigest()
@@ -183,6 +183,7 @@ def main():
     try:
         record=json.loads(args.run_record.read_text());d=json.loads((args.root/'diagnosis.json').read_text())
         assert record['job_id']==d['job_id']
+        assert d['complete'] is True, 'Diagnostic incomplete; inspect preserved failure and scheduler logs'
         for name,expected in record['sha256'].items():assert sha((args.snapshot/name).read_bytes())==expected,name
         expected=json.loads((args.snapshot/'rapidtinyrec/expected.json').read_text())
         assert d['release_sha256']==expected['release_sha256'] and d['cohort_sha256']==expected['users_sha256']

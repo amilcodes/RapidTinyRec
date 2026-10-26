@@ -1,0 +1,39 @@
+{
+  "run_id": "fp32-backend-diagnosis-20261026T035745Z-373a5daf14c4",
+  "job_id": "7955758",
+  "scheduler_state": "FAILED",
+  "exit_code": "1:0",
+  "elapsed_s": 16,
+  "measured_source_commit": "a135805e507a407b3154108f2c3bbb9cdab4e2e3",
+  "completed_cases": 0,
+  "model_loaded": false,
+  "backend_exactness_established": false,
+  "backend_latency_measured": false,
+  "ranking_quality_measured": false,
+  "original_audit_exit_code": 1,
+  "original_audit_errors": [
+    "KeyError: 'release_sha256'"
+  ],
+  "raw_files_verified": 6,
+  "source_files_verified": 47,
+  "observed_wheel_commit": "08187d9e0fba026dc8217405802ab5381dc88d90",
+  "original_guard_commit": "2b3ec34829036a65cd9d1398ea72a0167dc37470",
+  "numerical_source_files_byte_identical": 5,
+  "changed_upstream_files": [
+    "test/test_transformers.py"
+  ],
+  "decision": "Repair the build identity pin only after reviewing official source equivalence. Preserve this failed run. Fresh CI and separately guarded retry required; no algorithm or equality changes.",
+  "original_audit_command": [
+    "python3",
+    "-m",
+    "rapidtinyrec.audit_fp32_backend",
+    "/Users/AmilAgrawal/Documents/Codex/2026-10-18/let/work/rapidtinyrec_fp32_backend/.oscar/results/fp32-backend-diagnosis-20261026T035745Z-373a5daf14c4/outputs/diagnosis",
+    "--snapshot",
+    "/Users/AmilAgrawal/Documents/Codex/2026-10-18/let/work/rapidtinyrec_fp32_backend/.oscar/source_snapshots/fp32-backend-diagnosis-20261026T035745Z-373a5daf14c4",
+    "--run-record",
+    "/Users/AmilAgrawal/Documents/Codex/2026-10-18/let/work/rapidtinyrec_fp32_backend/.oscar/runs/fp32-backend-diagnosis-20261026T035745Z-373a5daf14c4.json",
+    "--output",
+    "/Users/AmilAgrawal/Documents/Codex/2026-10-18/let/outputs/rapidtinyrec_fp32_backend_audit.json"
+  ],
+  "original_audit_cwd": "/Users/AmilAgrawal/Documents/Codex/2026-10-18/let/work/rapidtinyrec_fp32_backend/.oscar/source_snapshots/fp32-backend-diagnosis-20261026T035745Z-373a5daf14c4"
+}
