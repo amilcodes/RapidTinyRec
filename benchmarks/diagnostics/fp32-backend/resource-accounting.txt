@@ -1,0 +1,5 @@
+JobID|State|AllocCPUS|ReqCPUS|ReqMem|AllocTRES|Elapsed
+7956300|COMPLETED|4|4|32G|billing=112,cpu=4,gres/gpu=1,mem=32G,node=1|00:00:45
+7956300.batch|COMPLETED|4|4||cpu=4,gres/gpu=1,mem=32G,node=1|00:00:45
+7956300.extern|COMPLETED|4|4||billing=112,cpu=4,gres/gpu=1,mem=32G,node=1|00:00:45
+7956300.0|COMPLETED|4|4||cpu=4,gres/gpu=1,mem=32G,node=1|00:00:43

@@ -13,6 +13,7 @@ jobs:
       - run: python -m compileall -q rapidtinyrec
       - run: python -m unittest discover -s tests -p test_fp32_backend.py -v
       - run: python -m unittest discover -s tests -p test_fp32_backend_build_evidence.py -v
+      - run: python -m unittest discover -s tests -p test_fp32_backend_evidence.py -v
       - run: python -m rapidtinyrec.audit_fp32_backend --help
       - run: python -m unittest discover -s tests -p test_evidence.py -v
       - run: python -m unittest discover -s tests -p test_folded_evidence.py -v
