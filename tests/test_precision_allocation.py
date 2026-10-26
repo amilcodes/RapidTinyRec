@@ -29,7 +29,7 @@ class AllocationIdentityTests(unittest.TestCase):
         self.env=dict(SLURM_JOB_ID='12345',OSCAR_RUN_DIR=self.remote,OSCAR_OUTPUT_DIR=self.remote+'/outputs')
         self.raw=('JobId=12345 JobState=RUNNING Partition=gpu QOS=norm-gpu TimeLimit=00:30:00 '
             'NumCPUs=4 NumNodes=1 Command='+self.remote+'/job.sh WorkDir='+self.remote+
-            ' AllocTRES=cpu=4,mem=32G,node=1,gres/gpu=1,gres/gpu:nvidia_rtx_a6000=1 NodeList=gpu-fixture')
+            ' AllocTRES=cpu=4,mem=32G,node=1,gres/gpu=1 TresPerNode=gres/gpu:nvidia_rtx_a6000:1 NodeList=gpu-fixture')
         self.fields=scheduler_fields(self.raw)
     def validate(self):return validate_manifest(self.prepared,self.config,self.protocol,'12345\n',self.env,self.fields)
     def records(self):
@@ -53,11 +53,16 @@ class AllocationIdentityTests(unittest.TestCase):
     def test_scheduler_resources_and_execution_identity_fail_closed(self):
         for k,v in [('JobId','54321'),('JobState','COMPLETED'),('Partition','gpu-he'),('QOS','other'),
                     ('TimeLimit','01:00:00'),('NumCPUs','8'),('NumNodes','2'),('Command','other'),('WorkDir','other'),
+                    ('TresPerNode','gres/gpu:a100:1'),('TresPerNode','gres/gpu:nvidia_rtx_a6000:2'),
                     ('AllocTRES','cpu=4,mem=32G,node=1,gres/gpu=2,gres/gpu:nvidia_rtx_a6000=2')]:
             fields=dict(self.fields,**{k:v})
             with self.subTest(k=k),self.assertRaises(AssertionError):validate_scheduler(fields,'12345',self.remote)
         fields=dict(self.fields,AllocTRES=self.fields['AllocTRES'].replace('32G','32768M'))
         validate_scheduler(fields,'12345',self.remote)
+        fields=dict(self.fields,AllocTRES=self.fields['AllocTRES']+',gres/gpu:nvidia_rtx_a6000=1')
+        validate_scheduler(fields,'12345',self.remote)
+        del fields['TresPerNode']
+        with self.assertRaises(KeyError):validate_scheduler(fields,'12345',self.remote)
     def test_duplicate_scheduler_fields_and_unknown_memory_fail(self):
         with self.assertRaises(AssertionError):scheduler_fields(self.raw+' JobId=12345')
         fields=dict(self.fields,AllocTRES=self.fields['AllocTRES'].replace('32G','32000000000'))

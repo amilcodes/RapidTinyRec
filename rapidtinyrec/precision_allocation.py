@@ -50,7 +50,13 @@ def validate_scheduler(fields, job_id, remote):
     tres=dict(entries)
     assert len(tres)==len(entries), 'Duplicate allocated resource'
     assert tres['cpu']=='4' and tres['node']=='1' and memory_mib(tres['mem'])==32768
-    assert tres['gres/gpu']=='1' and tres['gres/gpu:nvidia_rtx_a6000']=='1'
+    assert tres['gres/gpu']=='1'
+    # Oscar accounting records generic GPU counts without typed AllocTRES.
+    # Bind the scheduler's typed request separately; benchmark manifests still
+    # independently require the actual hardware to be NVIDIA RTX A6000.
+    assert fields['TresPerNode']=='gres/gpu:nvidia_rtx_a6000:1'
+    if 'gres/gpu:nvidia_rtx_a6000' in tres:
+        assert tres['gres/gpu:nvidia_rtx_a6000']=='1'
     assert fields['NodeList'] not in ('','(null)','None')
 
 
