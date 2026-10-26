@@ -10,7 +10,7 @@ that held-out recommendation quality is preserved.
 
 Branch: `experiment/quality-latency-frontier`, based on accepted
 `experiment/12-folded-profile` at `4711e463321deadb835ac8cc25c1dfbf41d86108`.
-This commit contains the research policy only. No quality candidate is implemented,
+The paired quality evaluator is implemented with eight focused CPU tests. No numerical candidate is implemented,
 no GPU job is submitted, and no quality or speed claim is established.
 
 ## First opportunities
@@ -100,3 +100,33 @@ logs, audits, source snapshots and reproduction scripts. Guard submissions with
 intent/run records and recover uncertain outcomes instead of duplicating jobs.
 Preserve execution failures and diagnose them; no blind replacement or unbounded
 precision/algorithm/beam sweep. No paid infrastructure, subagents or merges.
+
+## Paired evaluator implementation
+
+`python -m rapidtinyrec.quality_frontier INPUT.json --output REPORT.json` takes
+explicit unique users (`cohort_index`, `prompt_tokens`, three `target_token_ids`),
+observations (`cohort_index`, `variant` control/candidate, `repeat`, original 50
+five-token `token_ids` rows), unique catalog SIDs and `eos_token_id`. Inputs must
+come from a separate provenance/fidelity audit; the evaluator does not certify
+checkpoint, token-map or target hashes. Reports hash their input and refuse to
+overwrite existing evidence.
+
+The evaluator validates complete user/repeat pairing and reports token-rank
+repeat instability instead of silently selecting a favorable repeat. Quality
+uses the lowest matched repeat once per user. Invalid rows retain their rank
+positions and cannot hit the target; duplicate valid SIDs consume positions and
+are reported, not deduplicated into an inflated score. The existing release's
+suffix is newline token198 followed by supplied EOS; another task must explicitly
+revise that schema. SID set overlap is a diagnostic even for invalid outputs.
+No numerical-score stability is inferred from stable tokens.
+
+Freeze bootstrap protocol at 10,000 user-level paired draws, seed20261026,
+two-sided percentile95% with linearly interpolated endpoints. Length strata use
+seed20261026+prompt_length and have unadjusted descriptive intervals. Primary
+metrics remain Hit@10/NDCG@10; other cutoffs and strata are exploratory. The report
+includes per-user ranks/changes and improved/regressed/unchanged counts, so a zero
+aggregate change cannot hide swaps between winners and losers. Even an all-zero
+interval does not establish population noninferiority. `promotion` and
+`noninferiority_established` remain false; this module never auto-accepts a model.
+Large-cohort resampling belongs on allocated compute; local/CI tests use tiny
+fixtures and 64 draws. No GPU workload or large dataset is run by these tests.
