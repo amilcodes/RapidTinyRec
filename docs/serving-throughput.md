@@ -140,3 +140,22 @@ users; do not submit it directly from CPU tests. Freeze that full protocol befor
 submission and retain all 25,000 ranks/sequence values and 125,000 transitions.
 Main performance documents remain unchanged until an audited serving result
 passes its gates, and serving throughput stays separate from isolated latency.
+
+
+## Storage inventory preparation
+
+`serving_storage` now describes explicitly supplied live tensors using whole
+untyped-storage addresses and capacities. It unions overlapping ranges for
+physical byte accounting and rejects any shared range across lane inventories,
+including disjoint element views backed by the same allocation. Logical view
+bytes remain separate. Empty views retain their backing allocation; expanded
+views may have more logical bytes than physical capacity. Device address spaces
+are checked separately.
+
+Seven focused CPU tests cover aliasing, interval overlap, malformed records,
+empty/expanded views and actual Torch views/clones in CI. This is a building
+block for the CUDA runtime and auditor, not a completed ownership proof. Callers
+must enumerate and retain every model/buffer, constraint, prompt, cache, arena,
+graph input/output and retained score tensor while comparing both live lanes.
+Graph pool identity and stream/thread ownership require separate evidence.
+The CUDA runtime, complete independent auditor and GPU submission remain pending.
