@@ -138,7 +138,9 @@ def lane_initializer(release_root, reference_results, output_root):
     save_exclusive(root/'initialization-provenance.json', dict(users=users,
         observed_release_sha256=observed, reference_manifest_sha256=reference['manifest_sha256'],
         torch_version=torch.__version__, torch_git=torch.version.git_version,
-        transformers_version=transformers.__version__, tf32=False))
+        transformers_version=transformers.__version__, tf32=False,
+        cuda_version=torch.version.cuda,device_name=torch.cuda.get_device_name(0),
+        device_count=torch.cuda.device_count(),numerical_policy=policy_state(torch)))
     save_exclusive(root/'resource-verification-stages.json', dict(
         initializer_started_ns=initializer_started_ns, resources_verified_ns=resources_verified_ns,
         elapsed_s=(resources_verified_ns-initializer_started_ns)/1e9,

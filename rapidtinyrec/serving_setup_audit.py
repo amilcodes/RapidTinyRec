@@ -110,8 +110,20 @@ def audit_setup(root, historical, owners):
     wanted = dict(users=users, observed_release_sha256=expected['release_sha256'],
                   reference_manifest_sha256=manifest['manifest_sha256'], torch_version='2.14.0+cu126',
                   torch_git='08187d9e0fba026dc8217405802ab5381dc88d90', transformers_version='4.55.4', tf32=False)
-    if provenance != wanted or provenance['tf32'] is not False:
+    runtime_keys = {'cuda_version', 'device_name', 'device_count', 'numerical_policy'}
+    # Bare historical preparation records predate the runtime observation. A
+    # complete allocated run requires these fields separately in its run audit.
+    extra = set(provenance) - set(wanted)
+    if extra and extra != runtime_keys:
+        raise ValueError('Incomplete initializer runtime observation')
+    if {k:v for k,v in provenance.items() if k not in runtime_keys} != wanted or provenance['tf32'] is not False:
         raise ValueError('Initializer provenance mismatch')
+    if extra:
+        from .serving_policy import validate_state
+        if (provenance['cuda_version'] != '12.6' or provenance['device_name'] != 'NVIDIA RTX A6000' or
+                type(provenance['device_count']) is not int or provenance['device_count'] != 1):
+            raise ValueError('Initializer runtime/device mismatch')
+        validate_state(provenance['numerical_policy'])
     retained_ids = [users[0]['cohort_index'], users[2]['cohort_index']]
     hashes = {}; history = {}; valid = True
     def read(path):

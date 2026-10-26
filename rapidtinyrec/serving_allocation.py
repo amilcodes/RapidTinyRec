@@ -14,7 +14,7 @@ import sys
 import time
 
 from .serving_contract import PROFILE, PROTOCOL, PROTOCOL_SHA256, load_protocol
-from .serving_policy import validate_environment
+from .serving_policy import POLICY_ENV, validate_environment
 from .serving_setup_audit import read_unique
 
 CONFIG='oscar.serving-throughput.json'
@@ -134,14 +134,19 @@ def observe_allocation(run_root):
         uploaded_manifest_sha256=hashlib.sha256(manifest_bytes).hexdigest(),sbatch_job_id_file_sha256=hashlib.sha256(job_bytes).hexdigest(),
         scheduler_command=command,scheduler_stdout=raw,scheduler_fields=fields,observed_source_sha256=hashes,
         config=config,protocol_sha256=PROTOCOL_SHA256,started_ns=started,verified_ns=time.perf_counter_ns(),
+        numerical_environment={key:os.environ.get(key) for key in POLICY_ENV},
         requires_local_oscar_reconciliation=True)
     return record
 
 
-def reconcile_record(allocated, actual, manifest_bytes, job_bytes, protocol):
-    """Metadata-only terminal binding; does not import or invoke model/audit work."""
+def validate_observation(allocated, manifest_bytes, job_bytes, protocol):
+    """Bind observation to original prepared bytes, without inventing submission."""
     identity=allocated['allocation_identity']
     require(identity['schema']=='serving-allocated-identity-v1' and identity['requires_local_oscar_reconciliation'] is True,'Allocated proof schema differs')
+    numerical=identity['numerical_environment']
+    require(set(numerical)==set(POLICY_ENV) and all(v is None or isinstance(v,str) for v in numerical.values()),
+            'Complete observed numerical environment required')
+    validate_environment({k:v for k,v in numerical.items() if v is not None})
     require(identity['uploaded_manifest_sha256']==hashlib.sha256(manifest_bytes).hexdigest() and identity['sbatch_job_id_file_sha256']==hashlib.sha256(job_bytes).hexdigest(),'Submitted bytes differ')
     # Duplicate keys in uploaded JSON must be rejected too.
     def pairs(items):
@@ -150,14 +155,24 @@ def reconcile_record(allocated, actual, manifest_bytes, job_bytes, protocol):
             require(k not in result,'Duplicate manifest key');result[k]=v
         return result
     prepared=json.loads(manifest_bytes,object_pairs_hook=pairs);job=job_bytes.decode().strip()
-    require(actual['submission']=='submitted' and allocated['submission']=='allocated_observation','Submission states differ')
-    require(allocated['job_id']==actual['job_id']==job,'Job binding differs')
+    require(allocated['submission']=='allocated_observation','Observation state differs')
+    require(allocated['job_id']==job,'Job binding differs')
     for key in ('run_id','project','profile','ssh_target','remote_dir','resources','files','sha256'):
-        require(identical(allocated[key],actual[key]) and identical(actual[key],prepared[key]),'Submitted record differs: '+key)
+        require(identical(allocated[key],prepared[key]),'Prepared record differs: '+key)
     raw=identity['scheduler_stdout'];fields=scheduler_fields(raw)
     require(fields==identity['scheduler_fields'] and identity['scheduler_command']==['scontrol','show','job','-o',job],'Scheduler proof differs')
     env=dict(SLURM_JOB_ID=job,OSCAR_RUN_DIR=prepared['remote_dir'],OSCAR_OUTPUT_DIR=prepared['remote_dir']+'/outputs')
     validate_manifest(prepared,identity['config'],protocol,job,env,fields)
     require(identical(identity['observed_source_sha256'],prepared['sha256']) and identity['protocol_sha256']==PROTOCOL_SHA256,'Observed source/protocol proof differs')
     require(type(identity['started_ns']) is int and type(identity['verified_ns']) is int and 0<identity['started_ns']<=identity['verified_ns'],'Invalid verification clocks')
-    return dict(schema='serving-allocation-reconciliation-v1',matched=True,run_id=actual['run_id'],job_id=job,model_executed=False,advancement_ready=False)
+    return dict(schema='serving-allocation-observation-audit-v1',matched=True,run_id=prepared['run_id'],job_id=job,
+                model_executed=False,submitted_record_reconciled=False,advancement_ready=False)
+
+
+def reconcile_record(allocated, actual, manifest_bytes, job_bytes, protocol):
+    """Metadata-only terminal binding to the separately saved submission record."""
+    report=validate_observation(allocated,manifest_bytes,job_bytes,protocol)
+    require(actual['submission']=='submitted' and actual['job_id']==report['job_id'],'Submission states/job differ')
+    for key in ('run_id','project','profile','ssh_target','remote_dir','resources','files','sha256'):
+        require(identical(allocated[key],actual[key]),'Submitted record differs: '+key)
+    return dict(report,schema='serving-allocation-reconciliation-v1',submitted_record_reconciled=True)

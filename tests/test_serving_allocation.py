@@ -41,6 +41,7 @@ class AllocationTests(unittest.TestCase):
         manifest=json.dumps(self.prepared).encode();job=b'12345\n'
         allocated=copy.deepcopy(self.prepared);allocated.update(submission='allocated_observation',job_id='12345')
         allocated['allocation_identity']=dict(schema='serving-allocated-identity-v1',requires_local_oscar_reconciliation=True,
+            numerical_environment={key:None for key in policy.POLICY_ENV},
             uploaded_manifest_sha256=hashlib.sha256(manifest).hexdigest(),sbatch_job_id_file_sha256=hashlib.sha256(job).hexdigest(),
             scheduler_command=['scontrol','show','job','-o','12345'],scheduler_stdout=self.raw,scheduler_fields=self.fields,
             observed_source_sha256=self.prepared['sha256'],config=self.config,protocol_sha256=PROTOCOL_SHA256,started_ns=1,verified_ns=2)
