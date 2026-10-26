@@ -1,0 +1,587 @@
+{
+  "schema": "precision-setup-review-v1",
+  "reviewer": "Same research agent, separate post-audit source/raw review; not an independent reviewer identity.",
+  "run_id": "precision-setup-feasibility-20261026T102919Z-4f30e44cac46",
+  "job_id": "7972055",
+  "scheduler_state": "COMPLETED",
+  "audit_sha256": "4b72c99925c99f60f92b53813efae635d948d258b39f302463e1a29c6bf6144a",
+  "raw_manifest_sha256": "ae3583ed7ccbf4075ce6e64ea82bffed0b22d9b9637b902fc1df873d632fc91a",
+  "source_commit": "2448d031b4ddc2ffbde47bd010262f0a9e2f5684",
+  "source_files_verified": 69,
+  "raw_files": 227,
+  "raw_bytes": 144986577,
+  "integrity_audit_passed": true,
+  "setup_diagnostic_passed": true,
+  "decision": "Setup feasibility passed. Publish diagnostic; separately design and freeze a complete paired pilot with reviewed budget and one-time guard. No automatic submission.",
+  "eligible_for_full_quality_review": false,
+  "promotion": false,
+  "noninferiority_established": false,
+  "full_abba_retry_authorized_by_diagnostic_alone": false,
+  "phases": [
+    {
+      "phase": 1,
+      "variant": "folded_tf32",
+      "latency_ms": {
+        "n": 12,
+        "median_ms": 83.26283097267151,
+        "p95_ms": 83.71273819357157
+      },
+      "memory": {
+        "allocated_bytes": 6595040256,
+        "reserved_bytes": 8313110528,
+        "peak_allocated_bytes": 6913109504,
+        "peak_reserved_bytes": 8313110528
+      },
+      "compiler_artifacts_reused": false,
+      "setup_memory": {
+        "allocated_bytes": 6595040256,
+        "reserved_bytes": 8313110528,
+        "peak_allocated_bytes": 8411338752,
+        "peak_reserved_bytes": 9219080192
+      },
+      "unique_input_storage_bytes": 15546688,
+      "logical_input_bytes": 79599936,
+      "physical_prefix": {
+        "requests_loaded": 20,
+        "prefix_bytes_copied": 112967680,
+        "prefix_capacity_bytes": 6938624,
+        "suffix_capacity_bytes": 8601600,
+        "max_prefix_tokens": 121,
+        "max_suffix_tokens": 3,
+        "physical_prefix_batch": 1,
+        "suffix_batch": 50,
+        "attention_materialization": "Temporary dense exact-length K/V per layer; unchanged SDPA"
+      },
+      "direct_reorder": {
+        "direct_calls": 80,
+        "fallback_calls": 20,
+        "suffix_bytes_written": 344064000,
+        "prefix_bytes_reordered": 0
+      },
+      "model_load_s": 1.5664678439497948,
+      "model_parameter_logical_bytes": 6176878592,
+      "model_parameter_unique_bytes": 6176878592,
+      "repeat_comparison": {
+        "requests": 6,
+        "rank_positions": 300,
+        "sequence_values": 300,
+        "transition_values": 1500,
+        "matching_rank_lists": 6,
+        "matching_rank_positions": 300,
+        "matching_sequence_vectors": 6,
+        "matching_transition_arrays": 6,
+        "matching_sequence_values": 300,
+        "matching_transition_values": 1500,
+        "max_sequence_difference_common": 0.0,
+        "max_transition_difference_common": 0.0
+      },
+      "profile_comparison": {
+        "requests": 2,
+        "rank_positions": 100,
+        "sequence_values": 100,
+        "transition_values": 500,
+        "matching_rank_lists": 2,
+        "matching_rank_positions": 100,
+        "matching_sequence_vectors": 2,
+        "matching_transition_arrays": 2,
+        "matching_sequence_values": 100,
+        "matching_transition_values": 500,
+        "max_sequence_difference_common": 0.0,
+        "max_transition_difference_common": 0.0
+      },
+      "warmup_comparison": {
+        "requests": 4,
+        "rank_positions": 200,
+        "sequence_values": 200,
+        "transition_values": 1000,
+        "matching_rank_lists": 4,
+        "matching_rank_positions": 200,
+        "matching_sequence_vectors": 4,
+        "matching_transition_arrays": 4,
+        "matching_sequence_values": 200,
+        "matching_transition_values": 1000,
+        "max_sequence_difference_common": 0.0,
+        "max_transition_difference_common": 0.0
+      },
+      "warmup_historical_comparison": {
+        "requests": 12,
+        "rank_positions": 600,
+        "sequence_values": 600,
+        "transition_values": 3000,
+        "matching_rank_lists": 9,
+        "matching_rank_positions": 591,
+        "matching_sequence_vectors": 0,
+        "matching_transition_arrays": 0,
+        "matching_sequence_values": 0,
+        "matching_transition_values": 0,
+        "max_sequence_difference_common": 0.009477615356445312,
+        "max_transition_difference_common": 0.004464149475097656
+      },
+      "setup_s": 357.4091837666929,
+      "backend_compile_s": 269.86577229201794,
+      "capture_and_warmup_s": 219.1561722792685,
+      "measurement_compilations": 0,
+      "measurement_captures": 0,
+      "graphs": 8,
+      "output_suffix_bytes": 57344000,
+      "dispatch": {
+        "verified": true,
+        "api_gemm_calls": 6840,
+        "api_math_modes": {
+          "CUBLAS_TF32_TENSOR_OP_MATH": 6840
+        },
+        "required_shape_calls": {
+          "(8960, 50, 1536)": 2688,
+          "(1536, 50, 8960)": 1344
+        },
+        "native_policy_verified": true,
+        "replay_verified": true,
+        "kernel_symbol_corroboration": true,
+        "limitation": "Native GEMM API math mode plus TF32 kernel symbols in frozen model replay corroborate dispatch. Symbols alone are not proof; not every GEMM is required to accelerate. No instruction-level disassembly or speed claim.",
+        "replay_profiles": [
+          {
+            "kernel_events": 4037,
+            "tf32_kernel_symbols": {
+              "void cutlass::Kernel2<cutlass_80_tensorop_s1688gemm_64x64_16x6_tn_align4>(cutlass_80_tensorop_s1688gemm_64x64_16x6_tn_align4::Params)": 560,
+              "void cutlass::Kernel2<cutlass_80_tensorop_s1688gemm_64x64_16x10_tn_align4>(cutlass_80_tensorop_s1688gemm_64x64_16x10_tn_align4::Params)": 112,
+              "void cutlass::Kernel2<cutlass_80_tensorop_s1688gemm_64x64_32x6_tn_align4>(cutlass_80_tensorop_s1688gemm_64x64_32x6_tn_align4::Params)": 112,
+              "void cutlass::Kernel2<cutlass_80_tensorop_s1688gemm_128x64_32x3_tn_align1>(cutlass_80_tensorop_s1688gemm_128x64_32x3_tn_align1::Params)": 4
+            },
+            "graph_kernel_events": 2672,
+            "graph_kernels": {
+              "triton_red_fused_embedding_mean_mul_pow_rsqrt_0": 4,
+              "void cutlass::Kernel2<cutlass_80_tensorop_s1688gemm_64x64_16x6_tn_align4>(cutlass_80_tensorop_s1688gemm_64x64_16x6_tn_align4::Params)": 560,
+              "void cublasLt::splitKreduce_kernel<32, 16, int, float, float, float, false, float, float, float, true, true, false>(cublasLt::cublasSplitKParams<float>, float const*, float const*, float*, float*, float const*, float const*, float const*, float const*, float*, void*, long, float*, int*, float*, float const*, float const*, float const*, float const*)": 336,
+              "triton_poi_fused__to_copy_add_bmm_cat_cos_expand_mul_neg_sin_slice_transpose_unsqueeze_view_1": 112,
+              "triton_poi_fused__scaled_dot_product_efficient_attention__to_copy_add_bmm_cat_cos_expand_mul_neg_sin_slice_transpose_unsqueeze_view_2": 28,
+              "triton_poi_fused__scaled_dot_product_efficient_attention__to_copy_add_bmm_cat_cos_expand_mul_neg_sin_slice_transpose_unsqueeze_view_3": 140,
+              "void at::native::vectorized_elementwise_kernel<2, at::native::FillFunctor<long>, std::array<char*, 1ul>, false>(int, at::native::FillFunctor<long>, std::array<char*, 1ul>)": 224,
+              "fmha_cutlassF_f32_aligned_64x128_rf_sm80(PyTorchMemEffAttention::AttentionKernel<float, cutlass::arch::Sm80, true, 64, 128, 128, true, true>::Params)": 112,
+              "triton_poi_fused_clone_4": 28,
+              "void cutlass::Kernel2<cutlass_80_tensorop_s1688gemm_64x64_16x10_tn_align4>(cutlass_80_tensorop_s1688gemm_64x64_16x10_tn_align4::Params)": 112,
+              "void cublasLt::splitKreduce_kernel<32, 16, int, float, float, float, false, float, float, float, true, false, false>(cublasLt::cublasSplitKParams<float>, float const*, float const*, float*, float*, float const*, float const*, float const*, float const*, float*, void*, long, float*, int*, float*, float const*, float const*, float const*, float const*)": 224,
+              "triton_red_fused__unsafe_view_add_embedding_mean_mul_pow_rsqrt_5": 1,
+              "triton_poi_fused__unsafe_view_mul_silu_6": 28,
+              "void cutlass::Kernel2<cutlass_80_tensorop_s1688gemm_64x64_32x6_tn_align4>(cutlass_80_tensorop_s1688gemm_64x64_32x6_tn_align4::Params)": 112,
+              "triton_red_fused__unsafe_view_add_embedding_mean_mul_pow_rsqrt_7": 1,
+              "triton_red_fused__unsafe_view_add_embedding_mean_mul_pow_rsqrt_8": 4,
+              "triton_red_fused__unsafe_view_add_mean_mul_pow_rsqrt_9": 13,
+              "triton_red_fused__unsafe_view_add_mean_mul_pow_rsqrt_10": 49,
+              "triton_red_fused__unsafe_view_add_mean_mul_pow_rsqrt_11": 48,
+              "triton_red_fused__unsafe_view_add_mean_mul_pow_rsqrt_12": 47,
+              "triton_red_fused__unsafe_view_add_mean_mul_pow_rsqrt_13": 38,
+              "triton_red_fused__unsafe_view_add_mean_mul_pow_rsqrt_14": 4,
+              "triton_red_fused__unsafe_view_add_mean_mul_pow_rsqrt_15": 4,
+              "memset32": 4,
+              "void cutlass::Kernel2<cutlass_80_tensorop_s1688gemm_128x64_32x3_tn_align1>(cutlass_80_tensorop_s1688gemm_128x64_32x3_tn_align1::Params)": 4,
+              "triton_poi_fused_cat_transpose_view_2": 84,
+              "triton_poi_fused__scaled_dot_product_efficient_attention__to_copy_add_bmm_cat_cos_expand_mul_neg_sin_slice_transpose_unsqueeze_view_4": 168,
+              "triton_poi_fused_clone_5": 84,
+              "triton_red_fused__unsafe_view_add_embedding_mean_mul_pow_rsqrt_6": 3,
+              "triton_poi_fused__unsafe_view_mul_silu_7": 84,
+              "triton_red_fused__unsafe_view_add_embedding_mean_mul_pow_rsqrt_9": 3,
+              "triton_red_fused__unsafe_view_add_mean_mul_pow_rsqrt_16": 3,
+              "triton_red_fused__unsafe_view_add_mean_mul_pow_rsqrt_17": 4,
+              "triton_red_fused__unsafe_view_add_mean_mul_pow_rsqrt_18": 2
+            },
+            "cuda_graph_launches": 4
+          },
+          {
+            "kernel_events": 4009,
+            "tf32_kernel_symbols": {
+              "void cutlass::Kernel2<cutlass_80_tensorop_s1688gemm_64x64_16x6_tn_align4>(cutlass_80_tensorop_s1688gemm_64x64_16x6_tn_align4::Params)": 560,
+              "void cutlass::Kernel2<cutlass_80_tensorop_s1688gemm_64x64_16x10_tn_align4>(cutlass_80_tensorop_s1688gemm_64x64_16x10_tn_align4::Params)": 112,
+              "void cutlass::Kernel2<cutlass_80_tensorop_s1688gemm_64x64_32x6_tn_align4>(cutlass_80_tensorop_s1688gemm_64x64_32x6_tn_align4::Params)": 112,
+              "void cutlass::Kernel2<cutlass_80_tensorop_s1688gemm_128x64_32x3_tn_align1>(cutlass_80_tensorop_s1688gemm_128x64_32x3_tn_align1::Params)": 4
+            },
+            "graph_kernel_events": 2672,
+            "graph_kernels": {
+              "triton_red_fused_embedding_mean_mul_pow_rsqrt_0": 4,
+              "void cutlass::Kernel2<cutlass_80_tensorop_s1688gemm_64x64_16x6_tn_align4>(cutlass_80_tensorop_s1688gemm_64x64_16x6_tn_align4::Params)": 560,
+              "void cublasLt::splitKreduce_kernel<32, 16, int, float, float, float, false, float, float, float, true, true, false>(cublasLt::cublasSplitKParams<float>, float const*, float const*, float*, float*, float const*, float const*, float const*, float const*, float*, void*, long, float*, int*, float*, float const*, float const*, float const*, float const*)": 336,
+              "triton_poi_fused__to_copy_add_bmm_cat_cos_expand_mul_neg_sin_slice_transpose_unsqueeze_view_1": 112,
+              "triton_poi_fused__scaled_dot_product_efficient_attention__to_copy_add_bmm_cat_cos_expand_mul_neg_sin_slice_transpose_unsqueeze_view_2": 28,
+              "triton_poi_fused__scaled_dot_product_efficient_attention__to_copy_add_bmm_cat_cos_expand_mul_neg_sin_slice_transpose_unsqueeze_view_3": 140,
+              "void at::native::vectorized_elementwise_kernel<2, at::native::FillFunctor<long>, std::array<char*, 1ul>, false>(int, at::native::FillFunctor<long>, std::array<char*, 1ul>)": 224,
+              "fmha_cutlassF_f32_aligned_64x128_rf_sm80(PyTorchMemEffAttention::AttentionKernel<float, cutlass::arch::Sm80, true, 64, 128, 128, true, true>::Params)": 112,
+              "triton_poi_fused_clone_4": 28,
+              "void cutlass::Kernel2<cutlass_80_tensorop_s1688gemm_64x64_16x10_tn_align4>(cutlass_80_tensorop_s1688gemm_64x64_16x10_tn_align4::Params)": 112,
+              "void cublasLt::splitKreduce_kernel<32, 16, int, float, float, float, false, float, float, float, true, false, false>(cublasLt::cublasSplitKParams<float>, float const*, float const*, float*, float*, float const*, float const*, float const*, float const*, float*, void*, long, float*, int*, float*, float const*, float const*, float const*, float const*)": 224,
+              "triton_red_fused__unsafe_view_add_embedding_mean_mul_pow_rsqrt_5": 1,
+              "triton_poi_fused__unsafe_view_mul_silu_6": 28,
+              "void cutlass::Kernel2<cutlass_80_tensorop_s1688gemm_64x64_32x6_tn_align4>(cutlass_80_tensorop_s1688gemm_64x64_32x6_tn_align4::Params)": 112,
+              "triton_red_fused__unsafe_view_add_embedding_mean_mul_pow_rsqrt_7": 1,
+              "triton_red_fused__unsafe_view_add_embedding_mean_mul_pow_rsqrt_8": 4,
+              "triton_red_fused__unsafe_view_add_mean_mul_pow_rsqrt_9": 13,
+              "triton_red_fused__unsafe_view_add_mean_mul_pow_rsqrt_10": 49,
+              "triton_red_fused__unsafe_view_add_mean_mul_pow_rsqrt_11": 48,
+              "triton_red_fused__unsafe_view_add_mean_mul_pow_rsqrt_12": 47,
+              "triton_red_fused__unsafe_view_add_mean_mul_pow_rsqrt_13": 38,
+              "triton_red_fused__unsafe_view_add_mean_mul_pow_rsqrt_14": 4,
+              "triton_red_fused__unsafe_view_add_mean_mul_pow_rsqrt_15": 4,
+              "memset32": 4,
+              "void cutlass::Kernel2<cutlass_80_tensorop_s1688gemm_128x64_32x3_tn_align1>(cutlass_80_tensorop_s1688gemm_128x64_32x3_tn_align1::Params)": 4,
+              "triton_poi_fused_cat_transpose_view_2": 84,
+              "triton_poi_fused__scaled_dot_product_efficient_attention__to_copy_add_bmm_cat_cos_expand_mul_neg_sin_slice_transpose_unsqueeze_view_4": 168,
+              "triton_poi_fused_clone_5": 84,
+              "triton_red_fused__unsafe_view_add_embedding_mean_mul_pow_rsqrt_6": 3,
+              "triton_poi_fused__unsafe_view_mul_silu_7": 84,
+              "triton_red_fused__unsafe_view_add_embedding_mean_mul_pow_rsqrt_9": 3,
+              "triton_red_fused__unsafe_view_add_mean_mul_pow_rsqrt_16": 3,
+              "triton_red_fused__unsafe_view_add_mean_mul_pow_rsqrt_17": 4,
+              "triton_red_fused__unsafe_view_add_mean_mul_pow_rsqrt_18": 2
+            },
+            "cuda_graph_launches": 4
+          }
+        ]
+      },
+      "log_copy_s": 0.316080953925848,
+      "log_bytes": 51803130
+    },
+    {
+      "phase": 2,
+      "variant": "folded_tf32",
+      "latency_ms": {
+        "n": 12,
+        "median_ms": 82.86826312541962,
+        "p95_ms": 83.73372182250023
+      },
+      "memory": {
+        "allocated_bytes": 6586438656,
+        "reserved_bytes": 8539602944,
+        "peak_allocated_bytes": 6908346880,
+        "peak_reserved_bytes": 8539602944
+      },
+      "compiler_artifacts_reused": true,
+      "setup_memory": {
+        "allocated_bytes": 6586438656,
+        "reserved_bytes": 8539602944,
+        "peak_allocated_bytes": 7858849280,
+        "peak_reserved_bytes": 8539602944
+      },
+      "unique_input_storage_bytes": 15546688,
+      "logical_input_bytes": 79599936,
+      "physical_prefix": {
+        "requests_loaded": 20,
+        "prefix_bytes_copied": 112967680,
+        "prefix_capacity_bytes": 6938624,
+        "suffix_capacity_bytes": 8601600,
+        "max_prefix_tokens": 121,
+        "max_suffix_tokens": 3,
+        "physical_prefix_batch": 1,
+        "suffix_batch": 50,
+        "attention_materialization": "Temporary dense exact-length K/V per layer; unchanged SDPA"
+      },
+      "direct_reorder": {
+        "direct_calls": 80,
+        "fallback_calls": 20,
+        "suffix_bytes_written": 344064000,
+        "prefix_bytes_reordered": 0
+      },
+      "model_load_s": 1.5700765773653984,
+      "model_parameter_logical_bytes": 6176878592,
+      "model_parameter_unique_bytes": 6176878592,
+      "repeat_comparison": {
+        "requests": 6,
+        "rank_positions": 300,
+        "sequence_values": 300,
+        "transition_values": 1500,
+        "matching_rank_lists": 6,
+        "matching_rank_positions": 300,
+        "matching_sequence_vectors": 6,
+        "matching_transition_arrays": 6,
+        "matching_sequence_values": 300,
+        "matching_transition_values": 1500,
+        "max_sequence_difference_common": 0.0,
+        "max_transition_difference_common": 0.0
+      },
+      "profile_comparison": {
+        "requests": 2,
+        "rank_positions": 100,
+        "sequence_values": 100,
+        "transition_values": 500,
+        "matching_rank_lists": 2,
+        "matching_rank_positions": 100,
+        "matching_sequence_vectors": 2,
+        "matching_transition_arrays": 2,
+        "matching_sequence_values": 100,
+        "matching_transition_values": 500,
+        "max_sequence_difference_common": 0.0,
+        "max_transition_difference_common": 0.0
+      },
+      "warmup_comparison": {
+        "requests": 4,
+        "rank_positions": 200,
+        "sequence_values": 200,
+        "transition_values": 1000,
+        "matching_rank_lists": 4,
+        "matching_rank_positions": 200,
+        "matching_sequence_vectors": 4,
+        "matching_transition_arrays": 4,
+        "matching_sequence_values": 200,
+        "matching_transition_values": 1000,
+        "max_sequence_difference_common": 0.0,
+        "max_transition_difference_common": 0.0
+      },
+      "warmup_historical_comparison": {
+        "requests": 12,
+        "rank_positions": 600,
+        "sequence_values": 600,
+        "transition_values": 3000,
+        "matching_rank_lists": 9,
+        "matching_rank_positions": 591,
+        "matching_sequence_vectors": 0,
+        "matching_transition_arrays": 0,
+        "matching_sequence_values": 0,
+        "matching_transition_values": 0,
+        "max_sequence_difference_common": 0.009477615356445312,
+        "max_transition_difference_common": 0.004464149475097656
+      },
+      "setup_s": 152.68064679577947,
+      "backend_compile_s": 67.77677993476391,
+      "capture_and_warmup_s": 86.63975158333778,
+      "measurement_compilations": 0,
+      "measurement_captures": 0,
+      "graphs": 8,
+      "output_suffix_bytes": 57344000,
+      "dispatch": {
+        "verified": true,
+        "api_gemm_calls": 6780,
+        "api_math_modes": {
+          "CUBLAS_TF32_TENSOR_OP_MATH": 6780
+        },
+        "required_shape_calls": {
+          "(8960, 50, 1536)": 2688,
+          "(1536, 50, 8960)": 1344
+        },
+        "native_policy_verified": true,
+        "replay_verified": true,
+        "kernel_symbol_corroboration": true,
+        "limitation": "Native GEMM API math mode plus TF32 kernel symbols in frozen model replay corroborate dispatch. Symbols alone are not proof; not every GEMM is required to accelerate. No instruction-level disassembly or speed claim.",
+        "replay_profiles": [
+          {
+            "kernel_events": 4037,
+            "tf32_kernel_symbols": {
+              "void cutlass::Kernel2<cutlass_80_tensorop_s1688gemm_64x64_16x6_tn_align4>(cutlass_80_tensorop_s1688gemm_64x64_16x6_tn_align4::Params)": 560,
+              "void cutlass::Kernel2<cutlass_80_tensorop_s1688gemm_64x64_16x10_tn_align4>(cutlass_80_tensorop_s1688gemm_64x64_16x10_tn_align4::Params)": 112,
+              "void cutlass::Kernel2<cutlass_80_tensorop_s1688gemm_64x64_32x6_tn_align4>(cutlass_80_tensorop_s1688gemm_64x64_32x6_tn_align4::Params)": 112,
+              "void cutlass::Kernel2<cutlass_80_tensorop_s1688gemm_128x64_32x3_tn_align1>(cutlass_80_tensorop_s1688gemm_128x64_32x3_tn_align1::Params)": 4
+            },
+            "graph_kernel_events": 2672,
+            "graph_kernels": {
+              "triton_red_fused_embedding_mean_mul_pow_rsqrt_0": 4,
+              "void cutlass::Kernel2<cutlass_80_tensorop_s1688gemm_64x64_16x6_tn_align4>(cutlass_80_tensorop_s1688gemm_64x64_16x6_tn_align4::Params)": 560,
+              "void cublasLt::splitKreduce_kernel<32, 16, int, float, float, float, false, float, float, float, true, true, false>(cublasLt::cublasSplitKParams<float>, float const*, float const*, float*, float*, float const*, float const*, float const*, float const*, float*, void*, long, float*, int*, float*, float const*, float const*, float const*, float const*)": 336,
+              "triton_poi_fused__to_copy_add_bmm_cat_cos_expand_mul_neg_sin_slice_transpose_unsqueeze_view_1": 112,
+              "triton_poi_fused__scaled_dot_product_efficient_attention__to_copy_add_bmm_cat_cos_expand_mul_neg_sin_slice_transpose_unsqueeze_view_2": 28,
+              "triton_poi_fused__scaled_dot_product_efficient_attention__to_copy_add_bmm_cat_cos_expand_mul_neg_sin_slice_transpose_unsqueeze_view_3": 140,
+              "void at::native::vectorized_elementwise_kernel<2, at::native::FillFunctor<long>, std::array<char*, 1ul>, false>(int, at::native::FillFunctor<long>, std::array<char*, 1ul>)": 224,
+              "fmha_cutlassF_f32_aligned_64x128_rf_sm80(PyTorchMemEffAttention::AttentionKernel<float, cutlass::arch::Sm80, true, 64, 128, 128, true, true>::Params)": 112,
+              "triton_poi_fused_clone_4": 28,
+              "void cutlass::Kernel2<cutlass_80_tensorop_s1688gemm_64x64_16x10_tn_align4>(cutlass_80_tensorop_s1688gemm_64x64_16x10_tn_align4::Params)": 112,
+              "void cublasLt::splitKreduce_kernel<32, 16, int, float, float, float, false, float, float, float, true, false, false>(cublasLt::cublasSplitKParams<float>, float const*, float const*, float*, float*, float const*, float const*, float const*, float const*, float*, void*, long, float*, int*, float*, float const*, float const*, float const*, float const*)": 224,
+              "triton_red_fused__unsafe_view_add_embedding_mean_mul_pow_rsqrt_5": 1,
+              "triton_poi_fused__unsafe_view_mul_silu_6": 28,
+              "void cutlass::Kernel2<cutlass_80_tensorop_s1688gemm_64x64_32x6_tn_align4>(cutlass_80_tensorop_s1688gemm_64x64_32x6_tn_align4::Params)": 112,
+              "triton_red_fused__unsafe_view_add_embedding_mean_mul_pow_rsqrt_7": 1,
+              "triton_red_fused__unsafe_view_add_embedding_mean_mul_pow_rsqrt_8": 4,
+              "triton_red_fused__unsafe_view_add_mean_mul_pow_rsqrt_9": 13,
+              "triton_red_fused__unsafe_view_add_mean_mul_pow_rsqrt_10": 49,
+              "triton_red_fused__unsafe_view_add_mean_mul_pow_rsqrt_11": 48,
+              "triton_red_fused__unsafe_view_add_mean_mul_pow_rsqrt_12": 47,
+              "triton_red_fused__unsafe_view_add_mean_mul_pow_rsqrt_13": 38,
+              "triton_red_fused__unsafe_view_add_mean_mul_pow_rsqrt_14": 4,
+              "triton_red_fused__unsafe_view_add_mean_mul_pow_rsqrt_15": 4,
+              "memset32": 4,
+              "void cutlass::Kernel2<cutlass_80_tensorop_s1688gemm_128x64_32x3_tn_align1>(cutlass_80_tensorop_s1688gemm_128x64_32x3_tn_align1::Params)": 4,
+              "triton_poi_fused_cat_transpose_view_2": 84,
+              "triton_poi_fused__scaled_dot_product_efficient_attention__to_copy_add_bmm_cat_cos_expand_mul_neg_sin_slice_transpose_unsqueeze_view_4": 168,
+              "triton_poi_fused_clone_5": 84,
+              "triton_red_fused__unsafe_view_add_embedding_mean_mul_pow_rsqrt_6": 3,
+              "triton_poi_fused__unsafe_view_mul_silu_7": 84,
+              "triton_red_fused__unsafe_view_add_embedding_mean_mul_pow_rsqrt_9": 3,
+              "triton_red_fused__unsafe_view_add_mean_mul_pow_rsqrt_16": 3,
+              "triton_red_fused__unsafe_view_add_mean_mul_pow_rsqrt_17": 4,
+              "triton_red_fused__unsafe_view_add_mean_mul_pow_rsqrt_18": 2
+            },
+            "cuda_graph_launches": 4
+          },
+          {
+            "kernel_events": 4009,
+            "tf32_kernel_symbols": {
+              "void cutlass::Kernel2<cutlass_80_tensorop_s1688gemm_64x64_16x6_tn_align4>(cutlass_80_tensorop_s1688gemm_64x64_16x6_tn_align4::Params)": 560,
+              "void cutlass::Kernel2<cutlass_80_tensorop_s1688gemm_64x64_16x10_tn_align4>(cutlass_80_tensorop_s1688gemm_64x64_16x10_tn_align4::Params)": 112,
+              "void cutlass::Kernel2<cutlass_80_tensorop_s1688gemm_64x64_32x6_tn_align4>(cutlass_80_tensorop_s1688gemm_64x64_32x6_tn_align4::Params)": 112,
+              "void cutlass::Kernel2<cutlass_80_tensorop_s1688gemm_128x64_32x3_tn_align1>(cutlass_80_tensorop_s1688gemm_128x64_32x3_tn_align1::Params)": 4
+            },
+            "graph_kernel_events": 2672,
+            "graph_kernels": {
+              "triton_red_fused_embedding_mean_mul_pow_rsqrt_0": 4,
+              "void cutlass::Kernel2<cutlass_80_tensorop_s1688gemm_64x64_16x6_tn_align4>(cutlass_80_tensorop_s1688gemm_64x64_16x6_tn_align4::Params)": 560,
+              "void cublasLt::splitKreduce_kernel<32, 16, int, float, float, float, false, float, float, float, true, true, false>(cublasLt::cublasSplitKParams<float>, float const*, float const*, float*, float*, float const*, float const*, float const*, float const*, float*, void*, long, float*, int*, float*, float const*, float const*, float const*, float const*)": 336,
+              "triton_poi_fused__to_copy_add_bmm_cat_cos_expand_mul_neg_sin_slice_transpose_unsqueeze_view_1": 112,
+              "triton_poi_fused__scaled_dot_product_efficient_attention__to_copy_add_bmm_cat_cos_expand_mul_neg_sin_slice_transpose_unsqueeze_view_2": 28,
+              "triton_poi_fused__scaled_dot_product_efficient_attention__to_copy_add_bmm_cat_cos_expand_mul_neg_sin_slice_transpose_unsqueeze_view_3": 140,
+              "void at::native::vectorized_elementwise_kernel<2, at::native::FillFunctor<long>, std::array<char*, 1ul>, false>(int, at::native::FillFunctor<long>, std::array<char*, 1ul>)": 224,
+              "fmha_cutlassF_f32_aligned_64x128_rf_sm80(PyTorchMemEffAttention::AttentionKernel<float, cutlass::arch::Sm80, true, 64, 128, 128, true, true>::Params)": 112,
+              "triton_poi_fused_clone_4": 28,
+              "void cutlass::Kernel2<cutlass_80_tensorop_s1688gemm_64x64_16x10_tn_align4>(cutlass_80_tensorop_s1688gemm_64x64_16x10_tn_align4::Params)": 112,
+              "void cublasLt::splitKreduce_kernel<32, 16, int, float, float, float, false, float, float, float, true, false, false>(cublasLt::cublasSplitKParams<float>, float const*, float const*, float*, float*, float const*, float const*, float const*, float const*, float*, void*, long, float*, int*, float*, float const*, float const*, float const*, float const*)": 224,
+              "triton_red_fused__unsafe_view_add_embedding_mean_mul_pow_rsqrt_5": 1,
+              "triton_poi_fused__unsafe_view_mul_silu_6": 28,
+              "void cutlass::Kernel2<cutlass_80_tensorop_s1688gemm_64x64_32x6_tn_align4>(cutlass_80_tensorop_s1688gemm_64x64_32x6_tn_align4::Params)": 112,
+              "triton_red_fused__unsafe_view_add_embedding_mean_mul_pow_rsqrt_7": 1,
+              "triton_red_fused__unsafe_view_add_embedding_mean_mul_pow_rsqrt_8": 4,
+              "triton_red_fused__unsafe_view_add_mean_mul_pow_rsqrt_9": 13,
+              "triton_red_fused__unsafe_view_add_mean_mul_pow_rsqrt_10": 49,
+              "triton_red_fused__unsafe_view_add_mean_mul_pow_rsqrt_11": 48,
+              "triton_red_fused__unsafe_view_add_mean_mul_pow_rsqrt_12": 47,
+              "triton_red_fused__unsafe_view_add_mean_mul_pow_rsqrt_13": 38,
+              "triton_red_fused__unsafe_view_add_mean_mul_pow_rsqrt_14": 4,
+              "triton_red_fused__unsafe_view_add_mean_mul_pow_rsqrt_15": 4,
+              "memset32": 4,
+              "void cutlass::Kernel2<cutlass_80_tensorop_s1688gemm_128x64_32x3_tn_align1>(cutlass_80_tensorop_s1688gemm_128x64_32x3_tn_align1::Params)": 4,
+              "triton_poi_fused_cat_transpose_view_2": 84,
+              "triton_poi_fused__scaled_dot_product_efficient_attention__to_copy_add_bmm_cat_cos_expand_mul_neg_sin_slice_transpose_unsqueeze_view_4": 168,
+              "triton_poi_fused_clone_5": 84,
+              "triton_red_fused__unsafe_view_add_embedding_mean_mul_pow_rsqrt_6": 3,
+              "triton_poi_fused__unsafe_view_mul_silu_7": 84,
+              "triton_red_fused__unsafe_view_add_embedding_mean_mul_pow_rsqrt_9": 3,
+              "triton_red_fused__unsafe_view_add_mean_mul_pow_rsqrt_16": 3,
+              "triton_red_fused__unsafe_view_add_mean_mul_pow_rsqrt_17": 4,
+              "triton_red_fused__unsafe_view_add_mean_mul_pow_rsqrt_18": 2
+            },
+            "cuda_graph_launches": 4
+          }
+        ]
+      },
+      "log_copy_s": 0.29222603514790535,
+      "log_bytes": 51533232
+    }
+  ],
+  "prior_tf32_comparison": {
+    "requests": 24,
+    "rank_positions": 1200,
+    "sequence_values": 1200,
+    "transition_values": 6000,
+    "matching_rank_lists": 24,
+    "matching_rank_positions": 1200,
+    "matching_sequence_vectors": 24,
+    "matching_transition_arrays": 24,
+    "matching_sequence_values": 1200,
+    "matching_transition_values": 6000,
+    "max_sequence_difference_common": 0.0,
+    "max_transition_difference_common": 0.0
+  },
+  "prior_tf32_ancestry_exact": true,
+  "within_policy_comparison": {
+    "requests": 44,
+    "rank_positions": 2200,
+    "sequence_values": 2200,
+    "transition_values": 11000,
+    "matching_rank_lists": 44,
+    "matching_rank_positions": 2200,
+    "matching_sequence_vectors": 44,
+    "matching_transition_arrays": 44,
+    "matching_sequence_values": 2200,
+    "matching_transition_values": 11000,
+    "max_sequence_difference_common": 0.0,
+    "max_transition_difference_common": 0.0
+  },
+  "historical_fp32_fidelity": {
+    "requests": 24,
+    "rank_positions": 1200,
+    "sequence_values": 1200,
+    "transition_values": 6000,
+    "matching_rank_lists": 18,
+    "matching_rank_positions": 1182,
+    "matching_sequence_vectors": 0,
+    "matching_transition_arrays": 0,
+    "matching_sequence_values": 0,
+    "matching_transition_values": 0,
+    "max_sequence_difference_common": 0.009477615356445312,
+    "max_transition_difference_common": 0.004464149475097656
+  },
+  "latency_ms_descriptive_only": {
+    "folded_tf32": {
+      "n": 24,
+      "median_ms": 83.25580134987831,
+      "p95_ms": 83.73161647468805
+    }
+  },
+  "latency_by_length_ms_descriptive_only": {
+    "76": {
+      "folded_tf32": {
+        "n": 12,
+        "median_ms": 81.7237626761198,
+        "p95_ms": 82.71168116480112
+      }
+    },
+    "121": {
+      "folded_tf32": {
+        "n": 12,
+        "median_ms": 83.64379033446312,
+        "p95_ms": 83.77680834382772
+      }
+    }
+  },
+  "latency_by_user_ms_descriptive_only": {
+    "1": {
+      "folded_tf32": {
+        "n": 6,
+        "median_ms": 81.75505883991718,
+        "p95_ms": 82.41973351687193
+      }
+    },
+    "2": {
+      "folded_tf32": {
+        "n": 6,
+        "median_ms": 81.7237626761198,
+        "p95_ms": 82.68480002880096
+      }
+    },
+    "6": {
+      "folded_tf32": {
+        "n": 6,
+        "median_ms": 83.67592841386795,
+        "p95_ms": 83.80221668630838
+      }
+    },
+    "10": {
+      "folded_tf32": {
+        "n": 6,
+        "median_ms": 83.58783833682537,
+        "p95_ms": 83.64633098244667
+      }
+    }
+  },
+  "wrapper_child": {
+    "schema": "precision-child-exit-v1",
+    "returncode": 0,
+    "reason": "exited",
+    "signal": null,
+    "elapsed_s": 556.634991850704,
+    "completed_normally": true
+  },
+  "recovery_complete": true,
+  "review_findings": [
+    "All submitted source/config files and all fetched bytes hashed. Scheduler job script requests regular A6000,4CPU,32GB,30min; manifests pin observed device/runtime/cohort and policy.",
+    "Fresh cold and reuse processes each retain eight graphs; no compilation or capture in measurement. Warm/direct/profile/repeated/retained outputs and ownership checks pass.",
+    "Both model lengths in both phases show actual graph-linked TF32 dispatch and required GEMM API shapes/math mode.",
+    "All 24 rows match the preserved original TF32 policy exactly, including ancestry. Historical FP32 bits differ as expected, and that drift is retained, not treated as quality rejection.",
+    "Native logs were disabled/flushed and copied from tmpfs, hashes match recovery records, both locations recovered with no leftovers. Normal exit only; forced-termination recovery is not tested by this run.",
+    "Raw manifest protocol prose still describes the generic ABBA design. Actual experiment discriminator, phase directories, schedule and frozen setup protocol unambiguously specify TF32-only phases1/2; preserve this metadata caveat.",
+    "No new paired FP32 control or held-out quality estimate is present. Original four-user quality observations remain tiny and unchanged by identical TF32 outputs. No full500 eligibility.",
+    "Source and prior-reference identity verified; no new independent on-node checkpoint byte digest is emitted by this setup schema. Release identity relies on pinned historical/cohort references, source loading path, and exact same-policy outputs."
+  ],
+  "budget_review": {
+    "elapsed_scheduler_s": 562,
+    "child_elapsed_s": 556.634991850704,
+    "child_deadline_s": 1620,
+    "headroom_to_child_deadline_s": 1063.365008149296,
+    "illustrative_two_policy_child_s": 1113.269983701408,
+    "interpretation": "Doubling TF32 cold/reuse child wall time gives about1113seconds, a planning estimate only. FP32 under repaired logging is unmeasured, and load/profiling/cache costs may differ. A complete paired protocol needs conservative phase budget, same1620s supervisor limit, preserved failure and no automatic rerun. Setup/compiler/capture overlap and must not be added."
+  },
+  "logging_causality_established": false,
+  "paired_performance_gate_evaluated": false
+}

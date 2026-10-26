@@ -1,5 +1,11 @@
 # Quality–latency research track
 
+## Completed setup diagnostic, October26
+
+The separately frozen TF32-only diagnostic completed in9m22s and passed its audit. Cold/reuse setup took357.409/152.681seconds; all1200ranks,1200sequencevalues,6000transitions and ancestry match preserved TF32 outputs exactly. Ownership/stability, actual graph-linked dispatch and hashed log recovery pass. [Complete setup evidence and limitations](../benchmarks/diagnostics/precision-setup-feasibility/README.md) includes310verified archived members.
+
+This establishes setup feasibility only. There is no paired FP32 control, new quality estimate or causal logging claim; full500/promotion/noninferiority remain false. Next review and freeze a complete paired pilot with conservative budget and one-time guard. No new job submitted. Earlier preparation descriptions below are historical.
+
 The user explicitly authorized investigating large inference gains even when
 numerical outputs differ, provided recommendation quality is unchanged or only
 slightly affected. This is a separate research track from exact-score serving

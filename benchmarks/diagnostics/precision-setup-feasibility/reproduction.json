@@ -1,0 +1,27 @@
+{
+  "audit_cwd": "/Users/AmilAgrawal/Documents/Codex/2026-10-18/let/work/rapidtinyrec_precision_setup/.oscar/source_snapshots/precision-setup-feasibility-20261026T102919Z-4f30e44cac46",
+  "audit_command": [
+    "python3",
+    "-m",
+    "rapidtinyrec.audit_precision_setup",
+    "/Users/AmilAgrawal/Documents/Codex/2026-10-18/let/work/rapidtinyrec_precision_setup/.oscar/results/precision-setup-feasibility-20261026T102919Z-4f30e44cac46/outputs",
+    "--historical",
+    "/Users/AmilAgrawal/Documents/Codex/2026-10-18/let/work/minionerec_oscar/.oscar/results/benchmark-gqa-fp32-20261023T054059Z-7b4f0ee334cb/outputs/gqa_500_users",
+    "--snapshot",
+    "/Users/AmilAgrawal/Documents/Codex/2026-10-18/let/work/rapidtinyrec_precision_setup/.oscar/source_snapshots/precision-setup-feasibility-20261026T102919Z-4f30e44cac46/rapidtinyrec",
+    "--run-record",
+    "/Users/AmilAgrawal/Documents/Codex/2026-10-18/let/work/rapidtinyrec_precision_setup/.oscar/runs/precision-setup-feasibility-20261026T102919Z-4f30e44cac46.json",
+    "--prior-root",
+    "/Users/AmilAgrawal/Documents/Codex/2026-10-18/let/work/rapidtinyrec_precision/.oscar/results/precision-pilot-20261026T053441Z-f040754d1743",
+    "--prior-manifest",
+    "/Users/AmilAgrawal/Documents/Codex/2026-10-18/let/outputs/quality_frontier/precision-pilot-raw-manifest.json",
+    "--prior-review",
+    "/Users/AmilAgrawal/Documents/Codex/2026-10-18/let/outputs/quality_frontier/precision-timeout-independent-review.json",
+    "--output",
+    "/Users/AmilAgrawal/Documents/Codex/2026-10-18/let/outputs/rapidtinyrec_precision_setup_audit.json"
+  ],
+  "expected_exit_code": 0,
+  "requirements": "Restore archived source and raw files to the recorded workspace paths, with pinned historical GQA and preserved original pilot references. Use a new audit output path to preserve the original. No GPU submission is needed.",
+  "archive_verification": "Verify each shard and every member against archive-manifest.json.",
+  "scope": "Setup feasibility only; no paired performance or quality gate."
+}
