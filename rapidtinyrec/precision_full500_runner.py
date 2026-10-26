@@ -42,7 +42,13 @@ def run_stages(output, started, commands, env, *, clock=time.monotonic, launch=s
                 report['deadline_exhausted_before']=name;break
             entry=dict(name=name,started_monotonic=now,timeout_s=allowance,command=commands[name])
             save(output/f'full500-{name}-start.json',entry)
-            child=launch(commands[name],env,allowance)
+            # Record publication can block. It must consume this stage's budget,
+            # rather than silently shifting the child deadline forward.
+            launch_allowance=max(0,allowance-(clock()-now))
+            if launch_allowance>0:
+                child=launch(commands[name],env,launch_allowance)
+            else:
+                child=dict(completed_normally=False,reason='deadline_before_launch',returncode=None)
             entry.update(ended_monotonic=clock(),child=child);stages.append(entry)
             entry['within_deadline']=entry['ended_monotonic']-now<=allowance
             save(output/f'full500-{name}-exit.json',entry)

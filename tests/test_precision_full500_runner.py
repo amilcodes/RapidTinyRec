@@ -2,6 +2,7 @@ import json
 from pathlib import Path
 import tempfile
 import unittest
+from unittest.mock import patch
 
 from rapidtinyrec.precision_full500 import PROTOCOL_SHA256
 from rapidtinyrec.precision_full500_runner import (save,stage_allowance,run_stages,
@@ -34,6 +35,21 @@ class Full500RunnerTests(unittest.TestCase):
         self.now=230.;self.durations.update(generation=1450,recovery=10,audit=20)
         self.assertTrue(self.run_fixture()['completed_normally'])
         self.assertEqual(self.calls,[('generation',1490),('recovery',40),('audit',30)])
+    def test_start_record_publication_consumes_stage_budget(self):
+        def slow_save(path,value):
+            save(path,value)
+            if path.name=='full500-generation-start.json':self.now+=20
+        self.durations.update(generation=1460,recovery=10,audit=100)
+        with patch('rapidtinyrec.precision_full500_runner.save',side_effect=slow_save):
+            self.assertTrue(self.run_fixture()['completed_normally'])
+        self.assertEqual(self.calls[0],('generation',1480))
+    def test_expired_start_publication_never_launches_child(self):
+        def slow_save(path,value):
+            save(path,value)
+            if path.name=='full500-generation-start.json':self.now+=1620
+        with patch('rapidtinyrec.precision_full500_runner.save',side_effect=slow_save):
+            self.assertFalse(self.run_fixture()['completed_normally'])
+        self.assertEqual(self.calls,[])
     def test_audit_receives_remaining_time_after_recovery(self):
         self.durations.update(generation=1490,recovery=40,audit=80)
         self.assertTrue(self.run_fixture()['completed_normally'])
