@@ -179,3 +179,22 @@ intermediates, prove model-specific unregistered tensor completeness, establish
 stream or thread ownership, or prove exact concurrent results. Runtime integration,
 graph-pool checks, stream-scoped synchronization and the independent numerical,
 profile and clock auditor remain pending. No serving GPU run has been submitted.
+
+## Owner-thread execution context preparation
+
+`serving_context.OwnedCudaContext` creates one private stream on an explicitly
+indexed device from its persistent owner thread. Calls enter inference mode and
+that device/stream, reject reentry or cross-thread use, and drain the owner stream
+before returning. Callback errors also attempt a drain; if draining fails too,
+the original error retains a note. Failed contexts cannot execute again. Closing
+is owner-thread-only and idempotent, including after a failed drain.
+
+Seven CPU fake-backend tests cover lifecycle restoration, callback/drain errors,
+thread confinement, reentry, escaping the current stream/device, and integration
+with both persistent LaneServer threads. These tests do not initialize CUDA.
+The envelope does not alter model arithmetic or validate callback outputs; the
+future runtime must materialize independent CPU evidence within the callback.
+It cannot detect a callback temporarily using another stream and restoring it,
+or establish graph-pool isolation. Actual launch-stream profiles and independent
+numerical/ownership auditing remain required. Pinned generation integration and
+the serving GPU harness remain pending.
