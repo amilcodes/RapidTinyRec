@@ -166,6 +166,20 @@ class LaneServer:
             raise BurstExecutionError(records)
         return records
 
+    def visit(self, action):
+        """Run untimed inspection/cleanup serially on each idle owner thread.
+
+        The single controller cannot call this while its synchronous run_burst
+        is active. Failure prohibits subsequent admission, but close still drains
+        and shuts down every lane.
+        """
+        self._owner()
+        try:
+            return [lane.call(action).result() for lane in self.lanes]
+        except BaseException:
+            self.failed = True
+            raise
+
     def close(self):
         if threading.get_ident() != self.controller:
             raise RuntimeError('Only the owning controller may close lanes')

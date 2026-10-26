@@ -229,3 +229,16 @@ pools differ, shared owner threads/replay streams, malformed tokens and missing
 graphs. The tensor-storage audit is separate and still required. These recorded
 identities do not prove actual launch streams, hidden-storage completeness or
 GPU overlap; full orchestration and independent profiling remain pending.
+
+`serving_service.prepared_service` now connects the setup lifecycle: install the
+global folded-attention patch, initialize all lanes serially, freeze all lanes,
+collect owner-thread snapshots, run both retained-pool and live-storage checks,
+require a separately supplied setup auditor to pass, then release retained warm
+outputs on their owners before admitting requests. Inspection references are
+dropped before release or failure shutdown. The patch remains installed until
+all lane threads close. The same gates cover the one-lane control.
+
+CPU fake-lane tests verify this ordering and block admission on aliasing or audit
+failure. The production model initializer, warmup evidence orchestration and
+independent setup auditor are not yet supplied by this module. These lifecycle
+tests do not validate a live CUDA model or establish a serving speedup.
