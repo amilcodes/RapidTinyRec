@@ -10,7 +10,7 @@ import sys
 import time
 import uuid
 
-from .serving_allocation import identical, observe_allocation, require, verify_source
+from .serving_allocation import digest, identical, observe_allocation, require, verify_source
 from .serving_contract import PROTOCOL, PROTOCOL_SHA256, load_protocol
 from .serving_initialize import save_exclusive
 from .serving_process import process_identity, observe_cache, check_deadline
@@ -63,7 +63,7 @@ def coordinate(run_root, release_root, historical, *, final_auditor):
     out = run/'outputs/coordinator';out.mkdir(exist_ok=False)
     save_exclusive(out/'entry.json', dict(identity=parent,process_group=group,session=session,
         started_ns=time.perf_counter_ns(),supervisor_start=outer))
-    failure = None; finished = []; last_cache = {}; birth_ids = set()
+    failure = None; finished = []; last_cache = {}; birth_ids = set(); audit_published_ns = None; audit_sha256 = None
     try:
         allocation = observe_allocation(run)
         save_exclusive(out/'allocation-observation.json',allocation)
@@ -127,6 +127,7 @@ def coordinate(run_root, release_root, historical, *, final_auditor):
         require(isinstance(audit,dict) and type(audit.get('evidence_gates_passed')) is bool,
                 'Final run auditor must return its reconstructed evidence gates')
         save_exclusive(out/'final-audit.json',audit)
+        audit_sha256=digest(out/'final-audit.json');audit_published_ns=time.perf_counter_ns()
         check_deadline(boundary)
         return audit
     except BaseException as error:
@@ -134,4 +135,5 @@ def coordinate(run_root, release_root, historical, *, final_auditor):
         raise
     finally:
         save_exclusive(out/'exit.json',dict(identity=parent,finished_ns=time.perf_counter_ns(),
-            phases_completed=finished,complete=failure is None,error=failure,advancement_ready=False))
+            phases_completed=finished,complete=failure is None,error=failure,advancement_ready=False,
+            audit_published_ns=audit_published_ns,audit_sha256=audit_sha256))
