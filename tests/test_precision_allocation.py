@@ -105,11 +105,12 @@ class AllocationIdentityTests(unittest.TestCase):
             root=Path(temp);a,r,m,j=self.records()
             blobs={'allocated-record':json.dumps(a).encode(),'run-record':json.dumps(r).encode(),
                    'uploaded-manifest':m,'job-id-file':j}
-            argv=['audit','reconcile','--output',str(root/'result.json')]
+            argv=['audit','reconcile','--output',str(root/'result.json'),'--root',str(root)]
             for name,data in blobs.items():
-                (root/name).write_bytes(data);argv+=['--'+name,str(root/name)]
-            with patch('sys.argv',argv),patch('rapidtinyrec.audit_precision_full500.paired_audit') as paired,contextlib.redirect_stdout(io.StringIO()):
-                main();paired.assert_not_called()
+                path=root/('allocated-run-record.json' if name=='allocated-record' else name)
+                path.write_bytes(data);argv+=['--'+name,str(path)]
+            with patch('sys.argv',argv),patch('rapidtinyrec.audit_precision_full500.paired_audit') as paired,patch('rapidtinyrec.audit_precision_full500.reconcile_work',return_value={'passed':True}) as work,contextlib.redirect_stdout(io.StringIO()):
+                main();paired.assert_not_called();work.assert_called_once_with(root,r)
             self.assertTrue(json.loads((root/'result.json').read_text())['matched'])
 
 class SourceIdentityTests(unittest.TestCase):

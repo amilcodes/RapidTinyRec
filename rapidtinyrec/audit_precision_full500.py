@@ -4,11 +4,13 @@ import json
 import os
 from pathlib import Path
 import traceback
+import time
 
 from .audit_precision import audit as paired_audit
 from .audit_precision_setup import validate_wrapper
 from .precision_allocation import observe_allocation, reconcile_record, read, digest
 from .precision_full500 import PROTOCOL, PROTOCOL_SHA256, load_protocol
+from .precision_full500_runner import validate_audit_start, reconcile_work
 
 
 def validate_live_record(saved, live):
@@ -31,6 +33,7 @@ def audit(root, historical, snapshot, run_root, release):
     assert saved['sha256'][PROTOCOL]==PROTOCOL_SHA256
     wrapper=validate_wrapper(root,saved,phases=(0,1,2,3),
         child_timeout_s=protocol['budget']['generation_child_deadline_s'])
+    validate_audit_start(root,saved,now=time.monotonic())
     assert {p.name for p in root.glob('phase_*') if p.is_dir()}=={f'phase_{i}' for i in range(4)}
     result=paired_audit(root,historical,snapshot,record_path,release,full500_quality=True)
     assert result['unique_users']==result['paired_requests']==500
@@ -54,7 +57,7 @@ def main():
     for name in ('root','historical','snapshot','run-root','release-root','output'):
         allocated.add_argument('--'+name,type=Path,required=True)
     local=sub.add_parser('reconcile')
-    for name in ('allocated-record','run-record','uploaded-manifest','job-id-file','output'):
+    for name in ('allocated-record','run-record','uploaded-manifest','job-id-file','root','output'):
         local.add_argument('--'+name,type=Path,required=True)
     args=parser.parse_args()
     assert not args.output.exists(),'Never overwrite evidence'
@@ -65,6 +68,8 @@ def main():
         else:
             result=reconcile_record(read(args.allocated_record),read(args.run_record),
                 args.uploaded_manifest.read_bytes(),args.job_id_file.read_bytes())
+            assert args.allocated_record.resolve()==(args.root/'allocated-run-record.json').resolve()
+            result['work']=reconcile_work(args.root,read(args.run_record))
             passed=result['matched']
     except Exception as exc:
         result=dict(schema='precision-full500-audit-failure-v1',action=args.action,
