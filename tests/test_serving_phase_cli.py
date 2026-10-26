@@ -32,7 +32,7 @@ class WorkerTests(unittest.TestCase):
         self.launch=dict(schema='serving-phase-launch-v1',run_root=str(self.root),phase=1,
             protocol_sha256=PROTOCOL_SHA256,launch_token='f'*32,parent_identity=self.parent,
             global_started_ns=now-200,launch_started_ns=now-100,deadline_ns=now-200+1620*10**9,
-            cache=dict(family='lanes-2',root=str(self.cache),reuse=False))
+            cache=dict(family='lanes-2',root=str(self.cache),reuse=False),process_group=10,session=10)
         self.ticket=self.root/'outputs/launch/phase_1.json';self.ticket.write_text(json.dumps(self.launch))
         self.out=self.root/'outputs/phase_1';self.events=[];self.failure=None;self.close_failure=False
         self.factory=NS(allocation_observation={'source':'observed'})
@@ -60,6 +60,8 @@ class WorkerTests(unittest.TestCase):
                           ('setup_auditor',lambda *a:object()),('verify_source',lambda *a:self.events.append('source'))]:
             p=patch.object(worker,name,side_effect=func);p.start();self.addCleanup(p.stop)
         p=patch.object(sys,'dont_write_bytecode',True);p.start();self.addCleanup(p.stop)
+        for name in ('getpgrp','getsid'):
+            p=patch.object(worker.os,name,return_value=10);p.start();self.addCleanup(p.stop)
         self.env=dict(OSCAR_RUN_DIR=str(self.root),OSCAR_OUTPUT_DIR=str(self.root/'outputs'),SERVING_LAUNCH_TOKEN='f'*32,
             TORCHINDUCTOR_CACHE_DIR=str(self.cache/'inductor'),TRITON_CACHE_DIR=str(self.cache/'triton'),CUDA_CACHE_PATH=str(self.cache/'cuda'))
         p=patch.dict(os.environ,self.env,clear=True);p.start();self.addCleanup(p.stop)
@@ -129,6 +131,11 @@ class WorkerTests(unittest.TestCase):
         launch['cache']['family']='lanes-1'
         with self.assertRaisesRegex(ValueError,'cache family'):
             process.validate_launch(launch,self.root,2,self.protocol,self.child,self.parent,'f'*32)
+
+    def test_worker_rejects_escaped_group_before_factory(self):
+        with patch.object(worker.os,'getpgrp',return_value=999):
+            with self.assertRaisesRegex(ValueError,'inherit its supervised'):self.call()
+        self.assertFalse(self.events);self.assertFalse(self.out.exists())
 
 
 class ProcessTests(unittest.TestCase):

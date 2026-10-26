@@ -37,11 +37,15 @@ def run_phase(run_root, phase, release_root, historical):
     spec = validate_launch(launch, run, phase, protocol, identity, parent,
                            os.environ.get('SERVING_LAUNCH_TOKEN'))
     require(launch['launch_started_ns'] <= started, 'Parent launch must precede worker entry')
+    require(type(launch.get('process_group')) is int and type(launch.get('session')) is int and
+            launch['process_group'] == launch['session'] == parent['pid'] == os.getpgrp() == os.getsid(0),
+            'Worker must inherit its supervised coordinator group/session')
     cache_env = validate_cache_environment(launch['cache']['root'], os.environ)
     root = run/'outputs'/f'phase_{phase}'; root.mkdir(exist_ok=False)
     journal = []; failure = None; completed = None; closed_ns = None
     save_exclusive(root/'worker-entry.json', dict(schema='serving-worker-entry-v1', phase=phase,
-        started_ns=started, identity=identity, launch=launch, cache_environment=cache_env))
+        started_ns=started, identity=identity, launch=launch, cache_environment=cache_env,
+        process_group=os.getpgrp(), session=os.getsid(0)))
     try:
         before = observe_cache(launch['cache']['root'])
         save_exclusive(root/'cache-before.json', before)
