@@ -10,8 +10,9 @@ that held-out recommendation quality is preserved.
 
 Branch: `experiment/quality-latency-frontier`, based on accepted
 `experiment/12-folded-profile` at `4711e463321deadb835ac8cc25c1dfbf41d86108`.
-The paired quality evaluator is implemented with nine focused CPU tests. No numerical candidate is implemented,
-no GPU job is submitted, and no quality or speed claim is established.
+The paired quality evaluator and one TF32 matmul candidate are implemented.
+The candidate remains unmeasured; no GPU job has yet been submitted and no quality
+or speed claim is established. The exact serving track remains separate.
 
 ## First opportunities
 
