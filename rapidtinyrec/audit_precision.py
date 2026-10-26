@@ -79,7 +79,7 @@ def validate_log_staging(path, manifest):
     assert 0<=record['copy_s']<=record['session_wall_s']
 
 
-def audit(root,historical,snapshot,run_record,release):
+def inspect_phases(root,historical,snapshot,run_record,*,setup_diagnostic=False):
     record=read(run_record)
     assert record['resources']['gpus']==1 and record['resources']['gpu_type']=='nvidia_rtx_a6000'
     assert record['resources']['cpus']==4 and record['resources']['memory_gb']==32
@@ -96,13 +96,15 @@ def audit(root,historical,snapshot,run_record,release):
     all_lengths=sorted({u['prompt_tokens'] for u in reference['users']})
     phases=[]; joined={}; historical_pairs={v:[] for v in VARIANTS}; seen={}; artifact_paths={}
     full=None; repeated=[]; ancestry_stable=True
-    for phase,variant in enumerate(('folded_fp32','folded_tf32','folded_tf32','folded_fp32')):
+    schedule=[(1,'folded_tf32'),(2,'folded_tf32')] if setup_diagnostic else list(enumerate(('folded_fp32','folded_tf32','folded_tf32','folded_fp32')))
+    for phase,variant in schedule:
         path=root/f'phase_{phase}'
         m,s,w,c=(read(path/n) for n in ('manifest.json','summary.json','setup.json','compilation.json'))
         validate_log_staging(path,m)
         rows=read(path/'requests.json'); half=0 if phase<2 else 1
-        assert m['experiment'] in ('precision_500','precision_pilot')
+        assert m['experiment'] in (('precision_setup_feasibility',) if setup_diagnostic else ('precision_500','precision_pilot'))
         if full is None:full=m['experiment']=='precision_500'
+        if setup_diagnostic:assert not full,'Setup diagnostic is four-user only'
         assert (m['experiment']=='precision_500')==full
         assert m['phase']==phase and m['half']==half and m['variant']==variant
         assert m['attention_layout']=='folded_query_heads'
@@ -249,6 +251,17 @@ def audit(root,historical,snapshot,run_record,release):
             'dispatch':dispatch,'repeat_comparison':compare(warm_repeat),'profile_comparison':compare(profile_pairs),'warmup_comparison':compare(warm_comparisons),'warmup_historical_comparison':compare(warm_historical),
             'setup_s':w['combined_setup_and_warmup_s'],'backend_compile_s':c['backend_compile_total_s'],
             'capture_and_warmup_s':capture,'measurement_compilations':0,'measurement_captures':0})
+    return dict(record=record,expected=expected,users=users,lengths=lengths,full=full,
+        phases=phases,joined=joined,repeated=repeated,ancestry_stable=ancestry_stable,
+        historical_pairs=historical_pairs)
+
+
+def audit(root,historical,snapshot,run_record,release):
+    evidence=inspect_phases(root,historical,snapshot,run_record)
+    record,expected,users,lengths,full=(evidence[k] for k in ('record','expected','users','lengths','full'))
+    phases,joined,repeated,ancestry_stable,historical_pairs=(evidence[k] for k in
+        ('phases','joined','repeated','ancestry_stable','historical_pairs'))
+    assert [p['phase'] for p in phases]==[0,1,2,3], 'Full quality audit requires complete ABBA'
     paired=[joined[k] for k in sorted(joined)]
     assert len(paired)==(500 if full else 24) and all(set(r['runs'])==set(VARIANTS) for r in paired)
     timing=latency(paired,VARIANTS)

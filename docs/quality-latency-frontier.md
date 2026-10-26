@@ -234,3 +234,32 @@ profile, audit and one-time submission guard. A single-policy setup measurement
 would establish feasibility only, without replacing a complete paired ABBA
 pilot or qualifying for full500. Submission remains blocked until the concrete protocol, source review, tests
 and budget are ready under the existing research authorization.
+
+
+## Distinct setup-feasibility protocol
+
+The [frozen protocol](../benchmarks/preparation/quality-frontier/setup-feasibility-protocol.json)
+selects TF32 phase 1 cold setup followed by phase 2 disk-artifact reuse, each in a
+fresh process with the original four users, eight graphs and twelve request rows.
+The [allocation script](../benchmarks/preparation/quality-frontier/precision-setup.sh)
+uses one A6000, four CPUs and 32 GB for at most 30 minutes, with a 1,620-second
+supervised child deadline. The remaining nominal 180 seconds covers termination
+and recovery; it is not a guaranteed cleanup duration. No new GPU job is submitted.
+
+`audit_precision_setup` requires both phases, normal supervised exit, complete
+hash-matched log recovery, the original source/runtime/resource/graph/ownership
+checks, actual TF32 dispatch and exact within-policy output/ancestry stability.
+Every request must also match preserved original TF32 outputs; this checks that
+the logging repair itself leaves numerical behavior unchanged. FP32 differences
+are retained descriptively. Successful setup validation always leaves full500
+eligibility, promotion and noninferiority false. The complete ABBA auditor rejects
+this diagnostic scope. Eight CPU tests exercise these decision boundaries and
+mutations of real log publication/recovery records.
+
+Cold/reuse setup, nested compiler/capture intervals, memory and generation
+latencies will be reported separately. There is no concurrent FP32 control, so
+this diagnostic cannot establish a speedup, paired recommendation quality or a
+causal estimate of logging overhead. The previous incomplete ABBA evidence stays
+separate. Before submission, a distinct harness, immutable source/config snapshot,
+one-time submission guard and passed publication CI must be recorded. Review the
+resulting budget before designing any later complete paired pilot.

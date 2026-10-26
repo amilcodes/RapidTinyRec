@@ -14,6 +14,8 @@ jobs:
       - run: python -m unittest discover -s tests -p test_quality_frontier.py -v
       - run: python -m unittest discover -s tests -p "test_precision*.py" -v
       - run: python -m rapidtinyrec.precision_log_runner --help
+      - run: python -m rapidtinyrec.audit_precision_setup --help
+      - run: bash -n benchmarks/preparation/quality-frontier/precision-setup.sh
       - run: python -m rapidtinyrec.audit_precision --help
       - run: python -m rapidtinyrec.quality_frontier --help
       - run: python -m unittest discover -s tests -p test_evidence.py -v

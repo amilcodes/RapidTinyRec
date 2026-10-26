@@ -45,7 +45,10 @@ def main():
         help='Reuse this variant\'s earlier on-disk compiler artifacts; GPU process and graphs are still fresh')
     ap.add_argument('--api-log-local-root',type=Path,
         help='Allocated node-local log sink; requires preservation wrapper and verified local filesystem')
+    ap.add_argument('--setup-feasibility',action='store_true',help='Distinct TF32-only cold/reuse setup diagnostic; never full quality')
     args=ap.parse_args()
+    if args.setup_feasibility and (args.full_cohort or args.phase not in (1,2) or args.api_log_local_root is None):
+        ap.error('Setup feasibility requires staged logging, phase1/2 and four-user scope')
     if args.api_log_local_root is not None:
         wrapper_root=os.environ.get('RAPIDTINYREC_LOG_STAGE_WRAPPER')
         if not wrapper_root or Path(wrapper_root).resolve()!=args.api_log_local_root.resolve():
@@ -98,7 +101,7 @@ def main():
         assert all(p.dtype==torch.float32 for p in model.parameters())
         inputs={u['cohort_index']:torch.tensor([u['prompt_token_ids']],device='cuda') for u in users}
         masks={i:torch.ones_like(x) for i,x in inputs.items()}
-        manifest={'experiment':'precision_500' if args.full_cohort else 'precision_pilot',
+        manifest={'experiment':'precision_setup_feasibility' if args.setup_feasibility else ('precision_500' if args.full_cohort else 'precision_pilot'),
             'phase':args.phase,'variant':variant,'half':half,
             'api_log_staging':args.api_log_local_root is not None,
             'attention_layout':'folded_query_heads',
