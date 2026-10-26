@@ -1,0 +1,184 @@
+{
+  "run_id": "packed-mlp-diagnosis-20261026T002626Z-67a7da628839",
+  "job_id": "7949846",
+  "integrity_passed": true,
+  "source_files_verified": 47,
+  "cases": 12,
+  "aggregates": {
+    "separate": {
+      "gate": {
+        "values": 5376000,
+        "matching_bits": 5376000,
+        "max_abs": 0.0
+      },
+      "up": {
+        "values": 5376000,
+        "matching_bits": 5376000,
+        "max_abs": 0.0
+      },
+      "silu_product": {
+        "values": 5376000,
+        "matching_bits": 5376000,
+        "max_abs": 0.0
+      },
+      "down_output": {
+        "values": 921600,
+        "matching_bits": 921600,
+        "max_abs": 0.0
+      }
+    },
+    "packed_views_separate": {
+      "gate": {
+        "values": 5376000,
+        "matching_bits": 5376000,
+        "max_abs": 0.0
+      },
+      "up": {
+        "values": 5376000,
+        "matching_bits": 5376000,
+        "max_abs": 0.0
+      },
+      "silu_product": {
+        "values": 5376000,
+        "matching_bits": 5376000,
+        "max_abs": 0.0
+      },
+      "down_output": {
+        "values": 921600,
+        "matching_bits": 921600,
+        "max_abs": 0.0
+      }
+    },
+    "packed_wide": {
+      "gate": {
+        "values": 5376000,
+        "matching_bits": 262310,
+        "max_abs": 2.765655517578125e-05
+      },
+      "up": {
+        "values": 5376000,
+        "matching_bits": 241755,
+        "max_abs": 2.384185791015625e-05
+      },
+      "silu_product": {
+        "values": 5376000,
+        "matching_bits": 155154,
+        "max_abs": 7.62939453125e-05
+      },
+      "down_output": {
+        "values": 921600,
+        "matching_bits": 28944,
+        "max_abs": 9.1552734375e-05
+      }
+    },
+    "batched_two": {
+      "gate": {
+        "values": 5376000,
+        "matching_bits": 262310,
+        "max_abs": 2.765655517578125e-05
+      },
+      "up": {
+        "values": 5376000,
+        "matching_bits": 241755,
+        "max_abs": 2.384185791015625e-05
+      },
+      "silu_product": {
+        "values": 5376000,
+        "matching_bits": 155154,
+        "max_abs": 7.62939453125e-05
+      },
+      "down_output": {
+        "values": 921600,
+        "matching_bits": 28944,
+        "max_abs": 9.1552734375e-05
+      }
+    }
+  },
+  "identical_input_split_pointwise_exact": true,
+  "two_original_gemm_controls_exact": true,
+  "kernel_names": {
+    "separate": [
+      "Memset (Device)",
+      "ampere_sgemm_128x64_tn"
+    ],
+    "packed_views_separate": [
+      "Memset (Device)",
+      "ampere_sgemm_128x64_tn"
+    ],
+    "packed_wide": [
+      "ampere_sgemm_128x64_tn"
+    ],
+    "batched_two": [
+      "ampere_sgemm_128x128_tn"
+    ]
+  },
+  "microtiming_median_of_case_medians_us": {
+    "separate": 244.0894991159439,
+    "packed_views_separate": 245.21774798631668,
+    "packed_wide": 219.5499986410141,
+    "batched_two": 406.00499510765076
+  },
+  "scope": "Same-input gate/up GEMM and pointwise diagnosis only. Activations are from eager folded-attention shared-prefill generation, not a replay of the original compiled intermediate tensors. Microtimings are CUDA graph replays of projections only, not request latency.",
+  "source_sha256": {
+    "diagnose_packed_mlp.py": "451a56f41f675f55f9baa2eb5bdb6ba4d6af5d09690010adf0283dd327f06143",
+    "jobs/diagnose-packed-mlp.sh": "0fbb1aa9908ac9a3687c0536d745c09b4abf588fc42d7d2d1dfc94ea8b81972e",
+    "oscar.packed-mlp-diagnosis.json": "0c794464818b5e48452d73c3499b46aa3696595be570eba993bede60f60a5535",
+    "rapidtinyrec/__init__.py": "b199f072828413c59c95580d6aa7f16b01636f44653870c1d4a86da3b197c762",
+    "rapidtinyrec/audit.py": "baadb1b535f9bcfe3020c7bd7ba4156398e93e9077a0d094f029406b68e10ed7",
+    "rapidtinyrec/audit_decode_pilot.py": "3f90d7ebdd8c39ea1d8a013f261ca4439ea9c5b759160bd74c987743655d8399",
+    "rapidtinyrec/audit_folded_prefix.py": "9258af9fdc59d847fe830bed7d792e56c4845b148228bc7b0d62d138366effe4",
+    "rapidtinyrec/audit_folded_profile.py": "3fd09798db667990eadca66809bfae8dbd19064615793095411f193df1619495",
+    "rapidtinyrec/audit_input_arena.py": "a351e222eead05acdc762b5a64791dd579d3c50e4b8b55a79f4d1ad70eb6e983",
+    "rapidtinyrec/audit_packed_mlp.py": "7a79000663577a543b2539446115d671714e158836ef7b0e7b8f59f7a6e13f44",
+    "rapidtinyrec/audit_prefix_profile.py": "dd95bd1e80598df70d05e6ae70349cf9dc7febb8516eca21a146e90b99c078e2",
+    "rapidtinyrec/audit_replay_profile.py": "df1f67d02f0c8a3ef8ae8022cf4106b45bf3e3f792b81631748581a450f6b39f",
+    "rapidtinyrec/audit_results.py": "0cce231b214cfcd38e888286eadab7592ca0606e10a6c552352a686602d001a4",
+    "rapidtinyrec/audit_shared_prefix.py": "2f5908f94e21b8d93ef44aaaea0bd393ddf0898f27a1c1747f4ec5cd15b1b88c",
+    "rapidtinyrec/benchmark.py": "1a90a2440a6b01926779a6582c19b3d1f4ea436375c6dfb7e6b69b7f8aa614c6",
+    "rapidtinyrec/benchmark_folded_prefix.py": "47925842d794afa854f3f6b0e12c47656346d61eaec1b719d327e9776c170190",
+    "rapidtinyrec/benchmark_folded_profile.py": "68bd51c52c302794b534825b26072031390526e1de41b50382fe2c39e4fd1377",
+    "rapidtinyrec/benchmark_gqa.py": "5175532144b38989138c9a87c003de9189800184ec642383971e05b56fbb8ab0",
+    "rapidtinyrec/benchmark_input_arena.py": "4666df2dce59a13f81a5d73b105400c89b70cd45975583d4a091a4c50aa5a624",
+    "rapidtinyrec/benchmark_packed_mlp.py": "0c5decdb62149c19283aa9fb5dc91d7a2a19bdf26814103853653b2690fdd955",
+    "rapidtinyrec/benchmark_shared_prefix.py": "ac8a36a50f80f04a2d5bb3013b0d79009baa0c7e9fbfec5d769252a6a7260f4f",
+    "rapidtinyrec/bulk_constraints.py": "aa9b40445fdb45572f5adff31ba9dfca7f5fe03d367fb0975cee694b6ba838ec",
+    "rapidtinyrec/compiled_forward.py": "98c35f16f01a007ffc5896264b7c190bf8bf6da7c4cae153f1a8f98b4f6d125f",
+    "rapidtinyrec/decode_replay.py": "82c0dc0a615d6fd6f83d942c13912e261ccd4f1a3cf52cdb79d14f24f2f8b53f",
+    "rapidtinyrec/direct_reorder.py": "954dc6adef4c125d4d384b1e37ce116088c7a05ed74e6699f959555bfa5db11e",
+    "rapidtinyrec/expected.json": "fca32f80a6c8f85ca40c071b6579e1770e4b5058ad330f23570c987cfdadbe1e",
+    "rapidtinyrec/folded_attention.py": "3af11f5563a1f520f85731b23328fa08a3bfeefeaff6ae2331fa6c97c659b441",
+    "rapidtinyrec/gpu_constraints.py": "0a5e903b7251c067456377c7f09f569ccdbbf6f2c456b6a4b072d3a2f26f710c",
+    "rapidtinyrec/gqa_benchmark_protocol.py": "b2495bd756ffd0efc9f42753e8ccb7e4beabf928072e6bbcc54230ed710688d2",
+    "rapidtinyrec/input_arena.py": "d8631c73344d956b076c0a10de0fc0736095d3f5ff21de8f42c03293c5dea3f1",
+    "rapidtinyrec/packed_mlp.py": "a3f6f062e481e0c350c3ba03dc25434a8c6193c60207823ce224f393558842b9",
+    "rapidtinyrec/pilot_decode_replay.py": "9b09986bb7f138dbcbe8c43d4ab9be84f6d5539f19b14074f6c5536d27482716",
+    "rapidtinyrec/prefix_prefill.py": "fe66809e94986e5adc1b72c93b77097f5cd37d886f81dd0d1b1963b56e03cc90",
+    "rapidtinyrec/prefix_replay.py": "11f776c6789ac014282010831ddca0a432aeca9491c1181fb888d9b03af7f4cb",
+    "rapidtinyrec/prepare_release.py": "d3f783a92316289386ee43cc484289115f7c4d89685db9c556fdfa972af85be7",
+    "rapidtinyrec/profile_compiled.py": "60b4ede2ec386ba1434c4f0c5ad030e9e36553da62a2536e88e4d5558a14fb75",
+    "rapidtinyrec/profile_decode_replay.py": "b40cb860156ffa0c6fc538a47b7674e569ba23b84b73c5e2f0cd0cf9f5b4f477",
+    "rapidtinyrec/profile_prefix.py": "090e8649e23c848e64cb26bdfb9f84537ab51934b247a49df1aa0077eb92eba7",
+    "rapidtinyrec/profile_shared.py": "c7ad8afbe06d3bdd4faf692d28def678f759c6d786ec452232cffc1807acc7af",
+    "rapidtinyrec/requirements.txt": "5976ae1ce277513a5df2f83713791f5fddd22bc8e34def280406f52a7954ec23",
+    "rapidtinyrec/run.py": "543a4129e8b21a20a1a8681ee7bea82ff50ea044d10b4be0fc4b44bf1975466d",
+    "rapidtinyrec/shared_prefill.py": "ada528219c8f11ea54ff55db463c4c390e8e7073b60ae6fda01ce47f23665baa",
+    "rapidtinyrec/shared_prefix.py": "5479370d129466574376c62a81125909b1673bca76ff3d257ee915443dbcfd9f",
+    "rapidtinyrec/source/LogitProcessor.py": "13ab33ff0ed3f769370478a86624499ccc0f8813de9d63e3dc4e2fa25ec59eb8",
+    "rapidtinyrec/source/__init__.py": "d72e9591bbafb1089e30f86ba31f1c9994dbfdbdcee8f3daa838c52a5f5ec801",
+    "rapidtinyrec/source/data.py": "85edcb6b1e7d1124c204bbdcb312d70903920b3cb5f00bc3fc1414f3df03b555",
+    "rapidtinyrec/validate_gpu_constraints.py": "45fea3b3ce38fcc24837efc64ef7ffdfe6ac96371124b24242e2d8890ec08867"
+  },
+  "raw_sha256": {
+    "job-id": "9e53a919db7b74fc94453feaec5cd8113b68dbfb929907172b7ed51666f79aa9",
+    "job.sh": "2fb057ae1c829ae882c8cd2883ccdef65750aef153c008f9a67e9a78f442957b",
+    "logs/stderr.log": "d6af3f323a0173ffa73e661a2b68adebdbb9070fdb5eb19fa26dc369363b61a6",
+    "logs/stdout.log": "9329e6c00f156174b874377cc5a68cb9c90b6641f6c3570fb4f6711b3395f81b",
+    "outputs/diagnosis/batched_two_trace.json": "956e573df7a77548f510d3f16daaecd24fe269939405c76badfabab8944f37e6",
+    "outputs/diagnosis/diagnosis.json": "3771ca5eea10f9f56afb91b7e91266c5559aca63a295c7d850568cc415a063fd",
+    "outputs/diagnosis/packed_views_separate_trace.json": "17eb5ef6b867f42c7a65100e40cfc1ea7ad6319a85bae6059ab9ce1645932448",
+    "outputs/diagnosis/packed_wide_trace.json": "824b639e2dcf2de5aa2ea3a61f837652b02318fd099637f68fdcb0c1265ffc29",
+    "outputs/diagnosis/separate_trace.json": "a161a261976e3f90bf7c47623ac38f2ecf5bce29c73eedaf4987618d378bbcec",
+    "source-manifest.json": "e57d777c4ced388e01ce39b92413357411e52cecc3eb1a7ce882ec842d852b5d"
+  },
+  "no_end_to_end_promotion": true
+}

@@ -6,6 +6,8 @@ Job `7907979`, run `packed-mlp-pilot-20261024T215118Z-533138a5b479`, completed f
 
 Evidence: [summary](../benchmarks/pilots/packed-mlp/summary.json), [24 paired requests](../benchmarks/pilots/packed-mlp/requests.csv), [complete audit](../benchmarks/pilots/packed-mlp/audit.json), [source and evidence hashes](../benchmarks/pilots/packed-mlp/source.json), [raw archive](../benchmarks/pilots/packed-mlp/evidence.tar.gz), and [archive file manifest](../benchmarks/pilots/packed-mlp/archive-manifest.json).
 
+The subsequent [fixed-input diagnosis](packed-mlp-diagnosis.md) confirms projection-level mismatches, exact packed-storage controls, and a slower inexact batched alternative. It preserves this pilot and does not promote either variant.
+
 ## Exactness and gate decision
 
 | Timed comparison | Rank positions matching | Sequence FP32 values matching | Transition FP32 values matching | Max sequence delta | Max transition delta |
@@ -22,7 +24,7 @@ Changing decode GEMM dimensions preserves installed weight bits but is not outpu
 
 ## Request latency
 
-Four frozen users cover lengths 76 and 121, with six paired trials each. Values below are end-to-end inference milliseconds, including splitting packed outputs and all request work. P95 uses inclusive interpolation.
+Four frozen users cover lengths 76 and 121, with six paired trials each. Values below are synchronized generation-call milliseconds, including splitting packed outputs and all work inside generation. Input preparation, output extraction and file writes are excluded. P95 uses inclusive interpolation.
 
 | Scope | Pairs | Folded median | Packed median | Folded p95 | Packed p95 |
 |---|---:|---:|---:|---:|---:|
