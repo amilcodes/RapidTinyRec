@@ -1,7 +1,7 @@
 """Four fresh serving phases beneath an already active external supervisor.
 
-This callable requires a separately supplied final on-disk auditor. The final
-run auditor and executable harness are not supplied by this module.
+This callable requires a separately supplied final on-disk auditor. The
+production serving_runner binds it to the pre-exit allocated disk reader.
 """
 import os
 from pathlib import Path
@@ -47,7 +47,7 @@ def reconcile_worker(launch, observed, entry, exit_record, before, after, worker
 
 
 def coordinate(run_root, release_root, historical, *, final_auditor):
-    """No public submission/entry CLI until final auditor and harness are bound."""
+    """Run under serving_runner supervision with its mandatory disk auditor."""
     require(callable(final_auditor), 'Separate complete on-disk run auditor required')
     require(sys.dont_write_bytecode and sys.flags.optimize == 0, 'Coordinator requires -B and normal assertions')
     run = Path(run_root)

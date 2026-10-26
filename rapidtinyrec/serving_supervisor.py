@@ -119,8 +119,8 @@ def _run_group(command, cwd, env, output, *, started_ns, deadline_ns, observe_id
 def supervise(command, cwd, env, output, *, global_started_ns):
     """Production ceiling is fixed; the caller starts it before any preflight.
 
-    The future harness must bind command/source/run and put its coordinator in
-    this group. A successful process exit is not a successful serving audit.
+    serving_runner binds its coordinator to this group; the submitted harness
+    still supplies source/run identity. A successful exit is not an audit pass.
     """
     return _run_group(command, cwd, env, output, started_ns=global_started_ns,
                       deadline_ns=global_started_ns+1620*10**9)
