@@ -26,7 +26,8 @@ changing score layout/dtype/device, and using another stream are errors. Both
 score copies and integer suffix copies remain inside generation-call timing.
 Buffer reuse is an explicit borrowing contract, not general concurrent serving.
 
-CPU checks compare the unchanged operations against the existing processor for
+CPU checks also verify that the pinned HF beam-search implementation retains all
+five processor output storages and leaves their values unchanged. They compare the unchanged operations against the existing processor for
 valid and unknown prefixes, test staging ownership with mixed input lengths,
 and verify lease lifecycle guards:
 
@@ -34,8 +35,8 @@ and verify lease lifecycle guards:
 python -m unittest discover -s tests -p test_constraint_replay.py -v
 ```
 
-Before a GPU submission, integrate a fresh-process folded-control/candidate ABBA
-benchmark and independent auditor. The four-user pilot must check every warmup
+The `benchmark_constraint_replay` and `audit_constraint_replay` commands implement
+the fresh-process folded-control/candidate ABBA benchmark and independent audit. The four-user pilot must check every warmup
 and repeated output against paired controls and historical compiled GQA, five
 independent score outputs, graph/direct equality, unknown-prefix fallbacks and
 mixed-length safety. Freeze eight model graphs plus five constraint graphs per
@@ -55,3 +56,30 @@ This isolated branch starts from the validated folded/profile branch (#12).
 The rejected wide and batched packed-MLP evidence remains in #13. Graph-resident
 constraint work is inspired by FlashRec's orchestration, but this prototype
 does not adopt its restricted output-head normalization or precision modes.
+
+
+The candidate phases run twenty setup-only graph/direct checks over valid,
+unknown, mixed and repeated prefixes, retain all five outputs through each
+request, and save exact bit counts even on numerical failure. The independent
+CPU auditor checks those results, frozen graph events, staged byte counts and
+saved-score ownership. It recomputes held-out SID hit rate/NDCG/MRR and paired
+changes per unique user separately from FP32 fidelity. Tests deliberately inject
+one-bit errors, missing steps, omitted staging, timed captures and invalid output
+lifetimes to verify these cannot pass.
+
+The GPU job script runs phases 0/1 with cold variant-specific compiler artifacts
+and 2/3 with the corresponding on-disk artifacts reused, always fresh processes.
+Benchmark and audit CLIs:
+
+```bash
+python -m rapidtinyrec.benchmark_constraint_replay --release-root RELEASE \
+  --reference-results GQA_RESULTS --output-root OUTPUT --phase PHASE
+python -m rapidtinyrec.audit_constraint_replay OUTPUT --historical GQA_RESULTS \
+  --snapshot SNAPSHOT/rapidtinyrec --run-record RUN_RECORD.json \
+  --token-map RELEASE/Office_ckpt/added_tokens.json --output AUDIT.json
+```
+
+The exact saved invocation and frozen files are authoritative for any submitted
+run. A numerical mismatch produces an audit JSON before a nonzero exit. An
+execution/integrity failure requires diagnosis; it never authorizes a duplicate
+or blind replacement job.
