@@ -79,7 +79,8 @@ def validate_log_staging(path, manifest):
     assert 0<=record['copy_s']<=record['session_wall_s']
 
 
-def inspect_phases(root,historical,snapshot,run_record,*,setup_diagnostic=False):
+def inspect_phases(root,historical,snapshot,run_record,*,setup_diagnostic=False,staged_pilot=False):
+    assert not (setup_diagnostic and staged_pilot)
     record=read(run_record)
     assert record['resources']['gpus']==1 and record['resources']['gpu_type']=='nvidia_rtx_a6000'
     assert record['resources']['cpus']==4 and record['resources']['memory_gb']==32
@@ -102,7 +103,7 @@ def inspect_phases(root,historical,snapshot,run_record,*,setup_diagnostic=False)
         m,s,w,c=(read(path/n) for n in ('manifest.json','summary.json','setup.json','compilation.json'))
         validate_log_staging(path,m)
         rows=read(path/'requests.json'); half=0 if phase<2 else 1
-        assert m['experiment'] in (('precision_setup_feasibility',) if setup_diagnostic else ('precision_500','precision_pilot'))
+        assert m['experiment'] in (('precision_setup_feasibility',) if setup_diagnostic else (('precision_paired_staged_pilot',) if staged_pilot else ('precision_500','precision_pilot')))
         if full is None:full=m['experiment']=='precision_500'
         if setup_diagnostic:assert not full,'Setup diagnostic is four-user only'
         assert (m['experiment']=='precision_500')==full
@@ -130,6 +131,10 @@ def inspect_phases(root,historical,snapshot,run_record,*,setup_diagnostic=False)
         assert m['cohort_sha256']==expected['users_sha256'] and m['reference_manifest_sha256']==reference['manifest_sha256']
         names={'benchmark_precision.py','precision_policy.py','precision_dispatch.py','precision_log_staging.py','precision_quality_adapter.py','quality_frontier.py','quality_resources.json','folded_attention.py','shared_prefix.py','prefix_replay.py','prefix_prefill.py','input_arena.py','decode_replay.py','compiled_forward.py',
                'shared_prefill.py','gpu_constraints.py','expected.json','direct_reorder.py'}
+        if 'release_verification' in m:
+            from .precision_provenance import validate_release
+            names.add('precision_provenance.py')
+            validate_release(m['release_verification'],expected['release_sha256'])
         assert set(m['sha256'])==names
         for name,sha in m['sha256'].items():assert digest(snapshot/name)==sha,name
         users=reference['users'] if full else [u for n in (all_lengths[0],all_lengths[-1])
@@ -256,8 +261,8 @@ def inspect_phases(root,historical,snapshot,run_record,*,setup_diagnostic=False)
         historical_pairs=historical_pairs)
 
 
-def audit(root,historical,snapshot,run_record,release):
-    evidence=inspect_phases(root,historical,snapshot,run_record)
+def audit(root,historical,snapshot,run_record,release,*,staged_pilot=False):
+    evidence=inspect_phases(root,historical,snapshot,run_record,staged_pilot=staged_pilot)
     record,expected,users,lengths,full=(evidence[k] for k in ('record','expected','users','lengths','full'))
     phases,joined,repeated,ancestry_stable,historical_pairs=(evidence[k] for k in
         ('phases','joined','repeated','ancestry_stable','historical_pairs'))

@@ -15,8 +15,9 @@ def diagnostic_decision(stable, prior_exact, dispatch, normal_exit):
             'full_abba_retry_authorized_by_diagnostic_alone': False}
 
 
-def validate_wrapper(root, record):
+def validate_wrapper(root, record, *, phases=(1,2)):
     """Require normal bounded exit and recovery of the exact staged phase logs."""
+    assert phases in ((1,2),(0,1,2,3))
     start=read(root/'log-wrapper-start.json'); finish=read(root/'log-wrapper-exit.json')
     assert start['schema']=='precision-log-wrapper-v1'
     assert str(start['job_id'])==str(record['job_id'])
@@ -27,18 +28,18 @@ def validate_wrapper(root, record):
     assert child['returncode']==0 and child['reason']=='exited' and child['completed_normally'] is True
     assert child['signal'] is None and 0<child['elapsed_s']<=1620
     assert recovery['recovery_complete'] is True and not recovery['leftover_local_entries']
-    assert len(recovery['locations'])==2 and all(x['recovered'] is True for x in recovery['locations'])
+    assert len(recovery['locations'])==len(phases) and all(x['recovered'] is True for x in recovery['locations'])
     assert 'supervisor_error' not in finish
     recovered={x['location']:x for x in recovery['locations']}
-    assert len(recovered)==2
+    assert len(recovered)==len(phases)
     local_dirs=[]
-    for phase in (1,2):
+    for phase in phases:
         m=read(root/f'phase_{phase}'/'manifest.json'); assert m['api_log_staging'] is True
         location=read(root/f'phase_{phase}'/'log-staging-location.json')
         assert location['schema']=='precision-log-location-v1'
         output=Path(location['output_directory'])
         assert output.name==f'phase_{phase}'
-        assert output.parent==Path(read(root/'phase_1'/'log-staging-location.json')['output_directory']).parent
+        assert output.parent==Path(read(root/f'phase_{phases[0]}'/'log-staging-location.json')['output_directory']).parent
         item=recovered[str(output/'log-staging-location.json')]
         publication=read(root/f'phase_{phase}'/'log-staging.json')['publication']
         assert item['publication']['files']==publication['files']
@@ -48,7 +49,7 @@ def validate_wrapper(root, record):
         local_dirs.append(location['local_directory'])
         assert str(Path(location['local_directory']).parent)==start['local_directory']
         assert location['filesystem']==start['filesystem']
-    assert len(set(local_dirs))==2
+    assert len(set(local_dirs))==len(phases)
     return finish
 
 

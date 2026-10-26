@@ -269,3 +269,10 @@ causal estimate of logging overhead. The previous incomplete ABBA evidence stays
 separate. Before submission, a distinct harness, immutable source/config snapshot,
 one-time submission guard and passed publication CI must be recorded. Review the
 resulting budget before designing any later complete paired pilot.
+
+
+### Complete paired pilot preparation
+
+A distinct four-user FP32/TF32/TF32/FP32 pilot is being prepared after the successful setup diagnostic. The frozen [design](../benchmarks/preparation/quality-frontier/precision-paired-staged-protocol.json) plans 1500 seconds of child work under the existing 1620-second deadline, leaving nominal cleanup time within the 30-minute allocation. Repaired-logging FP32 setup remains unmeasured; this is a planning estimate, not a completion guarantee.
+
+The new phase manifests serialize the actual eleven release hashes already verified before model loading, including the checkpoint, and bind each phase to the frozen protocol. The previous setup benchmark already checked these hashes; its limitation was the absence of a serialized observed digest record. The distinct paired auditor additionally requires all four phase records and complete wrapper recovery before applying the original paired fidelity, dispatch, quality and performance gates. Generation, extraction and timing-loop ASTs remain identical to the original pilot. This source preparation has not submitted a new job: harness configuration, a one-time submission guard, source CI and final preflight review remain required. No full500 or promotion is implied.

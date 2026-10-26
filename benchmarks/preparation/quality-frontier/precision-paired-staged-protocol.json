@@ -1,0 +1,207 @@
+{
+  "schema": "precision-paired-staged-pilot-design-v1",
+  "design_frozen_at_utc": "2026-10-26T12:00:33.742058+00:00",
+  "stage": "DESIGN_FROZEN_IMPLEMENTATION_NOT_READY",
+  "submitted": false,
+  "purpose": "Complete fresh-process FP32/TF32/TF32/FP32 pilot after separately audited logging-only setup repair; distinct from the closed timeout and TF32-only diagnostic.",
+  "proposed_profile": "precision-paired-staged-pilot",
+  "proposed_harness": "/Users/AmilAgrawal/Documents/Codex/2026-10-18/let/work/rapidtinyrec_precision_paired_staged",
+  "source_base": "04dc02710d92cb21dc1a432e4beff9ab7241caff",
+  "setup_evidence": {
+    "run_id": "precision-setup-feasibility-20261026T102919Z-4f30e44cac46",
+    "job_id": "7972055",
+    "audit_sha256": "4b72c99925c99f60f92b53813efae635d948d258b39f302463e1a29c6bf6144a",
+    "review_sha256": "25f9e622d59d4eb953e0f24bd686c1e45d88b982761a9123ff64fb704c980e4c",
+    "evidence_commit": "04dc02710d92cb21dc1a432e4beff9ab7241caff",
+    "publication_ci": 40318799420
+  },
+  "phases": [
+    {
+      "phase": 0,
+      "variant": "folded_fp32",
+      "half": 0,
+      "disk_cache": "cold",
+      "repeats": [
+        0,
+        1,
+        2
+      ],
+      "fresh_process": true,
+      "fresh_allocations": true,
+      "fresh_graphs": true
+    },
+    {
+      "phase": 1,
+      "variant": "folded_tf32",
+      "half": 0,
+      "disk_cache": "cold",
+      "repeats": [
+        0,
+        1,
+        2
+      ],
+      "fresh_process": true,
+      "fresh_allocations": true,
+      "fresh_graphs": true
+    },
+    {
+      "phase": 2,
+      "variant": "folded_tf32",
+      "half": 1,
+      "disk_cache": "same-variant-reuse",
+      "repeats": [
+        3,
+        4,
+        5
+      ],
+      "fresh_process": true,
+      "fresh_allocations": true,
+      "fresh_graphs": true
+    },
+    {
+      "phase": 3,
+      "variant": "folded_fp32",
+      "half": 1,
+      "disk_cache": "same-variant-reuse",
+      "repeats": [
+        3,
+        4,
+        5
+      ],
+      "fresh_process": true,
+      "fresh_allocations": true,
+      "fresh_graphs": true
+    }
+  ],
+  "cohort_indices": [
+    1,
+    2,
+    6,
+    10
+  ],
+  "prompt_lengths": [
+    76,
+    121
+  ],
+  "requests_per_phase": 12,
+  "graphs_per_phase": 8,
+  "paired_requests": 24,
+  "unique_users": 4,
+  "paired_evidence_counts": {
+    "rank_positions_per_policy": 1200,
+    "sequence_fp32_values_per_policy": 1200,
+    "transition_fp32_values_per_policy": 6000
+  },
+  "resources": {
+    "partition": "gpu",
+    "qos": "norm-gpu",
+    "constraint": "ampere",
+    "gpu_type": "nvidia_rtx_a6000",
+    "gpus": 1,
+    "cpus": 4,
+    "memory_gb": 32,
+    "time": "00:30:00"
+  },
+  "budget": {
+    "allocation_s": 1800,
+    "supervisor_child_deadline_s": 1620,
+    "nominal_cleanup_headroom_s": 180,
+    "planning_setup_s_by_phase": [
+      450,
+      450,
+      250,
+      250
+    ],
+    "planning_other_child_s": 100,
+    "planning_total_child_s": 1500,
+    "planning_margin_to_child_deadline_s": 120,
+    "observed_tf32_setup_s": [
+      357.4091837666929,
+      152.68064679577947
+    ],
+    "observed_two_phase_child_s": 556.634991850704,
+    "illustrative_doubled_child_s": 1113.269983701408,
+    "interpretation": "Planning total is about35percent above doubled observed TF32 child duration. Repaired-logging FP32 setup is unmeasured, and no bound or statistical completion guarantee follows. Compile/capture are nested in setup; do not add them. Four phases always follow the fixed schedule until success/failure/global1620s deadline. No data-dependent repeats or selective acceptance.",
+    "deadline_policy": "One global child deadline; private process-group TERM then KILL, existing recovery wrapper. No per-phase restarts, silent partial completion, resubmission or weakened checks. Supervisor kill/node loss and forced-child buffers remain limitations."
+  },
+  "numerics": {
+    "candidate_change": "CUDA matmul allow_tf32=True versus False, legacy setter before compile/capture and restored after phase",
+    "storage_weights_logits_scores": "float32",
+    "cudnn_tf32": false,
+    "blas_preference": "cublas",
+    "max_autotune": false,
+    "tunable_op": false,
+    "scoring": "Original full-vocabulary normalization, beam50, five probabilities, HF clones, constraints, cache/reorder, termination and tie behavior. No batching/layout/workspace/backend/algorithm sweep."
+  },
+  "logging": "Identical native API logging coverage/level, verified local tmpfs/ext4/xfs sink; disable/flush/hashcopy before measurement and recovery of exactly four phase locations after child exit.",
+  "provenance": {
+    "release_hashes": {
+      "Office_ckpt/added_tokens.json": "682f42f571bea18c1fa3f4dd8161b0696a5ef802e716d21669742c7f9e678f1e",
+      "Office_ckpt/config.json": "c2b98b1986dc97a0ee19f6216fc2f7a13f70a78954d5a5957b9d308e35ab56cd",
+      "Office_ckpt/generation_config.json": "55b2b4462aedccc5858edd8d7aa0fa7aebf8a3bf9245f9a095ddeba8a9a1650a",
+      "Office_ckpt/merges.txt": "8831e4f1a044471340f7c0a83d7bd71306a5b867e95fd870f74d0c5308a904d5",
+      "Office_ckpt/model.safetensors": "69cddd1c19244e6925fcdc073fb54622f1367f749e193949f9456592f6d437fd",
+      "Office_ckpt/special_tokens_map.json": "a36726f7fe394c1324021cac4a9ee3ad6c4f6285c0d98721f9b0b95888ec9905",
+      "Office_ckpt/tokenizer.json": "727f175c5ff824b7cfa45c8577e293b356b255b215a504834c4451298bd5c50a",
+      "Office_ckpt/tokenizer_config.json": "8b398f3d12a0d462c5cc583e5db6fe70c1c30d4df1e0830d1957397a2d972564",
+      "Office_ckpt/vocab.json": "ca10d7e9fb3ed18575dd1e277a2579c16d108e32f27439684afa0e10b1440910",
+      "Amazon/test/Office_Products_5_2016-10-2018-11.csv": "c1967034e197a7837a8962f2556efaabc12eb5bb84e1fdc79cd0accbce71add5",
+      "Amazon/info/Office_Products_5_2016-10-2018-11.txt": "7e8bae0a051a377713364b9e669590f86feb869fc269157c64b2189c0f4bcfa4"
+    },
+    "existing_guard": "Measured setup source already hashes and asserts all11release files including model.safetensors before model load. It does not serialize the observed mapping; this is an evidence-reporting limitation, not absence of a runtime checkpoint guard.",
+    "new_record": "Emit actual observed release hashes and verification timing from the existing reads before load; audit exact equality to frozen expected.json and equality across phases. Do not copy expected values as observed. Emit explicit structured phase protocol and frozen protocol digest; fix setup-only prose without rewriting old raw evidence.",
+    "resource_hashes": "Keep existing quality_resources hashes and held-out row identity checks; no local model load or new large-file hashing for preparation."
+  },
+  "timing": "Generation includes staging/wrappers/original HF clones. Preparation, extraction, storage scans, profiling, file I/O and setup excluded. Model load separate; compiler/capture nested. Pair user/repeat across ABBA phases; no historical compounded speedup.",
+  "audit_required": [
+    "All source/config/protocol/resource/build/cohort/release identity and schedule",
+    "Normal bounded supervisor exit and exact four-location log recovery",
+    "Eight frozen model graphs per phase; zero measured compile/capture",
+    "Historical and paired FP32 control exactness, all within-policy warm/direct/graph/repeat/retained/profile outputs and ancestry stable",
+    "Original five score storages independent of each other and graph logits",
+    "Actual graph-linked TF32 kernel dispatch plus matching native API GEMM shapes/math modes for both lengths in both candidate phases",
+    "Output validity, all paired rank/FP32/transition/ancestry evidence; candidate/control differences informative, not rejection by themselves",
+    "All latency/memory/per-user/length/half/length-half strata and paired SID metrics/uncertainty"
+  ],
+  "performance_gate": {
+    "minimum_reduction_percent": 10,
+    "required": "Generation median and p95 overall, each length and each half; no median/p95 length-by-half regression",
+    "interpretation": "Predeclared minimum experimental effect, not user SLO or statistical claim"
+  },
+  "quality": {
+    "primary": [
+      "ndcg@10",
+      "hit_rate@10"
+    ],
+    "metrics": [
+      "Hit",
+      "NDCG",
+      "MRR"
+    ],
+    "cutoffs": [
+      1,
+      5,
+      10,
+      20,
+      50
+    ],
+    "unit": "First matched repeat per unique user; all repeats checked for stability",
+    "bootstrap_samples": 10000,
+    "seed": 20261026,
+    "interval": "two-sided percentile95, descriptive/unadjusted",
+    "collision_policy": "SID-level only; preserve ambiguity strata; no favorable item expansion",
+    "interpretation": "Four users cannot establish population parity. No numeric loss margin accepted and no noninferiority inference from nonsignificance."
+  },
+  "advancement": "Only complete audited control exactness/stability/ownership/dispatch/validity and original material-performance gate can support designing a separate full500 review. No full500 profile or automatic promotion. Large-cohort bootstrap only allocated compute.",
+  "promotion": false,
+  "noninferiority_established": false,
+  "submission_ready": false,
+  "remaining": [
+    "Implement explicit protocol/observed-release provenance without generation or measured-loop AST changes",
+    "Four-phase wrapper recovery audit and source/config/profile identity binding",
+    "Distinct staged-paired allocation script and harness",
+    "Focused mutation/CLI/CPU tests and exact-source CI",
+    "Same-agent preflight budget/source review with no independent-reviewer claim",
+    "Distinct exclusive intent/one-time submission guard and active-job check before at most one submission"
+  ]
+}

@@ -14,6 +14,7 @@ from . import benchmark as b
 from .compiled_forward import CompiledForward
 from .precision_policy import PHASES, precision_policy, validate_runtime, policy_state, validate_state
 from .precision_log_staging import capture_session
+from .precision_provenance import PROTOCOL, load_protocol, verify_release, phase_record
 from .prefix_prefill import PrefillPrefix
 from .folded_attention import fold_decode_attention
 from .decode_replay import DecodeReplayPool
@@ -46,7 +47,11 @@ def main():
     ap.add_argument('--api-log-local-root',type=Path,
         help='Allocated node-local log sink; requires preservation wrapper and verified local filesystem')
     ap.add_argument('--setup-feasibility',action='store_true',help='Distinct TF32-only cold/reuse setup diagnostic; never full quality')
+    ap.add_argument('--paired-staged-pilot',action='store_true',help='Distinct four-user ABBA pilot with staged logs and frozen protocol provenance')
     args=ap.parse_args()
+    if args.paired_staged_pilot and (args.full_cohort or args.setup_feasibility or args.api_log_local_root is None):
+        ap.error('Paired staged pilot requires staged logging, four users and exclusive experiment scope')
+    protocol=load_protocol(b.ROOT.parent/PROTOCOL) if args.paired_staged_pilot else None
     if args.setup_feasibility and (args.full_cohort or args.phase not in (1,2) or args.api_log_local_root is None):
         ap.error('Setup feasibility requires staged logging, phase1/2 and four-user scope')
     if args.api_log_local_root is not None:
@@ -76,8 +81,10 @@ def main():
         content={k:v for k,v in reference.items() if k!='manifest_sha256'}
         assert hashlib.sha256(json.dumps(content,sort_keys=True).encode()).hexdigest()==reference['manifest_sha256']
         assert hashlib.sha256(json.dumps(reference['users'],sort_keys=True).encode()).hexdigest()==expected['users_sha256']
-        for name,want in expected['release_sha256'].items():assert b.digest(args.release_root/name)==want,name
+        release_verification=verify_release(args.release_root,expected['release_sha256'],b.digest)
+        if protocol is not None:assert expected['release_sha256']==protocol['provenance']['release_hashes']
         users,warm_users=select_users(reference['users'],args.full_cohort)
+        phase_protocol=phase_record(protocol,args.phase,args.reuse_compiler_artifacts,users) if protocol is not None else None
         out=args.output_root/f'phase_{args.phase}'
         out.mkdir(parents=True,exist_ok=True)
         assert not (out/'manifest.json').exists(),'Use a new output directory'
@@ -101,8 +108,9 @@ def main():
         assert all(p.dtype==torch.float32 for p in model.parameters())
         inputs={u['cohort_index']:torch.tensor([u['prompt_token_ids']],device='cuda') for u in users}
         masks={i:torch.ones_like(x) for i,x in inputs.items()}
-        manifest={'experiment':'precision_setup_feasibility' if args.setup_feasibility else ('precision_500' if args.full_cohort else 'precision_pilot'),
+        manifest={'experiment':'precision_paired_staged_pilot' if args.paired_staged_pilot else 'precision_setup_feasibility' if args.setup_feasibility else ('precision_500' if args.full_cohort else 'precision_pilot'),
             'phase':args.phase,'variant':variant,'half':half,
+            'release_verification':release_verification,'phase_protocol':phase_protocol,
             'api_log_staging':args.api_log_local_root is not None,
             'attention_layout':'folded_query_heads',
             'compiler_artifacts':{'reused':args.reuse_compiler_artifacts,'before':artifacts_before},
@@ -112,9 +120,11 @@ def main():
             'model_parameter_unique_bytes':sum({x.untyped_storage().data_ptr():x.untyped_storage().nbytes() for x in model.parameters()}.values()),'hardware':torch.cuda.get_device_name(0),
             'cohort_sha256':expected['users_sha256'],'reference_manifest_sha256':reference['manifest_sha256'],
             'versions':{n:b.importlib.metadata.version(n) for n in ['torch','transformers','tokenizers']},
-            'sha256':{n:b.digest(b.ROOT/n) for n in ['benchmark_precision.py','precision_policy.py','precision_dispatch.py','precision_log_staging.py','precision_quality_adapter.py','quality_frontier.py','quality_resources.json','folded_attention.py','shared_prefix.py','prefix_replay.py','prefix_prefill.py','input_arena.py','decode_replay.py',
+            'sha256':{n:b.digest(b.ROOT/n) for n in ['benchmark_precision.py','precision_provenance.py','precision_policy.py','precision_dispatch.py','precision_log_staging.py','precision_quality_adapter.py','quality_frontier.py','quality_resources.json','folded_attention.py','shared_prefix.py','prefix_replay.py','prefix_prefill.py','input_arena.py','decode_replay.py',
                 'compiled_forward.py','shared_prefill.py','gpu_constraints.py','expected.json','direct_reorder.py']},
             'protocol':'Fresh folded-FP32/TF32/TF32/FP32 ABBA. FP32 storage and outputs; candidate changes only CUDA matmul allow_tf32 before compilation/capture, cudnn remains off. Original beam50, five full-vocabulary score steps and termination. Numerical fidelity is reported separately from paired SID quality. Original shape/attention/cache/reorder unchanged. Timed generation includes staging/wrappers/HF clones; input preparation, output extraction/audits and files excluded. Setup/capture/profiling excluded; nested intervals are not additive. No quality equivalence or automatic baseline promotion.'}
+        if args.setup_feasibility:
+            manifest['protocol']=manifest['protocol'].replace('Fresh folded-FP32/TF32/TF32/FP32 ABBA.', 'TF32-only fresh-process cold/reuse setup diagnostic, phases1/2; no paired FP32 comparison.')
         b.save(out/'manifest.json',manifest)
         compiler=CompiledForward(model,out,b.announce)
         from .input_arena import SharedInputArena
