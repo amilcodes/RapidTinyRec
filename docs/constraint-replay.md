@@ -75,7 +75,7 @@ must be measured. Existing prefix/suffix model storage remains unchanged.
 Each request obtains a processor lease from `ConstraintReplayPool.processor()`.
 It stages the scores and last three integer token IDs, then replays the graph
 for that step. Five independent graph-private pools keep processor outputs
-alive through subsequent steps. The pinned [HF 4.55.4 beam search](https://github.com/huggingface/transformers/blob/v4.55.4/src/transformers/generation/utils.py#L3761)
+alive through subsequent steps. The pinned [HF 4.55.4 beam search](https://github.com/huggingface/transformers/blob/v4.55.4/src/transformers/generation/utils.py#L4105)
 clones these outputs for `output_scores`, before adding cumulative beam scores.
 Those existing timed clones stay unchanged and add 152,265,000 bytes of live
 saved-score storage at five steps in both variants. Outside generation timing,
