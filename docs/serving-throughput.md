@@ -159,3 +159,23 @@ must enumerate and retain every model/buffer, constraint, prompt, cache, arena,
 graph input/output and retained score tensor while comparing both live lanes.
 Graph pool identity and stream/thread ownership require separate evidence.
 The CUDA runtime, complete independent auditor and GPU submission remain pending.
+
+## Explicit owner inventory preparation
+
+`serving_inventory.enumerate_folded_lane` enumerates registered model parameters
+and buffers (including tied names), GPU constraint tables, prefix/suffix arena
+backing storage and cached views, each frozen replay's input/cache/output tensors,
+and explicitly named prepared prompts and retained output tensors. It returns
+strong references so those storage allocations remain live during cross-lane
+comparison. Enumeration does not read tensor values, copy tensors, synchronize
+or execute the model, and belongs outside request timing.
+
+The pinned Python owner schemas fail closed when fields, replay arguments or
+arena identity change. Tests inject aliases into each owner category, reject
+omitted/unknown owners and hidden fixed tensor inputs, and check reference
+lifetime. CI additionally checks real Torch registered buffers and tied weights.
+This is still preparation: it does not enumerate allocator-hidden graph-private
+intermediates, prove model-specific unregistered tensor completeness, establish
+stream or thread ownership, or prove exact concurrent results. Runtime integration,
+graph-pool checks, stream-scoped synchronization and the independent numerical,
+profile and clock auditor remain pending. No serving GPU run has been submitted.
