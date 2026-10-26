@@ -24,6 +24,7 @@ jobs:
       - run: python -m rapidtinyrec.audit_folded_prefix --help
       - run: python -m rapidtinyrec.audit_folded_profile --help
       - run: python -m unittest discover -s tests -p test_beam_replay_audit.py -v
+      - run: python -m unittest discover -s tests -p test_beam_replay_evidence.py -v
       - run: python -m rapidtinyrec.audit_beam_replay --help
   decoding:
     runs-on: ubuntu-latest
