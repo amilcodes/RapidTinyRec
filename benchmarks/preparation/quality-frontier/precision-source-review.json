@@ -1,0 +1,49 @@
+{
+  "torch_commit": "08187d9e0fba026dc8217405802ab5381dc88d90",
+  "sources": {
+    "torch/_inductor/kernel/mm.py": {
+      "url": "https://raw.githubusercontent.com/pytorch/pytorch/08187d9e0fba026dc8217405802ab5381dc88d90/torch/_inductor/kernel/mm.py",
+      "sha256": "e95a01a7b2a5e9cc24023cb6bbdb864e56a54197d66434ff5f7695ad1838c58d"
+    },
+    "torch/_inductor/kernel/mm_common.py": {
+      "url": "https://raw.githubusercontent.com/pytorch/pytorch/08187d9e0fba026dc8217405802ab5381dc88d90/torch/_inductor/kernel/mm_common.py",
+      "sha256": "d174639b0e9191bc1979cbb7abde98ebf6caf1c8d5effe30cf433a881da87231"
+    },
+    "torch/_inductor/kernel_inputs.py": {
+      "url": "https://raw.githubusercontent.com/pytorch/pytorch/08187d9e0fba026dc8217405802ab5381dc88d90/torch/_inductor/kernel_inputs.py",
+      "sha256": "5a1f35ede498a3d547e97dfdde08a837823c1195e80a6d218a5d35dad9c9662d"
+    },
+    "torch/_inductor/config.py": {
+      "url": "https://raw.githubusercontent.com/pytorch/pytorch/08187d9e0fba026dc8217405802ab5381dc88d90/torch/_inductor/config.py",
+      "sha256": "9171c2ed249e13a19a2ae22dba0db14f3c4fe11762108f87c8a4e85f96945b0a"
+    },
+    "torch/backends/cuda/__init__.py": {
+      "url": "https://raw.githubusercontent.com/pytorch/pytorch/08187d9e0fba026dc8217405802ab5381dc88d90/torch/backends/cuda/__init__.py",
+      "sha256": "aa36a537f1fbea9292069b7b8cce52a5ef4c5f354b73165448a1ca9ab116d81e"
+    },
+    "aten/src/ATen/Context.cpp": {
+      "url": "https://raw.githubusercontent.com/pytorch/pytorch/08187d9e0fba026dc8217405802ab5381dc88d90/aten/src/ATen/Context.cpp",
+      "sha256": "e2b56a99a018e274f6b584c9c86c88140d5e4743000d1dd9e6aff4da4e559da3"
+    },
+    "aten/src/ATen/cuda/CUDABlas.cpp": {
+      "url": "https://raw.githubusercontent.com/pytorch/pytorch/08187d9e0fba026dc8217405802ab5381dc88d90/aten/src/ATen/cuda/CUDABlas.cpp",
+      "sha256": "1d81d9e5e68ba45636e8635cb8e7905f24044e1f4eb1449ed26be505be6bbcee"
+    },
+    "aten/src/ATen/cuda/CublasHandlePool.cpp": {
+      "url": "https://raw.githubusercontent.com/pytorch/pytorch/08187d9e0fba026dc8217405802ab5381dc88d90/aten/src/ATen/cuda/CublasHandlePool.cpp",
+      "sha256": "2dfaea7f42cb654bf4db6bddedbfd5f2661d92c6d96f2c90652f3d9c162baf2c"
+    }
+  },
+  "review": [
+    "Context.cpp legacy setter synchronizes CUDA MATMUL TF32/IEEE and HIGH/HIGHEST.",
+    "CublasHandlePool.cpp uses that policy for CUBLAS_TF32_TENSOR_OP_MATH unless NoTF32Guard.",
+    "Inductor mm.py registers native aten.mm.out and can select other implementations; config and actual generated code/dispatch must be recorded.",
+    "CUDABlas.cpp disables TF32 for GEMV; enabling matmul policy does not imply all operations change or accelerate."
+  ],
+  "limitations": [
+    "No GPU candidate result yet.",
+    "Precision flag alone is not proof of tensor-core execution.",
+    "Kernel names must be linked to cudaGraphLaunch, not merely found in prefill.",
+    "No algorithm tuning, layout or backend switch."
+  ]
+}

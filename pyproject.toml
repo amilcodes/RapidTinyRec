@@ -23,4 +23,4 @@ Repository = "https://github.com/amilcodes/RapidTinyRec"
 include = ["rapidtinyrec*"]
 
 [tool.setuptools.package-data]
-rapidtinyrec = ["expected.json", "requirements.txt"]
+rapidtinyrec = ["expected.json", "quality_resources.json", "requirements.txt"]

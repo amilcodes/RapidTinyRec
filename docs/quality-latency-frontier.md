@@ -151,3 +151,53 @@ quality auditor. Do not drop those seven users or select the favorable member of
 a collision. An eventual item-level comparison needs a fixed, common expansion
 or disambiguation policy with output-count/rank effects accounted for. This
 metadata finding is not evidence of any candidate regression.
+
+## TF32 pilot implementation and frozen decision rule
+
+`benchmark_precision.py` implements fresh-process folded-FP32 / folded-TF32 /
+folded-TF32 / folded-FP32 ABBA. Both sides retain FP32 model parameters, logits,
+saved scores, transitions, original full-vocabulary normalizations, beam50 and
+termination. The only numerical policy difference is the legacy
+`torch.backends.cuda.matmul.allow_tf32` setter before compilation and capture;
+cuDNN TF32 stays disabled. This deliberately uses the same API as the accepted
+control and does not mix hierarchical precision setters. In the pinned wheel's
+[Context.cpp](https://github.com/pytorch/pytorch/blob/08187d9e0fba026dc8217405802ab5381dc88d90/aten/src/ATen/Context.cpp#L368),
+this setter updates both legacy HIGH/HIGHEST and CUDA MATMUL TF32/IEEE policy.
+The effect can include prefill, attention matmuls and the output head, not just
+MLP projections. It does not promise that every operation uses tensor cores.
+
+The source review pins eight installed-wheel files, including the Inductor native
+`mm.out` selection, precision setters and cuBLAS handle math-mode selection.
+Runtime rejects build drift, precision/backend/workspace environment overrides,
+TunableOp and Inductor max-autotune. It leaves backend/workspace defaults intact.
+The benchmark saves generated wrapper/kernel sources, native API logs during
+untimed compiled warmup/capture, and post-measurement frozen model replay traces
+for both lengths. Dispatch verification requires original decode gate/up/down
+GEMM shapes with the intended API math mode plus corroborating kernel symbols
+and CUDA graph launches. A getter, unrelated tiny GEMM or kernel name alone
+cannot pass. Missing or ambiguous dispatch evidence blocks advancement. This
+is not an instruction-level disassembly proof or a measured acceleration claim.
+
+The pilot uses four frozen users (first two each at lengths76/121), six paired
+trials, eight model graphs per phase, cold disk artifacts in phases0/1 and
+same-variant artifact reuse in2/3 with fresh allocations/processes. Timing has
+identical boundaries on both sides. API logging, profiling, output extraction,
+retained-output scans and files are excluded; staging and original HF clones are
+inside generation. Model loading is separate. Setup intervals nest.
+
+Before seeing results, require **at least10% lower generation median and p95**
+overall, in each length and in each ABBA half, with no length-by-half median/p95
+regression, to justify a full exploratory quality evaluation. This is a research
+minimum-effect rule, not an accepted user SLO or statistical confidence claim.
+Also require valid/unique outputs, exact historical FP32 control, stable
+within-policy repeated/graph/direct/retained outputs and ancestry, frozen graphs,
+independent original saved HF score storage, and verified runtime/dispatch.
+Candidate/control FP32 differences remain reported rather than rejected.
+
+`audit_precision.py` keeps numerical fidelity separate from the paired SID
+quality evaluator, including ambiguous targets. Invalid or duplicate outputs
+remain in their original rank positions and fail validity; they are not removed
+from quality estimates. A four-user pilot never establishes population parity.
+The auditor never promotes a candidate or declares noninferiority. Full500
+bootstrap must run on allocated compute; the audit refuses that resampling on a
+local machine. No GPU experiment has yet been submitted for this implementation.
