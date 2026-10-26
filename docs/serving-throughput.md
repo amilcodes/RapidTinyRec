@@ -242,3 +242,22 @@ CPU fake-lane tests verify this ordering and block admission on aliasing or audi
 failure. The production model initializer, warmup evidence orchestration and
 independent setup auditor are not yet supplied by this module. These lifecycle
 tests do not validate a live CUDA model or establish a serving speedup.
+
+`serving_initialize.lane_initializer` now supplies the production allocation and
+warmup callback. It refuses non-allocation use before importing Torch, checks the
+pinned runtime/A6000 and historical cohort, hashes every pinned release resource
+before model load, and records the observed hashes. Each owner creates its own
+tokenizer, FP32 model, constraints, inputs, arena, compiler and replay pool under
+its stream. Allocation statements match the pinned original AST. Normal model
+construction explicitly disables inference mode inside the execution envelope;
+generation retains the original inference-mode behavior.
+
+Serialized warmup saves dense and replay evidence for all four users, retains the
+first replay output per length, then runs reverse-order repeats and re-extracts
+retained outputs after mixed requests. Files are exclusive; partial evidence and
+retained drift are preserved for the separate auditor. No compiler freezes in
+the initializer. Initializer failures drain/close their own context.
+
+This callback has not executed on CUDA. The independent setup/result/profile
+auditors, full allocation/source/deadline guard and serving CLI/harness remain
+pending. A Slurm environment check is not a complete allocation identity audit.

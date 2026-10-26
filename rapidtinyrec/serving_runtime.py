@@ -74,6 +74,18 @@ class PreparedFoldedLane:
             self.frozen = True
         return self.context.call(action)
 
+    def scan_retained(self, users):
+        """Re-extract retained warm outputs after mixed requests, outside timing."""
+        def action():
+            if self.closed:
+                raise RuntimeError('Cannot scan closed lane')
+            by_id = {user['cohort_index']: user for user in users}
+            if len(by_id) != len(users) or not self.retained or not set(self.retained) <= set(by_id):
+                raise ValueError('Retained outputs need unique matching cohort rows')
+            return {str(key): materialize(self.model, output, by_id[key])
+                    for key, output in self.retained.items()}
+        return self.context.call(action)
+
     def release_retained(self):
         def action():
             if not self.frozen:
