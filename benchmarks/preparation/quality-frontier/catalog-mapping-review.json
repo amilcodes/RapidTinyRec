@@ -1,0 +1,156 @@
+{
+  "schema": "sid-item-mapping-review-v1",
+  "items": 3459,
+  "unique_sids": 3444,
+  "collision_sids": 15,
+  "max_items_per_sid": 2,
+  "collision_mapping": {
+    "<a_102><b_13><c_0>": [
+      "112",
+      "118"
+    ],
+    "<a_204><b_229><c_0>": [
+      "171",
+      "1607"
+    ],
+    "<a_221><b_234><c_0>": [
+      "721",
+      "1303"
+    ],
+    "<a_53><b_75><c_0>": [
+      "916",
+      "917"
+    ],
+    "<a_94><b_194><c_0>": [
+      "998",
+      "1000"
+    ],
+    "<a_77><b_140><c_0>": [
+      "1070",
+      "1482"
+    ],
+    "<a_130><b_179><c_0>": [
+      "1092",
+      "1461"
+    ],
+    "<a_187><b_101><c_0>": [
+      "1110",
+      "1111"
+    ],
+    "<a_67><b_6><c_0>": [
+      "1122",
+      "1126"
+    ],
+    "<a_99><b_220><c_0>": [
+      "1339",
+      "1837"
+    ],
+    "<a_255><b_211><c_0>": [
+      "1348",
+      "1349"
+    ],
+    "<a_60><b_31><c_0>": [
+      "1444",
+      "2495"
+    ],
+    "<a_225><b_170><c_0>": [
+      "1909",
+      "1910"
+    ],
+    "<a_160><b_102><c_0>": [
+      "2819",
+      "2820"
+    ],
+    "<a_130><b_128><c_0>": [
+      "3039",
+      "3040"
+    ]
+  },
+  "unique_users": 500,
+  "ambiguous_target_user_count": 7,
+  "ambiguous_target_users": [
+    {
+      "cohort_index": 193,
+      "target_sid": "<a_255><b_211><c_0>",
+      "target_item_id": "1349",
+      "item_ids": [
+        "1348",
+        "1349"
+      ]
+    },
+    {
+      "cohort_index": 202,
+      "target_sid": "<a_130><b_179><c_0>",
+      "target_item_id": "1092",
+      "item_ids": [
+        "1092",
+        "1461"
+      ]
+    },
+    {
+      "cohort_index": 272,
+      "target_sid": "<a_204><b_229><c_0>",
+      "target_item_id": "171",
+      "item_ids": [
+        "171",
+        "1607"
+      ]
+    },
+    {
+      "cohort_index": 339,
+      "target_sid": "<a_255><b_211><c_0>",
+      "target_item_id": "1348",
+      "item_ids": [
+        "1348",
+        "1349"
+      ]
+    },
+    {
+      "cohort_index": 376,
+      "target_sid": "<a_255><b_211><c_0>",
+      "target_item_id": "1349",
+      "item_ids": [
+        "1348",
+        "1349"
+      ]
+    },
+    {
+      "cohort_index": 463,
+      "target_sid": "<a_255><b_211><c_0>",
+      "target_item_id": "1348",
+      "item_ids": [
+        "1348",
+        "1349"
+      ]
+    },
+    {
+      "cohort_index": 493,
+      "target_sid": "<a_53><b_75><c_0>",
+      "target_item_id": "917",
+      "item_ids": [
+        "916",
+        "917"
+      ]
+    }
+  ],
+  "source_sha256": {
+    "Amazon/index/Office_Products.index.json": "f599d2b858beb5a2f660d6253896746c25a65f3a7d0c2f3ae6fd4ec2091eebc8",
+    "Amazon/index/Office_Products.item.json": "398cb2bb7868bedf2ed8ed6b24d25e172f21b7022554d1f8ea52200478494c1c",
+    "Amazon/info/Office_Products_5_2016-10-2018-11.txt": "7e8bae0a051a377713364b9e669590f86feb869fc269157c64b2189c0f4bcfa4",
+    "Amazon/test/Office_Products_5_2016-10-2018-11.csv": "c1967034e197a7837a8962f2556efaabc12eb5bb84e1fdc79cd0accbce71add5",
+    "Office_ckpt/added_tokens.json": "682f42f571bea18c1fa3f4dd8161b0696a5ef802e716d21669742c7f9e678f1e"
+  },
+  "previously_pinned": [
+    "Amazon/info/Office_Products_5_2016-10-2018-11.txt",
+    "Amazon/test/Office_Products_5_2016-10-2018-11.csv",
+    "Office_ckpt/added_tokens.json"
+  ],
+  "newly_pinned": [
+    "Amazon/index/Office_Products.index.json",
+    "Amazon/index/Office_Products.item.json"
+  ],
+  "mapping_proof": "Index mapping and item IDs independently cross-checked against the already SHA-pinned SID/title/item-ID catalog; test targets and rows cross-checked against already SHA-pinned CSV and frozen500 manifest.",
+  "reference_manifest_sha256": "9ebf231fcdfd5f92c31131d76cb41638f7f03d3d6258b8913e4c8da54d4b77fd",
+  "decision": "Report SID-level quality explicitly. Item identifiers are recoverable, but a generated SID can identify two products. Do not choose a favorable item mapping or claim item-level equivalence without a fixed resolution/expansion policy.",
+  "model_executed": false
+}

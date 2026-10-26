@@ -130,3 +130,22 @@ interval does not establish population noninferiority. `promotion` and
 `noninferiority_established` remain false; this module never auto-accepts a model.
 Large-cohort resampling belongs on allocated compute; local/CI tests use tiny
 fixtures and 64 draws. No GPU workload or large dataset is run by these tests.
+
+## Catalog identity finding
+
+A bounded metadata audit of the released catalog found **3,459 item IDs mapped to
+3,444 SIDs**: 15 SID collisions, each covering two items. **Seven of the frozen
+500 users have a target SID with two possible item IDs.** Index/item resources
+were newly hash-pinned; all SID/item-ID associations were cross-checked against
+the already release-pinned catalog file, and target identities/source row indices
+against the already pinned test CSV and cohort manifest. The [mapping review](../benchmarks/preparation/quality-frontier/catalog-mapping-review.json)
+preserves hashes, every collision and the affected cohort indices.
+
+SID-level quality therefore cannot simply be relabeled as exact item retrieval
+quality. Item IDs are recoverable from the test data, but model outputs alone do
+not resolve a colliding SID. Keep all 500 users in primary SID metrics; report
+ambiguous-target and unambiguous-target strata separately when integrating the
+quality auditor. Do not drop those seven users or select the favorable member of
+a collision. An eventual item-level comparison needs a fixed, common expansion
+or disambiguation policy with output-count/rank effects accounted for. This
+metadata finding is not evidence of any candidate regression.
