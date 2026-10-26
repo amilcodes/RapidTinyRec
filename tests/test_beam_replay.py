@@ -49,6 +49,8 @@ class BeamReplayTests(unittest.TestCase):
     def test_pinned_helpers_and_reject_override(self):
         model = GenerationMixin()
         self.assertEqual(verify_helpers(model), PINNED_SOURCE_SHA256)
+        from rapidtinyrec.audit_beam_helpers import HASHES
+        self.assertEqual(PINNED_SOURCE_SHA256, HASHES)
         model._get_running_beams_for_next_iteration = lambda **kwargs: None
         with self.assertRaisesRegex(RuntimeError, 'Custom beam'):
             verify_helpers(model)
@@ -139,6 +141,32 @@ class BeamReplayTests(unittest.TestCase):
         self.assertEqual(pool.aborted_requests, 1)
         with self.assertRaises(RuntimeError): pool.freeze([7])
         pool.uninstall()
+
+
+    @torch.inference_mode()
+    def test_gpu_probe_inputs_use_actual_helper_shapes_on_cpu(self):
+        from rapidtinyrec.probe_beam_replay import inputs as probe_inputs, SCENARIOS, compare_tensors
+        from rapidtinyrec.audit_beam_helpers import input_spec, output_spec
+        model = GenerationMixin()
+        for scenario in SCENARIOS:
+            for request, prompt in enumerate((76,121,121,76)):
+                previous = None
+                for step in range(5):
+                    running, finished = probe_inputs(prompt,step,scenario,request,'cpu')
+                    if previous is not None:
+                        for name,value in zip(('sequences','beam_scores','beam_indices','is_sent_finished'),previous):
+                            finished[name]=value
+                    for method,args in ((RUNNING,running),(FINISHED,finished)):
+                        actual_spec={k:(list(v.shape),str(v.dtype)) for k,v in args.items() if isinstance(v,torch.Tensor)}
+                        self.assertEqual(actual_spec,input_spec(method,prompt))
+                        direct=getattr(model,method)(**args)
+                        owned=getattr(model,method)(**BeamReplayBuffers(args).arguments)
+                        equal_bits(self,direct,owned)
+                        self.assertEqual([(list(t.shape),str(t.dtype)) for t in direct],output_spec(method,prompt))
+                        self.assertTrue(all(compare_tensors(a,b)['no_nan'] for a,b in zip(direct,owned)))
+                        if method==FINISHED:previous=owned
+                    if scenario=='signed_zero':
+                        self.assertEqual(int((running['topk_log_probs'].view(torch.int32)<0).sum()),50)
 
 
 if __name__ == '__main__':
