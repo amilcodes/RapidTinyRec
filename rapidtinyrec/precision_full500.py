@@ -103,3 +103,28 @@ def validate_repeats(primary, repeats, phase_spec):
             'comparison': comparison, 'ancestry_stable': ancestry_stable,
             'passed': exact(comparison) and ancestry_stable,
             'included_in_primary_latency': False, 'additional_quality_users': 0}
+
+
+def collect_untimed_repeats(users, trials, variant, generate, unpack, synchronize, save):
+    """Execute the frozen reverse pass after primary summary publication.
+
+    Injected callbacks let CPU tests verify order/lifetime without loading Torch.
+    Every record is saved immediately, including drift, before summary auditing.
+    """
+    by_index = {u['cohort_index']: u for u in users}
+    selected = [u['cohort_index'] for repeat, u in trials]
+    assert all(repeat == 0 for repeat, _ in trials)
+    assert len(selected) == len(set(selected))
+    rows = []
+    for index in reversed(selected):
+        user = by_index[index]
+        output = generate(user)
+        synchronize()
+        raw = unpack(output, user)
+        del output
+        row = dict(cohort_index=index, prompt_tokens=user['prompt_tokens'],
+                   variant=variant, repeat=1, measurement_role='untimed_stability', run=raw)
+        assert 'elapsed_s' not in raw
+        save(row)
+        rows.append(row)
+    return rows

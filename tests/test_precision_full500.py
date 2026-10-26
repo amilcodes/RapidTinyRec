@@ -69,4 +69,69 @@ class UntimedRepeatTests(unittest.TestCase):
         for change in [lambda r:r['sequence_logp'].__setitem__(0,1.),lambda r:r['transition_logp'][0].pop(),lambda r:r['saved_score_storage_ptrs'].__setitem__(0,60),lambda r:r['saved_score_storage_ptrs'].__setitem__(0,20),lambda r:r['sequence_logp'].__setitem__(0,float('nan'))]:
             self.setUp();change(self.repeats[0]['run'])
             with self.assertRaises(AssertionError):self.check()
+
+class Full500RuntimeIntegrationTests(unittest.TestCase):
+    def test_collection_order_sync_save_and_release(self):
+        import weakref
+        from rapidtinyrec.precision_full500 import collect_untimed_repeats
+        users=[dict(cohort_index=i,prompt_tokens=76) for i in range(4)]
+        events=[];refs=[];saved=[]
+        class Output:pass
+        def generate(u):
+            self.assertTrue(all(r() is None for r in refs))
+            o=Output();refs.append(weakref.ref(o));events.append(('generate',u['cohort_index']));return o
+        def sync():events.append(('sync',))
+        def unpack(o,u):events.append(('unpack',u['cohort_index']));return run_record()
+        def save(row):
+            self.assertTrue(all(r() is None for r in refs))
+            events.append(('save',row['cohort_index']));saved.append(row)
+        rows=collect_untimed_repeats(users,[(0,users[0]),(0,users[2])],'folded_tf32',generate,unpack,sync,save)
+        self.assertEqual(events,[('generate',2),('sync',),('unpack',2),('save',2),('generate',0),('sync',),('unpack',0),('save',0)])
+        self.assertEqual(rows,saved);self.assertEqual([r['cohort_index'] for r in rows],[2,0])
+        self.assertTrue(all('elapsed_s' not in r['run'] for r in rows))
+
+    def test_collection_failure_keeps_saved_prefix_and_never_retries(self):
+        from rapidtinyrec.precision_full500 import collect_untimed_repeats
+        users=[dict(cohort_index=i,prompt_tokens=76) for i in (0,2)]
+        seen=[];saved=[]
+        def generate(u):
+            seen.append(u['cohort_index'])
+            if u['cohort_index']==0:raise RuntimeError('GPU fixture failure')
+            return object()
+        with self.assertRaisesRegex(RuntimeError,'fixture failure'):
+            collect_untimed_repeats(users,[(0,u) for u in users],'folded_tf32',generate,lambda o,u:run_record(),lambda:None,saved.append)
+        self.assertEqual(seen,[2,0]);self.assertEqual([r['cohort_index'] for r in saved],[2])
+
+    def test_actual_cli_guard_without_cuda_import(self):
+        import argparse,ast,contextlib,io,os
+        from types import SimpleNamespace
+        from unittest.mock import patch
+        from rapidtinyrec import precision_full500 as full500
+        from rapidtinyrec.precision_provenance import PROTOCOL,load_protocol
+        tree=ast.parse((ROOT/'rapidtinyrec/benchmark_precision.py').read_text())
+        main=next(n for n in tree.body if isinstance(n,ast.FunctionDef) and n.name=='main')
+        prefix=[]
+        for node in main.body:
+            if isinstance(node,ast.Assign) and any(isinstance(t,ast.Name) and t.id=='variant' for t in node.targets):break
+            prefix.append(node)
+        code=compile(ast.fix_missing_locations(ast.Module(body=prefix,type_ignores=[])),'guard','exec')
+        base=['benchmark','--release-root','r','--reference-results','r','--output-root','o','--phase','0']
+        namespace=dict(argparse=argparse,Path=Path,__doc__='test',full500=full500,b=SimpleNamespace(ROOT=ROOT/'rapidtinyrec'),PROTOCOL=PROTOCOL,load_protocol=load_protocol,os=os)
+        for extra in [['--full-cohort'],['--full500-quality'],['--full-cohort','--full500-quality'],['--full-cohort','--full500-quality','--api-log-local-root','/tmp','--setup-feasibility']]:
+            with patch('sys.argv',base+extra),contextlib.redirect_stderr(io.StringIO()),self.assertRaises(SystemExit):exec(code,dict(namespace))
+        with patch('sys.argv',base+['--full-cohort','--full500-quality','--api-log-local-root','/tmp']),patch.dict(os.environ,{'RAPIDTINYREC_LOG_STAGE_WRAPPER':'/tmp'}):
+            ns=dict(namespace);exec(code,ns);self.assertEqual(ns['full_protocol']['cohort']['unique_users'],500)
+
+    def test_repeats_execute_after_primary_summary_before_profiles(self):
+        import ast
+        tree=ast.parse((ROOT/'rapidtinyrec/benchmark_precision.py').read_text())
+        calls=[n for n in ast.walk(tree) if isinstance(n,ast.Call)]
+        repeat=next(n for n in calls if ast.unparse(n.func)=='full500.collect_untimed_repeats')
+        summary=next(n for n in calls if ast.unparse(n.func)=='b.save' and n.args and ast.unparse(n.args[0])=="out / 'summary.json'")
+        profile=next(n for n in calls if ast.unparse(n.func)=='torch.profiler.profile')
+        self.assertLess(summary.lineno,repeat.lineno);self.assertLess(repeat.lineno,profile.lineno)
+        args=ast.unparse(repeat)
+        self.assertNotIn('perf_counter',args)
+        self.assertIn('stability-users',args)
+
 if __name__=='__main__':unittest.main()

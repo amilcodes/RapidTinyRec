@@ -79,8 +79,8 @@ def validate_log_staging(path, manifest):
     assert 0<=record['copy_s']<=record['session_wall_s']
 
 
-def inspect_phases(root,historical,snapshot,run_record,*,setup_diagnostic=False,staged_pilot=False):
-    assert not (setup_diagnostic and staged_pilot)
+def inspect_phases(root,historical,snapshot,run_record,*,setup_diagnostic=False,staged_pilot=False,full500_quality=False):
+    assert sum(map(bool,(setup_diagnostic,staged_pilot,full500_quality)))<=1
     record=read(run_record)
     assert record['resources']['gpus']==1 and record['resources']['gpu_type']=='nvidia_rtx_a6000'
     assert record['resources']['cpus']==4 and record['resources']['memory_gb']==32
@@ -103,10 +103,10 @@ def inspect_phases(root,historical,snapshot,run_record,*,setup_diagnostic=False,
         m,s,w,c=(read(path/n) for n in ('manifest.json','summary.json','setup.json','compilation.json'))
         validate_log_staging(path,m)
         rows=read(path/'requests.json'); half=0 if phase<2 else 1
-        assert m['experiment'] in (('precision_setup_feasibility',) if setup_diagnostic else (('precision_paired_staged_pilot',) if staged_pilot else ('precision_500','precision_pilot')))
-        if full is None:full=m['experiment']=='precision_500'
+        assert m['experiment'] in (('precision_full500_quality',) if full500_quality else ('precision_setup_feasibility',) if setup_diagnostic else (('precision_paired_staged_pilot',) if staged_pilot else ('precision_500','precision_pilot')))
+        if full is None:full=m['experiment'] in ('precision_500','precision_full500_quality')
         if setup_diagnostic:assert not full,'Setup diagnostic is four-user only'
-        assert (m['experiment']=='precision_500')==full
+        assert (m['experiment'] in ('precision_500','precision_full500_quality'))==full
         assert m['phase']==phase and m['half']==half and m['variant']==variant
         assert m['attention_layout']=='folded_query_heads'
         artifacts=m['compiler_artifacts']
@@ -135,6 +135,7 @@ def inspect_phases(root,historical,snapshot,run_record,*,setup_diagnostic=False,
             from .precision_provenance import validate_release
             names.add('precision_provenance.py')
             validate_release(m['release_verification'],expected['release_sha256'])
+        if full500_quality:names.add('precision_full500.py')
         assert set(m['sha256'])==names
         for name,sha in m['sha256'].items():assert digest(snapshot/name)==sha,name
         users=reference['users'] if full else [u for n in (all_lengths[0],all_lengths[-1])
@@ -210,6 +211,37 @@ def inspect_phases(root,historical,snapshot,run_record,*,setup_diagnostic=False,
             old=read(historical/'users'/f"{row['cohort_index']:04d}.json")
             assert old['cohort_index']==row['cohort_index'] and old['manifest_sha256']==reference['manifest_sha256']
             historical_pairs[variant].append((old['runs']['compiled_gqa'],run))
+        repeat_check=None
+        if full500_quality:
+            from .precision_full500 import load_protocol, PROTOCOL, validate_phase, validate_repeats
+            protocol=load_protocol(snapshot.parent/PROTOCOL)
+            validate_phase(m,protocol,expected['release_sha256'])
+            repeats=read(path/'stability-requests.json')
+            repeat_check=validate_repeats(rows,repeats,protocol['phases'][phase])
+            saved=read(path/'stability-summary.json')
+            assert set(saved)==set(repeat_check)|{'replay','direct_reorder','memory'}
+            assert all(saved[k]==v for k,v in repeat_check.items())
+            assert sorted(p.name for p in (path/'stability-users').glob('*.json'))==sorted(f"{r['cohort_index']:04d}.json" for r in repeats)
+            by_index={r['cohort_index']:r for r in rows}
+            for r in repeats:
+                assert r==read(path/'stability-users'/f"{r['cohort_index']:04d}.json")
+                assert len(r['run']['graph_logit_storage_ptrs'])==graphs
+                repeated.append((by_index[r['cohort_index']]['run'],r['run']))
+            ancestry_stable &= repeat_check['ancestry_stable']
+            replay=saved['replay']; reorder=saved['direct_reorder']
+            assert replay['frozen'] and replay['graphs']==graphs
+            assert replay['events']==after['events'] and replay['capture_and_warmup_s']==after['capture_and_warmup_s']
+            assert replay['replays']-after['replays']==4*len(repeats)
+            assert replay['physical_prefix']['requests_loaded']-after['physical_prefix']['requests_loaded']==len(repeats)
+            assert replay['physical_prefix']['prefix_bytes_copied']-after['physical_prefix']['prefix_bytes_copied']==sum(bytes_per_token//50*r['prompt_tokens'] for r in repeats)
+            assert reorder['direct_calls']-last['direct_calls']==4*len(repeats)
+            assert reorder['fallback_calls']-last['fallback_calls']==len(repeats)
+            assert reorder['suffix_bytes_written']-last['suffix_bytes_written']==bytes_per_token*6*len(repeats)
+            assert reorder['prefix_bytes_reordered']==last['prefix_bytes_reordered']==0
+            mem=saved['memory']
+            assert 0<physical<=mem['allocated_bytes']<=mem['reserved_bytes']<46*1024**3
+            assert mem['allocated_bytes']<=mem['peak_allocated_bytes']<=mem['peak_reserved_bytes']
+            assert mem['reserved_bytes']<=mem['peak_reserved_bytes']
         warm_comparisons=[]; warm_historical=[]; warm_repeat=[]; profile_pairs=[]
         for index in warm:
             baseline=read(path/'warmup_outputs'/f'{index}_dense_forward.json')
@@ -235,7 +267,7 @@ def inspect_phases(root,historical,snapshot,run_record,*,setup_diagnostic=False,
         dispatch_raw=read(path/'dispatch.json')
         check_policy(dispatch_raw['precision_policy'],phase in (1,2))
         post=dispatch_raw['replay_after_profiles']
-        assert post['replays']-after['replays']==8 and post['events']==after['events'] and post['frozen']
+        assert post['replays']-after['replays']==8+(4*len(rows) if full500_quality else 0) and post['events']==after['events'] and post['frozen']
         assert sorted(t['prompt_tokens'] for t in dispatch_raw['profiles'])==[min(lengths),max(lengths)]
         for t in dispatch_raw['profiles']:
             assert t['cohort_index']==next(u['cohort_index'] for u in users if u['prompt_tokens']==t['prompt_tokens'])
@@ -256,13 +288,14 @@ def inspect_phases(root,historical,snapshot,run_record,*,setup_diagnostic=False,
             'dispatch':dispatch,'repeat_comparison':compare(warm_repeat),'profile_comparison':compare(profile_pairs),'warmup_comparison':compare(warm_comparisons),'warmup_historical_comparison':compare(warm_historical),
             'setup_s':w['combined_setup_and_warmup_s'],'backend_compile_s':c['backend_compile_total_s'],
             'capture_and_warmup_s':capture,'measurement_compilations':0,'measurement_captures':0})
+        if full500_quality:phases[-1]['untimed_repeat_check']=repeat_check
     return dict(record=record,expected=expected,users=users,lengths=lengths,full=full,
         phases=phases,joined=joined,repeated=repeated,ancestry_stable=ancestry_stable,
         historical_pairs=historical_pairs)
 
 
-def audit(root,historical,snapshot,run_record,release,*,staged_pilot=False):
-    evidence=inspect_phases(root,historical,snapshot,run_record,staged_pilot=staged_pilot)
+def audit(root,historical,snapshot,run_record,release,*,staged_pilot=False,full500_quality=False):
+    evidence=inspect_phases(root,historical,snapshot,run_record,staged_pilot=staged_pilot,full500_quality=full500_quality)
     record,expected,users,lengths,full=(evidence[k] for k in ('record','expected','users','lengths','full'))
     phases,joined,repeated,ancestry_stable,historical_pairs=(evidence[k] for k in
         ('phases','joined','repeated','ancestry_stable','historical_pairs'))

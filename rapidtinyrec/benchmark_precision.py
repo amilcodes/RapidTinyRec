@@ -15,6 +15,7 @@ from .compiled_forward import CompiledForward
 from .precision_policy import PHASES, precision_policy, validate_runtime, policy_state, validate_state
 from .precision_log_staging import capture_session
 from .precision_provenance import PROTOCOL, load_protocol, verify_release, phase_record
+from . import precision_full500 as full500
 from .prefix_prefill import PrefillPrefix
 from .folded_attention import fold_decode_attention
 from .decode_replay import DecodeReplayPool
@@ -48,10 +49,18 @@ def main():
         help='Allocated node-local log sink; requires preservation wrapper and verified local filesystem')
     ap.add_argument('--setup-feasibility',action='store_true',help='Distinct TF32-only cold/reuse setup diagnostic; never full quality')
     ap.add_argument('--paired-staged-pilot',action='store_true',help='Distinct four-user ABBA pilot with staged logs and frozen protocol provenance')
+    ap.add_argument('--full500-quality',action='store_true',help='Frozen exploratory full500 scope; requires full cohort and staged allocation wrapper')
     args=ap.parse_args()
     if args.paired_staged_pilot and (args.full_cohort or args.setup_feasibility or args.api_log_local_root is None):
         ap.error('Paired staged pilot requires staged logging, four users and exclusive experiment scope')
     protocol=load_protocol(b.ROOT.parent/PROTOCOL) if args.paired_staged_pilot else None
+    try:
+        full500.validate_scope(full_cohort=args.full_cohort,full500_quality=args.full500_quality,
+            paired_staged_pilot=args.paired_staged_pilot,setup_feasibility=args.setup_feasibility,
+            api_log_local_root=args.api_log_local_root)
+    except AssertionError as exc:
+        ap.error(str(exc) or 'Full500 requires explicit exclusive full-cohort staged scope')
+    full_protocol=full500.load_protocol(b.ROOT.parent/full500.PROTOCOL) if args.full500_quality else None
     if args.setup_feasibility and (args.full_cohort or args.phase not in (1,2) or args.api_log_local_root is None):
         ap.error('Setup feasibility requires staged logging, phase1/2 and four-user scope')
     if args.api_log_local_root is not None:
@@ -85,6 +94,9 @@ def main():
         if protocol is not None:assert expected['release_sha256']==protocol['provenance']['release_hashes']
         users,warm_users=select_users(reference['users'],args.full_cohort)
         phase_protocol=phase_record(protocol,args.phase,args.reuse_compiler_artifacts,users) if protocol is not None else None
+        if full_protocol is not None:
+            phase_protocol=full500.phase_record(full_protocol,args.phase,args.reuse_compiler_artifacts,users)
+            assert expected['release_sha256']==full_protocol['provenance']['release_hashes']
         out=args.output_root/f'phase_{args.phase}'
         out.mkdir(parents=True,exist_ok=True)
         assert not (out/'manifest.json').exists(),'Use a new output directory'
@@ -108,7 +120,7 @@ def main():
         assert all(p.dtype==torch.float32 for p in model.parameters())
         inputs={u['cohort_index']:torch.tensor([u['prompt_token_ids']],device='cuda') for u in users}
         masks={i:torch.ones_like(x) for i,x in inputs.items()}
-        manifest={'experiment':'precision_paired_staged_pilot' if args.paired_staged_pilot else 'precision_setup_feasibility' if args.setup_feasibility else ('precision_500' if args.full_cohort else 'precision_pilot'),
+        manifest={'experiment':'precision_full500_quality' if args.full500_quality else 'precision_paired_staged_pilot' if args.paired_staged_pilot else 'precision_setup_feasibility' if args.setup_feasibility else ('precision_500' if args.full_cohort else 'precision_pilot'),
             'phase':args.phase,'variant':variant,'half':half,
             'release_verification':release_verification,'phase_protocol':phase_protocol,
             'api_log_staging':args.api_log_local_root is not None,
@@ -125,6 +137,8 @@ def main():
             'protocol':'Fresh folded-FP32/TF32/TF32/FP32 ABBA. FP32 storage and outputs; candidate changes only CUDA matmul allow_tf32 before compilation/capture, cudnn remains off. Original beam50, five full-vocabulary score steps and termination. Numerical fidelity is reported separately from paired SID quality. Original shape/attention/cache/reorder unchanged. Timed generation includes staging/wrappers/HF clones; input preparation, output extraction/audits and files excluded. Setup/capture/profiling excluded; nested intervals are not additive. No quality equivalence or automatic baseline promotion.'}
         if args.setup_feasibility:
             manifest['protocol']=manifest['protocol'].replace('Fresh folded-FP32/TF32/TF32/FP32 ABBA.', 'TF32-only fresh-process cold/reuse setup diagnostic, phases1/2; no paired FP32 comparison.')
+        if args.full500_quality:
+            manifest['sha256']['precision_full500.py']=b.digest(b.ROOT/'precision_full500.py')
         b.save(out/'manifest.json',manifest)
         compiler=CompiledForward(model,out,b.announce)
         from .input_arena import SharedInputArena
@@ -236,6 +250,16 @@ def main():
         summary={'complete':True,'precision_policy':policy_state(torch),'measured_requests':len(rows),'latency':b.distribution([r['run']['elapsed_s'] for r in rows]),
             'replay':pool.report(),'memory':memory(),'direct_reorder':direct.report()}
         b.save(out/'summary.json',summary);b.announce(summary)
+        # Freeze primary timing/memory counters before the separate repeat pass.
+        if args.full500_quality:
+            (out/'stability-users').mkdir()
+            repeat_rows=full500.collect_untimed_repeats(users,trials,variant,
+                lambda user:generate(user,True,True),unpack,torch.cuda.synchronize,
+                lambda row:b.save(out/'stability-users'/f"{row['cohort_index']:04d}.json",row))
+            b.save(out/'stability-requests.json',repeat_rows)
+            b.save(out/'stability-summary.json',full500.validate_repeats(
+                rows,repeat_rows,full_protocol['phases'][args.phase]) |
+                dict(replay=pool.report(),direct_reorder=direct.report(),memory=memory()))
         # Freeze the timing counters above before diagnostic replay/profiling.
         # One actual request per length, preserving profile outputs for equality.
         profiles=[]
