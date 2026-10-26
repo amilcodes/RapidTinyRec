@@ -97,7 +97,7 @@ def lane_initializer(release_root, reference_results, output_root):
     if not torch.cuda.is_available() or torch.cuda.device_count() != 1 or torch.cuda.get_device_name(0) != 'NVIDIA RTX A6000':
         raise RuntimeError('One regular NVIDIA RTX A6000 required')
     torch.manual_seed(42)
-    torch.set_num_threads(4)
+    torch.set_num_threads(2)
     torch.backends.cuda.matmul.allow_tf32 = False
     torch.backends.cudnn.allow_tf32 = False
     expected = json.loads((b.ROOT/'expected.json').read_text())
