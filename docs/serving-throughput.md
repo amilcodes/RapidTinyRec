@@ -198,3 +198,24 @@ It cannot detect a callback temporarily using another stream and restoring it,
 or establish graph-pool isolation. Actual launch-stream profiles and independent
 numerical/ownership auditing remain required. Pinned generation integration and
 the serving GPU harness remain pending.
+
+## Prepared folded lane adapter
+
+`serving_generation.make_generation` binds lane-private objects to the accepted
+generation function. A test compares its complete function AST against a
+SHA-pinned original source fixture, parsed using the same Python interpreter.
+The function keeps both vocabulary normalizations, all five HF score clones,
+prefill, suffix reordering and original beam/termination behavior.
+
+`PreparedFoldedLane` connects that function to the owner context for warmup,
+freeze and requests. Warm outputs can remain retained through later requests
+until explicitly released after the external ownership/stability audit. Request
+generation ends at owner-stream completion; extraction then saves independent
+Python ranks, FP32 sequence/transition bits and beam ancestry before the response
+can complete. Frozen compilation/graph counts and four decode replays are checked.
+
+This adapter takes already-prepared lane objects. Model allocation and serialized
+warmup orchestration, the global attention-patch lifetime, all-retained graph-pool
+inventory, cross-lane ownership gates and independent result/profile audit are
+not yet integrated. Its local freeze alone is not approval to benchmark. CPU
+lifecycle tests and the AST check do not establish concurrent CUDA exactness.
