@@ -7,6 +7,7 @@ import collections
 import hashlib
 import json
 import os
+import time
 from pathlib import Path
 from types import SimpleNamespace
 
@@ -85,6 +86,7 @@ def lane_initializer(release_root, reference_results, output_root):
     active process-wide folded patch; prepared_service enters that patch before
     invoking the callback. This check is not the complete allocation audit.
     """
+    initializer_started_ns = time.perf_counter_ns()
     if not os.environ.get('SLURM_JOB_ID', '').isdigit():
         raise RuntimeError('Model initialization requires allocated compute')
     from . import benchmark as b
@@ -113,12 +115,17 @@ def lane_initializer(release_root, reference_results, output_root):
     observed = {name: b.digest(release_root/name) for name in expected['release_sha256']}
     if observed != expected['release_sha256']:
         raise ValueError('Release resources differ before model load')
+    resources_verified_ns = time.perf_counter_ns()
     root = Path(output_root)
     root.mkdir(parents=True, exist_ok=False)
     save_exclusive(root/'initialization-provenance.json', dict(users=users,
         observed_release_sha256=observed, reference_manifest_sha256=reference['manifest_sha256'],
         torch_version=torch.__version__, torch_git=torch.version.git_version,
         transformers_version=transformers.__version__, tf32=False))
+    save_exclusive(root/'resource-verification-stages.json', dict(
+        initializer_started_ns=initializer_started_ns, resources_verified_ns=resources_verified_ns,
+        elapsed_s=(resources_verified_ns-initializer_started_ns)/1e9,
+        scope='Runtime import/checks, historical identity and all release hashes; before model loading.'))
     def initialize(index):
         if type(index) is not int or index not in (0, 1):
             raise ValueError('Only one/two owned lanes supported')
@@ -134,9 +141,19 @@ def lane_initializer(release_root, reference_results, output_root):
         context = OwnedCudaContext(0)
         try:
             args = SimpleNamespace(release_root=release_root, full_cohort=False)
+            allocation_started_ns = time.perf_counter_ns()
             components = context.call(_allocate, args, users, out)
+            allocation_finished_ns = time.perf_counter_ns()
             lane = PreparedFoldedLane(context, *components)
+            warmup_started_ns = time.perf_counter_ns()
             warm_lane(lane, users, warm)
+            warmup_finished_ns = time.perf_counter_ns()
+            save_exclusive(out/'initialization-stages.json', dict(lane=index,
+                allocation_started_ns=allocation_started_ns, allocation_finished_ns=allocation_finished_ns,
+                warmup_started_ns=warmup_started_ns, warmup_finished_ns=warmup_finished_ns,
+                allocation_s=(allocation_finished_ns-allocation_started_ns)/1e9,
+                warmup_s=(warmup_finished_ns-warmup_started_ns)/1e9,
+                scope='Allocation includes tokenizer/constraints/model/prompts/arena/compiler wrapper; warmup includes dense/replay/reverse/retained evidence. Nested compilation/capture times are not additive.'))
             return lane
         except BaseException as error:
             try:
