@@ -58,6 +58,27 @@ def performance_gate(result):
     return dict(minimum_reduction_percent=10,passed=useful and no_cross_regression,
         note='Predeclared minimum experimental effect for exploratory full-quality review, not an SLO, significance or production promotion.')
 
+def validate_log_staging(path, manifest):
+    """Staging never relaxes dispatch; verify copied bytes and measurement exclusion."""
+    if not manifest.get('api_log_staging', False):
+        return
+    record=read(path/'log-staging.json')
+    assert record['schema']=='precision-staged-capture-v1'
+    for key in ('setup_succeeded','logs_disabled','published','measurement_allowed'):
+        assert record[key] is True,key
+    assert record['setup_error'] is None and 'preservation_error' not in record
+    publication=record['publication']
+    assert publication['complete'] is True
+    assert publication['filesystem']['filesystem'] in ('tmpfs','ext4','xfs')
+    rows=publication['files']
+    assert len(rows)==2 and {r['path'] for r in rows}=={'capture-cublas.log','capture-cublaslt.log'}
+    for row in rows:
+        source=path/row['path']
+        assert source.stat().st_size==row['bytes']>0
+        assert digest(source)==row['sha256']
+    assert 0<=record['copy_s']<=record['session_wall_s']
+
+
 def audit(root,historical,snapshot,run_record,release):
     record=read(run_record)
     assert record['resources']['gpus']==1 and record['resources']['gpu_type']=='nvidia_rtx_a6000'
@@ -78,6 +99,7 @@ def audit(root,historical,snapshot,run_record,release):
     for phase,variant in enumerate(('folded_fp32','folded_tf32','folded_tf32','folded_fp32')):
         path=root/f'phase_{phase}'
         m,s,w,c=(read(path/n) for n in ('manifest.json','summary.json','setup.json','compilation.json'))
+        validate_log_staging(path,m)
         rows=read(path/'requests.json'); half=0 if phase<2 else 1
         assert m['experiment'] in ('precision_500','precision_pilot')
         if full is None:full=m['experiment']=='precision_500'
@@ -104,7 +126,7 @@ def audit(root,historical,snapshot,run_record,release):
         for policy in (m['precision_policy'],w['precision_policy'],s['precision_policy']):check_policy(policy,phase in (1,2))
         assert m['versions']=={'torch':'2.14.0+cu126','transformers':'4.55.4','tokenizers':'0.21.4'}
         assert m['cohort_sha256']==expected['users_sha256'] and m['reference_manifest_sha256']==reference['manifest_sha256']
-        names={'benchmark_precision.py','precision_policy.py','precision_dispatch.py','precision_quality_adapter.py','quality_frontier.py','quality_resources.json','folded_attention.py','shared_prefix.py','prefix_replay.py','prefix_prefill.py','input_arena.py','decode_replay.py','compiled_forward.py',
+        names={'benchmark_precision.py','precision_policy.py','precision_dispatch.py','precision_log_staging.py','precision_quality_adapter.py','quality_frontier.py','quality_resources.json','folded_attention.py','shared_prefix.py','prefix_replay.py','prefix_prefill.py','input_arena.py','decode_replay.py','compiled_forward.py',
                'shared_prefill.py','gpu_constraints.py','expected.json','direct_reorder.py'}
         assert set(m['sha256'])==names
         for name,sha in m['sha256'].items():assert digest(snapshot/name)==sha,name

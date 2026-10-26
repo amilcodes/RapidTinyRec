@@ -203,3 +203,34 @@ from quality estimates. A four-user pilot never establishes population parity.
 The auditor never promotes a candidate or declares noninferiority. Full500
 bootstrap must run on allocated compute; the audit refuses that resampling on a
 local machine. The first pilot timed out; its incomplete evidence is preserved in the timeout archive.
+
+
+## Timeout repair preparation: local diagnostic logging
+
+The proposed repair moves only the native API log sink to verified node-local
+storage. It preserves the logging level, capture coverage, numerical operations,
+cohort, beam/scoring semantics and timed generation boundary. Logging overhead is
+still a hypothesis: original cold setups consumed 758.05/782.94 seconds and wrote
+51.31/51.67 MB of API logs. Compiler and capture durations overlap inside setup;
+they must not be summed. No repaired GPU run or acceleration claim exists yet.
+
+An explicit `--api-log-local-root` uses checked logger disable/flush followed by
+hashed, atomic log publication outside measurement. Setup exceptions preserve
+partial logs; copied hashes and exclusion from measurement are audited. Original
+local bytes remain until the supervisor observes child exit. The supervisor uses
+a private child process group, a maximum 1,620-second child deadline, TERM/KILL
+escalation, and checked recovery to leave time within a 30-minute allocation.
+Conflicting destination evidence is never overwritten. A forced kill can lose
+native userspace buffers; killing the supervisor or losing the node cannot
+guarantee recovery. Missing evidence continues to block acceptance.
+
+Twenty CPU tests cover staging, failure/partial recovery, copy conflicts, path
+confinement, logger-disable/flush failures, actual child timeout and forwarded
+signals. These tests do not establish CUDA behavior or a 30-minute ABBA budget.
+The original failure snapshot and archive are unchanged.
+
+Next: review a separately bounded setup feasibility diagnostic with its own
+profile, audit and one-time submission guard. A single-policy setup measurement
+would establish feasibility only, without replacing a complete paired ABBA
+pilot or qualifying for full500. Submission remains blocked until the concrete protocol, source review, tests
+and budget are ready under the existing research authorization.

@@ -13,7 +13,7 @@ from unittest.mock import patch
 from . import benchmark as b
 from .compiled_forward import CompiledForward
 from .precision_policy import PHASES, precision_policy, validate_runtime, policy_state, validate_state
-from .precision_dispatch import BlasLogs
+from .precision_log_staging import capture_session
 from .prefix_prefill import PrefillPrefix
 from .folded_attention import fold_decode_attention
 from .decode_replay import DecodeReplayPool
@@ -43,7 +43,13 @@ def main():
     ap.add_argument('--phase',type=int,choices=range(4),required=True)
     ap.add_argument('--reuse-compiler-artifacts',action='store_true',
         help='Reuse this variant\'s earlier on-disk compiler artifacts; GPU process and graphs are still fresh')
+    ap.add_argument('--api-log-local-root',type=Path,
+        help='Allocated node-local log sink; requires preservation wrapper and verified local filesystem')
     args=ap.parse_args()
+    if args.api_log_local_root is not None:
+        wrapper_root=os.environ.get('RAPIDTINYREC_LOG_STAGE_WRAPPER')
+        if not wrapper_root or Path(wrapper_root).resolve()!=args.api_log_local_root.resolve():
+            ap.error('Node-local logging requires the allocation preservation wrapper')
     variant=PHASES[args.phase]
     validate_runtime(torch, b.importlib.metadata.version('transformers'))
     with precision_policy(torch, variant) as numerical_policy, fold_decode_attention(True):
@@ -94,6 +100,7 @@ def main():
         masks={i:torch.ones_like(x) for i,x in inputs.items()}
         manifest={'experiment':'precision_500' if args.full_cohort else 'precision_pilot',
             'phase':args.phase,'variant':variant,'half':half,
+            'api_log_staging':args.api_log_local_root is not None,
             'attention_layout':'folded_query_heads',
             'compiler_artifacts':{'reused':args.reuse_compiler_artifacts,'before':artifacts_before},
             'users':users,'dtype':'float32','tf32':variant=='folded_tf32','precision_policy':numerical_policy,'compiler_policy':compiler_policy,
@@ -102,7 +109,7 @@ def main():
             'model_parameter_unique_bytes':sum({x.untyped_storage().data_ptr():x.untyped_storage().nbytes() for x in model.parameters()}.values()),'hardware':torch.cuda.get_device_name(0),
             'cohort_sha256':expected['users_sha256'],'reference_manifest_sha256':reference['manifest_sha256'],
             'versions':{n:b.importlib.metadata.version(n) for n in ['torch','transformers','tokenizers']},
-            'sha256':{n:b.digest(b.ROOT/n) for n in ['benchmark_precision.py','precision_policy.py','precision_dispatch.py','precision_quality_adapter.py','quality_frontier.py','quality_resources.json','folded_attention.py','shared_prefix.py','prefix_replay.py','prefix_prefill.py','input_arena.py','decode_replay.py',
+            'sha256':{n:b.digest(b.ROOT/n) for n in ['benchmark_precision.py','precision_policy.py','precision_dispatch.py','precision_log_staging.py','precision_quality_adapter.py','quality_frontier.py','quality_resources.json','folded_attention.py','shared_prefix.py','prefix_replay.py','prefix_prefill.py','input_arena.py','decode_replay.py',
                 'compiled_forward.py','shared_prefill.py','gpu_constraints.py','expected.json','direct_reorder.py']},
             'protocol':'Fresh folded-FP32/TF32/TF32/FP32 ABBA. FP32 storage and outputs; candidate changes only CUDA matmul allow_tf32 before compilation/capture, cudnn remains off. Original beam50, five full-vocabulary score steps and termination. Numerical fidelity is reported separately from paired SID quality. Original shape/attention/cache/reorder unchanged. Timed generation includes staging/wrappers/HF clones; input preparation, output extraction/audits and files excluded. Setup/capture/profiling excluded; nested intervals are not additive. No quality equivalence or automatic baseline promotion.'}
         b.save(out/'manifest.json',manifest)
@@ -159,41 +166,37 @@ def main():
                     'peak_allocated_bytes':torch.cuda.max_memory_allocated(),'peak_reserved_bytes':torch.cuda.max_memory_reserved()}
 
         setup_started=time.perf_counter()
-        logs=BlasLogs(out)
-        capture_logs=logs.begin('capture')
-        # Native API logging covers actual compiled warmup/capture, never timing.
-        # A logger failure is recorded and blocks the independent dispatch gate.
-        warm_outputs={};retained={}
-        (out/'warmup_outputs').mkdir()
-        for user in warm_users:
-            for mode in ('dense_forward',variant):
-                torch.cuda.synchronize();started=time.perf_counter()
-                output=generate(user,mode!='dense_forward',mode!='dense_forward')
-                torch.cuda.synchronize();elapsed=time.perf_counter()-started
-                raw=unpack(output,user)
-                if mode==variant and user['prompt_tokens'] not in retained:retained[user['prompt_tokens']]=(user,output)
-                del output
+        with capture_session(out,args.api_log_local_root) as capture_logs:
+            warm_outputs={};retained={}
+            (out/'warmup_outputs').mkdir()
+            for user in warm_users:
+                for mode in ('dense_forward',variant):
+                    torch.cuda.synchronize();started=time.perf_counter()
+                    output=generate(user,mode!='dense_forward',mode!='dense_forward')
+                    torch.cuda.synchronize();elapsed=time.perf_counter()-started
+                    raw=unpack(output,user)
+                    if mode==variant and user['prompt_tokens'] not in retained:retained[user['prompt_tokens']]=(user,output)
+                    del output
+                    key=user['cohort_index']
+                    b.save(out/'warmup_outputs'/f'{key}_{mode}.json',raw)
+                    if mode=='dense_forward':warm_outputs[key]=raw
+                    # Cross-policy fidelity is informational; within-policy stability stays strict.
+                    compiler.add_warmup({'variant':mode,'elapsed_s':elapsed,'prompt_tokens':user['prompt_tokens']})
+            for user in reversed(warm_users):
+                output=generate(user,True,True)
+                raw=unpack(output,user);del output
                 key=user['cohort_index']
-                b.save(out/'warmup_outputs'/f'{key}_{mode}.json',raw)
-                if mode=='dense_forward':warm_outputs[key]=raw
-                # Cross-policy fidelity is informational; within-policy stability stays strict.
-                compiler.add_warmup({'variant':mode,'elapsed_s':elapsed,'prompt_tokens':user['prompt_tokens']})
-        for user in reversed(warm_users):
-            output=generate(user,True,True)
-            raw=unpack(output,user);del output
-            key=user['cohort_index']
-            b.save(out/'warmup_outputs'/f'{key}_repeat.json',raw)
-            # Preserve instability for the independent audit instead of losing later samples.
-            warm_outputs[key]=raw
-        for user,output in retained.values():
-            b.save(out/'warmup_outputs'/f"{user['cohort_index']}_retained.json",unpack(output,user))
-        del user,output
-        retained.clear()
-        torch.cuda.synchronize()
-        assert torch.cuda.memory_allocated()<40*1024**3
-        assert torch.cuda.memory_reserved()<46*1024**3
-        pool.freeze();compiler.freeze()
-        logs.end()
+                b.save(out/'warmup_outputs'/f'{key}_repeat.json',raw)
+                # Preserve instability for the independent audit instead of losing later samples.
+                warm_outputs[key]=raw
+            for user,output in retained.values():
+                b.save(out/'warmup_outputs'/f"{user['cohort_index']}_retained.json",unpack(output,user))
+            del user,output
+            retained.clear()
+            torch.cuda.synchronize()
+            assert torch.cuda.memory_allocated()<40*1024**3
+            assert torch.cuda.memory_reserved()<46*1024**3
+            pool.freeze();compiler.freeze()
         validate_state(policy_state(torch),variant)
         b.save(out/'setup.json',{'combined_setup_and_warmup_s':time.perf_counter()-setup_started,
             'compiler_artifacts_after':artifact_inventory(),'precision_policy':policy_state(torch),

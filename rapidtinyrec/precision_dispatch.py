@@ -41,3 +41,12 @@ class BlasLogs:
             self.blas.cublasLoggerConfigure(0, 0, 0, None)
             self.lt.cublasLtLoggerSetLevel(0)
 
+
+    def end_verified(self):
+        """Staged logging must fail closed if diagnostics cannot be disabled."""
+        if self.error:
+            raise RuntimeError(self.error)
+        codes = [self.blas.cublasLoggerConfigure(0, 0, 0, None),
+                 self.lt.cublasLtLoggerSetLevel(0)]
+        if any(codes):
+            raise RuntimeError(f'Native logger disable failed: {codes}')
