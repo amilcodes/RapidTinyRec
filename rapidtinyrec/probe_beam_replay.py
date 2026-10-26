@@ -73,12 +73,15 @@ def probe(output_path):
                             finished[name] = value
                     for method, arguments in ((RUNNING, running), (FINISHED, finished)):
                         expected = pool.originals[method](**arguments)
+                        repeated = pool.originals[method](**arguments)
                         actual = getattr(model, method)(**arguments)
                         detail = dict(scenario=scenario, request=request, prompt_tokens=prompt, step=step, method=method,
-                            comparisons=[compare_tensors(a, b) for a, b in zip(expected, actual)])
+                            comparisons=[compare_tensors(a, b) for a, b in zip(expected, actual)],
+                            direct_repeat_comparisons=[compare_tensors(a, b) for a, b in zip(expected,repeated)])
                         rows.append(detail)
                         raw.write(json.dumps(dict(**detail, direct=[t.cpu().tolist() for t in expected],
-                            graph=[t.cpu().tolist() for t in actual]), allow_nan=True)+'\n')
+                            graph=[t.cpu().tolist() for t in actual],
+                            direct_repeat=[t.cpu().tolist() for t in repeated]), allow_nan=True)+'\n')
                         held.append((detail, actual, tuple(t.clone() for t in actual)))
                         if method == FINISHED: previous = actual
                 identities = [t.untyped_storage().data_ptr() for _, output, _ in held for t in output]
@@ -95,7 +98,7 @@ def probe(output_path):
                 if request == 1: pool.freeze([76, 121])
             reports.append(dict(scenario=scenario, replay=pool.report()))
             pool.uninstall()
-            del pool, lease, model, held, previous, actual, expected, saved, running, finished, arguments
+            del pool, lease, model, held, previous, actual, expected, repeated, saved, running, finished, arguments
     return dict(complete=True, scenarios=list(SCENARIOS), graph_direct=rows,
         retained_after_five_steps=retained_rows, reports=reports,
         raw_outputs_file=output_path.name,

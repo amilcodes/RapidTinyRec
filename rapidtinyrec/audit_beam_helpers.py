@@ -118,8 +118,11 @@ def audit_probe(probe,raw_path):
             if 'retained' in raw:continue
             k=key(raw);assert k in rows and k not in seen;seen.add(k)
             assert raw['comparisons']==rows[k]['comparisons']
+            assert raw['direct_repeat_comparisons']==rows[k]['direct_repeat_comparisons']
             for c,a,b in zip(raw['comparisons'],raw['direct'],raw['graph']):raw_comparison(c,a,b)
             assert len(raw['direct'])==len(raw['graph'])==len(raw['comparisons'])
+            assert len(raw['direct_repeat'])==len(raw['direct_repeat_comparisons'])==len(raw['comparisons'])
+            for c,a,b in zip(raw['direct_repeat_comparisons'],raw['direct'],raw['direct_repeat']):raw_comparison(c,a,b)
     assert seen==expected
     totals={};passed=True
     for field in ('graph_direct','retained_after_five_steps'):
@@ -130,11 +133,18 @@ def audit_probe(probe,raw_path):
             for c,(shape,dtype) in zip(r['comparisons'],output_spec(r['method'],n)):
                 assert c['shape']==shape and c['dtype']==dtype and c['values']==math.prod(shape)
                 passed &= exact_comparison(c)
+            if field=='graph_direct':
+                assert len(r['direct_repeat_comparisons'])==len(r['comparisons'])
+                for c,original in zip(r['direct_repeat_comparisons'],r['comparisons']):
+                    assert (c['shape'],c['dtype'],c['values'],c['left_sha256'])==(original['shape'],original['dtype'],original['values'],original['left_sha256'])
+                    passed &= exact_comparison(c)
             if field=='retained_after_five_steps':
                 passed &= r['independent_step_outputs']
                 assert [c['left_sha256'] for c in r['comparisons']]==[c['right_sha256'] for c in rows[key(r)]['comparisons']]
         cs=[c for r in probe[field] for c in r['comparisons']]
         totals[field]=dict(values=sum(c['values'] for c in cs),matching_bits=sum(c['matching_bits'] for c in cs),max_abs_finite=max(c['max_abs_finite'] for c in cs))
+    cs=[c for r in probe['graph_direct'] for c in r['direct_repeat_comparisons']]
+    totals['direct_repeated']=dict(values=sum(c['values'] for c in cs),matching_bits=sum(c['matching_bits'] for c in cs),max_abs_finite=max(c['max_abs_finite'] for c in cs))
     assert [r['scenario'] for r in probe['reports']]==list(SCENARIOS)
     for item in probe['reports']:
         r=item['replay'];s=item['scenario']

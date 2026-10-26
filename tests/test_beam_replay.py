@@ -1,5 +1,5 @@
 import unittest
-from unittest.mock import patch
+from unittest.mock import patch, MagicMock
 
 import torch
 from transformers.generation.utils import GenerationMixin
@@ -141,6 +141,17 @@ class BeamReplayTests(unittest.TestCase):
         self.assertEqual(pool.aborted_requests, 1)
         with self.assertRaises(RuntimeError): pool.freeze([7])
         pool.uninstall()
+
+    def test_stream_device_and_capture_freeze_guards(self):
+        pool=BeamReplayPool(GenerationMixin())
+        tensor=MagicMock(spec=torch.Tensor);tensor.device=torch.device('cuda:0')
+        with patch('torch.cuda.current_stream',return_value=MagicMock(cuda_stream=1)):
+            pool._stream({'x':tensor})
+        with patch('torch.cuda.current_stream',return_value=MagicMock(cuda_stream=2)):
+            with self.assertRaisesRegex(RuntimeError,'stream/device'):pool._stream({'x':tensor})
+        with self.assertRaisesRegex(ValueError,'CUDA'):pool._stream({'x':torch.zeros(1)})
+        pool.frozen=True
+        with self.assertRaisesRegex(RuntimeError,'capture after freeze'):pool.prepare(None,{})
 
 
     @torch.inference_mode()
