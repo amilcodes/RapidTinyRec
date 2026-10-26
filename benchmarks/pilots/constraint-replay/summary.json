@@ -1,0 +1,780 @@
+{
+  "integrity_audit_passed": true,
+  "unique_users": 4,
+  "paired_requests": 24,
+  "quality": {
+    "independent_users": 4,
+    "per_user": [
+      {
+        "cohort_index": 1,
+        "target_rank": {
+          "folded_prefix_replay": null,
+          "constraint_replay": null
+        }
+      },
+      {
+        "cohort_index": 2,
+        "target_rank": {
+          "folded_prefix_replay": 1,
+          "constraint_replay": 1
+        }
+      },
+      {
+        "cohort_index": 6,
+        "target_rank": {
+          "folded_prefix_replay": 45,
+          "constraint_replay": 45
+        }
+      },
+      {
+        "cohort_index": 10,
+        "target_rank": {
+          "folded_prefix_replay": null,
+          "constraint_replay": null
+        }
+      }
+    ],
+    "metrics": {
+      "folded_prefix_replay": {
+        "1": {
+          "hit_rate": 0.25,
+          "ndcg": 0.25,
+          "mrr": 0.25
+        },
+        "5": {
+          "hit_rate": 0.25,
+          "ndcg": 0.25,
+          "mrr": 0.25
+        },
+        "10": {
+          "hit_rate": 0.25,
+          "ndcg": 0.25,
+          "mrr": 0.25
+        },
+        "20": {
+          "hit_rate": 0.25,
+          "ndcg": 0.25,
+          "mrr": 0.25
+        },
+        "50": {
+          "hit_rate": 0.5,
+          "ndcg": 0.29526064919501005,
+          "mrr": 0.25555555555555554
+        }
+      },
+      "constraint_replay": {
+        "1": {
+          "hit_rate": 0.25,
+          "ndcg": 0.25,
+          "mrr": 0.25
+        },
+        "5": {
+          "hit_rate": 0.25,
+          "ndcg": 0.25,
+          "mrr": 0.25
+        },
+        "10": {
+          "hit_rate": 0.25,
+          "ndcg": 0.25,
+          "mrr": 0.25
+        },
+        "20": {
+          "hit_rate": 0.25,
+          "ndcg": 0.25,
+          "mrr": 0.25
+        },
+        "50": {
+          "hit_rate": 0.5,
+          "ndcg": 0.29526064919501005,
+          "mrr": 0.25555555555555554
+        }
+      }
+    },
+    "paired_mean_changes": {
+      "1": {
+        "hit_rate": 0.0,
+        "ndcg": 0.0,
+        "mrr": 0.0
+      },
+      "5": {
+        "hit_rate": 0.0,
+        "ndcg": 0.0,
+        "mrr": 0.0
+      },
+      "10": {
+        "hit_rate": 0.0,
+        "ndcg": 0.0,
+        "mrr": 0.0
+      },
+      "20": {
+        "hit_rate": 0.0,
+        "ndcg": 0.0,
+        "mrr": 0.0
+      },
+      "50": {
+        "hit_rate": 0.0,
+        "ndcg": 0.0,
+        "mrr": 0.0
+      }
+    },
+    "scope": "One held-out SID per unique user, using first timed repeat; no item-collision disambiguation. Repetitions are not independent quality samples. Fidelity and repeat stability are audited separately."
+  },
+  "repeat_comparisons": {
+    "folded_prefix_replay": {
+      "requests": 20,
+      "rank_positions": 1000,
+      "sequence_values": 1000,
+      "transition_values": 5000,
+      "matching_rank_lists": 20,
+      "matching_rank_positions": 1000,
+      "matching_sequence_vectors": 20,
+      "matching_transition_arrays": 20,
+      "matching_sequence_values": 1000,
+      "matching_transition_values": 5000,
+      "max_sequence_difference_common": 0.0,
+      "max_transition_difference_common": 0.0
+    },
+    "constraint_replay": {
+      "requests": 20,
+      "rank_positions": 1000,
+      "sequence_values": 1000,
+      "transition_values": 5000,
+      "matching_rank_lists": 20,
+      "matching_rank_positions": 1000,
+      "matching_sequence_vectors": 20,
+      "matching_transition_arrays": 20,
+      "matching_sequence_values": 1000,
+      "matching_transition_values": 5000,
+      "max_sequence_difference_common": 0.0,
+      "max_transition_difference_common": 0.0
+    }
+  },
+  "warm_repeat_comparison": {
+    "requests": 16,
+    "rank_positions": 800,
+    "sequence_values": 800,
+    "transition_values": 4000,
+    "matching_rank_lists": 16,
+    "matching_rank_positions": 800,
+    "matching_sequence_vectors": 16,
+    "matching_transition_arrays": 16,
+    "matching_sequence_values": 800,
+    "matching_transition_values": 4000,
+    "max_sequence_difference_common": 0.0,
+    "max_transition_difference_common": 0.0
+  },
+  "constraint_probe_exact": true,
+  "saved_score_clones_exact": true,
+  "cohort_sha256": "f78097bfedff69f5928a8ccbe39d5a96e07f7e9dd4616209953cf4f51408f487",
+  "comparison": {
+    "requests": 24,
+    "rank_positions": 1200,
+    "sequence_values": 1200,
+    "transition_values": 6000,
+    "matching_rank_lists": 24,
+    "matching_rank_positions": 1200,
+    "matching_sequence_vectors": 24,
+    "matching_transition_arrays": 24,
+    "matching_sequence_values": 1200,
+    "matching_transition_values": 6000,
+    "max_sequence_difference_common": 0.0,
+    "max_transition_difference_common": 0.0
+  },
+  "historical_comparisons": {
+    "folded_prefix_replay": {
+      "requests": 24,
+      "rank_positions": 1200,
+      "sequence_values": 1200,
+      "transition_values": 6000,
+      "matching_rank_lists": 24,
+      "matching_rank_positions": 1200,
+      "matching_sequence_vectors": 24,
+      "matching_transition_arrays": 24,
+      "matching_sequence_values": 1200,
+      "matching_transition_values": 6000,
+      "max_sequence_difference_common": 0.0,
+      "max_transition_difference_common": 0.0
+    },
+    "constraint_replay": {
+      "requests": 24,
+      "rank_positions": 1200,
+      "sequence_values": 1200,
+      "transition_values": 6000,
+      "matching_rank_lists": 24,
+      "matching_rank_positions": 1200,
+      "matching_sequence_vectors": 24,
+      "matching_transition_arrays": 24,
+      "matching_sequence_values": 1200,
+      "matching_transition_values": 6000,
+      "max_sequence_difference_common": 0.0,
+      "max_transition_difference_common": 0.0
+    }
+  },
+  "latency_ms": {
+    "folded_prefix_replay": {
+      "n": 24,
+      "median_ms": 116.611048579216,
+      "p95_ms": 120.72346154600382
+    },
+    "constraint_replay": {
+      "n": 24,
+      "median_ms": 116.65383912622929,
+      "p95_ms": 119.81550604104996
+    }
+  },
+  "reductions_percent": {
+    "median_ms": -0.036695105253437,
+    "p95_ms": 0.7520953204343539
+  },
+  "latency_by_length_ms": {
+    "76": {
+      "folded_prefix_replay": {
+        "n": 12,
+        "median_ms": 112.87073604762554,
+        "p95_ms": 114.65139836072922
+      },
+      "constraint_replay": {
+        "n": 12,
+        "median_ms": 113.32520470023155,
+        "p95_ms": 114.43885453045368
+      }
+    },
+    "121": {
+      "folded_prefix_replay": {
+        "n": 12,
+        "median_ms": 119.68923546373844,
+        "p95_ms": 120.9188537672162
+      },
+      "constraint_replay": {
+        "n": 12,
+        "median_ms": 119.25777979195118,
+        "p95_ms": 119.86205689609051
+      }
+    }
+  },
+  "latency_by_half_ms": {
+    "0": {
+      "folded_prefix_replay": {
+        "n": 12,
+        "median_ms": 117.01363325119019,
+        "p95_ms": 120.9188537672162
+      },
+      "constraint_replay": {
+        "n": 12,
+        "median_ms": 116.83408915996552,
+        "p95_ms": 119.86205689609051
+      }
+    },
+    "1": {
+      "folded_prefix_replay": {
+        "n": 12,
+        "median_ms": 116.1173302680254,
+        "p95_ms": 119.96080428361893
+      },
+      "constraint_replay": {
+        "n": 12,
+        "median_ms": 116.06941372156143,
+        "p95_ms": 119.60855014622211
+      }
+    }
+  },
+  "phases": [
+    {
+      "phase": 0,
+      "variant": "folded_prefix_replay",
+      "latency_ms": {
+        "n": 12,
+        "median_ms": 117.01363325119019,
+        "p95_ms": 120.9188537672162
+      },
+      "memory": {
+        "allocated_bytes": 6595040256,
+        "reserved_bytes": 7964983296,
+        "peak_allocated_bytes": 6911101440,
+        "peak_reserved_bytes": 7964983296
+      },
+      "compiler_artifacts_reused": false,
+      "setup_memory": {
+        "allocated_bytes": 6595040256,
+        "reserved_bytes": 7964983296,
+        "peak_allocated_bytes": 8411338752,
+        "peak_reserved_bytes": 9219080192
+      },
+      "unique_input_storage_bytes": 15546688,
+      "logical_input_bytes": 79599936,
+      "physical_prefix": {
+        "requests_loaded": 20,
+        "prefix_bytes_copied": 112967680,
+        "prefix_capacity_bytes": 6938624,
+        "suffix_capacity_bytes": 8601600,
+        "max_prefix_tokens": 121,
+        "max_suffix_tokens": 3,
+        "physical_prefix_batch": 1,
+        "suffix_batch": 50,
+        "attention_materialization": "Temporary dense exact-length K/V per layer; unchanged SDPA"
+      },
+      "direct_reorder": {
+        "direct_calls": 80,
+        "fallback_calls": 20,
+        "suffix_bytes_written": 344064000,
+        "prefix_bytes_reordered": 0
+      },
+      "warmup_comparison": {
+        "requests": 4,
+        "rank_positions": 200,
+        "sequence_values": 200,
+        "transition_values": 1000,
+        "matching_rank_lists": 4,
+        "matching_rank_positions": 200,
+        "matching_sequence_vectors": 4,
+        "matching_transition_arrays": 4,
+        "matching_sequence_values": 200,
+        "matching_transition_values": 1000,
+        "max_sequence_difference_common": 0.0,
+        "max_transition_difference_common": 0.0
+      },
+      "warmup_historical_comparison": {
+        "requests": 12,
+        "rank_positions": 600,
+        "sequence_values": 600,
+        "transition_values": 3000,
+        "matching_rank_lists": 12,
+        "matching_rank_positions": 600,
+        "matching_sequence_vectors": 12,
+        "matching_transition_arrays": 12,
+        "matching_sequence_values": 600,
+        "matching_transition_values": 3000,
+        "max_sequence_difference_common": 0.0,
+        "max_transition_difference_common": 0.0
+      },
+      "model_loading_s": 1.7431890070438385,
+      "model_storage": {
+        "logical_parameter_bytes": 6176878592,
+        "unique_parameter_storage_bytes": 6176878592,
+        "gate_up_unique_bytes": 3082813440
+      },
+      "constraint_replay": null,
+      "constraint_probe": null,
+      "setup_s": 351.7942291684449,
+      "backend_compile_s": 269.37406431883574,
+      "capture_and_warmup_s": 213.08411484584212,
+      "measurement_compilations": 0,
+      "measurement_captures": 0
+    },
+    {
+      "phase": 1,
+      "variant": "constraint_replay",
+      "latency_ms": {
+        "n": 12,
+        "median_ms": 116.83408915996552,
+        "p95_ms": 119.86205689609051
+      },
+      "memory": {
+        "allocated_bytes": 6905604608,
+        "reserved_bytes": 8841592832,
+        "peak_allocated_bytes": 7227512832,
+        "peak_reserved_bytes": 8841592832
+      },
+      "compiler_artifacts_reused": false,
+      "setup_memory": {
+        "allocated_bytes": 6905604608,
+        "reserved_bytes": 8841592832,
+        "peak_allocated_bytes": 8723541504,
+        "peak_reserved_bytes": 9307160576
+      },
+      "unique_input_storage_bytes": 15546688,
+      "logical_input_bytes": 79599936,
+      "physical_prefix": {
+        "requests_loaded": 20,
+        "prefix_bytes_copied": 112967680,
+        "prefix_capacity_bytes": 6938624,
+        "suffix_capacity_bytes": 8601600,
+        "max_prefix_tokens": 121,
+        "max_suffix_tokens": 3,
+        "physical_prefix_batch": 1,
+        "suffix_batch": 50,
+        "attention_materialization": "Temporary dense exact-length K/V per layer; unchanged SDPA"
+      },
+      "direct_reorder": {
+        "direct_calls": 80,
+        "fallback_calls": 20,
+        "suffix_bytes_written": 344064000,
+        "prefix_bytes_reordered": 0
+      },
+      "warmup_comparison": {
+        "requests": 4,
+        "rank_positions": 200,
+        "sequence_values": 200,
+        "transition_values": 1000,
+        "matching_rank_lists": 4,
+        "matching_rank_positions": 200,
+        "matching_sequence_vectors": 4,
+        "matching_transition_arrays": 4,
+        "matching_sequence_values": 200,
+        "matching_transition_values": 1000,
+        "max_sequence_difference_common": 0.0,
+        "max_transition_difference_common": 0.0
+      },
+      "warmup_historical_comparison": {
+        "requests": 12,
+        "rank_positions": 600,
+        "sequence_values": 600,
+        "transition_values": 3000,
+        "matching_rank_lists": 12,
+        "matching_rank_positions": 600,
+        "matching_sequence_vectors": 12,
+        "matching_transition_arrays": 12,
+        "matching_sequence_values": 600,
+        "matching_transition_values": 3000,
+        "max_sequence_difference_common": 0.0,
+        "max_transition_difference_common": 0.0
+      },
+      "model_loading_s": 1.7170939557254314,
+      "model_storage": {
+        "logical_parameter_bytes": 6176878592,
+        "unique_parameter_storage_bytes": 6176878592,
+        "gate_up_unique_bytes": 3082813440
+      },
+      "constraint_replay": {
+        "graphs": 5,
+        "frozen": true,
+        "replays": 120,
+        "requests": 24,
+        "staged_bytes": 3654504000,
+        "input_logical_bytes": 152271000,
+        "output_logical_bytes": 152265000,
+        "unique_input_output_storage_bytes": 304536000,
+        "disjoint_step_storage": true,
+        "active_request": false,
+        "capture_and_warmup_s": 0.03620489686727524,
+        "events": [
+          {
+            "step": 0,
+            "score_shape": [
+              50,
+              152265
+            ],
+            "capture_and_warmup_s": 0.00887840986251831,
+            "allocated_delta_bytes": 62916096
+          },
+          {
+            "step": 1,
+            "score_shape": [
+              50,
+              152265
+            ],
+            "capture_and_warmup_s": 0.007803481072187424,
+            "allocated_delta_bytes": 61912064
+          },
+          {
+            "step": 2,
+            "score_shape": [
+              50,
+              152265
+            ],
+            "capture_and_warmup_s": 0.00691840797662735,
+            "allocated_delta_bytes": 61912064
+          },
+          {
+            "step": 3,
+            "score_shape": [
+              50,
+              152265
+            ],
+            "capture_and_warmup_s": 0.007032889872789383,
+            "allocated_delta_bytes": 61912064
+          },
+          {
+            "step": 4,
+            "score_shape": [
+              50,
+              152265
+            ],
+            "capture_and_warmup_s": 0.005571708083152771,
+            "allocated_delta_bytes": 61912064
+          }
+        ],
+        "scope": "Five independent constraint graphs; same full-vocabulary arithmetic. Staging copies are timed. Output lifetime ends when the request lease closes. Unique storage excludes graph intermediates/private pool slack; allocator measurements include them.",
+        "saved_score_clones_exact": true,
+        "saved_score_comparison": {
+          "values": 761325000,
+          "matching_bits": 761325000,
+          "max_abs_finite": 0.0
+        }
+      },
+      "constraint_probe": {
+        "exact": true,
+        "graph_direct": {
+          "values": 152265000,
+          "matching_bits": 152265000,
+          "max_abs_finite": 0.0
+        },
+        "retained_after_five_steps": {
+          "values": 152265000,
+          "matching_bits": 152265000,
+          "max_abs_finite": 0.0
+        }
+      },
+      "setup_s": 357.8207926899195,
+      "backend_compile_s": 270.70261196419597,
+      "capture_and_warmup_s": 219.26031710207462,
+      "measurement_compilations": 0,
+      "measurement_captures": 0
+    },
+    {
+      "phase": 2,
+      "variant": "constraint_replay",
+      "latency_ms": {
+        "n": 12,
+        "median_ms": 116.06941372156143,
+        "p95_ms": 119.60855014622211
+      },
+      "memory": {
+        "allocated_bytes": 6905604608,
+        "reserved_bytes": 8841592832,
+        "peak_allocated_bytes": 7227512832,
+        "peak_reserved_bytes": 8841592832
+      },
+      "compiler_artifacts_reused": true,
+      "setup_memory": {
+        "allocated_bytes": 6905604608,
+        "reserved_bytes": 8841592832,
+        "peak_allocated_bytes": 7840794112,
+        "peak_reserved_bytes": 8841592832
+      },
+      "unique_input_storage_bytes": 15546688,
+      "logical_input_bytes": 79599936,
+      "physical_prefix": {
+        "requests_loaded": 20,
+        "prefix_bytes_copied": 112967680,
+        "prefix_capacity_bytes": 6938624,
+        "suffix_capacity_bytes": 8601600,
+        "max_prefix_tokens": 121,
+        "max_suffix_tokens": 3,
+        "physical_prefix_batch": 1,
+        "suffix_batch": 50,
+        "attention_materialization": "Temporary dense exact-length K/V per layer; unchanged SDPA"
+      },
+      "direct_reorder": {
+        "direct_calls": 80,
+        "fallback_calls": 20,
+        "suffix_bytes_written": 344064000,
+        "prefix_bytes_reordered": 0
+      },
+      "warmup_comparison": {
+        "requests": 4,
+        "rank_positions": 200,
+        "sequence_values": 200,
+        "transition_values": 1000,
+        "matching_rank_lists": 4,
+        "matching_rank_positions": 200,
+        "matching_sequence_vectors": 4,
+        "matching_transition_arrays": 4,
+        "matching_sequence_values": 200,
+        "matching_transition_values": 1000,
+        "max_sequence_difference_common": 0.0,
+        "max_transition_difference_common": 0.0
+      },
+      "warmup_historical_comparison": {
+        "requests": 12,
+        "rank_positions": 600,
+        "sequence_values": 600,
+        "transition_values": 3000,
+        "matching_rank_lists": 12,
+        "matching_rank_positions": 600,
+        "matching_sequence_vectors": 12,
+        "matching_transition_arrays": 12,
+        "matching_sequence_values": 600,
+        "matching_transition_values": 3000,
+        "max_sequence_difference_common": 0.0,
+        "max_transition_difference_common": 0.0
+      },
+      "model_loading_s": 1.693769358098507,
+      "model_storage": {
+        "logical_parameter_bytes": 6176878592,
+        "unique_parameter_storage_bytes": 6176878592,
+        "gate_up_unique_bytes": 3082813440
+      },
+      "constraint_replay": {
+        "graphs": 5,
+        "frozen": true,
+        "replays": 120,
+        "requests": 24,
+        "staged_bytes": 3654504000,
+        "input_logical_bytes": 152271000,
+        "output_logical_bytes": 152265000,
+        "unique_input_output_storage_bytes": 304536000,
+        "disjoint_step_storage": true,
+        "active_request": false,
+        "capture_and_warmup_s": 0.03633449599146843,
+        "events": [
+          {
+            "step": 0,
+            "score_shape": [
+              50,
+              152265
+            ],
+            "capture_and_warmup_s": 0.009132739156484604,
+            "allocated_delta_bytes": 62916096
+          },
+          {
+            "step": 1,
+            "score_shape": [
+              50,
+              152265
+            ],
+            "capture_and_warmup_s": 0.00778956338763237,
+            "allocated_delta_bytes": 61912064
+          },
+          {
+            "step": 2,
+            "score_shape": [
+              50,
+              152265
+            ],
+            "capture_and_warmup_s": 0.006850134581327438,
+            "allocated_delta_bytes": 61912064
+          },
+          {
+            "step": 3,
+            "score_shape": [
+              50,
+              152265
+            ],
+            "capture_and_warmup_s": 0.007017068564891815,
+            "allocated_delta_bytes": 61912064
+          },
+          {
+            "step": 4,
+            "score_shape": [
+              50,
+              152265
+            ],
+            "capture_and_warmup_s": 0.005544990301132202,
+            "allocated_delta_bytes": 61912064
+          }
+        ],
+        "scope": "Five independent constraint graphs; same full-vocabulary arithmetic. Staging copies are timed. Output lifetime ends when the request lease closes. Unique storage excludes graph intermediates/private pool slack; allocator measurements include them.",
+        "saved_score_clones_exact": true,
+        "saved_score_comparison": {
+          "values": 761325000,
+          "matching_bits": 761325000,
+          "max_abs_finite": 0.0
+        }
+      },
+      "constraint_probe": {
+        "exact": true,
+        "graph_direct": {
+          "values": 152265000,
+          "matching_bits": 152265000,
+          "max_abs_finite": 0.0
+        },
+        "retained_after_five_steps": {
+          "values": 152265000,
+          "matching_bits": 152265000,
+          "max_abs_finite": 0.0
+        }
+      },
+      "setup_s": 152.69189566746354,
+      "backend_compile_s": 69.9574401974678,
+      "capture_and_warmup_s": 85.57291691750288,
+      "measurement_compilations": 0,
+      "measurement_captures": 0
+    },
+    {
+      "phase": 3,
+      "variant": "folded_prefix_replay",
+      "latency_ms": {
+        "n": 12,
+        "median_ms": 116.1173302680254,
+        "p95_ms": 119.96080428361893
+      },
+      "memory": {
+        "allocated_bytes": 6595040256,
+        "reserved_bytes": 8225030144,
+        "peak_allocated_bytes": 6916948480,
+        "peak_reserved_bytes": 8225030144
+      },
+      "compiler_artifacts_reused": true,
+      "setup_memory": {
+        "allocated_bytes": 6595040256,
+        "reserved_bytes": 8225030144,
+        "peak_allocated_bytes": 7529849856,
+        "peak_reserved_bytes": 8225030144
+      },
+      "unique_input_storage_bytes": 15546688,
+      "logical_input_bytes": 79599936,
+      "physical_prefix": {
+        "requests_loaded": 20,
+        "prefix_bytes_copied": 112967680,
+        "prefix_capacity_bytes": 6938624,
+        "suffix_capacity_bytes": 8601600,
+        "max_prefix_tokens": 121,
+        "max_suffix_tokens": 3,
+        "physical_prefix_batch": 1,
+        "suffix_batch": 50,
+        "attention_materialization": "Temporary dense exact-length K/V per layer; unchanged SDPA"
+      },
+      "direct_reorder": {
+        "direct_calls": 80,
+        "fallback_calls": 20,
+        "suffix_bytes_written": 344064000,
+        "prefix_bytes_reordered": 0
+      },
+      "warmup_comparison": {
+        "requests": 4,
+        "rank_positions": 200,
+        "sequence_values": 200,
+        "transition_values": 1000,
+        "matching_rank_lists": 4,
+        "matching_rank_positions": 200,
+        "matching_sequence_vectors": 4,
+        "matching_transition_arrays": 4,
+        "matching_sequence_values": 200,
+        "matching_transition_values": 1000,
+        "max_sequence_difference_common": 0.0,
+        "max_transition_difference_common": 0.0
+      },
+      "warmup_historical_comparison": {
+        "requests": 12,
+        "rank_positions": 600,
+        "sequence_values": 600,
+        "transition_values": 3000,
+        "matching_rank_lists": 12,
+        "matching_rank_positions": 600,
+        "matching_sequence_vectors": 12,
+        "matching_transition_arrays": 12,
+        "matching_sequence_values": 600,
+        "matching_transition_values": 3000,
+        "max_sequence_difference_common": 0.0,
+        "max_transition_difference_common": 0.0
+      },
+      "model_loading_s": 1.6978660821914673,
+      "model_storage": {
+        "logical_parameter_bytes": 6176878592,
+        "unique_parameter_storage_bytes": 6176878592,
+        "gate_up_unique_bytes": 3082813440
+      },
+      "constraint_replay": null,
+      "constraint_probe": null,
+      "setup_s": 151.18582948297262,
+      "backend_compile_s": 67.73230426758528,
+      "capture_and_warmup_s": 85.96708066016436,
+      "measurement_compilations": 0,
+      "measurement_captures": 0
+    }
+  ],
+  "snapshot_files_verified": 48,
+  "audit_script_sha256": "149ce25fd22db652aec0450a45d5553533fcfdff9244ca1cacb309e8cff6743f",
+  "note": "Memory is isolated per fresh process; latency is paired by user/repeat across ABBA phases, not interleaved requests. One allocation does not establish run-to-run variance. Setup timings are nested; do not add. Integrity passing alone does not imply bit equality.",
+  "exactness_passed": true,
+  "experiment": "constraint-replay",
+  "control": "folded_prefix_replay",
+  "candidate": "constraint_replay",
+  "timing_boundary": "Synchronized generation call including staging and original HF score clones; excludes input preparation, output/transition extraction, post-request audit scans and file writes.",
+  "max_sequence_difference_at_rank": 0.0,
+  "max_transition_difference_at_rank": 0.0,
+  "performance_gate": false,
+  "decision": "No full500: aggregate median is 0.0367% slower, length76 median is 0.403% slower; sub-1% p95 improvement does not establish a useful consistent latency benefit. Exactness and ownership pass. Candidate adds ~310.6MB allocated residency.",
+  "requests_sha256": "10917e6467c12c27289ae485c8f91e7111da9d0e2f7420450a5e8295fb2588c2"
+}
