@@ -1,0 +1,824 @@
+{
+  "run_id": "packed-mlp-diagnosis-20261026T002626Z-67a7da628839",
+  "job_id": "7949846",
+  "package_source": "9b94664b1800260674d63a26cdc33eb5a4cb5370",
+  "integrity_passed": true,
+  "cases": 12,
+  "independent_users": 4,
+  "aggregates": {
+    "separate": {
+      "gate": {
+        "values": 5376000,
+        "matching_bits": 5376000,
+        "max_abs": 0.0
+      },
+      "up": {
+        "values": 5376000,
+        "matching_bits": 5376000,
+        "max_abs": 0.0
+      },
+      "silu_product": {
+        "values": 5376000,
+        "matching_bits": 5376000,
+        "max_abs": 0.0
+      },
+      "down_output": {
+        "values": 921600,
+        "matching_bits": 921600,
+        "max_abs": 0.0
+      }
+    },
+    "packed_views_separate": {
+      "gate": {
+        "values": 5376000,
+        "matching_bits": 5376000,
+        "max_abs": 0.0
+      },
+      "up": {
+        "values": 5376000,
+        "matching_bits": 5376000,
+        "max_abs": 0.0
+      },
+      "silu_product": {
+        "values": 5376000,
+        "matching_bits": 5376000,
+        "max_abs": 0.0
+      },
+      "down_output": {
+        "values": 921600,
+        "matching_bits": 921600,
+        "max_abs": 0.0
+      }
+    },
+    "packed_wide": {
+      "gate": {
+        "values": 5376000,
+        "matching_bits": 262310,
+        "max_abs": 2.765655517578125e-05
+      },
+      "up": {
+        "values": 5376000,
+        "matching_bits": 241755,
+        "max_abs": 2.384185791015625e-05
+      },
+      "silu_product": {
+        "values": 5376000,
+        "matching_bits": 155154,
+        "max_abs": 7.62939453125e-05
+      },
+      "down_output": {
+        "values": 921600,
+        "matching_bits": 28944,
+        "max_abs": 9.1552734375e-05
+      }
+    },
+    "batched_two": {
+      "gate": {
+        "values": 5376000,
+        "matching_bits": 262310,
+        "max_abs": 2.765655517578125e-05
+      },
+      "up": {
+        "values": 5376000,
+        "matching_bits": 241755,
+        "max_abs": 2.384185791015625e-05
+      },
+      "silu_product": {
+        "values": 5376000,
+        "matching_bits": 155154,
+        "max_abs": 7.62939453125e-05
+      },
+      "down_output": {
+        "values": 921600,
+        "matching_bits": 28944,
+        "max_abs": 9.1552734375e-05
+      }
+    }
+  },
+  "controls_exact": true,
+  "identical_value_pointwise_exact": true,
+  "graph_direct_matching_values": 43008000,
+  "projection_timing_by_case": [
+    {
+      "cohort_index": 1,
+      "layer": 0,
+      "timing": {
+        "separate": {
+          "median_us": 244.15849894285202,
+          "p95_us": 247.9535959661007,
+          "min_us": 227.31100022792816,
+          "max_us": 248.9279955625534
+        },
+        "packed_views_separate": {
+          "median_us": 245.53599953651428,
+          "p95_us": 249.45440217852592,
+          "min_us": 227.00800001621246,
+          "max_us": 249.82400238513947
+        },
+        "packed_wide": {
+          "median_us": 219.63199973106384,
+          "p95_us": 221.39999717473984,
+          "min_us": 197.76000082492828,
+          "max_us": 221.79199755191803
+        },
+        "batched_two": {
+          "median_us": 407.1520119905472,
+          "p95_us": 409.26879942417145,
+          "min_us": 370.2079951763153,
+          "max_us": 409.280002117157
+        }
+      }
+    },
+    {
+      "cohort_index": 1,
+      "layer": 13,
+      "timing": {
+        "separate": {
+          "median_us": 243.8409999012947,
+          "p95_us": 248.66740256547928,
+          "min_us": 224.47200119495392,
+          "max_us": 248.77800047397614
+        },
+        "packed_views_separate": {
+          "median_us": 247.26450443267822,
+          "p95_us": 249.46455135941505,
+          "min_us": 225.040003657341,
+          "max_us": 249.76100027561188
+        },
+        "packed_wide": {
+          "median_us": 219.48599815368652,
+          "p95_us": 222.2179464995861,
+          "min_us": 196.9359964132309,
+          "max_us": 222.5479930639267
+        },
+        "batched_two": {
+          "median_us": 405.0465077161789,
+          "p95_us": 411.8135616183281,
+          "min_us": 368.48801374435425,
+          "max_us": 414.4900143146515
+        }
+      }
+    },
+    {
+      "cohort_index": 1,
+      "layer": 27,
+      "timing": {
+        "separate": {
+          "median_us": 244.1990002989769,
+          "p95_us": 247.12609723210335,
+          "min_us": 226.02200508117676,
+          "max_us": 247.5859969854355
+        },
+        "packed_views_separate": {
+          "median_us": 246.68800085783005,
+          "p95_us": 249.69570264220238,
+          "min_us": 227.1450012922287,
+          "max_us": 250.5210041999817
+        },
+        "packed_wide": {
+          "median_us": 219.65250372886658,
+          "p95_us": 222.88465201854706,
+          "min_us": 198.32299649715424,
+          "max_us": 222.89900481700897
+        },
+        "batched_two": {
+          "median_us": 405.98849952220917,
+          "p95_us": 410.1573511958122,
+          "min_us": 352.5809943675995,
+          "max_us": 410.5840027332306
+        }
+      }
+    },
+    {
+      "cohort_index": 2,
+      "layer": 0,
+      "timing": {
+        "separate": {
+          "median_us": 242.69550293684006,
+          "p95_us": 245.19864916801453,
+          "min_us": 226.71900689601898,
+          "max_us": 246.50099873542786
+        },
+        "packed_views_separate": {
+          "median_us": 243.00000071525574,
+          "p95_us": 247.274549305439,
+          "min_us": 226.33600234985352,
+          "max_us": 247.871994972229
+        },
+        "packed_wide": {
+          "median_us": 218.67399662733078,
+          "p95_us": 221.5875968337059,
+          "min_us": 197.71000742912292,
+          "max_us": 221.903994679451
+        },
+        "batched_two": {
+          "median_us": 406.00599348545074,
+          "p95_us": 406.88084959983826,
+          "min_us": 385.2429986000061,
+          "max_us": 407.1429967880249
+        }
+      }
+    },
+    {
+      "cohort_index": 2,
+      "layer": 13,
+      "timing": {
+        "separate": {
+          "median_us": 243.0725023150444,
+          "p95_us": 245.0910523533821,
+          "min_us": 224.99999403953552,
+          "max_us": 245.20200490951538
+        },
+        "packed_views_separate": {
+          "median_us": 244.34300512075424,
+          "p95_us": 246.78954854607582,
+          "min_us": 227.73399949073792,
+          "max_us": 246.90400063991547
+        },
+        "packed_wide": {
+          "median_us": 217.9960012435913,
+          "p95_us": 220.91690003871918,
+          "min_us": 197.49900698661804,
+          "max_us": 221.12900018692017
+        },
+        "batched_two": {
+          "median_us": 406.2900096178055,
+          "p95_us": 406.4138412475586,
+          "min_us": 381.70498609542847,
+          "max_us": 406.4309895038605
+        }
+      }
+    },
+    {
+      "cohort_index": 2,
+      "layer": 27,
+      "timing": {
+        "separate": {
+          "median_us": 245.11950463056564,
+          "p95_us": 248.67509678006172,
+          "min_us": 226.6319990158081,
+          "max_us": 248.8899976015091
+        },
+        "packed_views_separate": {
+          "median_us": 246.0540011525154,
+          "p95_us": 248.84600192308426,
+          "min_us": 226.53500735759735,
+          "max_us": 249.77700412273407
+        },
+        "packed_wide": {
+          "median_us": 219.22499686479568,
+          "p95_us": 223.8512508571148,
+          "min_us": 197.65399396419525,
+          "max_us": 223.96500408649445
+        },
+        "batched_two": {
+          "median_us": 406.14500641822815,
+          "p95_us": 413.074991106987,
+          "min_us": 356.1049997806549,
+          "max_us": 414.4749939441681
+        }
+      }
+    },
+    {
+      "cohort_index": 6,
+      "layer": 0,
+      "timing": {
+        "separate": {
+          "median_us": 243.6169981956482,
+          "p95_us": 245.87785080075264,
+          "min_us": 226.81599855422974,
+          "max_us": 246.33599817752838
+        },
+        "packed_views_separate": {
+          "median_us": 245.38499861955643,
+          "p95_us": 249.41565170884132,
+          "min_us": 225.66300630569458,
+          "max_us": 250.73200464248657
+        },
+        "packed_wide": {
+          "median_us": 219.66800093650818,
+          "p95_us": 221.42645120620728,
+          "min_us": 198.94200563430786,
+          "max_us": 221.6619998216629
+        },
+        "batched_two": {
+          "median_us": 406.2655121088028,
+          "p95_us": 410.93670278787613,
+          "min_us": 385.0859999656677,
+          "max_us": 411.8250012397766
+        }
+      }
+    },
+    {
+      "cohort_index": 6,
+      "layer": 13,
+      "timing": {
+        "separate": {
+          "median_us": 244.88750100135803,
+          "p95_us": 248.6600011587143,
+          "min_us": 229.3889969587326,
+          "max_us": 248.75099956989288
+        },
+        "packed_views_separate": {
+          "median_us": 245.05049735307693,
+          "p95_us": 248.26269671320915,
+          "min_us": 224.31699931621552,
+          "max_us": 248.33199381828308
+        },
+        "packed_wide": {
+          "median_us": 220.61250358819962,
+          "p95_us": 223.7096481025219,
+          "min_us": 197.5950002670288,
+          "max_us": 225.22899508476257
+        },
+        "batched_two": {
+          "median_us": 406.2725007534027,
+          "p95_us": 411.2678438425064,
+          "min_us": 384.988009929657,
+          "max_us": 413.9379858970642
+        }
+      }
+    },
+    {
+      "cohort_index": 6,
+      "layer": 27,
+      "timing": {
+        "separate": {
+          "median_us": 244.0204992890358,
+          "p95_us": 244.41799521446228,
+          "min_us": 225.73399543762207,
+          "max_us": 244.41799521446228
+        },
+        "packed_views_separate": {
+          "median_us": 245.44549733400345,
+          "p95_us": 248.8851010799408,
+          "min_us": 234.76700484752655,
+          "max_us": 249.52000379562378
+        },
+        "packed_wide": {
+          "median_us": 219.98349577188492,
+          "p95_us": 222.50985205173492,
+          "min_us": 200.33800601959229,
+          "max_us": 223.129004240036
+        },
+        "batched_two": {
+          "median_us": 405.97400069236755,
+          "p95_us": 409.6922591328621,
+          "min_us": 363.97600173950195,
+          "max_us": 409.7500145435333
+        }
+      }
+    },
+    {
+      "cohort_index": 10,
+      "layer": 0,
+      "timing": {
+        "separate": {
+          "median_us": 244.5414960384369,
+          "p95_us": 248.20754751563072,
+          "min_us": 228.22999954223633,
+          "max_us": 248.84699285030365
+        },
+        "packed_views_separate": {
+          "median_us": 244.9369952082634,
+          "p95_us": 247.39179834723473,
+          "min_us": 226.01500153541565,
+          "max_us": 247.85099923610687
+        },
+        "packed_wide": {
+          "median_us": 219.61399912834167,
+          "p95_us": 221.4277520775795,
+          "min_us": 197.95599579811096,
+          "max_us": 221.88100218772888
+        },
+        "batched_two": {
+          "median_us": 406.00399672985077,
+          "p95_us": 414.9952471256256,
+          "min_us": 361.4270091056824,
+          "max_us": 415.7949984073639
+        }
+      }
+    },
+    {
+      "cohort_index": 10,
+      "layer": 13,
+      "timing": {
+        "separate": {
+          "median_us": 242.92049556970596,
+          "p95_us": 246.71799913048744,
+          "min_us": 227.8990000486374,
+          "max_us": 247.29900062084198
+        },
+        "packed_views_separate": {
+          "median_us": 244.3389967083931,
+          "p95_us": 247.69684672355652,
+          "min_us": 226.85399651527405,
+          "max_us": 248.20399284362793
+        },
+        "packed_wide": {
+          "median_us": 218.8040018081665,
+          "p95_us": 220.91540023684502,
+          "min_us": 198.93400371074677,
+          "max_us": 220.9630012512207
+        },
+        "batched_two": {
+          "median_us": 405.97449243068695,
+          "p95_us": 406.37890845537186,
+          "min_us": 382.88500905036926,
+          "max_us": 406.3880145549774
+        }
+      }
+    },
+    {
+      "cohort_index": 10,
+      "layer": 27,
+      "timing": {
+        "separate": {
+          "median_us": 244.6184977889061,
+          "p95_us": 251.98259353637695,
+          "min_us": 225.8940041065216,
+          "max_us": 253.19498777389526
+        },
+        "packed_views_separate": {
+          "median_us": 244.936503469944,
+          "p95_us": 248.84794652462006,
+          "min_us": 225.87400674819946,
+          "max_us": 249.35999512672424
+        },
+        "packed_wide": {
+          "median_us": 219.4484993815422,
+          "p95_us": 221.84505239129066,
+          "min_us": 200.0660002231598,
+          "max_us": 222.34100103378296
+        },
+        "batched_two": {
+          "median_us": 405.8609902858734,
+          "p95_us": 409.6469536423683,
+          "min_us": 362.1860146522522,
+          "max_us": 409.7670018672943
+        }
+      }
+    }
+  ],
+  "first_case_kernel_launches": {
+    "separate": [
+      {
+        "name": "Memset (Device)",
+        "dur": 0.8,
+        "args": {
+          "External id": 4,
+          "device": 0,
+          "context": 1,
+          "stream": 7,
+          "correlation": 9,
+          "bytes": 280,
+          "memory bandwidth (GB/s)": 0.35,
+          "graph id": 0,
+          "graph node id": 0,
+          "channel": 0,
+          "channel_type": 1
+        }
+      },
+      {
+        "name": "ampere_sgemm_128x64_tn",
+        "dur": 113.216,
+        "args": {
+          "External id": 4,
+          "queued": 0,
+          "device": 0,
+          "context": 1,
+          "stream": 7,
+          "correlation": 12,
+          "registers per thread": 122,
+          "shared memory": 12800,
+          "blocks per SM": 2.5,
+          "warps per SM": 10,
+          "grid": [
+            70,
+            1,
+            3
+          ],
+          "block": [
+            128,
+            1,
+            1
+          ],
+          "est. achieved occupancy %": 21,
+          "occupancy": {
+            "activeBlocksPerMultiprocessor": 4,
+            "limitingFactors": "REGS",
+            "blockLimitRegs": 4,
+            "blockLimitSharedMem": 7,
+            "blockLimitWarps": 12,
+            "blockLimitBlocks": 16,
+            "blockLimitBarriers": 2147483647,
+            "allocatedRegistersPerBlock": 16384,
+            "allocatedSharedMemPerBlock": 13824
+          },
+          "graph id": 0,
+          "graph node id": 0,
+          "channel": 0,
+          "channel_type": 1
+        }
+      },
+      {
+        "name": "Memset (Device)",
+        "dur": 0.48,
+        "args": {
+          "External id": 8,
+          "device": 0,
+          "context": 1,
+          "stream": 7,
+          "correlation": 24,
+          "bytes": 280,
+          "memory bandwidth (GB/s)": 0.5833333333333334,
+          "graph id": 0,
+          "graph node id": 0,
+          "channel": 0,
+          "channel_type": 1
+        }
+      },
+      {
+        "name": "ampere_sgemm_128x64_tn",
+        "dur": 112.513,
+        "args": {
+          "External id": 8,
+          "queued": 0,
+          "device": 0,
+          "context": 1,
+          "stream": 7,
+          "correlation": 27,
+          "registers per thread": 122,
+          "shared memory": 12800,
+          "blocks per SM": 2.5,
+          "warps per SM": 10,
+          "grid": [
+            70,
+            1,
+            3
+          ],
+          "block": [
+            128,
+            1,
+            1
+          ],
+          "est. achieved occupancy %": 21,
+          "occupancy": {
+            "activeBlocksPerMultiprocessor": 4,
+            "limitingFactors": "REGS",
+            "blockLimitRegs": 4,
+            "blockLimitSharedMem": 7,
+            "blockLimitWarps": 12,
+            "blockLimitBlocks": 16,
+            "blockLimitBarriers": 2147483647,
+            "allocatedRegistersPerBlock": 16384,
+            "allocatedSharedMemPerBlock": 13824
+          },
+          "graph id": 0,
+          "graph node id": 0,
+          "channel": 0,
+          "channel_type": 1
+        }
+      }
+    ],
+    "packed_views_separate": [
+      {
+        "name": "Memset (Device)",
+        "dur": 0.447,
+        "args": {
+          "External id": 523,
+          "device": 0,
+          "context": 1,
+          "stream": 7,
+          "correlation": 49,
+          "bytes": 280,
+          "memory bandwidth (GB/s)": 0.6263982102908278,
+          "graph id": 0,
+          "graph node id": 0,
+          "channel": 0,
+          "channel_type": 1
+        }
+      },
+      {
+        "name": "ampere_sgemm_128x64_tn",
+        "dur": 109.825,
+        "args": {
+          "External id": 523,
+          "queued": 0,
+          "device": 0,
+          "context": 1,
+          "stream": 7,
+          "correlation": 52,
+          "registers per thread": 122,
+          "shared memory": 12800,
+          "blocks per SM": 2.5,
+          "warps per SM": 10,
+          "grid": [
+            70,
+            1,
+            3
+          ],
+          "block": [
+            128,
+            1,
+            1
+          ],
+          "est. achieved occupancy %": 21,
+          "occupancy": {
+            "activeBlocksPerMultiprocessor": 4,
+            "limitingFactors": "REGS",
+            "blockLimitRegs": 4,
+            "blockLimitSharedMem": 7,
+            "blockLimitWarps": 12,
+            "blockLimitBlocks": 16,
+            "blockLimitBarriers": 2147483647,
+            "allocatedRegistersPerBlock": 16384,
+            "allocatedSharedMemPerBlock": 13824
+          },
+          "graph id": 0,
+          "graph node id": 0,
+          "channel": 0,
+          "channel_type": 1
+        }
+      },
+      {
+        "name": "Memset (Device)",
+        "dur": 0.448,
+        "args": {
+          "External id": 527,
+          "device": 0,
+          "context": 1,
+          "stream": 7,
+          "correlation": 64,
+          "bytes": 280,
+          "memory bandwidth (GB/s)": 0.625,
+          "graph id": 0,
+          "graph node id": 0,
+          "channel": 0,
+          "channel_type": 1
+        }
+      },
+      {
+        "name": "ampere_sgemm_128x64_tn",
+        "dur": 110.018,
+        "args": {
+          "External id": 527,
+          "queued": 0,
+          "device": 0,
+          "context": 1,
+          "stream": 7,
+          "correlation": 67,
+          "registers per thread": 122,
+          "shared memory": 12800,
+          "blocks per SM": 2.5,
+          "warps per SM": 10,
+          "grid": [
+            70,
+            1,
+            3
+          ],
+          "block": [
+            128,
+            1,
+            1
+          ],
+          "est. achieved occupancy %": 21,
+          "occupancy": {
+            "activeBlocksPerMultiprocessor": 4,
+            "limitingFactors": "REGS",
+            "blockLimitRegs": 4,
+            "blockLimitSharedMem": 7,
+            "blockLimitWarps": 12,
+            "blockLimitBlocks": 16,
+            "blockLimitBarriers": 2147483647,
+            "allocatedRegistersPerBlock": 16384,
+            "allocatedSharedMemPerBlock": 13824
+          },
+          "graph id": 0,
+          "graph node id": 0,
+          "channel": 0,
+          "channel_type": 1
+        }
+      }
+    ],
+    "packed_wide": [
+      {
+        "name": "ampere_sgemm_128x64_tn",
+        "dur": 190.178,
+        "args": {
+          "External id": 1028,
+          "queued": 0,
+          "device": 0,
+          "context": 1,
+          "stream": 7,
+          "correlation": 89,
+          "registers per thread": 122,
+          "shared memory": 12800,
+          "blocks per SM": 1.6666666269302368,
+          "warps per SM": 6.666666507720947,
+          "grid": [
+            140,
+            1,
+            1
+          ],
+          "block": [
+            128,
+            1,
+            1
+          ],
+          "est. achieved occupancy %": 14,
+          "occupancy": {
+            "activeBlocksPerMultiprocessor": 4,
+            "limitingFactors": "REGS",
+            "blockLimitRegs": 4,
+            "blockLimitSharedMem": 7,
+            "blockLimitWarps": 12,
+            "blockLimitBlocks": 16,
+            "blockLimitBarriers": 2147483647,
+            "allocatedRegistersPerBlock": 16384,
+            "allocatedSharedMemPerBlock": 13824
+          },
+          "graph id": 0,
+          "graph node id": 0,
+          "channel": 0,
+          "channel_type": 1
+        }
+      }
+    ],
+    "batched_two": [
+      {
+        "name": "ampere_sgemm_128x128_tn",
+        "dur": 346.657,
+        "args": {
+          "External id": 1544,
+          "queued": 0,
+          "device": 0,
+          "context": 1,
+          "stream": 7,
+          "correlation": 110,
+          "registers per thread": 118,
+          "shared memory": 16896,
+          "blocks per SM": 1.6666666269302368,
+          "warps per SM": 13.333333015441895,
+          "grid": [
+            70,
+            1,
+            2
+          ],
+          "block": [
+            256,
+            1,
+            1
+          ],
+          "est. achieved occupancy %": 28,
+          "occupancy": {
+            "activeBlocksPerMultiprocessor": 2,
+            "limitingFactors": "REGS",
+            "blockLimitRegs": 2,
+            "blockLimitSharedMem": 5,
+            "blockLimitWarps": 6,
+            "blockLimitBlocks": 16,
+            "blockLimitBarriers": 2147483647,
+            "allocatedRegistersPerBlock": 30720,
+            "allocatedSharedMemPerBlock": 17920
+          },
+          "graph id": 0,
+          "graph node id": 0,
+          "channel": 0,
+          "channel_type": 1
+        }
+      }
+    ]
+  },
+  "median_of_case_medians_us": {
+    "separate": 244.0894991159439,
+    "packed_views_separate": 245.21774798631668,
+    "packed_wide": 219.5499986410141,
+    "batched_two": 406.00499510765076
+  },
+  "median_of_case_p95_us": {
+    "separate": 247.53984659910202,
+    "packed_views_separate": 248.84697422385216,
+    "packed_wide": 221.71632461249828,
+    "batched_two": 409.92480516433716
+  },
+  "memory_bytes": {
+    "allocated": 6572664832,
+    "reserved": 7176454144,
+    "peak_allocated": 6744970240,
+    "peak_reserved": 7308574720
+  },
+  "activation_collection_s": 5.834087830036879,
+  "hardware": "NVIDIA RTX A6000",
+  "torch": "2.14.0+cu126",
+  "cuda": "12.6",
+  "tf32": false,
+  "decision": "Reject wide and batched projections under the FP32-bit contract. Separate packed views are exact but show no consistent useful projection improvement. Proceed to constraint-operation graph replay.",
+  "limitations": [
+    "Same-input gate/up GEMM and pointwise diagnosis only. Activations are from eager folded-attention shared-prefill generation, not a replay of the original compiled intermediate tensors. Microtimings are CUDA graph replays of projections only, not request latency.",
+    "GPU output tensors were compared on device; raw activations and projection outputs were not persisted. Saved evidence contains input hashes, comparison counts/deltas, traces and all timing samples.",
+    "Matching error summaries for wide and batched variants do not prove their tensors are equal to each other.",
+    "Launch grid changes are consistent with different split-K/reduction organization; kernel names and grid dimensions alone do not expose proprietary cuBLAS internals.",
+    "Memory is diagnostic-process current and lifetime-peak allocator usage, not per-variant inference memory. Model loading/packing/compilation/capture intervals were not separately timed here."
+  ]
+}
