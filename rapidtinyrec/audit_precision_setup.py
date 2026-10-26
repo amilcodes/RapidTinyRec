@@ -15,18 +15,20 @@ def diagnostic_decision(stable, prior_exact, dispatch, normal_exit):
             'full_abba_retry_authorized_by_diagnostic_alone': False}
 
 
-def validate_wrapper(root, record, *, phases=(1,2)):
+def validate_wrapper(root, record, *, phases=(1,2), child_timeout_s=1620):
     """Require normal bounded exit and recovery of the exact staged phase logs."""
     assert phases in ((1,2),(0,1,2,3))
+    assert child_timeout_s in (1500,1620)
+    if child_timeout_s==1500:assert phases==(0,1,2,3)
     start=read(root/'log-wrapper-start.json'); finish=read(root/'log-wrapper-exit.json')
     assert start['schema']=='precision-log-wrapper-v1'
     assert str(start['job_id'])==str(record['job_id'])
-    assert start['child_timeout_s']==1620
+    assert start['child_timeout_s']==child_timeout_s
     assert start['filesystem']['filesystem'] in ('tmpfs','ext4','xfs')
     child=finish['child']; recovery=finish['recovery']
     assert child['schema']=='precision-child-exit-v1' and recovery['schema']=='precision-log-recovery-v1'
     assert child['returncode']==0 and child['reason']=='exited' and child['completed_normally'] is True
-    assert child['signal'] is None and 0<child['elapsed_s']<=1620
+    assert child['signal'] is None and 0<child['elapsed_s']<=child_timeout_s
     assert recovery['recovery_complete'] is True and not recovery['leftover_local_entries']
     assert len(recovery['locations'])==len(phases) and all(x['recovered'] is True for x in recovery['locations'])
     assert 'supervisor_error' not in finish

@@ -16,6 +16,7 @@ jobs:
       - run: python -m rapidtinyrec.precision_log_runner --help
       - run: python -m rapidtinyrec.audit_precision_setup --help
       - run: python -m rapidtinyrec.audit_precision_paired_staged --help
+      - run: python -m rapidtinyrec.audit_precision_full500 --help
       - run: bash -n benchmarks/preparation/quality-frontier/precision-paired-staged.sh
       - run: bash -n benchmarks/preparation/quality-frontier/precision-setup.sh
       - run: python -m rapidtinyrec.audit_precision --help

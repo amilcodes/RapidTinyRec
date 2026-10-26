@@ -132,6 +132,16 @@ class FourPhaseRecoveryTests(unittest.TestCase):
     def test_setup_auditor_does_not_accept_four_phase_scope(self):
         with self.assertRaises(AssertionError):validate_wrapper(self.root,{'job_id':'test'})
 
+    def test_full500_deadline_is_explicit_and_stricter(self):
+        path=self.root/'log-wrapper-start.json'
+        start=json.loads(path.read_text());start['child_timeout_s']=1500
+        save_record(path,start)
+        validate_wrapper(self.root,{'job_id':'test'},phases=(0,1,2,3),child_timeout_s=1500)
+        with self.assertRaises(AssertionError):self.validate()
+        self.finish['child']['elapsed_s']=1500.001;self.write()
+        with self.assertRaises(AssertionError):
+            validate_wrapper(self.root,{'job_id':'test'},phases=(0,1,2,3),child_timeout_s=1500)
+
 
 class ProvenanceBindingTests(FourPhaseRecoveryTests):
     def setUp(self):
