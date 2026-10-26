@@ -181,5 +181,9 @@ class NumericalBoundaryTests(unittest.TestCase):
         selected=[nodes[n] for n in ('select_users','generate','unpack','memory')]
         selected += [n for n in ast.walk(tree) if isinstance(n,ast.For) and ast.unparse(n.target)=='(repeat, user)']
         self.assertEqual(len(selected),5)
-        digest=hashlib.sha256('\n'.join(ast.dump(n) for n in selected).encode()).hexdigest()
-        self.assertEqual(digest,'5cddf1ffa962ff75356078f7fb0732f41c70e0afc573a578f0bff69b8077cd9e')
+        fixture=ROOT/'tests/fixtures/precision-original-boundaries.py.txt'
+        self.assertEqual(hashlib.sha256(fixture.read_bytes()).hexdigest(),'d1a05c050029781ed991512ce33e3a57783ae97ce9969786b2cdb43cb1024a45')
+        # Parse both under this interpreter: FunctionDef/type_params and ast.dump
+        # defaults differ between local Python3.14 and CI Python3.11.
+        reference=ast.parse(fixture.read_text()).body
+        self.assertEqual([ast.dump(n) for n in selected],[ast.dump(n) for n in reference])
