@@ -44,6 +44,7 @@ class WorkerTests(unittest.TestCase):
         def service(factory,callback,**kw):
             self.events.append('initialize_models')
             self.assertEqual(json.loads((self.out/'allocation-observation.json').read_text()),factory.allocation_observation)
+            self.assertTrue((self.out/'allocation-persisted.json').exists())
             self.assertEqual(kw['lane_count'],2);self.assertEqual(kw['expected_graphs'],8)
             kw['lifecycle'].append({'operation':'initialize'})
             try:yield self.server,{'admission_events':[{'operation':'initialize'}]}

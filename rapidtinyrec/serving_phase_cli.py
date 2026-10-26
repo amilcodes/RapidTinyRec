@@ -9,7 +9,7 @@ from pathlib import Path
 import sys
 import time
 
-from .serving_allocation import require, verify_source
+from .serving_allocation import require, verify_source, digest
 from .serving_contract import PROTOCOL, load_protocol
 from .serving_process import (process_identity, validate_launch, check_deadline,
                               observe_cache, validate_cache_environment)
@@ -55,6 +55,8 @@ def run_phase(run_root, phase, release_root, historical):
         # This is written before prepared_service can invoke any model lane.
         observation = initialize.allocation_observation
         save_exclusive(root/'allocation-observation.json', observation)
+        save_exclusive(root/'allocation-persisted.json', dict(schema='serving-allocation-persisted-v1',
+            sha256=digest(root/'allocation-observation.json'),published_ns=time.perf_counter_ns()))
         verify_source(run/'code', observation)
         check_deadline(launch)
         callback = setup_auditor(root/'setup', historical, root/'setup-audit.json')

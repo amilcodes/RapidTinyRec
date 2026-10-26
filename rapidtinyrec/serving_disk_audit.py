@@ -20,6 +20,8 @@ from .serving_measurement_audit import ORDERS, audit_burst, audit_measurements
 from .serving_invariants import audit_interval, integer
 from .serving_overlap_audit import audit_overlap
 from .serving_initialize import save_exclusive
+from .serving_worker_audit import WORKER_FILES, audit_worker
+from .serving_contract import PROTOCOL, load_protocol
 
 
 class Evidence:
@@ -226,6 +228,14 @@ def audit_phase(root, historical, index, evidence):
     setup_pairs += [(dense[r['result']['cohort_index']], r['result']['raw']) for r in profile_records]
     setup_fidelity = compare(setup_pairs)
     setup_ancestry = all(a['beam_indices'] == b['beam_indices'] for a, b in setup_pairs)
+    worker = None
+    if files & WORKER_FILES:
+        # Presence of any wrapper file requires every wrapper and its raw audit;
+        # no file filtering or caller-supplied online verdict can bypass it.
+        raw = {name: read(name) for name in sorted(WORKER_FILES)}
+        worker = audit_worker(raw,phase=index,protocol=load_protocol(Path(__file__).resolve().parents[1]/PROTOCOL),
+            preparation=preparation,resource_stages=stages,execution_finished_ns=complete['finished_ns'],
+            allocation_sha256=digest(root/'allocation-observation.json'))
     if files != required:
         raise ValueError(f'Exact phase file set required; missing={sorted(required-files)}, extra={sorted(files-required)}')
     return dict(phase=phase, users=users, dense=dense, setup=setup,
@@ -236,7 +246,7 @@ def audit_phase(root, historical, index, evidence):
                 setup_to_execution_comparison=setup_fidelity,
                 setup_to_execution_passed=bool(exact(setup_fidelity) and setup_ancestry),
                 resource_stages=stages, lane_stages=stage_reports, admission=admission,
-                started_ns=first, finished_ns=complete['finished_ns'])
+                started_ns=first, finished_ns=complete['finished_ns'], worker=worker)
 
 
 def audit_run(phase_roots, historical):
@@ -253,6 +263,22 @@ def audit_run(phase_roots, historical):
     users = [u for n in (lengths[0], lengths[-1]) for u in [v for v in manifest['users'] if v['prompt_tokens'] == n][:2]]
     history = {u['cohort_index']: evidence.read(historical/'users'/f"{u['cohort_index']:04d}.json")['runs']['compiled_gqa'] for u in users}
     reports = [audit_phase(root, historical, i, evidence) for i, root in enumerate(phase_roots)]
+    workers = [r['worker'] for r in reports]
+    if any(w is not None for w in workers):
+        if any(w is None for w in workers):
+            raise ValueError('Mixed bare-core and wrapped worker phases')
+        births={(w['identity']['boot_id'],w['identity']['pid'],w['identity']['start_ticks']) for w in workers}
+        parent=workers[0]['launch']['parent_identity'];run=workers[0]['run_id'];job=workers[0]['job_id']
+        if (len(births)!=4 or any(w['launch']['parent_identity']!=parent or w['run_id']!=run or w['job_id']!=job for w in workers) or
+                any(a['finished_ns']>=z['started_ns'] for a,z in zip(workers,workers[1:])) or
+                workers[2]['cache_before']!=workers[1]['cache_after'] or workers[3]['cache_before']!=workers[0]['cache_after']):
+            raise ValueError('Worker ABBA process/cache/clock identity differs')
+        for worker in workers[1:]:
+            if any(worker['launch'][key]!=workers[0]['launch'][key] for key in ('global_started_ns','deadline_ns','run_root','protocol_sha256')):
+                raise ValueError('Worker phases do not share one global deadline/run')
+            keys=('uploaded_manifest_sha256','sbatch_job_id_file_sha256','observed_source_sha256','protocol_sha256','config')
+            if any(worker['allocation_identity'][key]!=workers[0]['allocation_identity'][key] for key in keys):
+                raise ValueError('Worker observed allocation/source changed across phases')
     if any(r['users'] != users for r in reports) or any(a['finished_ns'] >= z['started_ns'] for a, z in zip(reports, reports[1:])):
         raise ValueError('ABBA phases overlap or cohort changes')
     measurement = audit_measurements([r['phase'] for r in reports], users, history)
