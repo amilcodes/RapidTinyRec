@@ -35,6 +35,9 @@ def check_policy(state, candidate):
 def validate_output_storage(run):
     ptrs=run['saved_score_storage_ptrs']
     assert len(ptrs)==len(set(ptrs))==5 and all(type(p) is int and p>0 for p in ptrs)
+    graph_ptrs=run['graph_logit_storage_ptrs']
+    assert isinstance(graph_ptrs,list) and all(type(p) is int and p>0 for p in graph_ptrs)
+    assert len(graph_ptrs)==len(set(graph_ptrs)) and not (set(ptrs)&set(graph_ptrs))
     assert run['saved_score_dtypes']==['torch.float32']*5
     ancestry=run['beam_indices']
     assert len(ancestry)==50 and all(len(row)==5 and all(type(x) is int and -1<=x<50 for x in row) for row in ancestry)
@@ -165,6 +168,7 @@ def audit(root,historical,snapshot,run_record,release):
             assert row['variant']==variant and row['prompt_tokens']==user['prompt_tokens']
             assert row==read(path/'users'/f"{row['repeat']}_{row['cohort_index']:04d}.json")
             run=row['run'];validate_run(run);validate_output_storage(run)
+            assert len(run['graph_logit_storage_ptrs'])==graphs
             key=(row['repeat'],row['cohort_index'])
             pair=joined.setdefault(key,{'repeat':row['repeat'],'cohort_index':row['cohort_index'],'prompt_tokens':row['prompt_tokens'],'runs':{}})
             assert variant not in pair['runs'];pair['runs'][variant]=run

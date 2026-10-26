@@ -11,7 +11,7 @@ from rapidtinyrec.audit_decode_pilot import compare
 def run():
     return dict(token_ids=[[i,1,2,198,151645] for i in range(50)],sequence_logp=[-5.]*50,
         transition_logp=[[-1.]*5 for _ in range(50)],elapsed_s=.1,
-        saved_score_storage_ptrs=[1,2,3,4,5],saved_score_dtypes=['torch.float32']*5,
+        graph_logit_storage_ptrs=[10,11,12,13,14,15,16,17],saved_score_storage_ptrs=[1,2,3,4,5],saved_score_dtypes=['torch.float32']*5,
         beam_indices=[[i]*5 for i in range(50)])
 
 
@@ -39,6 +39,8 @@ class PrecisionAuditTests(unittest.TestCase):
         a=run();b=copy.deepcopy(a);a['sequence_logp'][0]=0.;b['sequence_logp'][0]=-0.
         self.assertNotEqual(compare([(a,b)])['matching_sequence_values'],50)
         a=run();a['saved_score_storage_ptrs'][-1]=1
+        with self.assertRaises(AssertionError):validate_output_storage(a)
+        a=run();a['graph_logit_storage_ptrs'][0]=1
         with self.assertRaises(AssertionError):validate_output_storage(a)
         a=run();a['beam_indices'][0][0]=50
         with self.assertRaises(AssertionError):validate_output_storage(a)

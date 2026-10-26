@@ -130,7 +130,9 @@ def main():
                 assert ids.shape==((1,user['prompt_tokens']) if step==0 else (50,1))
                 assert cache.get_seq_length()==(0 if step==0 else user['prompt_tokens']+step-1)
                 kw['attention_mask']={'full_attention':None}
-                return pool(**kw) if replay and step else compiler.compiled(**kw)
+                result=pool(**kw) if replay and step else compiler.compiled(**kw)
+                assert result.logits.dtype==torch.float32,'Model logits must remain FP32'
+                return result
             cfg=b.GenerationConfig(max_new_tokens=8,length_penalty=0.,num_beams=50,num_return_sequences=50,
                 pad_token_id=tok.eos_token_id,eos_token_id=tok.eos_token_id,bos_token_id=tok.bos_token_id,
                 do_sample=False,top_k=None,top_p=None,use_cache=True)
@@ -147,7 +149,7 @@ def main():
             saved_ptrs=[s.untyped_storage().data_ptr() for s in output.scores]
             graph_ptrs={entry[2].logits.untyped_storage().data_ptr() for entry in pool.entries.values()}
             assert len(saved_ptrs)==len(set(saved_ptrs))==5 and not (set(saved_ptrs)&graph_ptrs)
-            return {'saved_score_storage_ptrs':saved_ptrs,'saved_score_dtypes':[str(s.dtype) for s in output.scores],
+            return {'graph_logit_storage_ptrs':sorted(graph_ptrs),'saved_score_storage_ptrs':saved_ptrs,'saved_score_dtypes':[str(s.dtype) for s in output.scores],
                 'beam_indices':output.beam_indices.cpu().tolist(),'token_ids':output.sequences[:,user['prompt_tokens']:].cpu().tolist(),
                 'sequence_logp':output.sequences_scores.float().cpu().tolist(),
                 'transition_logp':model.compute_transition_scores(output.sequences,output.scores,output.beam_indices,normalize_logits=False).float().cpu().tolist()}
