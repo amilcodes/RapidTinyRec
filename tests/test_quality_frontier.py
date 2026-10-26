@@ -76,6 +76,17 @@ class QualityFrontierTests(unittest.TestCase):
         u,r,c=fixture();r[1]['token_ids'].reverse()
         self.assertEqual(run(u,r,c),run(list(reversed(u)),list(reversed(r)),c))
 
+    def test_collision_strata_keep_all_users_and_require_complete_mapping(self):
+        u,r,c=fixture();self.assertIsNone(run(u,r,c)['by_target_ambiguity'])
+        u[0]['target_item_count']=1
+        with self.assertRaises(ValueError):run(u,r,c)
+        u[1]['target_item_count']=2
+        q=run(u,r,c);self.assertEqual(q['overall']['independent_users'],2)
+        self.assertEqual(q['by_target_ambiguity']['ambiguous']['independent_users'],1)
+        self.assertEqual(q['by_target_ambiguity']['unambiguous']['independent_users'],1)
+        u[1]['target_item_count']=0
+        with self.assertRaises(ValueError):run(u,r,c)
+
     def test_malformed_termination_counts_as_invalid_not_silent_removal(self):
         u,r,c=fixture();r[1]['token_ids'][0]=r[1]['token_ids'][0][:3]
         q=run(u,r,c)

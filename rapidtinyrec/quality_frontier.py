@@ -83,6 +83,11 @@ def evaluate(users, observations, catalog_sids, eos_token_id, *, bootstrap_sampl
         target = _sid(u['target_token_ids'])
         _require(target in catalog, 'Held-out target absent from catalog')
         user_map[index] = dict(u, target_token_ids=target)
+    ambiguity_known = ['target_item_count' in u for u in user_map.values()]
+    _require(all(ambiguity_known) or not any(ambiguity_known), 'Partial item-mapping metadata')
+    if all(ambiguity_known):
+        _require(all(type(u['target_item_count']) is int and u['target_item_count'] >= 1 for u in user_map.values()),
+                 'Invalid item multiplicity')
     runs = defaultdict(dict)
     for row in observations:
         index, variant, repeat = row['cohort_index'], row['variant'], row['repeat']
@@ -104,7 +109,7 @@ def evaluate(users, observations, catalog_sids, eos_token_id, *, bootstrap_sampl
         _require(repeat_sets['control'] and repeat_sets['control'] == repeat_sets['candidate'], 'Unpaired repeats')
         first = min(repeat_sets['control'])
         result = dict(cohort_index=index, prompt_tokens=u['prompt_tokens'], repeats=len(repeat_sets['control']),
-                      representative_repeat=first, variants={})
+                      representative_repeat=first, variants={}, target_item_count=u.get('target_item_count'))
         for variant in VARIANTS:
             token_rows = runs[index][variant, first]
             stable = all(runs[index][variant,r] == token_rows for r in repeat_sets[variant])
@@ -142,6 +147,10 @@ def evaluate(users, observations, catalog_sids, eos_token_id, *, bootstrap_sampl
     result = dict(schema='paired-sid-quality-v1', primary_metrics=['ndcg@10','hit_rate@10'],
         overall=aggregate(rows, bootstrap_seed),
         by_prompt_length={str(n): aggregate([r for r in rows if r['prompt_tokens']==n], bootstrap_seed+n) for n in strata},
+        by_target_ambiguity=({name: aggregate(selected, bootstrap_seed+offset)
+            for name,offset,selected in [('unambiguous',1,[r for r in rows if r['target_item_count']==1]),
+                                        ('ambiguous',2,[r for r in rows if r['target_item_count']>1])] if selected}
+            if all(ambiguity_known) else None),
         per_user=rows, catalog_size=len(catalog),
         catalog_coverage={v: len(all_catalog[v])/len(catalog) for v in VARIANTS},
         output_validity={v: {key:sum(r['variants'][v][key] for r in rows) for key in

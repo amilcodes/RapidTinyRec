@@ -10,7 +10,7 @@ that held-out recommendation quality is preserved.
 
 Branch: `experiment/quality-latency-frontier`, based on accepted
 `experiment/12-folded-profile` at `4711e463321deadb835ac8cc25c1dfbf41d86108`.
-The paired quality evaluator is implemented with eight focused CPU tests. No numerical candidate is implemented,
+The paired quality evaluator is implemented with nine focused CPU tests. No numerical candidate is implemented,
 no GPU job is submitted, and no quality or speed claim is established.
 
 ## First opportunities
@@ -111,7 +111,9 @@ come from a separate provenance/fidelity audit; the evaluator does not certify
 checkpoint, token-map or target hashes. Reports hash their input and refuse to
 overwrite existing evidence.
 
-The evaluator validates complete user/repeat pairing and reports token-rank
+Optional `target_item_count` metadata must cover every user if supplied; it adds
+ambiguous/unambiguous target strata without removing users. The caller must verify
+the mapping provenance. The evaluator validates complete user/repeat pairing and reports token-rank
 repeat instability instead of silently selecting a favorable repeat. Quality
 uses the lowest matched repeat once per user. Invalid rows retain their rank
 positions and cannot hit the target; duplicate valid SIDs consume positions and
