@@ -18,7 +18,7 @@ def tables():
 
 
 class ConstraintReplayTests(unittest.TestCase):
-    def test_pinned_hf_beam_search_retains_processor_output_storage(self):
+    def test_pinned_hf_beam_search_clones_processor_outputs(self):
         from transformers import Qwen2Config, Qwen2ForCausalLM, GenerationConfig, LogitsProcessorList
         class RecordingProcessor(GpuSidConstrainedLogitsProcessor):
             def __init__(self, table):
@@ -39,7 +39,9 @@ class ConstraintReplayTests(unittest.TestCase):
                 return_dict_in_generate=True,output_scores=True)
             self.assertEqual(len(output.scores),5)
             for actual,processed,saved in zip(output.scores,processor.outputs,processor.saved):
-                self.assertEqual(actual.untyped_storage().data_ptr(),processed.untyped_storage().data_ptr())
+                self.assertNotEqual(actual.untyped_storage().data_ptr(),processed.untyped_storage().data_ptr())
+                self.assertTrue(torch.equal(actual.view(torch.int32),saved.view(torch.int32)))
+                processed.zero_()
                 self.assertTrue(torch.equal(actual.view(torch.int32),saved.view(torch.int32)))
             transition=model.compute_transition_scores(output.sequences,output.scores,output.beam_indices,normalize_logits=False)
             self.assertEqual(tuple(transition.shape),(2,5))

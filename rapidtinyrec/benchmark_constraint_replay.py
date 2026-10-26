@@ -15,7 +15,7 @@ from .compiled_forward import CompiledForward
 from .prefix_prefill import PrefillPrefix
 from .folded_attention import fold_decode_attention
 from .constraint_replay import ConstraintReplayPool
-from .probe_constraint_replay import probe as probe_constraints
+from .probe_constraint_replay import probe as probe_constraints, compare_tensors
 from .decode_replay import DecodeReplayPool
 from .gpu_constraints import GpuSidConstraintTables,GpuSidConstrainedLogitsProcessor
 
@@ -160,9 +160,15 @@ def main():
             if is_replay:
                 captured=[constraint_pool.entries[i][2] for i in range(5)]
                 assert len(output.scores)==5
-                matches=[x.untyped_storage().data_ptr()==y.untyped_storage().data_ptr() for x,y in zip(output.scores,captured)]
-                assert all(matches), 'HF saved scores must retain the five borrowed outputs'
-                ownership_records.append(dict(cohort_index=user['cohort_index'],steps=5,distinct_saved_score_storages=len({x.untyped_storage().data_ptr() for x in output.scores}),saved_outputs_match_graphs=all(matches),lease_open_during_extraction=not processor.closed))
+                # Pinned HF 4.55.4 clones each processor output before beam-score addition.
+                # Preserve those original timed clones; inspect bits outside generation timing.
+                saved_storages={x.untyped_storage().data_ptr() for x in output.scores}
+                graph_storages={x.untyped_storage().data_ptr() for x in captured}
+                comparisons=[compare_tensors(x,y) for x,y in zip(output.scores,captured)]
+                ownership_records.append(dict(cohort_index=user['cohort_index'],steps=5,
+                    distinct_saved_score_storages=len(saved_storages),
+                    saved_outputs_independent_of_graphs=not bool(saved_storages & graph_storages),
+                    saved_score_comparisons=comparisons,lease_open_during_extraction=not processor.closed))
             result={'token_ids':output.sequences[:,user['prompt_tokens']:].cpu().tolist(),
                 'sequence_logp':output.sequences_scores.float().cpu().tolist(),
                 'transition_logp':model.compute_transition_scores(output.sequences,output.scores,output.beam_indices,normalize_logits=False).float().cpu().tolist()}

@@ -61,9 +61,15 @@ def audit_constraint_phase(setup,summary,ownership,requests,candidate):
     assert setup['score_ownership_checks']==2*len(setup['warmup_cohort_indices'])
     for row in ownership:
         assert row['steps']==row['distinct_saved_score_storages']==5
-        assert row['saved_outputs_match_graphs'] and row['lease_open_during_extraction']
+        assert row['saved_outputs_independent_of_graphs'] and row['lease_open_during_extraction']
+        assert len(row['saved_score_comparisons'])==5
+        for comparison in row['saved_score_comparisons']:
+            assert comparison['values']==50*152265
+            assert 0<=comparison['matching_bits']<=comparison['values']
     assert setup['combined_setup_and_warmup_s']>=after['capture_and_warmup_s']
-    return after
+    comparisons=[c for row in ownership for c in row['saved_score_comparisons']]
+    return dict(after,saved_score_clones_exact=all(c['matching_bits']==c['values'] and c['finite_mask_equal'] and c['no_nan'] for c in comparisons),
+        saved_score_comparison=dict(values=sum(c['values'] for c in comparisons),matching_bits=sum(c['matching_bits'] for c in comparisons),max_abs_finite=max(c['max_abs_finite'] for c in comparisons)))
 
 
 def quality(paired,users,token_map):
@@ -251,6 +257,7 @@ def audit(root,historical,snapshot,run_record,token_map_path):
         'repeat_comparisons':{v:compare(p) for v,p in repeat_pairs.items()},
         'warm_repeat_comparison':compare(warm_repeat_pairs),
         'constraint_probe_exact':all(r['exact'] for r in probe_results),
+        'saved_score_clones_exact':all(p['constraint_replay']['saved_score_clones_exact'] for p in phases if p['constraint_replay'] is not None),
         'cohort_sha256':expected['users_sha256'],'comparison':compare([(r['runs'][VARIANTS[0]],r['runs'][VARIANTS[1]]) for r in paired]),
         'historical_comparisons':{v:compare(p) for v,p in historical_pairs.items()},'latency_ms':timing,
         'reductions_percent':{s:100*(1-timing[VARIANTS[1]][s]/timing[VARIANTS[0]][s]) for s in ('median_ms','p95_ms')},
@@ -271,7 +278,7 @@ def main():
     comparisons.extend(p[k] for p in result['phases'] for k in ('warmup_comparison','warmup_historical_comparison'))
     comparisons.extend(result['repeat_comparisons'].values())
     comparisons.append(result['warm_repeat_comparison'])
-    result['exactness_passed']=all(exact(c) for c in comparisons) and result['constraint_probe_exact']
+    result['exactness_passed']=all(exact(c) for c in comparisons) and result['constraint_probe_exact'] and result['saved_score_clones_exact']
     a.output.write_text(json.dumps(result,indent=2,allow_nan=False)+'\n');print(json.dumps(result,indent=2))
     if not result['exactness_passed']:raise SystemExit('FP32 equality failed; all comparisons preserved')
 

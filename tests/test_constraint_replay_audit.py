@@ -28,7 +28,7 @@ def phase_fixture():
     after=copy.deepcopy(before);after.update(replays=120,requests=24,staged_bytes=120*(score+suffix))
     setup=dict(constraint_replay=before,score_ownership_checks=8,warmup_cohort_indices=[1,2,6,10],combined_setup_and_warmup_s=10.)
     summary=dict(constraint_replay=after,score_ownership_checks=20)
-    ownership=[dict(steps=5,distinct_saved_score_storages=5,saved_outputs_match_graphs=True,lease_open_during_extraction=True) for _ in range(20)]
+    ownership=[dict(steps=5,distinct_saved_score_storages=5,saved_outputs_independent_of_graphs=True,saved_score_comparisons=[dict(values=50*152265,matching_bits=50*152265,max_abs_finite=0.,finite_mask_equal=True,no_nan=True) for _ in range(5)],lease_open_during_extraction=True) for _ in range(20)]
     return setup,summary,ownership
 
 
@@ -54,9 +54,17 @@ class ConstraintAuditTests(unittest.TestCase):
                        lambda s,z,o:z['constraint_replay'].update(staged_bytes=z['constraint_replay']['staged_bytes']-1),
                        lambda s,z,o:o[-1].update(distinct_saved_score_storages=1),
                        lambda s,z,o:o[-1].update(lease_open_during_extraction=False),
+                       lambda s,z,o:o[-1].update(saved_outputs_independent_of_graphs=False),
                        lambda s,z,o:z['constraint_replay'].update(active_request=True)):
             s,z,o=phase_fixture();mutate(s,z,o)
             with self.assertRaises(AssertionError):audit_constraint_phase(s,z,o,12,True)
+
+    def test_saved_score_clone_corruption_is_reported(self):
+        s,z,o=phase_fixture()
+        o[-1]['saved_score_comparisons'][2].update(matching_bits=50*152265-1,max_abs_finite=2**-23)
+        report=audit_constraint_phase(s,z,o,12,True)
+        self.assertFalse(report['saved_score_clones_exact'])
+        self.assertEqual(report['saved_score_comparison']['matching_bits'],report['saved_score_comparison']['values']-1)
 
     def test_quality_counts_unique_users_and_reports_paired_changes(self):
         users=[dict(cohort_index=1,target_sid='<a><b><c>'),dict(cohort_index=2,target_sid='<a><b><c>')]

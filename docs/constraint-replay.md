@@ -14,8 +14,12 @@ must be measured. Existing prefix/suffix model storage remains unchanged.
 
 Each request obtains a processor lease from `ConstraintReplayPool.processor()`.
 It stages the scores and last three integer token IDs, then replays the graph
-for that step. Five independent graph-private pools keep each saved score output
-alive through subsequent steps. The caller must consume transition-score and
+for that step. Five independent graph-private pools keep processor outputs
+alive through subsequent steps. The pinned [HF 4.55.4 beam search](https://github.com/huggingface/transformers/blob/v4.55.4/src/transformers/generation/utils.py#L3761)
+clones these outputs for `output_scores`, before adding cumulative beam scores.
+Those existing timed clones stay unchanged and add 152,265,000 bytes of live
+saved-score storage at five steps in both variants. Outside generation timing,
+the audit checks the clones remain bit-identical to the independent graph outputs. The caller must consume transition-score and
 other saved-score outputs before calling `lease.close()`; overlapping request
 leases and use after close are rejected. The pool supports one sequential CUDA
 stream, one score shape per step, and precisely the five validated steps.
@@ -26,8 +30,9 @@ changing score layout/dtype/device, and using another stream are errors. Both
 score copies and integer suffix copies remain inside generation-call timing.
 Buffer reuse is an explicit borrowing contract, not general concurrent serving.
 
-CPU checks also verify that the pinned HF beam-search implementation retains all
-five processor output storages and leaves their values unchanged. They compare the unchanged operations against the existing processor for
+CPU checks verify that pinned HF beam search clones all five processor outputs
+and preserves their bits even if the original storage changes. They also compare
+the unchanged operations against the existing processor for
 valid and unknown prefixes, test staging ownership with mixed input lengths,
 and verify lease lifecycle guards:
 
