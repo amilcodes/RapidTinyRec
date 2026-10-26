@@ -19,7 +19,7 @@ FINISHED = '_update_finished_beams'
 METHODS = (RUNNING, FINISHED)
 PINNED_SOURCE_SHA256 = {
     '_gather_beams': '4e29903be152b0c59a229a00b8b333466b19103330f242f52c25ccdb596e87e3',
-    RUNNING: 'abfc3b60fe17b1b33629ea70e3b4e5a31c5ec061ea8b9b86cfd3c44cde4e1',
+    RUNNING: '97511a4b165780149cfebe20ed583f79e411b6dda676e2430fae57442d7e8a07',
     FINISHED: 'b2bd70364b53bdd154e4f54b22d0774846ac53f6720ccea319c8d77d38700d74',
     '_beam_search': '432fafa552a0b380f14340750057593112be902c03ae7eb4f29328d378a4d0c5',
 }
@@ -37,7 +37,7 @@ def verify_helpers(model):
         source = textwrap.dedent(inspect.getsource(method)).strip()
         found[name] = hashlib.sha256(source.encode()).hexdigest()
         if found[name] != expected:
-            raise RuntimeError('Pinned HF beam implementation changed: ' + name)
+            raise RuntimeError(f'Pinned HF beam implementation changed: {name}: expected {expected}, observed {found[name]}')
     return found
 
 
