@@ -1,0 +1,5866 @@
+{
+  "integrity_audit_passed": true,
+  "unique_users": 4,
+  "paired_requests": 24,
+  "quality": {
+    "independent_users": 4,
+    "per_user": [
+      {
+        "cohort_index": 1,
+        "target_rank": {
+          "folded_prefix_replay": null,
+          "beam_replay": null
+        }
+      },
+      {
+        "cohort_index": 2,
+        "target_rank": {
+          "folded_prefix_replay": 1,
+          "beam_replay": 1
+        }
+      },
+      {
+        "cohort_index": 6,
+        "target_rank": {
+          "folded_prefix_replay": 45,
+          "beam_replay": 45
+        }
+      },
+      {
+        "cohort_index": 10,
+        "target_rank": {
+          "folded_prefix_replay": null,
+          "beam_replay": null
+        }
+      }
+    ],
+    "metrics": {
+      "folded_prefix_replay": {
+        "1": {
+          "hit_rate": 0.25,
+          "ndcg": 0.25,
+          "mrr": 0.25
+        },
+        "5": {
+          "hit_rate": 0.25,
+          "ndcg": 0.25,
+          "mrr": 0.25
+        },
+        "10": {
+          "hit_rate": 0.25,
+          "ndcg": 0.25,
+          "mrr": 0.25
+        },
+        "20": {
+          "hit_rate": 0.25,
+          "ndcg": 0.25,
+          "mrr": 0.25
+        },
+        "50": {
+          "hit_rate": 0.5,
+          "ndcg": 0.29526064919501005,
+          "mrr": 0.25555555555555554
+        }
+      },
+      "beam_replay": {
+        "1": {
+          "hit_rate": 0.25,
+          "ndcg": 0.25,
+          "mrr": 0.25
+        },
+        "5": {
+          "hit_rate": 0.25,
+          "ndcg": 0.25,
+          "mrr": 0.25
+        },
+        "10": {
+          "hit_rate": 0.25,
+          "ndcg": 0.25,
+          "mrr": 0.25
+        },
+        "20": {
+          "hit_rate": 0.25,
+          "ndcg": 0.25,
+          "mrr": 0.25
+        },
+        "50": {
+          "hit_rate": 0.5,
+          "ndcg": 0.29526064919501005,
+          "mrr": 0.25555555555555554
+        }
+      }
+    },
+    "paired_mean_changes": {
+      "1": {
+        "hit_rate": 0.0,
+        "ndcg": 0.0,
+        "mrr": 0.0
+      },
+      "5": {
+        "hit_rate": 0.0,
+        "ndcg": 0.0,
+        "mrr": 0.0
+      },
+      "10": {
+        "hit_rate": 0.0,
+        "ndcg": 0.0,
+        "mrr": 0.0
+      },
+      "20": {
+        "hit_rate": 0.0,
+        "ndcg": 0.0,
+        "mrr": 0.0
+      },
+      "50": {
+        "hit_rate": 0.0,
+        "ndcg": 0.0,
+        "mrr": 0.0
+      }
+    },
+    "scope": "One held-out SID per unique user, using first timed repeat; no item-collision disambiguation. Repetitions are not independent quality samples. Fidelity and repeat stability are audited separately."
+  },
+  "repeat_comparisons": {
+    "folded_prefix_replay": {
+      "requests": 20,
+      "rank_positions": 1000,
+      "sequence_values": 1000,
+      "transition_values": 5000,
+      "matching_rank_lists": 20,
+      "matching_rank_positions": 1000,
+      "matching_sequence_vectors": 20,
+      "matching_transition_arrays": 20,
+      "matching_sequence_values": 1000,
+      "matching_transition_values": 5000,
+      "max_sequence_difference_common": 0.0,
+      "max_transition_difference_common": 0.0
+    },
+    "beam_replay": {
+      "requests": 20,
+      "rank_positions": 1000,
+      "sequence_values": 1000,
+      "transition_values": 5000,
+      "matching_rank_lists": 20,
+      "matching_rank_positions": 1000,
+      "matching_sequence_vectors": 20,
+      "matching_transition_arrays": 20,
+      "matching_sequence_values": 1000,
+      "matching_transition_values": 5000,
+      "max_sequence_difference_common": 0.0,
+      "max_transition_difference_common": 0.0
+    }
+  },
+  "warm_repeat_comparison": {
+    "requests": 16,
+    "rank_positions": 800,
+    "sequence_values": 800,
+    "transition_values": 4000,
+    "matching_rank_lists": 16,
+    "matching_rank_positions": 800,
+    "matching_sequence_vectors": 16,
+    "matching_transition_arrays": 16,
+    "matching_sequence_values": 800,
+    "matching_transition_values": 4000,
+    "max_sequence_difference_common": 0.0,
+    "max_transition_difference_common": 0.0
+  },
+  "beam_probe_exact": true,
+  "final_outputs_exact": true,
+  "cohort_sha256": "f78097bfedff69f5928a8ccbe39d5a96e07f7e9dd4616209953cf4f51408f487",
+  "comparison": {
+    "requests": 24,
+    "rank_positions": 1200,
+    "sequence_values": 1200,
+    "transition_values": 6000,
+    "matching_rank_lists": 24,
+    "matching_rank_positions": 1200,
+    "matching_sequence_vectors": 24,
+    "matching_transition_arrays": 24,
+    "matching_sequence_values": 1200,
+    "matching_transition_values": 6000,
+    "max_sequence_difference_common": 0.0,
+    "max_transition_difference_common": 0.0
+  },
+  "historical_comparisons": {
+    "folded_prefix_replay": {
+      "requests": 24,
+      "rank_positions": 1200,
+      "sequence_values": 1200,
+      "transition_values": 6000,
+      "matching_rank_lists": 24,
+      "matching_rank_positions": 1200,
+      "matching_sequence_vectors": 24,
+      "matching_transition_arrays": 24,
+      "matching_sequence_values": 1200,
+      "matching_transition_values": 6000,
+      "max_sequence_difference_common": 0.0,
+      "max_transition_difference_common": 0.0
+    },
+    "beam_replay": {
+      "requests": 24,
+      "rank_positions": 1200,
+      "sequence_values": 1200,
+      "transition_values": 6000,
+      "matching_rank_lists": 24,
+      "matching_rank_positions": 1200,
+      "matching_sequence_vectors": 24,
+      "matching_transition_arrays": 24,
+      "matching_sequence_values": 1200,
+      "matching_transition_values": 6000,
+      "max_sequence_difference_common": 0.0,
+      "max_transition_difference_common": 0.0
+    }
+  },
+  "latency_ms": {
+    "folded_prefix_replay": {
+      "n": 24,
+      "median_ms": 116.23504385352135,
+      "p95_ms": 121.17344439029694
+    },
+    "beam_replay": {
+      "n": 24,
+      "median_ms": 115.72594195604324,
+      "p95_ms": 119.51505988836288
+    }
+  },
+  "reductions_percent": {
+    "median_ms": 0.43799346616987256,
+    "p95_ms": 1.3686039134056749
+  },
+  "latency_by_length_ms": {
+    "76": {
+      "folded_prefix_replay": {
+        "n": 12,
+        "median_ms": 112.94236592948437,
+        "p95_ms": 114.16863556951284
+      },
+      "beam_replay": {
+        "n": 12,
+        "median_ms": 112.2159045189619,
+        "p95_ms": 113.20758424699306
+      }
+    },
+    "121": {
+      "folded_prefix_replay": {
+        "n": 12,
+        "median_ms": 119.36252377927303,
+        "p95_ms": 121.28611672669649
+      },
+      "beam_replay": {
+        "n": 12,
+        "median_ms": 118.88221092522144,
+        "p95_ms": 119.632831774652
+      }
+    }
+  },
+  "latency_by_half_ms": {
+    "0": {
+      "folded_prefix_replay": {
+        "n": 12,
+        "median_ms": 115.96828512847424,
+        "p95_ms": 120.9880918264389
+      },
+      "beam_replay": {
+        "n": 12,
+        "median_ms": 115.57776294648647,
+        "p95_ms": 119.632831774652
+      }
+    },
+    "1": {
+      "folded_prefix_replay": {
+        "n": 12,
+        "median_ms": 116.43622256815434,
+        "p95_ms": 120.84632236510515
+      },
+      "beam_replay": {
+        "n": 12,
+        "median_ms": 115.72594195604324,
+        "p95_ms": 119.17220503091812
+      }
+    }
+  },
+  "phases": [
+    {
+      "phase": 0,
+      "variant": "folded_prefix_replay",
+      "latency_ms": {
+        "n": 12,
+        "median_ms": 115.96828512847424,
+        "p95_ms": 120.9880918264389
+      },
+      "memory": {
+        "allocated_bytes": 6595040256,
+        "reserved_bytes": 7964983296,
+        "peak_allocated_bytes": 6911101440,
+        "peak_reserved_bytes": 7964983296
+      },
+      "compiler_artifacts_reused": false,
+      "setup_memory": {
+        "allocated_bytes": 6595040256,
+        "reserved_bytes": 7964983296,
+        "peak_allocated_bytes": 8411338752,
+        "peak_reserved_bytes": 9219080192
+      },
+      "unique_input_storage_bytes": 15546688,
+      "logical_input_bytes": 79599936,
+      "physical_prefix": {
+        "requests_loaded": 20,
+        "prefix_bytes_copied": 112967680,
+        "prefix_capacity_bytes": 6938624,
+        "suffix_capacity_bytes": 8601600,
+        "max_prefix_tokens": 121,
+        "max_suffix_tokens": 3,
+        "physical_prefix_batch": 1,
+        "suffix_batch": 50,
+        "attention_materialization": "Temporary dense exact-length K/V per layer; unchanged SDPA"
+      },
+      "direct_reorder": {
+        "direct_calls": 80,
+        "fallback_calls": 20,
+        "suffix_bytes_written": 344064000,
+        "prefix_bytes_reordered": 0
+      },
+      "warmup_comparison": {
+        "requests": 4,
+        "rank_positions": 200,
+        "sequence_values": 200,
+        "transition_values": 1000,
+        "matching_rank_lists": 4,
+        "matching_rank_positions": 200,
+        "matching_sequence_vectors": 4,
+        "matching_transition_arrays": 4,
+        "matching_sequence_values": 200,
+        "matching_transition_values": 1000,
+        "max_sequence_difference_common": 0.0,
+        "max_transition_difference_common": 0.0
+      },
+      "warmup_historical_comparison": {
+        "requests": 12,
+        "rank_positions": 600,
+        "sequence_values": 600,
+        "transition_values": 3000,
+        "matching_rank_lists": 12,
+        "matching_rank_positions": 600,
+        "matching_sequence_vectors": 12,
+        "matching_transition_arrays": 12,
+        "matching_sequence_values": 600,
+        "matching_transition_values": 3000,
+        "max_sequence_difference_common": 0.0,
+        "max_transition_difference_common": 0.0
+      },
+      "model_loading_s": 1.7432411536574364,
+      "model_storage": {
+        "logical_parameter_bytes": 6176878592,
+        "unique_parameter_storage_bytes": 6176878592,
+        "gate_up_unique_bytes": 3082813440
+      },
+      "beam_replay": null,
+      "beam_probe": null,
+      "setup_s": 351.50960759818554,
+      "backend_compile_s": 269.29433623701334,
+      "capture_and_warmup_s": 213.83442902937531,
+      "measurement_compilations": 0,
+      "measurement_captures": 0
+    },
+    {
+      "phase": 1,
+      "variant": "beam_replay",
+      "latency_ms": {
+        "n": 12,
+        "median_ms": 115.57776294648647,
+        "p95_ms": 119.632831774652
+      },
+      "memory": {
+        "allocated_bytes": 6598222336,
+        "reserved_bytes": 8009023488,
+        "peak_allocated_bytes": 6914229248,
+        "peak_reserved_bytes": 8009023488
+      },
+      "compiler_artifacts_reused": false,
+      "setup_memory": {
+        "allocated_bytes": 6598222336,
+        "reserved_bytes": 8009023488,
+        "peak_allocated_bytes": 8411338752,
+        "peak_reserved_bytes": 9202302976
+      },
+      "unique_input_storage_bytes": 15546688,
+      "logical_input_bytes": 79599936,
+      "physical_prefix": {
+        "requests_loaded": 20,
+        "prefix_bytes_copied": 112967680,
+        "prefix_capacity_bytes": 6938624,
+        "suffix_capacity_bytes": 8601600,
+        "max_prefix_tokens": 121,
+        "max_suffix_tokens": 3,
+        "physical_prefix_batch": 1,
+        "suffix_batch": 50,
+        "attention_materialization": "Temporary dense exact-length K/V per layer; unchanged SDPA"
+      },
+      "direct_reorder": {
+        "direct_calls": 80,
+        "fallback_calls": 20,
+        "suffix_bytes_written": 344064000,
+        "prefix_bytes_reordered": 0
+      },
+      "warmup_comparison": {
+        "requests": 4,
+        "rank_positions": 200,
+        "sequence_values": 200,
+        "transition_values": 1000,
+        "matching_rank_lists": 4,
+        "matching_rank_positions": 200,
+        "matching_sequence_vectors": 4,
+        "matching_transition_arrays": 4,
+        "matching_sequence_values": 200,
+        "matching_transition_values": 1000,
+        "max_sequence_difference_common": 0.0,
+        "max_transition_difference_common": 0.0
+      },
+      "warmup_historical_comparison": {
+        "requests": 12,
+        "rank_positions": 600,
+        "sequence_values": 600,
+        "transition_values": 3000,
+        "matching_rank_lists": 12,
+        "matching_rank_positions": 600,
+        "matching_sequence_vectors": 12,
+        "matching_transition_arrays": 12,
+        "matching_sequence_values": 600,
+        "matching_transition_values": 3000,
+        "max_sequence_difference_common": 0.0,
+        "max_transition_difference_common": 0.0
+      },
+      "model_loading_s": 1.7378353290259838,
+      "model_storage": {
+        "logical_parameter_bytes": 6176878592,
+        "unique_parameter_storage_bytes": 6176878592,
+        "gate_up_unique_bytes": 3082813440
+      },
+      "beam_replay": {
+        "graphs": 20,
+        "frozen": true,
+        "replays": 200,
+        "requests": 20,
+        "staged_bytes": 22235100,
+        "aborted_requests": 0,
+        "input_logical_bytes": 2223510,
+        "output_logical_bytes": 888500,
+        "unique_input_output_storage_bytes": 3112010,
+        "disjoint_step_storage": true,
+        "active_request": false,
+        "helper_source_sha256": {
+          "_gather_beams": "4e29903be152b0c59a229a00b8b333466b19103330f242f52c25ccdb596e87e3",
+          "_get_running_beams_for_next_iteration": "97511a4b165780149cfebe20ed583f79e411b6dda676e2430fae57442d7e8a07",
+          "_update_finished_beams": "b2bd70364b53bdd154e4f54b22d0774846ac53f6720ccea319c8d77d38700d74",
+          "_beam_search": "432fafa552a0b380f14340750057593112be902c03ae7eb4f29328d378a4d0c5"
+        },
+        "capture_and_warmup_s": 0.11948414891958237,
+        "events": [
+          {
+            "method": "_get_running_beams_for_next_iteration",
+            "prompt_tokens": 76,
+            "step": 0,
+            "signature": [
+              [
+                "topk_log_probs",
+                "tensor",
+                [
+                  1,
+                  100
+                ],
+                [
+                  100,
+                  1
+                ],
+                "torch.float32",
+                "cuda:0"
+              ],
+              [
+                "topk_running_sequences",
+                "tensor",
+                [
+                  1,
+                  100,
+                  84
+                ],
+                [
+                  8400,
+                  84,
+                  1
+                ],
+                "torch.int64",
+                "cuda:0"
+              ],
+              [
+                "topk_running_beam_indices",
+                "tensor",
+                [
+                  1,
+                  100,
+                  8
+                ],
+                [
+                  800,
+                  8,
+                  1
+                ],
+                "torch.int32",
+                "cuda:0"
+              ],
+              [
+                "next_token_hits_stopping_criteria",
+                "tensor",
+                [
+                  1,
+                  100
+                ],
+                [
+                  100,
+                  1
+                ],
+                "torch.bool",
+                "cuda:0"
+              ],
+              [
+                "num_beams",
+                "int",
+                50
+              ]
+            ],
+            "input_bytes": 70900,
+            "output_bytes": 35400,
+            "capture_and_warmup_s": 0.010622989386320114,
+            "allocated_delta_bytes": 108544
+          },
+          {
+            "method": "_update_finished_beams",
+            "prompt_tokens": 76,
+            "step": 0,
+            "signature": [
+              [
+                "sequences",
+                "tensor",
+                [
+                  1,
+                  50,
+                  84
+                ],
+                [
+                  4200,
+                  84,
+                  1
+                ],
+                "torch.int64",
+                "cuda:0"
+              ],
+              [
+                "topk_running_sequences",
+                "tensor",
+                [
+                  1,
+                  100,
+                  84
+                ],
+                [
+                  8400,
+                  84,
+                  1
+                ],
+                "torch.int64",
+                "cuda:0"
+              ],
+              [
+                "beam_scores",
+                "tensor",
+                [
+                  1,
+                  50
+                ],
+                [
+                  50,
+                  1
+                ],
+                "torch.float32",
+                "cuda:0"
+              ],
+              [
+                "topk_log_probs",
+                "tensor",
+                [
+                  1,
+                  100
+                ],
+                [
+                  100,
+                  1
+                ],
+                "torch.float32",
+                "cuda:0"
+              ],
+              [
+                "beam_indices",
+                "tensor",
+                [
+                  1,
+                  50,
+                  8
+                ],
+                [
+                  400,
+                  8,
+                  1
+                ],
+                "torch.int32",
+                "cuda:0"
+              ],
+              [
+                "topk_running_beam_indices",
+                "tensor",
+                [
+                  1,
+                  100,
+                  8
+                ],
+                [
+                  800,
+                  8,
+                  1
+                ],
+                "torch.int32",
+                "cuda:0"
+              ],
+              [
+                "is_early_stop_heuristic_unsatisfied",
+                "tensor",
+                [
+                  1,
+                  1
+                ],
+                [
+                  1,
+                  1
+                ],
+                "torch.bool",
+                "cuda:0"
+              ],
+              [
+                "is_sent_finished",
+                "tensor",
+                [
+                  1,
+                  50
+                ],
+                [
+                  50,
+                  1
+                ],
+                "torch.bool",
+                "cuda:0"
+              ],
+              [
+                "next_token_hits_stopping_criteria",
+                "tensor",
+                [
+                  1,
+                  100
+                ],
+                [
+                  100,
+                  1
+                ],
+                "torch.bool",
+                "cuda:0"
+              ],
+              [
+                "top_num_beam_mask",
+                "tensor",
+                [
+                  100
+                ],
+                [
+                  1
+                ],
+                "torch.bool",
+                "cuda:0"
+              ],
+              [
+                "num_beams",
+                "int",
+                50
+              ],
+              [
+                "cur_len",
+                "int",
+                76
+              ],
+              [
+                "decoder_prompt_len",
+                "int",
+                76
+              ],
+              [
+                "length_penalty",
+                "float",
+                0.0
+              ],
+              [
+                "early_stopping",
+                "bool",
+                false
+              ]
+            ],
+            "input_bytes": 106451,
+            "output_bytes": 35450,
+            "capture_and_warmup_s": 0.006134208291769028,
+            "allocated_delta_bytes": 146944
+          },
+          {
+            "method": "_get_running_beams_for_next_iteration",
+            "prompt_tokens": 76,
+            "step": 1,
+            "signature": [
+              [
+                "topk_log_probs",
+                "tensor",
+                [
+                  1,
+                  100
+                ],
+                [
+                  100,
+                  1
+                ],
+                "torch.float32",
+                "cuda:0"
+              ],
+              [
+                "topk_running_sequences",
+                "tensor",
+                [
+                  1,
+                  100,
+                  84
+                ],
+                [
+                  8400,
+                  84,
+                  1
+                ],
+                "torch.int64",
+                "cuda:0"
+              ],
+              [
+                "topk_running_beam_indices",
+                "tensor",
+                [
+                  1,
+                  100,
+                  8
+                ],
+                [
+                  800,
+                  8,
+                  1
+                ],
+                "torch.int32",
+                "cuda:0"
+              ],
+              [
+                "next_token_hits_stopping_criteria",
+                "tensor",
+                [
+                  1,
+                  100
+                ],
+                [
+                  100,
+                  1
+                ],
+                "torch.bool",
+                "cuda:0"
+              ],
+              [
+                "num_beams",
+                "int",
+                50
+              ]
+            ],
+            "input_bytes": 70900,
+            "output_bytes": 35400,
+            "capture_and_warmup_s": 0.004510246217250824,
+            "allocated_delta_bytes": 108544
+          },
+          {
+            "method": "_update_finished_beams",
+            "prompt_tokens": 76,
+            "step": 1,
+            "signature": [
+              [
+                "sequences",
+                "tensor",
+                [
+                  1,
+                  50,
+                  84
+                ],
+                [
+                  4200,
+                  84,
+                  1
+                ],
+                "torch.int64",
+                "cuda:0"
+              ],
+              [
+                "topk_running_sequences",
+                "tensor",
+                [
+                  1,
+                  100,
+                  84
+                ],
+                [
+                  8400,
+                  84,
+                  1
+                ],
+                "torch.int64",
+                "cuda:0"
+              ],
+              [
+                "beam_scores",
+                "tensor",
+                [
+                  1,
+                  50
+                ],
+                [
+                  50,
+                  1
+                ],
+                "torch.float32",
+                "cuda:0"
+              ],
+              [
+                "topk_log_probs",
+                "tensor",
+                [
+                  1,
+                  100
+                ],
+                [
+                  100,
+                  1
+                ],
+                "torch.float32",
+                "cuda:0"
+              ],
+              [
+                "beam_indices",
+                "tensor",
+                [
+                  1,
+                  50,
+                  8
+                ],
+                [
+                  400,
+                  8,
+                  1
+                ],
+                "torch.int32",
+                "cuda:0"
+              ],
+              [
+                "topk_running_beam_indices",
+                "tensor",
+                [
+                  1,
+                  100,
+                  8
+                ],
+                [
+                  800,
+                  8,
+                  1
+                ],
+                "torch.int32",
+                "cuda:0"
+              ],
+              [
+                "is_early_stop_heuristic_unsatisfied",
+                "tensor",
+                [
+                  1,
+                  1
+                ],
+                [
+                  1,
+                  1
+                ],
+                "torch.bool",
+                "cuda:0"
+              ],
+              [
+                "is_sent_finished",
+                "tensor",
+                [
+                  1,
+                  50
+                ],
+                [
+                  50,
+                  1
+                ],
+                "torch.bool",
+                "cuda:0"
+              ],
+              [
+                "next_token_hits_stopping_criteria",
+                "tensor",
+                [
+                  1,
+                  100
+                ],
+                [
+                  100,
+                  1
+                ],
+                "torch.bool",
+                "cuda:0"
+              ],
+              [
+                "top_num_beam_mask",
+                "tensor",
+                [
+                  100
+                ],
+                [
+                  1
+                ],
+                "torch.bool",
+                "cuda:0"
+              ],
+              [
+                "num_beams",
+                "int",
+                50
+              ],
+              [
+                "cur_len",
+                "int",
+                77
+              ],
+              [
+                "decoder_prompt_len",
+                "int",
+                76
+              ],
+              [
+                "length_penalty",
+                "float",
+                0.0
+              ],
+              [
+                "early_stopping",
+                "bool",
+                false
+              ]
+            ],
+            "input_bytes": 106451,
+            "output_bytes": 35450,
+            "capture_and_warmup_s": 0.005252990871667862,
+            "allocated_delta_bytes": 146944
+          },
+          {
+            "method": "_get_running_beams_for_next_iteration",
+            "prompt_tokens": 76,
+            "step": 2,
+            "signature": [
+              [
+                "topk_log_probs",
+                "tensor",
+                [
+                  1,
+                  100
+                ],
+                [
+                  100,
+                  1
+                ],
+                "torch.float32",
+                "cuda:0"
+              ],
+              [
+                "topk_running_sequences",
+                "tensor",
+                [
+                  1,
+                  100,
+                  84
+                ],
+                [
+                  8400,
+                  84,
+                  1
+                ],
+                "torch.int64",
+                "cuda:0"
+              ],
+              [
+                "topk_running_beam_indices",
+                "tensor",
+                [
+                  1,
+                  100,
+                  8
+                ],
+                [
+                  800,
+                  8,
+                  1
+                ],
+                "torch.int32",
+                "cuda:0"
+              ],
+              [
+                "next_token_hits_stopping_criteria",
+                "tensor",
+                [
+                  1,
+                  100
+                ],
+                [
+                  100,
+                  1
+                ],
+                "torch.bool",
+                "cuda:0"
+              ],
+              [
+                "num_beams",
+                "int",
+                50
+              ]
+            ],
+            "input_bytes": 70900,
+            "output_bytes": 35400,
+            "capture_and_warmup_s": 0.004623103886842728,
+            "allocated_delta_bytes": 108544
+          },
+          {
+            "method": "_update_finished_beams",
+            "prompt_tokens": 76,
+            "step": 2,
+            "signature": [
+              [
+                "sequences",
+                "tensor",
+                [
+                  1,
+                  50,
+                  84
+                ],
+                [
+                  4200,
+                  84,
+                  1
+                ],
+                "torch.int64",
+                "cuda:0"
+              ],
+              [
+                "topk_running_sequences",
+                "tensor",
+                [
+                  1,
+                  100,
+                  84
+                ],
+                [
+                  8400,
+                  84,
+                  1
+                ],
+                "torch.int64",
+                "cuda:0"
+              ],
+              [
+                "beam_scores",
+                "tensor",
+                [
+                  1,
+                  50
+                ],
+                [
+                  50,
+                  1
+                ],
+                "torch.float32",
+                "cuda:0"
+              ],
+              [
+                "topk_log_probs",
+                "tensor",
+                [
+                  1,
+                  100
+                ],
+                [
+                  100,
+                  1
+                ],
+                "torch.float32",
+                "cuda:0"
+              ],
+              [
+                "beam_indices",
+                "tensor",
+                [
+                  1,
+                  50,
+                  8
+                ],
+                [
+                  400,
+                  8,
+                  1
+                ],
+                "torch.int32",
+                "cuda:0"
+              ],
+              [
+                "topk_running_beam_indices",
+                "tensor",
+                [
+                  1,
+                  100,
+                  8
+                ],
+                [
+                  800,
+                  8,
+                  1
+                ],
+                "torch.int32",
+                "cuda:0"
+              ],
+              [
+                "is_early_stop_heuristic_unsatisfied",
+                "tensor",
+                [
+                  1,
+                  1
+                ],
+                [
+                  1,
+                  1
+                ],
+                "torch.bool",
+                "cuda:0"
+              ],
+              [
+                "is_sent_finished",
+                "tensor",
+                [
+                  1,
+                  50
+                ],
+                [
+                  50,
+                  1
+                ],
+                "torch.bool",
+                "cuda:0"
+              ],
+              [
+                "next_token_hits_stopping_criteria",
+                "tensor",
+                [
+                  1,
+                  100
+                ],
+                [
+                  100,
+                  1
+                ],
+                "torch.bool",
+                "cuda:0"
+              ],
+              [
+                "top_num_beam_mask",
+                "tensor",
+                [
+                  100
+                ],
+                [
+                  1
+                ],
+                "torch.bool",
+                "cuda:0"
+              ],
+              [
+                "num_beams",
+                "int",
+                50
+              ],
+              [
+                "cur_len",
+                "int",
+                78
+              ],
+              [
+                "decoder_prompt_len",
+                "int",
+                76
+              ],
+              [
+                "length_penalty",
+                "float",
+                0.0
+              ],
+              [
+                "early_stopping",
+                "bool",
+                false
+              ]
+            ],
+            "input_bytes": 106451,
+            "output_bytes": 35450,
+            "capture_and_warmup_s": 0.0053439997136592865,
+            "allocated_delta_bytes": 146944
+          },
+          {
+            "method": "_get_running_beams_for_next_iteration",
+            "prompt_tokens": 76,
+            "step": 3,
+            "signature": [
+              [
+                "topk_log_probs",
+                "tensor",
+                [
+                  1,
+                  100
+                ],
+                [
+                  100,
+                  1
+                ],
+                "torch.float32",
+                "cuda:0"
+              ],
+              [
+                "topk_running_sequences",
+                "tensor",
+                [
+                  1,
+                  100,
+                  84
+                ],
+                [
+                  8400,
+                  84,
+                  1
+                ],
+                "torch.int64",
+                "cuda:0"
+              ],
+              [
+                "topk_running_beam_indices",
+                "tensor",
+                [
+                  1,
+                  100,
+                  8
+                ],
+                [
+                  800,
+                  8,
+                  1
+                ],
+                "torch.int32",
+                "cuda:0"
+              ],
+              [
+                "next_token_hits_stopping_criteria",
+                "tensor",
+                [
+                  1,
+                  100
+                ],
+                [
+                  100,
+                  1
+                ],
+                "torch.bool",
+                "cuda:0"
+              ],
+              [
+                "num_beams",
+                "int",
+                50
+              ]
+            ],
+            "input_bytes": 70900,
+            "output_bytes": 35400,
+            "capture_and_warmup_s": 0.005019940435886383,
+            "allocated_delta_bytes": 108544
+          },
+          {
+            "method": "_update_finished_beams",
+            "prompt_tokens": 76,
+            "step": 3,
+            "signature": [
+              [
+                "sequences",
+                "tensor",
+                [
+                  1,
+                  50,
+                  84
+                ],
+                [
+                  4200,
+                  84,
+                  1
+                ],
+                "torch.int64",
+                "cuda:0"
+              ],
+              [
+                "topk_running_sequences",
+                "tensor",
+                [
+                  1,
+                  100,
+                  84
+                ],
+                [
+                  8400,
+                  84,
+                  1
+                ],
+                "torch.int64",
+                "cuda:0"
+              ],
+              [
+                "beam_scores",
+                "tensor",
+                [
+                  1,
+                  50
+                ],
+                [
+                  50,
+                  1
+                ],
+                "torch.float32",
+                "cuda:0"
+              ],
+              [
+                "topk_log_probs",
+                "tensor",
+                [
+                  1,
+                  100
+                ],
+                [
+                  100,
+                  1
+                ],
+                "torch.float32",
+                "cuda:0"
+              ],
+              [
+                "beam_indices",
+                "tensor",
+                [
+                  1,
+                  50,
+                  8
+                ],
+                [
+                  400,
+                  8,
+                  1
+                ],
+                "torch.int32",
+                "cuda:0"
+              ],
+              [
+                "topk_running_beam_indices",
+                "tensor",
+                [
+                  1,
+                  100,
+                  8
+                ],
+                [
+                  800,
+                  8,
+                  1
+                ],
+                "torch.int32",
+                "cuda:0"
+              ],
+              [
+                "is_early_stop_heuristic_unsatisfied",
+                "tensor",
+                [
+                  1,
+                  1
+                ],
+                [
+                  1,
+                  1
+                ],
+                "torch.bool",
+                "cuda:0"
+              ],
+              [
+                "is_sent_finished",
+                "tensor",
+                [
+                  1,
+                  50
+                ],
+                [
+                  50,
+                  1
+                ],
+                "torch.bool",
+                "cuda:0"
+              ],
+              [
+                "next_token_hits_stopping_criteria",
+                "tensor",
+                [
+                  1,
+                  100
+                ],
+                [
+                  100,
+                  1
+                ],
+                "torch.bool",
+                "cuda:0"
+              ],
+              [
+                "top_num_beam_mask",
+                "tensor",
+                [
+                  100
+                ],
+                [
+                  1
+                ],
+                "torch.bool",
+                "cuda:0"
+              ],
+              [
+                "num_beams",
+                "int",
+                50
+              ],
+              [
+                "cur_len",
+                "int",
+                79
+              ],
+              [
+                "decoder_prompt_len",
+                "int",
+                76
+              ],
+              [
+                "length_penalty",
+                "float",
+                0.0
+              ],
+              [
+                "early_stopping",
+                "bool",
+                false
+              ]
+            ],
+            "input_bytes": 106451,
+            "output_bytes": 35450,
+            "capture_and_warmup_s": 0.006187845021486282,
+            "allocated_delta_bytes": 146944
+          },
+          {
+            "method": "_get_running_beams_for_next_iteration",
+            "prompt_tokens": 76,
+            "step": 4,
+            "signature": [
+              [
+                "topk_log_probs",
+                "tensor",
+                [
+                  1,
+                  100
+                ],
+                [
+                  100,
+                  1
+                ],
+                "torch.float32",
+                "cuda:0"
+              ],
+              [
+                "topk_running_sequences",
+                "tensor",
+                [
+                  1,
+                  100,
+                  84
+                ],
+                [
+                  8400,
+                  84,
+                  1
+                ],
+                "torch.int64",
+                "cuda:0"
+              ],
+              [
+                "topk_running_beam_indices",
+                "tensor",
+                [
+                  1,
+                  100,
+                  8
+                ],
+                [
+                  800,
+                  8,
+                  1
+                ],
+                "torch.int32",
+                "cuda:0"
+              ],
+              [
+                "next_token_hits_stopping_criteria",
+                "tensor",
+                [
+                  1,
+                  100
+                ],
+                [
+                  100,
+                  1
+                ],
+                "torch.bool",
+                "cuda:0"
+              ],
+              [
+                "num_beams",
+                "int",
+                50
+              ]
+            ],
+            "input_bytes": 70900,
+            "output_bytes": 35400,
+            "capture_and_warmup_s": 0.004941653460264206,
+            "allocated_delta_bytes": 108544
+          },
+          {
+            "method": "_update_finished_beams",
+            "prompt_tokens": 76,
+            "step": 4,
+            "signature": [
+              [
+                "sequences",
+                "tensor",
+                [
+                  1,
+                  50,
+                  84
+                ],
+                [
+                  4200,
+                  84,
+                  1
+                ],
+                "torch.int64",
+                "cuda:0"
+              ],
+              [
+                "topk_running_sequences",
+                "tensor",
+                [
+                  1,
+                  100,
+                  84
+                ],
+                [
+                  8400,
+                  84,
+                  1
+                ],
+                "torch.int64",
+                "cuda:0"
+              ],
+              [
+                "beam_scores",
+                "tensor",
+                [
+                  1,
+                  50
+                ],
+                [
+                  50,
+                  1
+                ],
+                "torch.float32",
+                "cuda:0"
+              ],
+              [
+                "topk_log_probs",
+                "tensor",
+                [
+                  1,
+                  100
+                ],
+                [
+                  100,
+                  1
+                ],
+                "torch.float32",
+                "cuda:0"
+              ],
+              [
+                "beam_indices",
+                "tensor",
+                [
+                  1,
+                  50,
+                  8
+                ],
+                [
+                  400,
+                  8,
+                  1
+                ],
+                "torch.int32",
+                "cuda:0"
+              ],
+              [
+                "topk_running_beam_indices",
+                "tensor",
+                [
+                  1,
+                  100,
+                  8
+                ],
+                [
+                  800,
+                  8,
+                  1
+                ],
+                "torch.int32",
+                "cuda:0"
+              ],
+              [
+                "is_early_stop_heuristic_unsatisfied",
+                "tensor",
+                [
+                  1,
+                  1
+                ],
+                [
+                  1,
+                  1
+                ],
+                "torch.bool",
+                "cuda:0"
+              ],
+              [
+                "is_sent_finished",
+                "tensor",
+                [
+                  1,
+                  50
+                ],
+                [
+                  50,
+                  1
+                ],
+                "torch.bool",
+                "cuda:0"
+              ],
+              [
+                "next_token_hits_stopping_criteria",
+                "tensor",
+                [
+                  1,
+                  100
+                ],
+                [
+                  100,
+                  1
+                ],
+                "torch.bool",
+                "cuda:0"
+              ],
+              [
+                "top_num_beam_mask",
+                "tensor",
+                [
+                  100
+                ],
+                [
+                  1
+                ],
+                "torch.bool",
+                "cuda:0"
+              ],
+              [
+                "num_beams",
+                "int",
+                50
+              ],
+              [
+                "cur_len",
+                "int",
+                80
+              ],
+              [
+                "decoder_prompt_len",
+                "int",
+                76
+              ],
+              [
+                "length_penalty",
+                "float",
+                0.0
+              ],
+              [
+                "early_stopping",
+                "bool",
+                false
+              ]
+            ],
+            "input_bytes": 106451,
+            "output_bytes": 35450,
+            "capture_and_warmup_s": 0.005938727408647537,
+            "allocated_delta_bytes": 146944
+          },
+          {
+            "method": "_get_running_beams_for_next_iteration",
+            "prompt_tokens": 121,
+            "step": 0,
+            "signature": [
+              [
+                "topk_log_probs",
+                "tensor",
+                [
+                  1,
+                  100
+                ],
+                [
+                  100,
+                  1
+                ],
+                "torch.float32",
+                "cuda:0"
+              ],
+              [
+                "topk_running_sequences",
+                "tensor",
+                [
+                  1,
+                  100,
+                  129
+                ],
+                [
+                  12900,
+                  129,
+                  1
+                ],
+                "torch.int64",
+                "cuda:0"
+              ],
+              [
+                "topk_running_beam_indices",
+                "tensor",
+                [
+                  1,
+                  100,
+                  8
+                ],
+                [
+                  800,
+                  8,
+                  1
+                ],
+                "torch.int32",
+                "cuda:0"
+              ],
+              [
+                "next_token_hits_stopping_criteria",
+                "tensor",
+                [
+                  1,
+                  100
+                ],
+                [
+                  100,
+                  1
+                ],
+                "torch.bool",
+                "cuda:0"
+              ],
+              [
+                "num_beams",
+                "int",
+                50
+              ]
+            ],
+            "input_bytes": 106900,
+            "output_bytes": 53400,
+            "capture_and_warmup_s": 0.007786214351654053,
+            "allocated_delta_bytes": 162304
+          },
+          {
+            "method": "_update_finished_beams",
+            "prompt_tokens": 121,
+            "step": 0,
+            "signature": [
+              [
+                "sequences",
+                "tensor",
+                [
+                  1,
+                  50,
+                  129
+                ],
+                [
+                  6450,
+                  129,
+                  1
+                ],
+                "torch.int64",
+                "cuda:0"
+              ],
+              [
+                "topk_running_sequences",
+                "tensor",
+                [
+                  1,
+                  100,
+                  129
+                ],
+                [
+                  12900,
+                  129,
+                  1
+                ],
+                "torch.int64",
+                "cuda:0"
+              ],
+              [
+                "beam_scores",
+                "tensor",
+                [
+                  1,
+                  50
+                ],
+                [
+                  50,
+                  1
+                ],
+                "torch.float32",
+                "cuda:0"
+              ],
+              [
+                "topk_log_probs",
+                "tensor",
+                [
+                  1,
+                  100
+                ],
+                [
+                  100,
+                  1
+                ],
+                "torch.float32",
+                "cuda:0"
+              ],
+              [
+                "beam_indices",
+                "tensor",
+                [
+                  1,
+                  50,
+                  8
+                ],
+                [
+                  400,
+                  8,
+                  1
+                ],
+                "torch.int32",
+                "cuda:0"
+              ],
+              [
+                "topk_running_beam_indices",
+                "tensor",
+                [
+                  1,
+                  100,
+                  8
+                ],
+                [
+                  800,
+                  8,
+                  1
+                ],
+                "torch.int32",
+                "cuda:0"
+              ],
+              [
+                "is_early_stop_heuristic_unsatisfied",
+                "tensor",
+                [
+                  1,
+                  1
+                ],
+                [
+                  1,
+                  1
+                ],
+                "torch.bool",
+                "cuda:0"
+              ],
+              [
+                "is_sent_finished",
+                "tensor",
+                [
+                  1,
+                  50
+                ],
+                [
+                  50,
+                  1
+                ],
+                "torch.bool",
+                "cuda:0"
+              ],
+              [
+                "next_token_hits_stopping_criteria",
+                "tensor",
+                [
+                  1,
+                  100
+                ],
+                [
+                  100,
+                  1
+                ],
+                "torch.bool",
+                "cuda:0"
+              ],
+              [
+                "top_num_beam_mask",
+                "tensor",
+                [
+                  100
+                ],
+                [
+                  1
+                ],
+                "torch.bool",
+                "cuda:0"
+              ],
+              [
+                "num_beams",
+                "int",
+                50
+              ],
+              [
+                "cur_len",
+                "int",
+                121
+              ],
+              [
+                "decoder_prompt_len",
+                "int",
+                121
+              ],
+              [
+                "length_penalty",
+                "float",
+                0.0
+              ],
+              [
+                "early_stopping",
+                "bool",
+                false
+              ]
+            ],
+            "input_bytes": 160451,
+            "output_bytes": 53450,
+            "capture_and_warmup_s": 0.006133325397968292,
+            "allocated_delta_bytes": 218624
+          },
+          {
+            "method": "_get_running_beams_for_next_iteration",
+            "prompt_tokens": 121,
+            "step": 1,
+            "signature": [
+              [
+                "topk_log_probs",
+                "tensor",
+                [
+                  1,
+                  100
+                ],
+                [
+                  100,
+                  1
+                ],
+                "torch.float32",
+                "cuda:0"
+              ],
+              [
+                "topk_running_sequences",
+                "tensor",
+                [
+                  1,
+                  100,
+                  129
+                ],
+                [
+                  12900,
+                  129,
+                  1
+                ],
+                "torch.int64",
+                "cuda:0"
+              ],
+              [
+                "topk_running_beam_indices",
+                "tensor",
+                [
+                  1,
+                  100,
+                  8
+                ],
+                [
+                  800,
+                  8,
+                  1
+                ],
+                "torch.int32",
+                "cuda:0"
+              ],
+              [
+                "next_token_hits_stopping_criteria",
+                "tensor",
+                [
+                  1,
+                  100
+                ],
+                [
+                  100,
+                  1
+                ],
+                "torch.bool",
+                "cuda:0"
+              ],
+              [
+                "num_beams",
+                "int",
+                50
+              ]
+            ],
+            "input_bytes": 106900,
+            "output_bytes": 53400,
+            "capture_and_warmup_s": 0.0059146396815776825,
+            "allocated_delta_bytes": 162304
+          },
+          {
+            "method": "_update_finished_beams",
+            "prompt_tokens": 121,
+            "step": 1,
+            "signature": [
+              [
+                "sequences",
+                "tensor",
+                [
+                  1,
+                  50,
+                  129
+                ],
+                [
+                  6450,
+                  129,
+                  1
+                ],
+                "torch.int64",
+                "cuda:0"
+              ],
+              [
+                "topk_running_sequences",
+                "tensor",
+                [
+                  1,
+                  100,
+                  129
+                ],
+                [
+                  12900,
+                  129,
+                  1
+                ],
+                "torch.int64",
+                "cuda:0"
+              ],
+              [
+                "beam_scores",
+                "tensor",
+                [
+                  1,
+                  50
+                ],
+                [
+                  50,
+                  1
+                ],
+                "torch.float32",
+                "cuda:0"
+              ],
+              [
+                "topk_log_probs",
+                "tensor",
+                [
+                  1,
+                  100
+                ],
+                [
+                  100,
+                  1
+                ],
+                "torch.float32",
+                "cuda:0"
+              ],
+              [
+                "beam_indices",
+                "tensor",
+                [
+                  1,
+                  50,
+                  8
+                ],
+                [
+                  400,
+                  8,
+                  1
+                ],
+                "torch.int32",
+                "cuda:0"
+              ],
+              [
+                "topk_running_beam_indices",
+                "tensor",
+                [
+                  1,
+                  100,
+                  8
+                ],
+                [
+                  800,
+                  8,
+                  1
+                ],
+                "torch.int32",
+                "cuda:0"
+              ],
+              [
+                "is_early_stop_heuristic_unsatisfied",
+                "tensor",
+                [
+                  1,
+                  1
+                ],
+                [
+                  1,
+                  1
+                ],
+                "torch.bool",
+                "cuda:0"
+              ],
+              [
+                "is_sent_finished",
+                "tensor",
+                [
+                  1,
+                  50
+                ],
+                [
+                  50,
+                  1
+                ],
+                "torch.bool",
+                "cuda:0"
+              ],
+              [
+                "next_token_hits_stopping_criteria",
+                "tensor",
+                [
+                  1,
+                  100
+                ],
+                [
+                  100,
+                  1
+                ],
+                "torch.bool",
+                "cuda:0"
+              ],
+              [
+                "top_num_beam_mask",
+                "tensor",
+                [
+                  100
+                ],
+                [
+                  1
+                ],
+                "torch.bool",
+                "cuda:0"
+              ],
+              [
+                "num_beams",
+                "int",
+                50
+              ],
+              [
+                "cur_len",
+                "int",
+                122
+              ],
+              [
+                "decoder_prompt_len",
+                "int",
+                121
+              ],
+              [
+                "length_penalty",
+                "float",
+                0.0
+              ],
+              [
+                "early_stopping",
+                "bool",
+                false
+              ]
+            ],
+            "input_bytes": 160451,
+            "output_bytes": 53450,
+            "capture_and_warmup_s": 0.005975943058729172,
+            "allocated_delta_bytes": 218624
+          },
+          {
+            "method": "_get_running_beams_for_next_iteration",
+            "prompt_tokens": 121,
+            "step": 2,
+            "signature": [
+              [
+                "topk_log_probs",
+                "tensor",
+                [
+                  1,
+                  100
+                ],
+                [
+                  100,
+                  1
+                ],
+                "torch.float32",
+                "cuda:0"
+              ],
+              [
+                "topk_running_sequences",
+                "tensor",
+                [
+                  1,
+                  100,
+                  129
+                ],
+                [
+                  12900,
+                  129,
+                  1
+                ],
+                "torch.int64",
+                "cuda:0"
+              ],
+              [
+                "topk_running_beam_indices",
+                "tensor",
+                [
+                  1,
+                  100,
+                  8
+                ],
+                [
+                  800,
+                  8,
+                  1
+                ],
+                "torch.int32",
+                "cuda:0"
+              ],
+              [
+                "next_token_hits_stopping_criteria",
+                "tensor",
+                [
+                  1,
+                  100
+                ],
+                [
+                  100,
+                  1
+                ],
+                "torch.bool",
+                "cuda:0"
+              ],
+              [
+                "num_beams",
+                "int",
+                50
+              ]
+            ],
+            "input_bytes": 106900,
+            "output_bytes": 53400,
+            "capture_and_warmup_s": 0.006030377000570297,
+            "allocated_delta_bytes": 162304
+          },
+          {
+            "method": "_update_finished_beams",
+            "prompt_tokens": 121,
+            "step": 2,
+            "signature": [
+              [
+                "sequences",
+                "tensor",
+                [
+                  1,
+                  50,
+                  129
+                ],
+                [
+                  6450,
+                  129,
+                  1
+                ],
+                "torch.int64",
+                "cuda:0"
+              ],
+              [
+                "topk_running_sequences",
+                "tensor",
+                [
+                  1,
+                  100,
+                  129
+                ],
+                [
+                  12900,
+                  129,
+                  1
+                ],
+                "torch.int64",
+                "cuda:0"
+              ],
+              [
+                "beam_scores",
+                "tensor",
+                [
+                  1,
+                  50
+                ],
+                [
+                  50,
+                  1
+                ],
+                "torch.float32",
+                "cuda:0"
+              ],
+              [
+                "topk_log_probs",
+                "tensor",
+                [
+                  1,
+                  100
+                ],
+                [
+                  100,
+                  1
+                ],
+                "torch.float32",
+                "cuda:0"
+              ],
+              [
+                "beam_indices",
+                "tensor",
+                [
+                  1,
+                  50,
+                  8
+                ],
+                [
+                  400,
+                  8,
+                  1
+                ],
+                "torch.int32",
+                "cuda:0"
+              ],
+              [
+                "topk_running_beam_indices",
+                "tensor",
+                [
+                  1,
+                  100,
+                  8
+                ],
+                [
+                  800,
+                  8,
+                  1
+                ],
+                "torch.int32",
+                "cuda:0"
+              ],
+              [
+                "is_early_stop_heuristic_unsatisfied",
+                "tensor",
+                [
+                  1,
+                  1
+                ],
+                [
+                  1,
+                  1
+                ],
+                "torch.bool",
+                "cuda:0"
+              ],
+              [
+                "is_sent_finished",
+                "tensor",
+                [
+                  1,
+                  50
+                ],
+                [
+                  50,
+                  1
+                ],
+                "torch.bool",
+                "cuda:0"
+              ],
+              [
+                "next_token_hits_stopping_criteria",
+                "tensor",
+                [
+                  1,
+                  100
+                ],
+                [
+                  100,
+                  1
+                ],
+                "torch.bool",
+                "cuda:0"
+              ],
+              [
+                "top_num_beam_mask",
+                "tensor",
+                [
+                  100
+                ],
+                [
+                  1
+                ],
+                "torch.bool",
+                "cuda:0"
+              ],
+              [
+                "num_beams",
+                "int",
+                50
+              ],
+              [
+                "cur_len",
+                "int",
+                123
+              ],
+              [
+                "decoder_prompt_len",
+                "int",
+                121
+              ],
+              [
+                "length_penalty",
+                "float",
+                0.0
+              ],
+              [
+                "early_stopping",
+                "bool",
+                false
+              ]
+            ],
+            "input_bytes": 160451,
+            "output_bytes": 53450,
+            "capture_and_warmup_s": 0.005944784730672836,
+            "allocated_delta_bytes": 218624
+          },
+          {
+            "method": "_get_running_beams_for_next_iteration",
+            "prompt_tokens": 121,
+            "step": 3,
+            "signature": [
+              [
+                "topk_log_probs",
+                "tensor",
+                [
+                  1,
+                  100
+                ],
+                [
+                  100,
+                  1
+                ],
+                "torch.float32",
+                "cuda:0"
+              ],
+              [
+                "topk_running_sequences",
+                "tensor",
+                [
+                  1,
+                  100,
+                  129
+                ],
+                [
+                  12900,
+                  129,
+                  1
+                ],
+                "torch.int64",
+                "cuda:0"
+              ],
+              [
+                "topk_running_beam_indices",
+                "tensor",
+                [
+                  1,
+                  100,
+                  8
+                ],
+                [
+                  800,
+                  8,
+                  1
+                ],
+                "torch.int32",
+                "cuda:0"
+              ],
+              [
+                "next_token_hits_stopping_criteria",
+                "tensor",
+                [
+                  1,
+                  100
+                ],
+                [
+                  100,
+                  1
+                ],
+                "torch.bool",
+                "cuda:0"
+              ],
+              [
+                "num_beams",
+                "int",
+                50
+              ]
+            ],
+            "input_bytes": 106900,
+            "output_bytes": 53400,
+            "capture_and_warmup_s": 0.005444768816232681,
+            "allocated_delta_bytes": 162304
+          },
+          {
+            "method": "_update_finished_beams",
+            "prompt_tokens": 121,
+            "step": 3,
+            "signature": [
+              [
+                "sequences",
+                "tensor",
+                [
+                  1,
+                  50,
+                  129
+                ],
+                [
+                  6450,
+                  129,
+                  1
+                ],
+                "torch.int64",
+                "cuda:0"
+              ],
+              [
+                "topk_running_sequences",
+                "tensor",
+                [
+                  1,
+                  100,
+                  129
+                ],
+                [
+                  12900,
+                  129,
+                  1
+                ],
+                "torch.int64",
+                "cuda:0"
+              ],
+              [
+                "beam_scores",
+                "tensor",
+                [
+                  1,
+                  50
+                ],
+                [
+                  50,
+                  1
+                ],
+                "torch.float32",
+                "cuda:0"
+              ],
+              [
+                "topk_log_probs",
+                "tensor",
+                [
+                  1,
+                  100
+                ],
+                [
+                  100,
+                  1
+                ],
+                "torch.float32",
+                "cuda:0"
+              ],
+              [
+                "beam_indices",
+                "tensor",
+                [
+                  1,
+                  50,
+                  8
+                ],
+                [
+                  400,
+                  8,
+                  1
+                ],
+                "torch.int32",
+                "cuda:0"
+              ],
+              [
+                "topk_running_beam_indices",
+                "tensor",
+                [
+                  1,
+                  100,
+                  8
+                ],
+                [
+                  800,
+                  8,
+                  1
+                ],
+                "torch.int32",
+                "cuda:0"
+              ],
+              [
+                "is_early_stop_heuristic_unsatisfied",
+                "tensor",
+                [
+                  1,
+                  1
+                ],
+                [
+                  1,
+                  1
+                ],
+                "torch.bool",
+                "cuda:0"
+              ],
+              [
+                "is_sent_finished",
+                "tensor",
+                [
+                  1,
+                  50
+                ],
+                [
+                  50,
+                  1
+                ],
+                "torch.bool",
+                "cuda:0"
+              ],
+              [
+                "next_token_hits_stopping_criteria",
+                "tensor",
+                [
+                  1,
+                  100
+                ],
+                [
+                  100,
+                  1
+                ],
+                "torch.bool",
+                "cuda:0"
+              ],
+              [
+                "top_num_beam_mask",
+                "tensor",
+                [
+                  100
+                ],
+                [
+                  1
+                ],
+                "torch.bool",
+                "cuda:0"
+              ],
+              [
+                "num_beams",
+                "int",
+                50
+              ],
+              [
+                "cur_len",
+                "int",
+                124
+              ],
+              [
+                "decoder_prompt_len",
+                "int",
+                121
+              ],
+              [
+                "length_penalty",
+                "float",
+                0.0
+              ],
+              [
+                "early_stopping",
+                "bool",
+                false
+              ]
+            ],
+            "input_bytes": 160451,
+            "output_bytes": 53450,
+            "capture_and_warmup_s": 0.005957677960395813,
+            "allocated_delta_bytes": 218624
+          },
+          {
+            "method": "_get_running_beams_for_next_iteration",
+            "prompt_tokens": 121,
+            "step": 4,
+            "signature": [
+              [
+                "topk_log_probs",
+                "tensor",
+                [
+                  1,
+                  100
+                ],
+                [
+                  100,
+                  1
+                ],
+                "torch.float32",
+                "cuda:0"
+              ],
+              [
+                "topk_running_sequences",
+                "tensor",
+                [
+                  1,
+                  100,
+                  129
+                ],
+                [
+                  12900,
+                  129,
+                  1
+                ],
+                "torch.int64",
+                "cuda:0"
+              ],
+              [
+                "topk_running_beam_indices",
+                "tensor",
+                [
+                  1,
+                  100,
+                  8
+                ],
+                [
+                  800,
+                  8,
+                  1
+                ],
+                "torch.int32",
+                "cuda:0"
+              ],
+              [
+                "next_token_hits_stopping_criteria",
+                "tensor",
+                [
+                  1,
+                  100
+                ],
+                [
+                  100,
+                  1
+                ],
+                "torch.bool",
+                "cuda:0"
+              ],
+              [
+                "num_beams",
+                "int",
+                50
+              ]
+            ],
+            "input_bytes": 106900,
+            "output_bytes": 53400,
+            "capture_and_warmup_s": 0.005614578723907471,
+            "allocated_delta_bytes": 162304
+          },
+          {
+            "method": "_update_finished_beams",
+            "prompt_tokens": 121,
+            "step": 4,
+            "signature": [
+              [
+                "sequences",
+                "tensor",
+                [
+                  1,
+                  50,
+                  129
+                ],
+                [
+                  6450,
+                  129,
+                  1
+                ],
+                "torch.int64",
+                "cuda:0"
+              ],
+              [
+                "topk_running_sequences",
+                "tensor",
+                [
+                  1,
+                  100,
+                  129
+                ],
+                [
+                  12900,
+                  129,
+                  1
+                ],
+                "torch.int64",
+                "cuda:0"
+              ],
+              [
+                "beam_scores",
+                "tensor",
+                [
+                  1,
+                  50
+                ],
+                [
+                  50,
+                  1
+                ],
+                "torch.float32",
+                "cuda:0"
+              ],
+              [
+                "topk_log_probs",
+                "tensor",
+                [
+                  1,
+                  100
+                ],
+                [
+                  100,
+                  1
+                ],
+                "torch.float32",
+                "cuda:0"
+              ],
+              [
+                "beam_indices",
+                "tensor",
+                [
+                  1,
+                  50,
+                  8
+                ],
+                [
+                  400,
+                  8,
+                  1
+                ],
+                "torch.int32",
+                "cuda:0"
+              ],
+              [
+                "topk_running_beam_indices",
+                "tensor",
+                [
+                  1,
+                  100,
+                  8
+                ],
+                [
+                  800,
+                  8,
+                  1
+                ],
+                "torch.int32",
+                "cuda:0"
+              ],
+              [
+                "is_early_stop_heuristic_unsatisfied",
+                "tensor",
+                [
+                  1,
+                  1
+                ],
+                [
+                  1,
+                  1
+                ],
+                "torch.bool",
+                "cuda:0"
+              ],
+              [
+                "is_sent_finished",
+                "tensor",
+                [
+                  1,
+                  50
+                ],
+                [
+                  50,
+                  1
+                ],
+                "torch.bool",
+                "cuda:0"
+              ],
+              [
+                "next_token_hits_stopping_criteria",
+                "tensor",
+                [
+                  1,
+                  100
+                ],
+                [
+                  100,
+                  1
+                ],
+                "torch.bool",
+                "cuda:0"
+              ],
+              [
+                "top_num_beam_mask",
+                "tensor",
+                [
+                  100
+                ],
+                [
+                  1
+                ],
+                "torch.bool",
+                "cuda:0"
+              ],
+              [
+                "num_beams",
+                "int",
+                50
+              ],
+              [
+                "cur_len",
+                "int",
+                125
+              ],
+              [
+                "decoder_prompt_len",
+                "int",
+                121
+              ],
+              [
+                "length_penalty",
+                "float",
+                0.0
+              ],
+              [
+                "early_stopping",
+                "bool",
+                false
+              ]
+            ],
+            "input_bytes": 160451,
+            "output_bytes": 53450,
+            "capture_and_warmup_s": 0.006106134504079819,
+            "allocated_delta_bytes": 218624
+          }
+        ],
+        "scope": "Original HF helpers; borrowed per-step output state until lease close. Timed staging. Unique inputs/outputs exclude graph intermediates and private pool slack; allocator measurements include them.",
+        "final_outputs_exact": true,
+        "final_output_comparison": {
+          "values": 109500,
+          "matching_bits": 109500,
+          "max_abs_finite": 0.0
+        }
+      },
+      "beam_probe": {
+        "exact": true,
+        "graph_direct": {
+          "values": 1624000,
+          "matching_bits": 1624000,
+          "max_abs_finite": 0.0
+        },
+        "retained_after_five_steps": {
+          "values": 1624000,
+          "matching_bits": 1624000,
+          "max_abs_finite": 0.0
+        },
+        "direct_repeated": {
+          "values": 1624000,
+          "matching_bits": 1624000,
+          "max_abs_finite": 0.0
+        }
+      },
+      "setup_s": 367.7374183125794,
+      "backend_compile_s": 276.14447440207005,
+      "capture_and_warmup_s": 218.00432396680117,
+      "measurement_compilations": 0,
+      "measurement_captures": 0
+    },
+    {
+      "phase": 2,
+      "variant": "beam_replay",
+      "latency_ms": {
+        "n": 12,
+        "median_ms": 115.72594195604324,
+        "p95_ms": 119.17220503091812
+      },
+      "memory": {
+        "allocated_bytes": 6598222336,
+        "reserved_bytes": 8269070336,
+        "peak_allocated_bytes": 6920076288,
+        "peak_reserved_bytes": 8269070336
+      },
+      "compiler_artifacts_reused": true,
+      "setup_memory": {
+        "allocated_bytes": 6598222336,
+        "reserved_bytes": 8269070336,
+        "peak_allocated_bytes": 7533031936,
+        "peak_reserved_bytes": 8269070336
+      },
+      "unique_input_storage_bytes": 15546688,
+      "logical_input_bytes": 79599936,
+      "physical_prefix": {
+        "requests_loaded": 20,
+        "prefix_bytes_copied": 112967680,
+        "prefix_capacity_bytes": 6938624,
+        "suffix_capacity_bytes": 8601600,
+        "max_prefix_tokens": 121,
+        "max_suffix_tokens": 3,
+        "physical_prefix_batch": 1,
+        "suffix_batch": 50,
+        "attention_materialization": "Temporary dense exact-length K/V per layer; unchanged SDPA"
+      },
+      "direct_reorder": {
+        "direct_calls": 80,
+        "fallback_calls": 20,
+        "suffix_bytes_written": 344064000,
+        "prefix_bytes_reordered": 0
+      },
+      "warmup_comparison": {
+        "requests": 4,
+        "rank_positions": 200,
+        "sequence_values": 200,
+        "transition_values": 1000,
+        "matching_rank_lists": 4,
+        "matching_rank_positions": 200,
+        "matching_sequence_vectors": 4,
+        "matching_transition_arrays": 4,
+        "matching_sequence_values": 200,
+        "matching_transition_values": 1000,
+        "max_sequence_difference_common": 0.0,
+        "max_transition_difference_common": 0.0
+      },
+      "warmup_historical_comparison": {
+        "requests": 12,
+        "rank_positions": 600,
+        "sequence_values": 600,
+        "transition_values": 3000,
+        "matching_rank_lists": 12,
+        "matching_rank_positions": 600,
+        "matching_sequence_vectors": 12,
+        "matching_transition_arrays": 12,
+        "matching_sequence_values": 600,
+        "matching_transition_values": 3000,
+        "max_sequence_difference_common": 0.0,
+        "max_transition_difference_common": 0.0
+      },
+      "model_loading_s": 1.7345767505466938,
+      "model_storage": {
+        "logical_parameter_bytes": 6176878592,
+        "unique_parameter_storage_bytes": 6176878592,
+        "gate_up_unique_bytes": 3082813440
+      },
+      "beam_replay": {
+        "graphs": 20,
+        "frozen": true,
+        "replays": 200,
+        "requests": 20,
+        "staged_bytes": 22235100,
+        "aborted_requests": 0,
+        "input_logical_bytes": 2223510,
+        "output_logical_bytes": 888500,
+        "unique_input_output_storage_bytes": 3112010,
+        "disjoint_step_storage": true,
+        "active_request": false,
+        "helper_source_sha256": {
+          "_gather_beams": "4e29903be152b0c59a229a00b8b333466b19103330f242f52c25ccdb596e87e3",
+          "_get_running_beams_for_next_iteration": "97511a4b165780149cfebe20ed583f79e411b6dda676e2430fae57442d7e8a07",
+          "_update_finished_beams": "b2bd70364b53bdd154e4f54b22d0774846ac53f6720ccea319c8d77d38700d74",
+          "_beam_search": "432fafa552a0b380f14340750057593112be902c03ae7eb4f29328d378a4d0c5"
+        },
+        "capture_and_warmup_s": 0.1300753876566887,
+        "events": [
+          {
+            "method": "_get_running_beams_for_next_iteration",
+            "prompt_tokens": 76,
+            "step": 0,
+            "signature": [
+              [
+                "topk_log_probs",
+                "tensor",
+                [
+                  1,
+                  100
+                ],
+                [
+                  100,
+                  1
+                ],
+                "torch.float32",
+                "cuda:0"
+              ],
+              [
+                "topk_running_sequences",
+                "tensor",
+                [
+                  1,
+                  100,
+                  84
+                ],
+                [
+                  8400,
+                  84,
+                  1
+                ],
+                "torch.int64",
+                "cuda:0"
+              ],
+              [
+                "topk_running_beam_indices",
+                "tensor",
+                [
+                  1,
+                  100,
+                  8
+                ],
+                [
+                  800,
+                  8,
+                  1
+                ],
+                "torch.int32",
+                "cuda:0"
+              ],
+              [
+                "next_token_hits_stopping_criteria",
+                "tensor",
+                [
+                  1,
+                  100
+                ],
+                [
+                  100,
+                  1
+                ],
+                "torch.bool",
+                "cuda:0"
+              ],
+              [
+                "num_beams",
+                "int",
+                50
+              ]
+            ],
+            "input_bytes": 70900,
+            "output_bytes": 35400,
+            "capture_and_warmup_s": 0.01207253709435463,
+            "allocated_delta_bytes": 108544
+          },
+          {
+            "method": "_update_finished_beams",
+            "prompt_tokens": 76,
+            "step": 0,
+            "signature": [
+              [
+                "sequences",
+                "tensor",
+                [
+                  1,
+                  50,
+                  84
+                ],
+                [
+                  4200,
+                  84,
+                  1
+                ],
+                "torch.int64",
+                "cuda:0"
+              ],
+              [
+                "topk_running_sequences",
+                "tensor",
+                [
+                  1,
+                  100,
+                  84
+                ],
+                [
+                  8400,
+                  84,
+                  1
+                ],
+                "torch.int64",
+                "cuda:0"
+              ],
+              [
+                "beam_scores",
+                "tensor",
+                [
+                  1,
+                  50
+                ],
+                [
+                  50,
+                  1
+                ],
+                "torch.float32",
+                "cuda:0"
+              ],
+              [
+                "topk_log_probs",
+                "tensor",
+                [
+                  1,
+                  100
+                ],
+                [
+                  100,
+                  1
+                ],
+                "torch.float32",
+                "cuda:0"
+              ],
+              [
+                "beam_indices",
+                "tensor",
+                [
+                  1,
+                  50,
+                  8
+                ],
+                [
+                  400,
+                  8,
+                  1
+                ],
+                "torch.int32",
+                "cuda:0"
+              ],
+              [
+                "topk_running_beam_indices",
+                "tensor",
+                [
+                  1,
+                  100,
+                  8
+                ],
+                [
+                  800,
+                  8,
+                  1
+                ],
+                "torch.int32",
+                "cuda:0"
+              ],
+              [
+                "is_early_stop_heuristic_unsatisfied",
+                "tensor",
+                [
+                  1,
+                  1
+                ],
+                [
+                  1,
+                  1
+                ],
+                "torch.bool",
+                "cuda:0"
+              ],
+              [
+                "is_sent_finished",
+                "tensor",
+                [
+                  1,
+                  50
+                ],
+                [
+                  50,
+                  1
+                ],
+                "torch.bool",
+                "cuda:0"
+              ],
+              [
+                "next_token_hits_stopping_criteria",
+                "tensor",
+                [
+                  1,
+                  100
+                ],
+                [
+                  100,
+                  1
+                ],
+                "torch.bool",
+                "cuda:0"
+              ],
+              [
+                "top_num_beam_mask",
+                "tensor",
+                [
+                  100
+                ],
+                [
+                  1
+                ],
+                "torch.bool",
+                "cuda:0"
+              ],
+              [
+                "num_beams",
+                "int",
+                50
+              ],
+              [
+                "cur_len",
+                "int",
+                76
+              ],
+              [
+                "decoder_prompt_len",
+                "int",
+                76
+              ],
+              [
+                "length_penalty",
+                "float",
+                0.0
+              ],
+              [
+                "early_stopping",
+                "bool",
+                false
+              ]
+            ],
+            "input_bytes": 106451,
+            "output_bytes": 35450,
+            "capture_and_warmup_s": 0.005775913596153259,
+            "allocated_delta_bytes": 146944
+          },
+          {
+            "method": "_get_running_beams_for_next_iteration",
+            "prompt_tokens": 76,
+            "step": 1,
+            "signature": [
+              [
+                "topk_log_probs",
+                "tensor",
+                [
+                  1,
+                  100
+                ],
+                [
+                  100,
+                  1
+                ],
+                "torch.float32",
+                "cuda:0"
+              ],
+              [
+                "topk_running_sequences",
+                "tensor",
+                [
+                  1,
+                  100,
+                  84
+                ],
+                [
+                  8400,
+                  84,
+                  1
+                ],
+                "torch.int64",
+                "cuda:0"
+              ],
+              [
+                "topk_running_beam_indices",
+                "tensor",
+                [
+                  1,
+                  100,
+                  8
+                ],
+                [
+                  800,
+                  8,
+                  1
+                ],
+                "torch.int32",
+                "cuda:0"
+              ],
+              [
+                "next_token_hits_stopping_criteria",
+                "tensor",
+                [
+                  1,
+                  100
+                ],
+                [
+                  100,
+                  1
+                ],
+                "torch.bool",
+                "cuda:0"
+              ],
+              [
+                "num_beams",
+                "int",
+                50
+              ]
+            ],
+            "input_bytes": 70900,
+            "output_bytes": 35400,
+            "capture_and_warmup_s": 0.005128961056470871,
+            "allocated_delta_bytes": 108544
+          },
+          {
+            "method": "_update_finished_beams",
+            "prompt_tokens": 76,
+            "step": 1,
+            "signature": [
+              [
+                "sequences",
+                "tensor",
+                [
+                  1,
+                  50,
+                  84
+                ],
+                [
+                  4200,
+                  84,
+                  1
+                ],
+                "torch.int64",
+                "cuda:0"
+              ],
+              [
+                "topk_running_sequences",
+                "tensor",
+                [
+                  1,
+                  100,
+                  84
+                ],
+                [
+                  8400,
+                  84,
+                  1
+                ],
+                "torch.int64",
+                "cuda:0"
+              ],
+              [
+                "beam_scores",
+                "tensor",
+                [
+                  1,
+                  50
+                ],
+                [
+                  50,
+                  1
+                ],
+                "torch.float32",
+                "cuda:0"
+              ],
+              [
+                "topk_log_probs",
+                "tensor",
+                [
+                  1,
+                  100
+                ],
+                [
+                  100,
+                  1
+                ],
+                "torch.float32",
+                "cuda:0"
+              ],
+              [
+                "beam_indices",
+                "tensor",
+                [
+                  1,
+                  50,
+                  8
+                ],
+                [
+                  400,
+                  8,
+                  1
+                ],
+                "torch.int32",
+                "cuda:0"
+              ],
+              [
+                "topk_running_beam_indices",
+                "tensor",
+                [
+                  1,
+                  100,
+                  8
+                ],
+                [
+                  800,
+                  8,
+                  1
+                ],
+                "torch.int32",
+                "cuda:0"
+              ],
+              [
+                "is_early_stop_heuristic_unsatisfied",
+                "tensor",
+                [
+                  1,
+                  1
+                ],
+                [
+                  1,
+                  1
+                ],
+                "torch.bool",
+                "cuda:0"
+              ],
+              [
+                "is_sent_finished",
+                "tensor",
+                [
+                  1,
+                  50
+                ],
+                [
+                  50,
+                  1
+                ],
+                "torch.bool",
+                "cuda:0"
+              ],
+              [
+                "next_token_hits_stopping_criteria",
+                "tensor",
+                [
+                  1,
+                  100
+                ],
+                [
+                  100,
+                  1
+                ],
+                "torch.bool",
+                "cuda:0"
+              ],
+              [
+                "top_num_beam_mask",
+                "tensor",
+                [
+                  100
+                ],
+                [
+                  1
+                ],
+                "torch.bool",
+                "cuda:0"
+              ],
+              [
+                "num_beams",
+                "int",
+                50
+              ],
+              [
+                "cur_len",
+                "int",
+                77
+              ],
+              [
+                "decoder_prompt_len",
+                "int",
+                76
+              ],
+              [
+                "length_penalty",
+                "float",
+                0.0
+              ],
+              [
+                "early_stopping",
+                "bool",
+                false
+              ]
+            ],
+            "input_bytes": 106451,
+            "output_bytes": 35450,
+            "capture_and_warmup_s": 0.0052909813821315765,
+            "allocated_delta_bytes": 146944
+          },
+          {
+            "method": "_get_running_beams_for_next_iteration",
+            "prompt_tokens": 76,
+            "step": 2,
+            "signature": [
+              [
+                "topk_log_probs",
+                "tensor",
+                [
+                  1,
+                  100
+                ],
+                [
+                  100,
+                  1
+                ],
+                "torch.float32",
+                "cuda:0"
+              ],
+              [
+                "topk_running_sequences",
+                "tensor",
+                [
+                  1,
+                  100,
+                  84
+                ],
+                [
+                  8400,
+                  84,
+                  1
+                ],
+                "torch.int64",
+                "cuda:0"
+              ],
+              [
+                "topk_running_beam_indices",
+                "tensor",
+                [
+                  1,
+                  100,
+                  8
+                ],
+                [
+                  800,
+                  8,
+                  1
+                ],
+                "torch.int32",
+                "cuda:0"
+              ],
+              [
+                "next_token_hits_stopping_criteria",
+                "tensor",
+                [
+                  1,
+                  100
+                ],
+                [
+                  100,
+                  1
+                ],
+                "torch.bool",
+                "cuda:0"
+              ],
+              [
+                "num_beams",
+                "int",
+                50
+              ]
+            ],
+            "input_bytes": 70900,
+            "output_bytes": 35400,
+            "capture_and_warmup_s": 0.005226917564868927,
+            "allocated_delta_bytes": 108544
+          },
+          {
+            "method": "_update_finished_beams",
+            "prompt_tokens": 76,
+            "step": 2,
+            "signature": [
+              [
+                "sequences",
+                "tensor",
+                [
+                  1,
+                  50,
+                  84
+                ],
+                [
+                  4200,
+                  84,
+                  1
+                ],
+                "torch.int64",
+                "cuda:0"
+              ],
+              [
+                "topk_running_sequences",
+                "tensor",
+                [
+                  1,
+                  100,
+                  84
+                ],
+                [
+                  8400,
+                  84,
+                  1
+                ],
+                "torch.int64",
+                "cuda:0"
+              ],
+              [
+                "beam_scores",
+                "tensor",
+                [
+                  1,
+                  50
+                ],
+                [
+                  50,
+                  1
+                ],
+                "torch.float32",
+                "cuda:0"
+              ],
+              [
+                "topk_log_probs",
+                "tensor",
+                [
+                  1,
+                  100
+                ],
+                [
+                  100,
+                  1
+                ],
+                "torch.float32",
+                "cuda:0"
+              ],
+              [
+                "beam_indices",
+                "tensor",
+                [
+                  1,
+                  50,
+                  8
+                ],
+                [
+                  400,
+                  8,
+                  1
+                ],
+                "torch.int32",
+                "cuda:0"
+              ],
+              [
+                "topk_running_beam_indices",
+                "tensor",
+                [
+                  1,
+                  100,
+                  8
+                ],
+                [
+                  800,
+                  8,
+                  1
+                ],
+                "torch.int32",
+                "cuda:0"
+              ],
+              [
+                "is_early_stop_heuristic_unsatisfied",
+                "tensor",
+                [
+                  1,
+                  1
+                ],
+                [
+                  1,
+                  1
+                ],
+                "torch.bool",
+                "cuda:0"
+              ],
+              [
+                "is_sent_finished",
+                "tensor",
+                [
+                  1,
+                  50
+                ],
+                [
+                  50,
+                  1
+                ],
+                "torch.bool",
+                "cuda:0"
+              ],
+              [
+                "next_token_hits_stopping_criteria",
+                "tensor",
+                [
+                  1,
+                  100
+                ],
+                [
+                  100,
+                  1
+                ],
+                "torch.bool",
+                "cuda:0"
+              ],
+              [
+                "top_num_beam_mask",
+                "tensor",
+                [
+                  100
+                ],
+                [
+                  1
+                ],
+                "torch.bool",
+                "cuda:0"
+              ],
+              [
+                "num_beams",
+                "int",
+                50
+              ],
+              [
+                "cur_len",
+                "int",
+                78
+              ],
+              [
+                "decoder_prompt_len",
+                "int",
+                76
+              ],
+              [
+                "length_penalty",
+                "float",
+                0.0
+              ],
+              [
+                "early_stopping",
+                "bool",
+                false
+              ]
+            ],
+            "input_bytes": 106451,
+            "output_bytes": 35450,
+            "capture_and_warmup_s": 0.005245096981525421,
+            "allocated_delta_bytes": 146944
+          },
+          {
+            "method": "_get_running_beams_for_next_iteration",
+            "prompt_tokens": 76,
+            "step": 3,
+            "signature": [
+              [
+                "topk_log_probs",
+                "tensor",
+                [
+                  1,
+                  100
+                ],
+                [
+                  100,
+                  1
+                ],
+                "torch.float32",
+                "cuda:0"
+              ],
+              [
+                "topk_running_sequences",
+                "tensor",
+                [
+                  1,
+                  100,
+                  84
+                ],
+                [
+                  8400,
+                  84,
+                  1
+                ],
+                "torch.int64",
+                "cuda:0"
+              ],
+              [
+                "topk_running_beam_indices",
+                "tensor",
+                [
+                  1,
+                  100,
+                  8
+                ],
+                [
+                  800,
+                  8,
+                  1
+                ],
+                "torch.int32",
+                "cuda:0"
+              ],
+              [
+                "next_token_hits_stopping_criteria",
+                "tensor",
+                [
+                  1,
+                  100
+                ],
+                [
+                  100,
+                  1
+                ],
+                "torch.bool",
+                "cuda:0"
+              ],
+              [
+                "num_beams",
+                "int",
+                50
+              ]
+            ],
+            "input_bytes": 70900,
+            "output_bytes": 35400,
+            "capture_and_warmup_s": 0.005524437874555588,
+            "allocated_delta_bytes": 108544
+          },
+          {
+            "method": "_update_finished_beams",
+            "prompt_tokens": 76,
+            "step": 3,
+            "signature": [
+              [
+                "sequences",
+                "tensor",
+                [
+                  1,
+                  50,
+                  84
+                ],
+                [
+                  4200,
+                  84,
+                  1
+                ],
+                "torch.int64",
+                "cuda:0"
+              ],
+              [
+                "topk_running_sequences",
+                "tensor",
+                [
+                  1,
+                  100,
+                  84
+                ],
+                [
+                  8400,
+                  84,
+                  1
+                ],
+                "torch.int64",
+                "cuda:0"
+              ],
+              [
+                "beam_scores",
+                "tensor",
+                [
+                  1,
+                  50
+                ],
+                [
+                  50,
+                  1
+                ],
+                "torch.float32",
+                "cuda:0"
+              ],
+              [
+                "topk_log_probs",
+                "tensor",
+                [
+                  1,
+                  100
+                ],
+                [
+                  100,
+                  1
+                ],
+                "torch.float32",
+                "cuda:0"
+              ],
+              [
+                "beam_indices",
+                "tensor",
+                [
+                  1,
+                  50,
+                  8
+                ],
+                [
+                  400,
+                  8,
+                  1
+                ],
+                "torch.int32",
+                "cuda:0"
+              ],
+              [
+                "topk_running_beam_indices",
+                "tensor",
+                [
+                  1,
+                  100,
+                  8
+                ],
+                [
+                  800,
+                  8,
+                  1
+                ],
+                "torch.int32",
+                "cuda:0"
+              ],
+              [
+                "is_early_stop_heuristic_unsatisfied",
+                "tensor",
+                [
+                  1,
+                  1
+                ],
+                [
+                  1,
+                  1
+                ],
+                "torch.bool",
+                "cuda:0"
+              ],
+              [
+                "is_sent_finished",
+                "tensor",
+                [
+                  1,
+                  50
+                ],
+                [
+                  50,
+                  1
+                ],
+                "torch.bool",
+                "cuda:0"
+              ],
+              [
+                "next_token_hits_stopping_criteria",
+                "tensor",
+                [
+                  1,
+                  100
+                ],
+                [
+                  100,
+                  1
+                ],
+                "torch.bool",
+                "cuda:0"
+              ],
+              [
+                "top_num_beam_mask",
+                "tensor",
+                [
+                  100
+                ],
+                [
+                  1
+                ],
+                "torch.bool",
+                "cuda:0"
+              ],
+              [
+                "num_beams",
+                "int",
+                50
+              ],
+              [
+                "cur_len",
+                "int",
+                79
+              ],
+              [
+                "decoder_prompt_len",
+                "int",
+                76
+              ],
+              [
+                "length_penalty",
+                "float",
+                0.0
+              ],
+              [
+                "early_stopping",
+                "bool",
+                false
+              ]
+            ],
+            "input_bytes": 106451,
+            "output_bytes": 35450,
+            "capture_and_warmup_s": 0.006038777530193329,
+            "allocated_delta_bytes": 146944
+          },
+          {
+            "method": "_get_running_beams_for_next_iteration",
+            "prompt_tokens": 76,
+            "step": 4,
+            "signature": [
+              [
+                "topk_log_probs",
+                "tensor",
+                [
+                  1,
+                  100
+                ],
+                [
+                  100,
+                  1
+                ],
+                "torch.float32",
+                "cuda:0"
+              ],
+              [
+                "topk_running_sequences",
+                "tensor",
+                [
+                  1,
+                  100,
+                  84
+                ],
+                [
+                  8400,
+                  84,
+                  1
+                ],
+                "torch.int64",
+                "cuda:0"
+              ],
+              [
+                "topk_running_beam_indices",
+                "tensor",
+                [
+                  1,
+                  100,
+                  8
+                ],
+                [
+                  800,
+                  8,
+                  1
+                ],
+                "torch.int32",
+                "cuda:0"
+              ],
+              [
+                "next_token_hits_stopping_criteria",
+                "tensor",
+                [
+                  1,
+                  100
+                ],
+                [
+                  100,
+                  1
+                ],
+                "torch.bool",
+                "cuda:0"
+              ],
+              [
+                "num_beams",
+                "int",
+                50
+              ]
+            ],
+            "input_bytes": 70900,
+            "output_bytes": 35400,
+            "capture_and_warmup_s": 0.0054740384221076965,
+            "allocated_delta_bytes": 108544
+          },
+          {
+            "method": "_update_finished_beams",
+            "prompt_tokens": 76,
+            "step": 4,
+            "signature": [
+              [
+                "sequences",
+                "tensor",
+                [
+                  1,
+                  50,
+                  84
+                ],
+                [
+                  4200,
+                  84,
+                  1
+                ],
+                "torch.int64",
+                "cuda:0"
+              ],
+              [
+                "topk_running_sequences",
+                "tensor",
+                [
+                  1,
+                  100,
+                  84
+                ],
+                [
+                  8400,
+                  84,
+                  1
+                ],
+                "torch.int64",
+                "cuda:0"
+              ],
+              [
+                "beam_scores",
+                "tensor",
+                [
+                  1,
+                  50
+                ],
+                [
+                  50,
+                  1
+                ],
+                "torch.float32",
+                "cuda:0"
+              ],
+              [
+                "topk_log_probs",
+                "tensor",
+                [
+                  1,
+                  100
+                ],
+                [
+                  100,
+                  1
+                ],
+                "torch.float32",
+                "cuda:0"
+              ],
+              [
+                "beam_indices",
+                "tensor",
+                [
+                  1,
+                  50,
+                  8
+                ],
+                [
+                  400,
+                  8,
+                  1
+                ],
+                "torch.int32",
+                "cuda:0"
+              ],
+              [
+                "topk_running_beam_indices",
+                "tensor",
+                [
+                  1,
+                  100,
+                  8
+                ],
+                [
+                  800,
+                  8,
+                  1
+                ],
+                "torch.int32",
+                "cuda:0"
+              ],
+              [
+                "is_early_stop_heuristic_unsatisfied",
+                "tensor",
+                [
+                  1,
+                  1
+                ],
+                [
+                  1,
+                  1
+                ],
+                "torch.bool",
+                "cuda:0"
+              ],
+              [
+                "is_sent_finished",
+                "tensor",
+                [
+                  1,
+                  50
+                ],
+                [
+                  50,
+                  1
+                ],
+                "torch.bool",
+                "cuda:0"
+              ],
+              [
+                "next_token_hits_stopping_criteria",
+                "tensor",
+                [
+                  1,
+                  100
+                ],
+                [
+                  100,
+                  1
+                ],
+                "torch.bool",
+                "cuda:0"
+              ],
+              [
+                "top_num_beam_mask",
+                "tensor",
+                [
+                  100
+                ],
+                [
+                  1
+                ],
+                "torch.bool",
+                "cuda:0"
+              ],
+              [
+                "num_beams",
+                "int",
+                50
+              ],
+              [
+                "cur_len",
+                "int",
+                80
+              ],
+              [
+                "decoder_prompt_len",
+                "int",
+                76
+              ],
+              [
+                "length_penalty",
+                "float",
+                0.0
+              ],
+              [
+                "early_stopping",
+                "bool",
+                false
+              ]
+            ],
+            "input_bytes": 106451,
+            "output_bytes": 35450,
+            "capture_and_warmup_s": 0.005995001643896103,
+            "allocated_delta_bytes": 146944
+          },
+          {
+            "method": "_get_running_beams_for_next_iteration",
+            "prompt_tokens": 121,
+            "step": 0,
+            "signature": [
+              [
+                "topk_log_probs",
+                "tensor",
+                [
+                  1,
+                  100
+                ],
+                [
+                  100,
+                  1
+                ],
+                "torch.float32",
+                "cuda:0"
+              ],
+              [
+                "topk_running_sequences",
+                "tensor",
+                [
+                  1,
+                  100,
+                  129
+                ],
+                [
+                  12900,
+                  129,
+                  1
+                ],
+                "torch.int64",
+                "cuda:0"
+              ],
+              [
+                "topk_running_beam_indices",
+                "tensor",
+                [
+                  1,
+                  100,
+                  8
+                ],
+                [
+                  800,
+                  8,
+                  1
+                ],
+                "torch.int32",
+                "cuda:0"
+              ],
+              [
+                "next_token_hits_stopping_criteria",
+                "tensor",
+                [
+                  1,
+                  100
+                ],
+                [
+                  100,
+                  1
+                ],
+                "torch.bool",
+                "cuda:0"
+              ],
+              [
+                "num_beams",
+                "int",
+                50
+              ]
+            ],
+            "input_bytes": 106900,
+            "output_bytes": 53400,
+            "capture_and_warmup_s": 0.012607049196958542,
+            "allocated_delta_bytes": 162304
+          },
+          {
+            "method": "_update_finished_beams",
+            "prompt_tokens": 121,
+            "step": 0,
+            "signature": [
+              [
+                "sequences",
+                "tensor",
+                [
+                  1,
+                  50,
+                  129
+                ],
+                [
+                  6450,
+                  129,
+                  1
+                ],
+                "torch.int64",
+                "cuda:0"
+              ],
+              [
+                "topk_running_sequences",
+                "tensor",
+                [
+                  1,
+                  100,
+                  129
+                ],
+                [
+                  12900,
+                  129,
+                  1
+                ],
+                "torch.int64",
+                "cuda:0"
+              ],
+              [
+                "beam_scores",
+                "tensor",
+                [
+                  1,
+                  50
+                ],
+                [
+                  50,
+                  1
+                ],
+                "torch.float32",
+                "cuda:0"
+              ],
+              [
+                "topk_log_probs",
+                "tensor",
+                [
+                  1,
+                  100
+                ],
+                [
+                  100,
+                  1
+                ],
+                "torch.float32",
+                "cuda:0"
+              ],
+              [
+                "beam_indices",
+                "tensor",
+                [
+                  1,
+                  50,
+                  8
+                ],
+                [
+                  400,
+                  8,
+                  1
+                ],
+                "torch.int32",
+                "cuda:0"
+              ],
+              [
+                "topk_running_beam_indices",
+                "tensor",
+                [
+                  1,
+                  100,
+                  8
+                ],
+                [
+                  800,
+                  8,
+                  1
+                ],
+                "torch.int32",
+                "cuda:0"
+              ],
+              [
+                "is_early_stop_heuristic_unsatisfied",
+                "tensor",
+                [
+                  1,
+                  1
+                ],
+                [
+                  1,
+                  1
+                ],
+                "torch.bool",
+                "cuda:0"
+              ],
+              [
+                "is_sent_finished",
+                "tensor",
+                [
+                  1,
+                  50
+                ],
+                [
+                  50,
+                  1
+                ],
+                "torch.bool",
+                "cuda:0"
+              ],
+              [
+                "next_token_hits_stopping_criteria",
+                "tensor",
+                [
+                  1,
+                  100
+                ],
+                [
+                  100,
+                  1
+                ],
+                "torch.bool",
+                "cuda:0"
+              ],
+              [
+                "top_num_beam_mask",
+                "tensor",
+                [
+                  100
+                ],
+                [
+                  1
+                ],
+                "torch.bool",
+                "cuda:0"
+              ],
+              [
+                "num_beams",
+                "int",
+                50
+              ],
+              [
+                "cur_len",
+                "int",
+                121
+              ],
+              [
+                "decoder_prompt_len",
+                "int",
+                121
+              ],
+              [
+                "length_penalty",
+                "float",
+                0.0
+              ],
+              [
+                "early_stopping",
+                "bool",
+                false
+              ]
+            ],
+            "input_bytes": 160451,
+            "output_bytes": 53450,
+            "capture_and_warmup_s": 0.007310729473829269,
+            "allocated_delta_bytes": 218624
+          },
+          {
+            "method": "_get_running_beams_for_next_iteration",
+            "prompt_tokens": 121,
+            "step": 1,
+            "signature": [
+              [
+                "topk_log_probs",
+                "tensor",
+                [
+                  1,
+                  100
+                ],
+                [
+                  100,
+                  1
+                ],
+                "torch.float32",
+                "cuda:0"
+              ],
+              [
+                "topk_running_sequences",
+                "tensor",
+                [
+                  1,
+                  100,
+                  129
+                ],
+                [
+                  12900,
+                  129,
+                  1
+                ],
+                "torch.int64",
+                "cuda:0"
+              ],
+              [
+                "topk_running_beam_indices",
+                "tensor",
+                [
+                  1,
+                  100,
+                  8
+                ],
+                [
+                  800,
+                  8,
+                  1
+                ],
+                "torch.int32",
+                "cuda:0"
+              ],
+              [
+                "next_token_hits_stopping_criteria",
+                "tensor",
+                [
+                  1,
+                  100
+                ],
+                [
+                  100,
+                  1
+                ],
+                "torch.bool",
+                "cuda:0"
+              ],
+              [
+                "num_beams",
+                "int",
+                50
+              ]
+            ],
+            "input_bytes": 106900,
+            "output_bytes": 53400,
+            "capture_and_warmup_s": 0.006359033286571503,
+            "allocated_delta_bytes": 162304
+          },
+          {
+            "method": "_update_finished_beams",
+            "prompt_tokens": 121,
+            "step": 1,
+            "signature": [
+              [
+                "sequences",
+                "tensor",
+                [
+                  1,
+                  50,
+                  129
+                ],
+                [
+                  6450,
+                  129,
+                  1
+                ],
+                "torch.int64",
+                "cuda:0"
+              ],
+              [
+                "topk_running_sequences",
+                "tensor",
+                [
+                  1,
+                  100,
+                  129
+                ],
+                [
+                  12900,
+                  129,
+                  1
+                ],
+                "torch.int64",
+                "cuda:0"
+              ],
+              [
+                "beam_scores",
+                "tensor",
+                [
+                  1,
+                  50
+                ],
+                [
+                  50,
+                  1
+                ],
+                "torch.float32",
+                "cuda:0"
+              ],
+              [
+                "topk_log_probs",
+                "tensor",
+                [
+                  1,
+                  100
+                ],
+                [
+                  100,
+                  1
+                ],
+                "torch.float32",
+                "cuda:0"
+              ],
+              [
+                "beam_indices",
+                "tensor",
+                [
+                  1,
+                  50,
+                  8
+                ],
+                [
+                  400,
+                  8,
+                  1
+                ],
+                "torch.int32",
+                "cuda:0"
+              ],
+              [
+                "topk_running_beam_indices",
+                "tensor",
+                [
+                  1,
+                  100,
+                  8
+                ],
+                [
+                  800,
+                  8,
+                  1
+                ],
+                "torch.int32",
+                "cuda:0"
+              ],
+              [
+                "is_early_stop_heuristic_unsatisfied",
+                "tensor",
+                [
+                  1,
+                  1
+                ],
+                [
+                  1,
+                  1
+                ],
+                "torch.bool",
+                "cuda:0"
+              ],
+              [
+                "is_sent_finished",
+                "tensor",
+                [
+                  1,
+                  50
+                ],
+                [
+                  50,
+                  1
+                ],
+                "torch.bool",
+                "cuda:0"
+              ],
+              [
+                "next_token_hits_stopping_criteria",
+                "tensor",
+                [
+                  1,
+                  100
+                ],
+                [
+                  100,
+                  1
+                ],
+                "torch.bool",
+                "cuda:0"
+              ],
+              [
+                "top_num_beam_mask",
+                "tensor",
+                [
+                  100
+                ],
+                [
+                  1
+                ],
+                "torch.bool",
+                "cuda:0"
+              ],
+              [
+                "num_beams",
+                "int",
+                50
+              ],
+              [
+                "cur_len",
+                "int",
+                122
+              ],
+              [
+                "decoder_prompt_len",
+                "int",
+                121
+              ],
+              [
+                "length_penalty",
+                "float",
+                0.0
+              ],
+              [
+                "early_stopping",
+                "bool",
+                false
+              ]
+            ],
+            "input_bytes": 160451,
+            "output_bytes": 53450,
+            "capture_and_warmup_s": 0.005987595766782761,
+            "allocated_delta_bytes": 218624
+          },
+          {
+            "method": "_get_running_beams_for_next_iteration",
+            "prompt_tokens": 121,
+            "step": 2,
+            "signature": [
+              [
+                "topk_log_probs",
+                "tensor",
+                [
+                  1,
+                  100
+                ],
+                [
+                  100,
+                  1
+                ],
+                "torch.float32",
+                "cuda:0"
+              ],
+              [
+                "topk_running_sequences",
+                "tensor",
+                [
+                  1,
+                  100,
+                  129
+                ],
+                [
+                  12900,
+                  129,
+                  1
+                ],
+                "torch.int64",
+                "cuda:0"
+              ],
+              [
+                "topk_running_beam_indices",
+                "tensor",
+                [
+                  1,
+                  100,
+                  8
+                ],
+                [
+                  800,
+                  8,
+                  1
+                ],
+                "torch.int32",
+                "cuda:0"
+              ],
+              [
+                "next_token_hits_stopping_criteria",
+                "tensor",
+                [
+                  1,
+                  100
+                ],
+                [
+                  100,
+                  1
+                ],
+                "torch.bool",
+                "cuda:0"
+              ],
+              [
+                "num_beams",
+                "int",
+                50
+              ]
+            ],
+            "input_bytes": 106900,
+            "output_bytes": 53400,
+            "capture_and_warmup_s": 0.006050728261470795,
+            "allocated_delta_bytes": 162304
+          },
+          {
+            "method": "_update_finished_beams",
+            "prompt_tokens": 121,
+            "step": 2,
+            "signature": [
+              [
+                "sequences",
+                "tensor",
+                [
+                  1,
+                  50,
+                  129
+                ],
+                [
+                  6450,
+                  129,
+                  1
+                ],
+                "torch.int64",
+                "cuda:0"
+              ],
+              [
+                "topk_running_sequences",
+                "tensor",
+                [
+                  1,
+                  100,
+                  129
+                ],
+                [
+                  12900,
+                  129,
+                  1
+                ],
+                "torch.int64",
+                "cuda:0"
+              ],
+              [
+                "beam_scores",
+                "tensor",
+                [
+                  1,
+                  50
+                ],
+                [
+                  50,
+                  1
+                ],
+                "torch.float32",
+                "cuda:0"
+              ],
+              [
+                "topk_log_probs",
+                "tensor",
+                [
+                  1,
+                  100
+                ],
+                [
+                  100,
+                  1
+                ],
+                "torch.float32",
+                "cuda:0"
+              ],
+              [
+                "beam_indices",
+                "tensor",
+                [
+                  1,
+                  50,
+                  8
+                ],
+                [
+                  400,
+                  8,
+                  1
+                ],
+                "torch.int32",
+                "cuda:0"
+              ],
+              [
+                "topk_running_beam_indices",
+                "tensor",
+                [
+                  1,
+                  100,
+                  8
+                ],
+                [
+                  800,
+                  8,
+                  1
+                ],
+                "torch.int32",
+                "cuda:0"
+              ],
+              [
+                "is_early_stop_heuristic_unsatisfied",
+                "tensor",
+                [
+                  1,
+                  1
+                ],
+                [
+                  1,
+                  1
+                ],
+                "torch.bool",
+                "cuda:0"
+              ],
+              [
+                "is_sent_finished",
+                "tensor",
+                [
+                  1,
+                  50
+                ],
+                [
+                  50,
+                  1
+                ],
+                "torch.bool",
+                "cuda:0"
+              ],
+              [
+                "next_token_hits_stopping_criteria",
+                "tensor",
+                [
+                  1,
+                  100
+                ],
+                [
+                  100,
+                  1
+                ],
+                "torch.bool",
+                "cuda:0"
+              ],
+              [
+                "top_num_beam_mask",
+                "tensor",
+                [
+                  100
+                ],
+                [
+                  1
+                ],
+                "torch.bool",
+                "cuda:0"
+              ],
+              [
+                "num_beams",
+                "int",
+                50
+              ],
+              [
+                "cur_len",
+                "int",
+                123
+              ],
+              [
+                "decoder_prompt_len",
+                "int",
+                121
+              ],
+              [
+                "length_penalty",
+                "float",
+                0.0
+              ],
+              [
+                "early_stopping",
+                "bool",
+                false
+              ]
+            ],
+            "input_bytes": 160451,
+            "output_bytes": 53450,
+            "capture_and_warmup_s": 0.005840238183736801,
+            "allocated_delta_bytes": 218624
+          },
+          {
+            "method": "_get_running_beams_for_next_iteration",
+            "prompt_tokens": 121,
+            "step": 3,
+            "signature": [
+              [
+                "topk_log_probs",
+                "tensor",
+                [
+                  1,
+                  100
+                ],
+                [
+                  100,
+                  1
+                ],
+                "torch.float32",
+                "cuda:0"
+              ],
+              [
+                "topk_running_sequences",
+                "tensor",
+                [
+                  1,
+                  100,
+                  129
+                ],
+                [
+                  12900,
+                  129,
+                  1
+                ],
+                "torch.int64",
+                "cuda:0"
+              ],
+              [
+                "topk_running_beam_indices",
+                "tensor",
+                [
+                  1,
+                  100,
+                  8
+                ],
+                [
+                  800,
+                  8,
+                  1
+                ],
+                "torch.int32",
+                "cuda:0"
+              ],
+              [
+                "next_token_hits_stopping_criteria",
+                "tensor",
+                [
+                  1,
+                  100
+                ],
+                [
+                  100,
+                  1
+                ],
+                "torch.bool",
+                "cuda:0"
+              ],
+              [
+                "num_beams",
+                "int",
+                50
+              ]
+            ],
+            "input_bytes": 106900,
+            "output_bytes": 53400,
+            "capture_and_warmup_s": 0.006024397909641266,
+            "allocated_delta_bytes": 162304
+          },
+          {
+            "method": "_update_finished_beams",
+            "prompt_tokens": 121,
+            "step": 3,
+            "signature": [
+              [
+                "sequences",
+                "tensor",
+                [
+                  1,
+                  50,
+                  129
+                ],
+                [
+                  6450,
+                  129,
+                  1
+                ],
+                "torch.int64",
+                "cuda:0"
+              ],
+              [
+                "topk_running_sequences",
+                "tensor",
+                [
+                  1,
+                  100,
+                  129
+                ],
+                [
+                  12900,
+                  129,
+                  1
+                ],
+                "torch.int64",
+                "cuda:0"
+              ],
+              [
+                "beam_scores",
+                "tensor",
+                [
+                  1,
+                  50
+                ],
+                [
+                  50,
+                  1
+                ],
+                "torch.float32",
+                "cuda:0"
+              ],
+              [
+                "topk_log_probs",
+                "tensor",
+                [
+                  1,
+                  100
+                ],
+                [
+                  100,
+                  1
+                ],
+                "torch.float32",
+                "cuda:0"
+              ],
+              [
+                "beam_indices",
+                "tensor",
+                [
+                  1,
+                  50,
+                  8
+                ],
+                [
+                  400,
+                  8,
+                  1
+                ],
+                "torch.int32",
+                "cuda:0"
+              ],
+              [
+                "topk_running_beam_indices",
+                "tensor",
+                [
+                  1,
+                  100,
+                  8
+                ],
+                [
+                  800,
+                  8,
+                  1
+                ],
+                "torch.int32",
+                "cuda:0"
+              ],
+              [
+                "is_early_stop_heuristic_unsatisfied",
+                "tensor",
+                [
+                  1,
+                  1
+                ],
+                [
+                  1,
+                  1
+                ],
+                "torch.bool",
+                "cuda:0"
+              ],
+              [
+                "is_sent_finished",
+                "tensor",
+                [
+                  1,
+                  50
+                ],
+                [
+                  50,
+                  1
+                ],
+                "torch.bool",
+                "cuda:0"
+              ],
+              [
+                "next_token_hits_stopping_criteria",
+                "tensor",
+                [
+                  1,
+                  100
+                ],
+                [
+                  100,
+                  1
+                ],
+                "torch.bool",
+                "cuda:0"
+              ],
+              [
+                "top_num_beam_mask",
+                "tensor",
+                [
+                  100
+                ],
+                [
+                  1
+                ],
+                "torch.bool",
+                "cuda:0"
+              ],
+              [
+                "num_beams",
+                "int",
+                50
+              ],
+              [
+                "cur_len",
+                "int",
+                124
+              ],
+              [
+                "decoder_prompt_len",
+                "int",
+                121
+              ],
+              [
+                "length_penalty",
+                "float",
+                0.0
+              ],
+              [
+                "early_stopping",
+                "bool",
+                false
+              ]
+            ],
+            "input_bytes": 160451,
+            "output_bytes": 53450,
+            "capture_and_warmup_s": 0.005840633064508438,
+            "allocated_delta_bytes": 218624
+          },
+          {
+            "method": "_get_running_beams_for_next_iteration",
+            "prompt_tokens": 121,
+            "step": 4,
+            "signature": [
+              [
+                "topk_log_probs",
+                "tensor",
+                [
+                  1,
+                  100
+                ],
+                [
+                  100,
+                  1
+                ],
+                "torch.float32",
+                "cuda:0"
+              ],
+              [
+                "topk_running_sequences",
+                "tensor",
+                [
+                  1,
+                  100,
+                  129
+                ],
+                [
+                  12900,
+                  129,
+                  1
+                ],
+                "torch.int64",
+                "cuda:0"
+              ],
+              [
+                "topk_running_beam_indices",
+                "tensor",
+                [
+                  1,
+                  100,
+                  8
+                ],
+                [
+                  800,
+                  8,
+                  1
+                ],
+                "torch.int32",
+                "cuda:0"
+              ],
+              [
+                "next_token_hits_stopping_criteria",
+                "tensor",
+                [
+                  1,
+                  100
+                ],
+                [
+                  100,
+                  1
+                ],
+                "torch.bool",
+                "cuda:0"
+              ],
+              [
+                "num_beams",
+                "int",
+                50
+              ]
+            ],
+            "input_bytes": 106900,
+            "output_bytes": 53400,
+            "capture_and_warmup_s": 0.006231497973203659,
+            "allocated_delta_bytes": 162304
+          },
+          {
+            "method": "_update_finished_beams",
+            "prompt_tokens": 121,
+            "step": 4,
+            "signature": [
+              [
+                "sequences",
+                "tensor",
+                [
+                  1,
+                  50,
+                  129
+                ],
+                [
+                  6450,
+                  129,
+                  1
+                ],
+                "torch.int64",
+                "cuda:0"
+              ],
+              [
+                "topk_running_sequences",
+                "tensor",
+                [
+                  1,
+                  100,
+                  129
+                ],
+                [
+                  12900,
+                  129,
+                  1
+                ],
+                "torch.int64",
+                "cuda:0"
+              ],
+              [
+                "beam_scores",
+                "tensor",
+                [
+                  1,
+                  50
+                ],
+                [
+                  50,
+                  1
+                ],
+                "torch.float32",
+                "cuda:0"
+              ],
+              [
+                "topk_log_probs",
+                "tensor",
+                [
+                  1,
+                  100
+                ],
+                [
+                  100,
+                  1
+                ],
+                "torch.float32",
+                "cuda:0"
+              ],
+              [
+                "beam_indices",
+                "tensor",
+                [
+                  1,
+                  50,
+                  8
+                ],
+                [
+                  400,
+                  8,
+                  1
+                ],
+                "torch.int32",
+                "cuda:0"
+              ],
+              [
+                "topk_running_beam_indices",
+                "tensor",
+                [
+                  1,
+                  100,
+                  8
+                ],
+                [
+                  800,
+                  8,
+                  1
+                ],
+                "torch.int32",
+                "cuda:0"
+              ],
+              [
+                "is_early_stop_heuristic_unsatisfied",
+                "tensor",
+                [
+                  1,
+                  1
+                ],
+                [
+                  1,
+                  1
+                ],
+                "torch.bool",
+                "cuda:0"
+              ],
+              [
+                "is_sent_finished",
+                "tensor",
+                [
+                  1,
+                  50
+                ],
+                [
+                  50,
+                  1
+                ],
+                "torch.bool",
+                "cuda:0"
+              ],
+              [
+                "next_token_hits_stopping_criteria",
+                "tensor",
+                [
+                  1,
+                  100
+                ],
+                [
+                  100,
+                  1
+                ],
+                "torch.bool",
+                "cuda:0"
+              ],
+              [
+                "top_num_beam_mask",
+                "tensor",
+                [
+                  100
+                ],
+                [
+                  1
+                ],
+                "torch.bool",
+                "cuda:0"
+              ],
+              [
+                "num_beams",
+                "int",
+                50
+              ],
+              [
+                "cur_len",
+                "int",
+                125
+              ],
+              [
+                "decoder_prompt_len",
+                "int",
+                121
+              ],
+              [
+                "length_penalty",
+                "float",
+                0.0
+              ],
+              [
+                "early_stopping",
+                "bool",
+                false
+              ]
+            ],
+            "input_bytes": 160451,
+            "output_bytes": 53450,
+            "capture_and_warmup_s": 0.006050821393728256,
+            "allocated_delta_bytes": 218624
+          }
+        ],
+        "scope": "Original HF helpers; borrowed per-step output state until lease close. Timed staging. Unique inputs/outputs exclude graph intermediates and private pool slack; allocator measurements include them.",
+        "final_outputs_exact": true,
+        "final_output_comparison": {
+          "values": 109500,
+          "matching_bits": 109500,
+          "max_abs_finite": 0.0
+        }
+      },
+      "beam_probe": {
+        "exact": true,
+        "graph_direct": {
+          "values": 1624000,
+          "matching_bits": 1624000,
+          "max_abs_finite": 0.0
+        },
+        "retained_after_five_steps": {
+          "values": 1624000,
+          "matching_bits": 1624000,
+          "max_abs_finite": 0.0
+        },
+        "direct_repeated": {
+          "values": 1624000,
+          "matching_bits": 1624000,
+          "max_abs_finite": 0.0
+        }
+      },
+      "setup_s": 157.7831760942936,
+      "backend_compile_s": 68.48782364651561,
+      "capture_and_warmup_s": 85.28718626871705,
+      "measurement_compilations": 0,
+      "measurement_captures": 0
+    },
+    {
+      "phase": 3,
+      "variant": "folded_prefix_replay",
+      "latency_ms": {
+        "n": 12,
+        "median_ms": 116.43622256815434,
+        "p95_ms": 120.84632236510515
+      },
+      "memory": {
+        "allocated_bytes": 6595040256,
+        "reserved_bytes": 8225030144,
+        "peak_allocated_bytes": 6916948480,
+        "peak_reserved_bytes": 8225030144
+      },
+      "compiler_artifacts_reused": true,
+      "setup_memory": {
+        "allocated_bytes": 6595040256,
+        "reserved_bytes": 8225030144,
+        "peak_allocated_bytes": 7529849856,
+        "peak_reserved_bytes": 8225030144
+      },
+      "unique_input_storage_bytes": 15546688,
+      "logical_input_bytes": 79599936,
+      "physical_prefix": {
+        "requests_loaded": 20,
+        "prefix_bytes_copied": 112967680,
+        "prefix_capacity_bytes": 6938624,
+        "suffix_capacity_bytes": 8601600,
+        "max_prefix_tokens": 121,
+        "max_suffix_tokens": 3,
+        "physical_prefix_batch": 1,
+        "suffix_batch": 50,
+        "attention_materialization": "Temporary dense exact-length K/V per layer; unchanged SDPA"
+      },
+      "direct_reorder": {
+        "direct_calls": 80,
+        "fallback_calls": 20,
+        "suffix_bytes_written": 344064000,
+        "prefix_bytes_reordered": 0
+      },
+      "warmup_comparison": {
+        "requests": 4,
+        "rank_positions": 200,
+        "sequence_values": 200,
+        "transition_values": 1000,
+        "matching_rank_lists": 4,
+        "matching_rank_positions": 200,
+        "matching_sequence_vectors": 4,
+        "matching_transition_arrays": 4,
+        "matching_sequence_values": 200,
+        "matching_transition_values": 1000,
+        "max_sequence_difference_common": 0.0,
+        "max_transition_difference_common": 0.0
+      },
+      "warmup_historical_comparison": {
+        "requests": 12,
+        "rank_positions": 600,
+        "sequence_values": 600,
+        "transition_values": 3000,
+        "matching_rank_lists": 12,
+        "matching_rank_positions": 600,
+        "matching_sequence_vectors": 12,
+        "matching_transition_arrays": 12,
+        "matching_sequence_values": 600,
+        "matching_transition_values": 3000,
+        "max_sequence_difference_common": 0.0,
+        "max_transition_difference_common": 0.0
+      },
+      "model_loading_s": 1.7322804518043995,
+      "model_storage": {
+        "logical_parameter_bytes": 6176878592,
+        "unique_parameter_storage_bytes": 6176878592,
+        "gate_up_unique_bytes": 3082813440
+      },
+      "beam_replay": null,
+      "beam_probe": null,
+      "setup_s": 152.99154271557927,
+      "backend_compile_s": 70.88337295874953,
+      "capture_and_warmup_s": 85.30639835447073,
+      "measurement_compilations": 0,
+      "measurement_captures": 0
+    }
+  ],
+  "snapshot_files_verified": 49,
+  "audit_script_sha256": "d9bff8ecf28c47433b09b256b9a08147869b62466a5478e661c1a60f0e604d7c",
+  "audit_helpers_sha256": "6dd69304043b27b892331fa0ecb1e3a0a7c056bf4eee62a55b531127af633711",
+  "note": "Memory is isolated per fresh process; latency is paired by user/repeat across ABBA phases, not interleaved requests. One allocation does not establish run-to-run variance. Setup timings are nested; do not add. Integrity passing alone does not imply bit equality.",
+  "exactness_passed": true
+}
