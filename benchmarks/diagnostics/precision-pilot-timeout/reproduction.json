@@ -1,0 +1,27 @@
+{
+  "audit_cwd": "/Users/AmilAgrawal/Documents/Codex/2026-10-18/let/work/rapidtinyrec_precision/.oscar/source_snapshots/precision-pilot-20261026T053441Z-f040754d1743",
+  "audit_command": [
+    "python3",
+    "-m",
+    "rapidtinyrec.audit_precision",
+    "/Users/AmilAgrawal/Documents/Codex/2026-10-18/let/work/rapidtinyrec_precision/.oscar/results/precision-pilot-20261026T053441Z-f040754d1743/outputs",
+    "--historical",
+    "/Users/AmilAgrawal/Documents/Codex/2026-10-18/let/work/minionerec_oscar/.oscar/results/benchmark-gqa-fp32-20261023T054059Z-7b4f0ee334cb/outputs/gqa_500_users",
+    "--snapshot",
+    "/Users/AmilAgrawal/Documents/Codex/2026-10-18/let/work/rapidtinyrec_precision/.oscar/source_snapshots/precision-pilot-20261026T053441Z-f040754d1743/rapidtinyrec",
+    "--run-record",
+    "/Users/AmilAgrawal/Documents/Codex/2026-10-18/let/work/rapidtinyrec_precision/.oscar/runs/precision-pilot-20261026T053441Z-f040754d1743.json",
+    "--release-root",
+    "/Users/AmilAgrawal/Documents/Codex/2026-10-18/let/work/minionerec_trace/release",
+    "--output",
+    "/Users/AmilAgrawal/Documents/Codex/2026-10-18/let/outputs/rapidtinyrec_precision_pilot_audit.json"
+  ],
+  "expected_audit_exit_code": 1,
+  "expected_missing_file": "outputs/phase_2/summary.json",
+  "partial_review_command": [
+    "python3",
+    "/Users/AmilAgrawal/Documents/Codex/2026-10-18/let/work/rapidtinyrec_prep/review_precision_timeout.py"
+  ],
+  "partial_review_note": "Requires original workspace paths and absent output target; output is diagnostic only. Script calls unchanged frozen audit and inspects its exception frame for completed phase checks. It never supplies missing phases. Historical/release roots are required and remain separately pinned resources.",
+  "archive_verification": "Verify archive SHA256 and every extracted member against archive-manifest.json; do not submit a GPU job."
+}

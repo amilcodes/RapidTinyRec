@@ -11,8 +11,9 @@ that held-out recommendation quality is preserved.
 Branch: `experiment/quality-latency-frontier`, based on accepted
 `experiment/12-folded-profile` at `4711e463321deadb835ac8cc25c1dfbf41d86108`.
 The paired quality evaluator and one TF32 matmul candidate are implemented.
-The candidate remains unmeasured; no GPU job has yet been submitted and no quality
-or speed claim is established. The exact serving track remains separate.
+Job **7958148** timed out during phase 2 setup after completing the first FP32/TF32 half. The original frozen audit failed on missing `phase_2/summary.json`; full500 eligibility remains false. Partial median/p95 were **114.947196/117.922076 ms → 83.586782/84.571161 ms** (27.28%/28.28% lower). Available control/stability/ownership/dispatch checks pass. Candidate scores differ and one of four users has a changed list; all four users’ Hit/NDCG/MRR metrics are unchanged. Four users and an incomplete ABBA schedule cannot establish quality parity or a passed performance gate. Completed setup took 758.051/782.936 seconds; diagnose setup cost before any separately frozen bounded repair. No automatic resubmission.
+
+Complete failure evidence: [timeout archive](../benchmarks/diagnostics/precision-pilot-timeout/README.md). The exact serving track remains separate.
 
 ## First opportunities
 
@@ -201,4 +202,4 @@ remain in their original rank positions and fail validity; they are not removed
 from quality estimates. A four-user pilot never establishes population parity.
 The auditor never promotes a candidate or declares noninferiority. Full500
 bootstrap must run on allocated compute; the audit refuses that resampling on a
-local machine. No GPU experiment has yet been submitted for this implementation.
+local machine. The first pilot timed out; its incomplete evidence is preserved in the timeout archive.
