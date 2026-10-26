@@ -13,6 +13,7 @@ from test_serving_setup_audit import raw, owner
 from test_serving_invariants import fixture as invariant_fixture
 from test_serving_measurement_audit import fixture as measurement_fixture
 from test_serving_overlap_audit import fixture as overlap_fixture
+from test_serving_admission_audit import fixture as admission_fixture
 
 
 def write(path, value):
@@ -64,7 +65,7 @@ def build(base):
             write(prefix/'warmup/retained_after_mixed.json', {'0': raw(), '1': raw()})
         write(root/'setup/initialization-provenance.json', dict(users=users, observed_release_sha256=expected['release_sha256'], reference_manifest_sha256=manifest['manifest_sha256'], torch_version='2.14.0+cu126', torch_git='08187d9e0fba026dc8217405802ab5381dc88d90', transformers_version='4.55.4', tf32=False))
         write(root/'setup/resource-verification-stages.json', dict(initializer_started_ns=offset+10, resources_verified_ns=offset+20, elapsed_s=10/1e9))
-        write(root/'preparation.json', dict(owners=owners, setup_audit={'passed': True}))
+        write(root/'preparation.json', dict(owners=owners, setup_audit={'passed': True}, admission_events=admission_fixture(lanes, offset)[0]))
         write(root/'setup-audit.json', {'passed': True})
         live = copy.deepcopy(owners)
         for row in live.values():

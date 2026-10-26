@@ -109,5 +109,30 @@ class ServiceTests(unittest.TestCase):
             self.assertEqual(set(report['owners']), {0})
         self.assertEqual(self.events[-2:], [('close', 0), 'unpatch'])
 
+    def test_admission_journal_uses_owner_clocks_and_snapshot_survives_close(self):
+        journal=[]
+        with prepared_service(self.initialize,self.audit,lane_count=2,expected_graphs=1,lifecycle=journal) as (server,report):
+            events=report['admission_events']
+            self.assertEqual(events[-1]['operation'],'admitted')
+            for row in events:
+                self.assertTrue(row['success']);self.assertIsNone(row['error'])
+                self.assertLessEqual(row['started_ns'],row['finished_ns'])
+                if row['lane'] is not None:
+                    self.assertEqual(row['thread_id'],report['owners'][row['lane']]['identity']['owner_thread_id'])
+            self.assertLess(max(r['finished_ns'] for r in events if r['operation']=='initialize'),
+                            min(r['started_ns'] for r in events if r['operation']=='freeze'))
+        self.assertEqual([r['operation'] for r in journal[-2:]],['close','close'])
+        self.assertEqual(report['admission_events'][-1]['operation'],'admitted')
+
+    def test_failed_setup_journal_preserved_and_admission_absent(self):
+        journal=[]
+        with self.assertRaises(ValueError):
+            with prepared_service(self.initialize,lambda records:{'passed':False},lane_count=2,expected_graphs=1,lifecycle=journal):
+                self.fail('Must not admit')
+        rows=[r for r in journal if r['operation']=='setup_audit']
+        self.assertEqual(len(rows),1);self.assertFalse(rows[0]['success']);self.assertIn('did not pass',rows[0]['error'])
+        self.assertFalse(any(r['operation']=='admitted' for r in journal))
+        self.assertEqual([r['operation'] for r in journal[-2:]],['close','close'])
+
 
 if __name__ == '__main__': unittest.main()

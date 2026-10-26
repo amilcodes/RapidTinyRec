@@ -13,6 +13,7 @@ from pathlib import Path
 from .audit_decode_pilot import compare, digest
 from .audit_prefix_profile import exact
 from .serving_graph_ownership import audit_graph_owners
+from .serving_admission_audit import audit_admission
 from .serving_storage import audit_lane_storage
 from .serving_setup_audit import audit_setup, read_unique
 from .serving_measurement_audit import ORDERS, audit_burst, audit_measurements
@@ -143,6 +144,8 @@ def audit_phase(root, historical, index, evidence):
             complete['primary_requests'] != 12 or complete['secondary_requests'] != (12 if lanes == 2 else 0) or
             complete['profile_requests'] != 4):
         raise ValueError('Complete ordered phase envelope required')
+    admission = audit_admission(preparation['admission_events'], setup_owners, stage_reports,
+                                stages['resources_verified_ns'], start['started_ns'])
     live_reports = []
     expected_live = copy.deepcopy(setup_owners)
     for row in expected_live.values():
@@ -232,7 +235,7 @@ def audit_phase(root, historical, index, evidence):
                 profile_numerical_passed=bool(profile_clocks['outputs_valid'] and exact(profile_fidelity) and profile_ancestry),
                 setup_to_execution_comparison=setup_fidelity,
                 setup_to_execution_passed=bool(exact(setup_fidelity) and setup_ancestry),
-                resource_stages=stages, lane_stages=stage_reports,
+                resource_stages=stages, lane_stages=stage_reports, admission=admission,
                 started_ns=first, finished_ns=complete['finished_ns'])
 
 
@@ -265,7 +268,7 @@ def audit_run(phase_roots, historical):
     return dict(schema='serving-disk-evidence-audit-v1', evidence_gates_passed=all(gates.values()), gates=gates,
                 phases=reports, measurements=measurement, cross_phase_setup=cross_report, evidence_sha256=hashes,
                 online_verdicts_trusted=False, historical_ancestry_available=False, advancement_ready=False,
-                remaining='Source/config/protocol, live allocation, fresh process/cache identity, freeze ordering, external global deadline/recovery and harness binding remain required.')
+                remaining='Source/config/protocol, live allocation, fresh process/cache identity, external global deadline/recovery and harness binding remain required.')
 
 
 def save_audit(phase_roots, historical, output):
