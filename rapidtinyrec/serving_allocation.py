@@ -128,6 +128,8 @@ def observe_allocation(run_root):
     fields=scheduler_fields(raw)
     validate_manifest(prepared,config,protocol,job_text,os.environ,fields)
     hashes=verify_source(code,prepared)
+    from .serving_harness import validate_provenance
+    validate_provenance(read_unique(code/'source-provenance.json'),hashes)
     require(manifest_path.read_bytes()==manifest_bytes and job_path.read_bytes()==job_bytes,'Submission identity changed during verification')
     record=copy.deepcopy(prepared);record.update(job_id=job,submission='allocated_observation')
     record['allocation_identity']=dict(schema='serving-allocated-identity-v1',

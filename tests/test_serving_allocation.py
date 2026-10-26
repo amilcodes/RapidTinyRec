@@ -19,6 +19,14 @@ from rapidtinyrec.serving_initialize import lane_initializer
 ROOT=Path(__file__).resolve().parents[1]
 
 
+
+def write_provenance(code):
+    from rapidtinyrec.serving_harness import TEMPLATES
+    hashes={p.relative_to(code).as_posix():a.digest(p) for p in code.rglob('*') if p.is_file() and p.name!='source-provenance.json'}
+    mapping={n:(TEMPLATES+a.CONFIG if n==a.CONFIG else TEMPLATES+'serving-throughput.sh' if n==a.COMMAND[1] else n) for n in hashes}
+    (code/'source-provenance.json').write_text(json.dumps(dict(schema='serving-source-provenance-v1',source_commit='a'*40,
+        protocol_sha256=PROTOCOL_SHA256,source_files=hashes,repository_paths=mapping,submission_ready=False)))
+
 class AllocationTests(unittest.TestCase):
     def setUp(self):
         self.protocol=load_protocol(ROOT/PROTOCOL)
@@ -112,7 +120,7 @@ class AllocationTests(unittest.TestCase):
             config=copy.deepcopy(self.config);config['remote_root']=temp
             (code/a.CONFIG).write_text(json.dumps(config))
             (code/a.COMMAND[1]).parent.mkdir();(code/a.COMMAND[1]).write_text('# fixture only')
-            (code/'source-provenance.json').write_text('{}')
+            write_provenance(code)
             prepared=copy.deepcopy(self.prepared);prepared['remote_dir']=str(run)
             prepared['sha256']={p.relative_to(code).as_posix():a.digest(p) for p in code.rglob('*') if p.is_file()}
             prepared['files']=sorted(prepared['sha256'])

@@ -32,9 +32,10 @@ class RunAuditTests(unittest.TestCase):
         p=patch.object(a.time,'perf_counter_ns',return_value=4000000);p.start();self.addCleanup(p.stop)
         code=self.run/'code';write(code/'rapidtinyrec/expected.json',expected)
         write(code/'oscar.serving-throughput.json',allocation.config);write(code/'source-provenance.json',{'synthetic':True})
-        for name in ['rapidtinyrec/source/LogitProcessor.py','jobs/serving-throughput.sh']:
+        for name in ['rapidtinyrec/source/LogitProcessor.py','jobs/serving-throughput.sh','rapidtinyrec/serving_runner.py','rapidtinyrec/serving_run_audit.py','rapidtinyrec/serving_terminal_audit.py']:
             target=code/name;target.parent.mkdir(parents=True,exist_ok=True);target.write_text('# synthetic CPU fixture\n')
         target=code/PROTOCOL;target.parent.mkdir(parents=True);target.write_bytes((Path(__file__).resolve().parents[1]/PROTOCOL).read_bytes())
+        allocation_tests.write_provenance(code)
         allocation.prepared['files']=sorted(p.relative_to(code).as_posix() for p in code.rglob('*') if p.is_file())
         allocation.prepared['sha256']={name:hashlib.sha256((code/name).read_bytes()).hexdigest() for name in allocation.prepared['files']}
         allocated,_,manifest,job,_=allocation.records();(self.run/'source-manifest.json').write_bytes(manifest);(self.run/'job-id').write_bytes(job)

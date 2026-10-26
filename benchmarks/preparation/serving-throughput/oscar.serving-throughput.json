@@ -1,0 +1,37 @@
+{
+  "project": "rapidtinyrec-exact-serving-pilot",
+  "ssh_target": "aagraw73@sshcampus.ccv.brown.edu",
+  "remote_root": "/oscar/scratch/aagraw73/agent-runs",
+  "max_upload_mb": 5,
+  "extra_files": [
+    "rapidtinyrec",
+    "tests",
+    "benchmarks/preparation/serving-throughput",
+    "jobs",
+    "source-provenance.json",
+    "oscar.serving-throughput.json"
+  ],
+  "exclude": [
+    "**/__pycache__/**",
+    "**/*.pyc"
+  ],
+  "profiles": {
+    "exact-serving-throughput-pilot": {
+      "partition": "gpu",
+      "qos": "norm-gpu",
+      "constraint": "ampere",
+      "gpu_type": "nvidia_rtx_a6000",
+      "gpus": 1,
+      "cpus": 4,
+      "memory_gb": 32,
+      "time": "00:30:00",
+      "setup": [
+        "module purge"
+      ],
+      "command": [
+        "bash",
+        "jobs/serving-throughput.sh"
+      ]
+    }
+  }
+}

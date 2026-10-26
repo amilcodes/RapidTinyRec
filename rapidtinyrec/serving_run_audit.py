@@ -28,6 +28,8 @@ def audit_pre_exit(run_root, historical):
         require(path.suffix not in ('.pyc','.pyo') and '__pycache__' not in path.parts,'Unreviewed source bytecode')
         require(evidence.hashes[(code/name).absolute()]==prepared['sha256'][name],'Uploaded source bytes changed')
     require('rapidtinyrec/source/LogitProcessor.py' in source_files,'Nested source dependency omitted')
+    from .serving_harness import validate_provenance
+    validate_provenance(evidence.read(code/'source-provenance.json'),prepared['sha256'])
     protocol=load_protocol(code/PROTOCOL);config=evidence.read(code/CONFIG)
     expected=evidence.read(code/'rapidtinyrec/expected.json')
     require(expected['users_sha256']==protocol['cohort']['full_users_sha256'] and
