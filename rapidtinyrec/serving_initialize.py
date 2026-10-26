@@ -89,21 +89,36 @@ def lane_initializer(release_root, reference_results, output_root):
     initializer_started_ns = time.perf_counter_ns()
     if not os.environ.get('SLURM_JOB_ID', '').isdigit():
         raise RuntimeError('Model initialization requires allocated compute')
+    from .serving_policy import validate_environment, validate_runtime, policy_state, validate_state
+    from .serving_allocation import observe_allocation
+    validate_environment(os.environ)
+    run_root = os.environ.get('OSCAR_RUN_DIR')
+    if not run_root:
+        raise RuntimeError('Live allocation run identity required before runtime import')
+    allocation = observe_allocation(run_root)
+    from .serving_contract import PROTOCOL, load_protocol
+    protocol = load_protocol(Path(run_root)/'code'/PROTOCOL)
+    output_path = Path(output_root).absolute()
+    allowed = [Path(run_root)/'outputs'/f'phase_{i}'/'setup' for i in range(4)]
+    if output_path not in allowed or output_path.resolve() != output_path:
+        raise ValueError('Initializer output must belong to an allocated phase')
     from . import benchmark as b
     import torch
     import torch._dynamo
     import transformers
-    if (torch.__version__ != '2.14.0+cu126' or torch.version.git_version !=
-            '08187d9e0fba026dc8217405802ab5381dc88d90' or transformers.__version__ != '4.55.4'):
-        raise RuntimeError('Pinned serving runtime required')
-    if not torch.cuda.is_available() or torch.cuda.device_count() != 1 or torch.cuda.get_device_name(0) != 'NVIDIA RTX A6000':
-        raise RuntimeError('One regular NVIDIA RTX A6000 required')
+    validate_runtime(torch, transformers.__version__)
     torch.manual_seed(42)
     torch.set_num_threads(2)
     torch.backends.cuda.matmul.allow_tf32 = False
     torch.backends.cudnn.allow_tf32 = False
+    validate_state(policy_state(torch))
     expected = json.loads((b.ROOT/'expected.json').read_text())
-    reference = json.loads((Path(reference_results)/'manifest.json').read_text())
+    reference_path = Path(reference_results)/'manifest.json'
+    if (b.digest(reference_path) != protocol['cohort']['historical_manifest_file_sha256'] or
+            expected['users_sha256'] != protocol['cohort']['full_users_sha256'] or
+            expected['release_sha256'] != protocol['cohort']['release_sha256']):
+        raise ValueError('Frozen serving resource/cohort identity differs')
+    reference = json.loads(reference_path.read_text())
     content = {key: value for key, value in reference.items() if key != 'manifest_sha256'}
     if (reference['experiment'] != 'gqa_three_way' or reference['dtype'] != 'float32' or
             hashlib.sha256(json.dumps(content, sort_keys=True).encode()).hexdigest() != reference['manifest_sha256'] or
@@ -111,6 +126,8 @@ def lane_initializer(release_root, reference_results, output_root):
         raise ValueError('Historical reference identity mismatch')
     from .benchmark_folded_prefix import select_users
     users, _ = select_users(reference['users'], False)
+    if users != protocol['cohort']['users'] or reference['manifest_sha256'] != protocol['cohort']['historical_manifest_sha256']:
+        raise ValueError('Frozen serving user/manifest identity differs')
     release_root = Path(release_root)
     observed = {name: b.digest(release_root/name) for name in expected['release_sha256']}
     if observed != expected['release_sha256']:
@@ -125,7 +142,7 @@ def lane_initializer(release_root, reference_results, output_root):
     save_exclusive(root/'resource-verification-stages.json', dict(
         initializer_started_ns=initializer_started_ns, resources_verified_ns=resources_verified_ns,
         elapsed_s=(resources_verified_ns-initializer_started_ns)/1e9,
-        scope='Runtime import/checks, historical identity and all release hashes; before model loading.'))
+        scope='Live source/allocation verification, runtime checks, historical identity and all release hashes; before model loading.'))
     def initialize(index):
         if type(index) is not int or index not in (0, 1):
             raise ValueError('Only one/two owned lanes supported')
@@ -161,4 +178,6 @@ def lane_initializer(release_root, reference_results, output_root):
             except BaseException as drain_error:
                 error.add_note(f'Initialization stream cleanup failed: {drain_error!r}')
             raise
+    # The phase CLI must persist this raw observation before invoking initialize.
+    initialize.allocation_observation = allocation
     return initialize

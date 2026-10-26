@@ -7,6 +7,8 @@ import copy
 import math
 import time
 
+from .serving_policy import policy_state, validate_state
+
 BYTES_PER_TOKEN = 28*2*50*2*128*4
 PREFIX_BYTES_PER_TOKEN = BYTES_PER_TOKEN//50
 METADATA_BYTES = 101*8
@@ -24,8 +26,7 @@ def snapshot_lane(lane, backend):
             global_compiler=dict(error_on_recompile=backend._dynamo.config.error_on_recompile,
                 counters={str(k):dict(v) for k,v in backend._dynamo.utils.counters.items()},
                 generated_kernel_count=backend._inductor.metrics.generated_kernel_count),
-            policy=dict(matmul_tf32=backend.backends.cuda.matmul.allow_tf32,
-                        cudnn_tf32=backend.backends.cudnn.allow_tf32,intraop_threads=backend.get_num_threads())))
+            policy=policy_state(backend)))
     return lane.context.call(collect)
 
 
@@ -50,8 +51,7 @@ def integer(value):
 
 def validate_lane(row):
     policy=row['policy']
-    if policy!={'matmul_tf32':False,'cudnn_tf32':False,'intraop_threads':2} or any(policy[k] is not False for k in ('matmul_tf32','cudnn_tf32')):
-        raise ValueError('Frozen FP32/two-thread policy changed')
+    validate_state(policy)
     identity=row['identity']
     if identity['failed'] is not False or identity['device']!='cuda:0' or any(integer(identity[k])==0 for k in ('owner_thread_id','stream_id')):
         raise ValueError('Live indexed private owner required')

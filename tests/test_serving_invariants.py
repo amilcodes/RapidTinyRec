@@ -8,7 +8,7 @@ def fixture():
     byte=a.BYTES_PER_TOKEN;prefix=a.PREFIX_BYTES_PER_TOKEN;metadata=a.METADATA_BYTES
     events=[dict(cache_tokens=n+j,batch=50,input_buffer_bytes=prefix*n+byte*j+metadata,capture_and_warmup_s=1.) for n in (76,121) for j in range(4)]
     replay=dict(graphs=8,frozen=True,shared_input_arena=True,replays=100,events=events,capture_and_warmup_s=8.,input_buffer_bytes=sum(e['input_buffer_bytes'] for e in events),unique_input_storage_bytes=prefix*121+byte*3+8*metadata,output_suffix_bytes=byte*20,physical_prefix=dict(requests_loaded=10,prefix_bytes_copied=1000,prefix_capacity_bytes=prefix*121,suffix_capacity_bytes=byte*3,max_prefix_tokens=121,max_suffix_tokens=3,physical_prefix_batch=1,suffix_batch=50))
-    lane=dict(identity=dict(owner_thread_id=1,device='cuda:0',stream_id=3,failed=False),compiler=dict(phase='measurement',events=[{'success':True}],frozen_event_count=1),replay=replay,reorder=dict(direct_calls=100,fallback_calls=25,suffix_bytes_written=1000,prefix_bytes_reordered=0),global_compiler=dict(error_on_recompile=True,counters={},generated_kernel_count=10),policy=dict(matmul_tf32=False,cudnn_tf32=False,intraop_threads=2))
+    lane=dict(identity=dict(owner_thread_id=1,device='cuda:0',stream_id=3,failed=False),compiler=dict(phase='measurement',events=[{'success':True}],frozen_event_count=1),replay=replay,reorder=dict(direct_calls=100,fallback_calls=25,suffix_bytes_written=1000,prefix_bytes_reordered=0),global_compiler=dict(error_on_recompile=True,counters={},generated_kernel_count=10),policy=dict(matmul_tf32=False,cudnn_tf32=False,intraop_threads=2,float32_matmul_precision='highest',blas_backend='_BlasBackend.Cublas'))
     memory=dict(allocated_bytes=2**30,reserved_bytes=2**31,peak_allocated_bytes=2**30,peak_reserved_bytes=2**31)
     before=dict(schema='serving-runtime-snapshot-v1',started_ns=1,finished_ns=2,lanes=[lane],memory=memory)
     after=copy.deepcopy(before);after.update(started_ns=100,finished_ns=101)
@@ -59,7 +59,7 @@ class InvariantTests(unittest.TestCase):
 
     def test_snapshot_deepcopies_state_and_does_not_run_or_reset_allocator(self):
         x,_,_=fixture();state=x['lanes'][0];calls=[]
-        backend=NS(_dynamo=NS(config=NS(error_on_recompile=True),utils=NS(counters={})),_inductor=NS(metrics=NS(generated_kernel_count=10)),backends=NS(cuda=NS(matmul=NS(allow_tf32=False)),cudnn=NS(allow_tf32=False)),get_num_threads=lambda:2)
+        backend=NS(_dynamo=NS(config=NS(error_on_recompile=True),utils=NS(counters={})),_inductor=NS(metrics=NS(generated_kernel_count=10)),backends=NS(cuda=NS(matmul=NS(allow_tf32=False),preferred_blas_library=lambda:'_BlasBackend.Cublas'),cudnn=NS(allow_tf32=False)),get_num_threads=lambda:2,get_float32_matmul_precision=lambda:'highest')
         lane=NS(frozen=True,closed=False,retained={},context=NS(identity=lambda:state['identity'],call=lambda f:f()),compiler=NS(**state['compiler']),pool=NS(report=lambda:state['replay']),direct=NS(report=lambda:state['reorder']))
         for method,key in [('memory_allocated','allocated_bytes'),('memory_reserved','reserved_bytes'),('max_memory_allocated','peak_allocated_bytes'),('max_memory_reserved','peak_reserved_bytes')]:
             def read(device,key=key):calls.append((key,device));return x['memory'][key]
