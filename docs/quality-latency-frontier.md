@@ -1,0 +1,102 @@
+# Quality–latency research track
+
+The user explicitly authorized investigating large inference gains even when
+numerical outputs differ, provided recommendation quality is unchanged or only
+slightly affected. This is a separate research track from exact-score serving
+(PR17). The exact reference, original audits and rejected results remain intact.
+A failed bitwise comparison is a fidelity result, not by itself evidence of worse
+recommendations. Conversely, small score deltas or high beam overlap do not prove
+that held-out recommendation quality is preserved.
+
+Branch: `experiment/quality-latency-frontier`, based on accepted
+`experiment/12-folded-profile` at `4711e463321deadb835ac8cc25c1dfbf41d86108`.
+This commit contains the research policy only. No quality candidate is implemented,
+no GPU job is submitted, and no quality or speed claim is established.
+
+## First opportunities
+
+1. **Reduced internal matmul precision with FP32 storage/output.** Design a single
+   explicit TF32-enabled candidate against the original FP32/TF32-off control,
+   on the same checkpoint and A6000. Keep beam 50, five score steps, the full
+   vocabulary, both normalizations, constraints and termination unchanged. This
+   isolates numerical precision before changing the scoring objective. Confirm
+   installed PyTorch policy and actual kernel dispatch; do not identify a getter
+   with acceleration. [PyTorch 2.14 documents internal precision independently
+   from output dtype](https://docs.pytorch.org/docs/2.14/generated/torch.set_float32_matmul_precision.html).
+   Its `high` policy may select different implementations; pin the exact setting
+   and record what runs, without an algorithm/workspace sweep.
+2. **BF16 inference** is a follow-on hypothesis if source/profile review suggests
+   substantially greater benefit. Specify accumulation and logits/normalization
+   casts explicitly, measure their cost, and test this change separately. A
+   checkpoint converted at inference is not a retrained checkpoint.
+3. **Merged request batches and selective-head scoring** may offer structural
+   gains, but must be distinct later candidates. Batch shapes can alter rounding;
+   restricted normalization can change cross-prefix beam ordering even if each
+   local ordering appears unchanged. Preserve invalid-output, termination and
+   catalog checks and disclose every semantic difference.
+
+[FlashRec's pinned documentation](https://github.com/sohu-mptc/FlashRec/blob/1089682a087ae5493f3b357ed1ec501cb684717b/README.md#numerical-match-vs-huggingface)
+separates BF16/FP8 numerical overlap from retrieval quality. Its Qwen3 workloads
+and native codebook scoring are not a head-to-head result for our Office/Qwen2
+checkpoint. Use its design as a hypothesis, then measure on common hardware,
+checkpoint, users and catalog. Native FP8 support must be verified for this
+hardware/software before proposing an experiment; no headline speedup transfers.
+
+Do not automatically rerun old candidates. The cuBLASLt down path and batched MLP
+were slower, so relaxed fidelity does not rescue their performance evidence.
+The old wide-MLP pilot's four-user unchanged ranks and modest timing benefit are
+insufficient quality evidence and lower priority than a large hardware opportunity.
+Reuse archived outputs for analysis before considering any new run.
+
+## Quality evidence and decisions
+
+Use the same frozen users, history construction, targets, catalog, token map,
+SID-to-item mapping, tie handling and output count for paired comparisons. Keep
+numerical fidelity (bit matches, score deltas, rank/beam overlap) separate from
+held-out target quality. Report hit rate, NDCG and MRR at 1/5/10/20/50, with primary
+NDCG@10 and Hit@10 declared before viewing candidate results. Report per-user
+paired changes, improvements/regressions, length strata, invalid and duplicate
+recommendations, coverage, and memory. Existing metrics are SID-level; do not
+rename them item quality if SID collisions or item mapping are unresolved.
+
+Use user-level paired confidence intervals with a fixed resampling protocol and
+seed; repeats measure runtime stability, not additional quality samples. A tiny
+pilot is for execution and latency feasibility, never population quality parity.
+A promising pilot may advance to the frozen 500-user quality evaluation despite
+nonidentical scores. Evaluate both control and candidate on those users; preserve
+all ranks, sequence scores and five transitions for the initial precision-only
+candidate, including every failed exactness comparison. Bit equality is recorded
+but is not this track's promotion gate. Complete output validity, ownership and
+repeat stability remain mandatory.
+
+The initial quality target is no aggregate observed loss in primary metrics and
+no concentrated serious regression in a subgroup. "No statistically significant
+loss" is not a noninferiority result. The user has not supplied a numerical loss
+budget. Propose an explicit noninferiority margin, justified in interpretable
+metric units and frozen before confirmatory analysis; do not silently invent an
+accepted production tolerance. If confidence intervals cannot exclude a material
+loss, call the result inconclusive and propose a larger/disjoint held-out check.
+Repeated use of the same 500 users for candidate selection is exploratory; reserve
+a disjoint confirmatory set if comparing several candidates. No retraining.
+
+Rank candidates by the measured quality–latency–throughput–memory frontier. Seek
+material gains, not tiny noisy wins in exchange for changed behavior. A promising
+research result does not automatically change the accepted exact baseline or
+merge a branch. Present concrete gain/loss and uncertainty before adoption.
+Research pilots do not need renewed permission merely because bits differ.
+
+## Execution discipline
+
+One candidate at a time across both tracks, one regular A6000, four CPUs/32 GB,
+maximum 30 minutes per job. Source/tests/CI and an independent quality/fidelity
+and performance auditor before a bounded paired pilot. Fresh processes and
+counterbalanced order; identical timing boundaries and workload. Report setup
+and model load separately, no overlapping-time sums or cross-run compounded
+speedups. Single-request latency and serving throughput are different outcomes;
+serving response includes queueing under its defined load.
+
+Freeze/hash all submitted source/config/resources and preserve raw results,
+logs, audits, source snapshots and reproduction scripts. Guard submissions with
+intent/run records and recover uncertain outcomes instead of duplicating jobs.
+Preserve execution failures and diagnose them; no blind replacement or unbounded
+precision/algorithm/beam sweep. No paid infrastructure, subagents or merges.
