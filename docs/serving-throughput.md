@@ -219,3 +219,13 @@ warmup orchestration, the global attention-patch lifetime, all-retained graph-po
 inventory, cross-lane ownership gates and independent result/profile audit are
 not yet integrated. Its local freeze alone is not approval to benchmark. CPU
 lifecycle tests and the AST check do not establish concurrent CUDA exactness.
+
+The prepared adapter now exposes an untimed owner-thread `ownership_snapshot`.
+It combines the explicit tensor inventory (including every retained HF score)
+with each live graph's primary and all-retained pool tokens. Returned tensor and
+graph references must remain alive while both lanes are compared. The CPU graph
+identity auditor rejects cross-lane retained-pool intersections even when primary
+pools differ, shared owner threads/replay streams, malformed tokens and missing
+graphs. The tensor-storage audit is separate and still required. These recorded
+identities do not prove actual launch streams, hidden-storage completeness or
+GPU overlap; full orchestration and independent profiling remain pending.

@@ -129,5 +129,25 @@ class RuntimeTests(unittest.TestCase):
         self.assertEqual(raw['sequence_bits'], [0, -2147483648])
         self.assertEqual(raw['beam_indices'], [[0, 1], [1, 0]])
 
+    def test_ownership_snapshot_includes_every_retained_score_and_holds_graphs(self):
+        from test_serving_graph_ownership import Graph
+        lane = self.prepared(); graph = Graph((1, 0))
+        self.pool.entries = {'shape': (None, graph, None)}
+        lane.inputs = {7: object()}; lane.masks = {7: object()}
+        scores = tuple(object() for _ in range(5))
+        lane.retained[7] = types.SimpleNamespace(sequences=object(), sequences_scores=object(),
+                                                beam_indices=object(), scores=scores)
+        lane.freeze()
+        refs = (('test', 'retained', object()),)
+        with patch('rapidtinyrec.serving_inventory.enumerate_folded_lane', return_value=refs) as enumerate_, \
+                patch('rapidtinyrec.serving_storage.describe_tensors', return_value=['storage']):
+            snapshot = lane.ownership_snapshot(1)
+        supplied = enumerate_.call_args.args[-1]['7']
+        self.assertEqual(len(supplied), 8)
+        for i, score in enumerate(scores): self.assertIs(supplied[f'score_{i}'], score)
+        self.assertIs(snapshot['tensor_refs'], refs)
+        self.assertIs(snapshot['graph_refs'][0], graph)
+        self.assertEqual(snapshot['record']['storage'], ['storage'])
+
 
 if __name__ == '__main__': unittest.main()

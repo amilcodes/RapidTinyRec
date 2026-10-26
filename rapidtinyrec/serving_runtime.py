@@ -81,6 +81,34 @@ class PreparedFoldedLane:
             self.retained.clear()
         return self.context.call(action)
 
+    def ownership_snapshot(self, expected_graphs):
+        """Call with all lanes idle; hold returned references through comparison."""
+        from .serving_graph_ownership import snapshot_graphs
+        from .serving_inventory import enumerate_folded_lane
+        from .serving_storage import describe_tensors
+        identity = self.context.identity()
+        def action():
+            if not self.frozen or self.closed:
+                raise RuntimeError('Ownership snapshot needs a live frozen lane')
+            if set(self.inputs) != set(self.masks):
+                raise ValueError('Prompt and attention-mask owner sets differ')
+            prompts = {str(key): {'input_ids': value, 'attention_mask': self.masks[key]}
+                       for key, value in self.inputs.items()}
+            retained = {}
+            for key, output in self.retained.items():
+                if len(output.scores) != 5:
+                    raise ValueError('Retained output must include five HF score storages')
+                retained[str(key)] = dict(sequences=output.sequences,
+                    sequence_scores=output.sequences_scores, beam_indices=output.beam_indices,
+                    **{f'score_{i}': score for i, score in enumerate(output.scores)})
+            tensors = enumerate_folded_lane(self.model, self.tables, self.arena,
+                                            self.pool, prompts, retained)
+            graphs, graph_refs = snapshot_graphs(self.pool, expected_graphs)
+            return dict(record=dict(identity=identity, graphs=graphs,
+                                    storage=describe_tensors(tensors)),
+                        tensor_refs=tensors, graph_refs=graph_refs)
+        return self.context.call(action)
+
     def run(self, user):
         def action():
             if not self.frozen or self.closed or self.retained:
