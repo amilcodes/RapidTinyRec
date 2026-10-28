@@ -212,6 +212,20 @@ def audit(root,historical,snapshot,run_record,release):
     assert start['started_monotonic']<=time.monotonic()<start['deadline_monotonic']
     wrapper=validate_wrapper(root,record,phases=(0,1,2,3),child_timeout_s=1500)
     e=inspect_phases(root,historical,snapshot,run_record)
+    return evaluate_phases(e,root,snapshot,release,wrapper=wrapper,allocation_identity=live['allocation_identity'])
+
+
+def evaluate_phases(e,root,snapshot,release,*,wrapper,allocation_identity):
+    """Evaluate validated saved phases on the current allocation.
+
+    Callers must validate provenance and deadlines before inspection. Recovery
+    callers supply their own live CPU identity; the saved run/job remain the
+    original generation identity. This helper does not certify recovery.
+    """
+    job=os.environ.get('SLURM_JOB_ID')
+    assert job and job.isdecimal(),'Allocated quality audit only'
+    fields=allocation_identity['scheduler_fields']
+    assert fields['JobId']==job and fields['JobState']=='RUNNING','Current audit allocation required'
     rows=[e['joined'][k] for k in sorted(e['joined'])]
     assert len(rows)==24 and all(set(r['runs'])==set(VARIANTS) for r in rows)
     protocol=load_protocol(snapshot.parent/PROTOCOL)
@@ -255,7 +269,7 @@ def audit(root,historical,snapshot,run_record,release):
     validity=quality['token_repeat_stability'] and all(all(v==0 for v in counts.values()) for counts in quality['output_validity'].values())
     speed=all(t['folded_bf16'][k]<=.9*t['folded_tf32'][k] for t in [timing,*bylength.values(),*byhalf.values()] for k in ('median_ms','p95_ms')) and all(t['folded_bf16'][k]<=t['folded_tf32'][k] for t in bycross.values() for k in ('median_ms','p95_ms'))
     result=dict(schema='bf16-vs-tf32-pilot-audit-v1',integrity_audit_passed=True,run_id=e['record']['run_id'],job_id=e['record']['job_id'],
-        unique_users=4,paired_requests=24,quality=quality,wrapper=wrapper,allocation_identity=live['allocation_identity'],control_reference='audited TF32 full500',control_comparison=control,
+        unique_users=4,paired_requests=24,quality=quality,wrapper=wrapper,allocation_identity=allocation_identity,control_reference='audited TF32 full500',control_comparison=control,
         control_exact=exact(control) and control_ancestry,stability_exact=stable,dispatch_verified=dispatch,validity_passed=validity,
         comparison=compare([(r['runs']['folded_tf32'],r['runs']['folded_bf16']) for r in rows]),repeated_comparison=repeated,
         latency_ms=timing,latency_by_length_ms=bylength,latency_by_half_ms=byhalf,latency_by_length_half_ms=bycross,
