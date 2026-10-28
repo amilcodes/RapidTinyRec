@@ -116,6 +116,8 @@ def inspect_phases(root,code,historical,release,live):
         inventories=[read(path/f'storage-{stage}.json') for stage in ('before-measurement','after-measurement','after-profiles')]
         if any(r['variant']!=variant for r in inventories):raise ValueError('Storage inventory belongs to another arm')
         storage=validate_stages(inventories,**layout,vocab_size=vocab)
+        if dispatch['capture_logs']!={'available':True,'cublas':'capture-cublas.log','cublaslt':'capture-cublaslt.log'}:
+            raise ValueError('Dispatch must use the original hash-verified staged capture logs')
         observed_dispatch=inspect_dispatch(path,dispatch,variant)
         for item in dispatch['generated_code']:
             name=Path(item['file'])
