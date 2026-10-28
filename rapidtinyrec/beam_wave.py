@@ -99,8 +99,10 @@ class WavePrefill:
     Patch only one model instance for the duration of a sequential wave. Native
     HF retains batch_size=2 and num_beams=50; no request becomes one100-beam search.
     """
-    def __init__(self,model,beams=50):
-        self.model=model;self.layout=WaveLayout(beams);self.used=False
+    def __init__(self,model,beams=50,arena=None):
+        self.model=model;self.layout=WaveLayout(beams);self.used=False;self.arena=arena
+        if arena is not None and arena.layout!=self.layout:
+            raise ValueError('Wave prefill and arena beam layouts differ')
 
     def __enter__(self):
         if getattr(self.model,'_beam_wave_active',False):raise ValueError('Model already owns an active wave')
@@ -136,7 +138,8 @@ class WavePrefill:
                     if value.shape[0]==2*beams:reduced[name]=value.index_select(0,selection)
             self.used=True
             output=self.original(**reduced)
-            output.past_key_values=WavePrefixCache(output.past_key_values,self.layout)
+            output.past_key_values=(self.arena.start_wave(output.past_key_values) if self.arena is not None
+                                    else WavePrefixCache(output.past_key_values,self.layout))
             output.logits=output.logits.repeat_interleave(beams,dim=0)
             return output
         self.model.forward=forward

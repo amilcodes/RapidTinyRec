@@ -3,6 +3,8 @@
 Sequential waves only. Starting a new wave invalidates borrowed cache views.
 Graph outputs must own suffix/logit storage; prefix views remain borrowed.
 """
+import contextlib
+from unittest.mock import patch
 import torch
 from transformers.cache_utils import DynamicCache
 from .beam_wave import WaveLayout, WavePrefixCache, WavePrefixLayer
@@ -130,3 +132,14 @@ class WaveReorder:
             self.suffix_bytes_written+=sum(x.numel()*x.element_size() for pair in target for x in pair)
         self.direct_calls+=1
         return borrowed_wave(prefix,target,self.arena.layout)
+
+    @contextlib.contextmanager
+    def install(self,model):
+        if hasattr(model,'_reorder_cache'):
+            raise ValueError('Model already supplies a custom cache reorder')
+        with patch.object(model,'_reorder_cache',self.reorder,create=True):
+            yield
+
+    def report(self):
+        return dict(direct_calls=self.direct_calls,fallback_calls=self.final_calls,
+                    suffix_bytes_written=self.suffix_bytes_written,prefix_bytes_reordered=0)

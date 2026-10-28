@@ -62,7 +62,7 @@ class WaveGenerationTests(unittest.TestCase):
             length_penalty=0.,do_sample=False,use_cache=True,pad_token_id=511,eos_token_id=511)
         cls.ids=torch.tensor([[1,7,8,1,2,3],[1,19,27,1,2,3]])
 
-    def generate(self,ids,wave):
+    def generate(self,ids,wave,arena=None):
         tables=GpuSidConstraintTables(catalog(),(1,2,3),510,511,'cpu')
         shapes=[];original=self.model.forward
         @functools.wraps(original)
@@ -70,7 +70,9 @@ class WaveGenerationTests(unittest.TestCase):
             shapes.append(tuple(kw['input_ids'].shape));return original(*a,**kw)
         import contextlib
         with patch.object(self.model,'forward',traced):
-            with WavePrefill(self.model) if wave else contextlib.nullcontext():
+            from rapidtinyrec.beam_wave_arena import WaveReorder
+            with (WavePrefill(self.model,arena=arena) if wave else contextlib.nullcontext()), \
+                    (WaveReorder(arena).install(self.model) if arena is not None else contextlib.nullcontext()):
                 output=self.model.generate(ids,attention_mask=torch.ones_like(ids),generation_config=self.config,
                     logits_processor=LogitsProcessorList([GpuSidConstrainedLogitsProcessor(tables)]),
                     return_dict_in_generate=True,output_scores=True)
@@ -100,6 +102,21 @@ class WaveGenerationTests(unittest.TestCase):
         for old,new in zip(first.scores,saved):self.assertTrue(torch.equal(old,new))
         repeated,_=self.generate(self.ids,True)
         self.assertTrue(torch.equal(first.sequences,repeated.sequences))
+
+    @torch.inference_mode()
+    def test_arena_generation_direct_gathers_and_repeated_waves(self):
+        from rapidtinyrec.beam_wave_arena import WaveArena
+        arena=WaveArena(6,3,50)
+        expected,_=self.generate(self.ids,True)
+        actual,shapes=self.generate(self.ids,True,arena)
+        self.assertEqual(shapes,[(2,6)]+[(100,1)]*4)
+        self.assertTrue(torch.equal(expected.sequences,actual.sequences))
+        torch.testing.assert_close(expected.sequences_scores,actual.sequences_scores,rtol=0,atol=0)
+        retained=[x.clone() for x in actual.scores]
+        reverse,_=self.generate(self.ids.flip(0),True,arena)
+        self.assertTrue(torch.equal(actual.sequences[:50],reverse.sequences[50:]))
+        for before,after in zip(retained,actual.scores):self.assertTrue(torch.equal(before,after))
+        self.assertEqual(arena.report()['waves_loaded'],2)
 
     def test_context_exception_restores_model_and_excludes_nested_wave(self):
         original=self.model.forward
