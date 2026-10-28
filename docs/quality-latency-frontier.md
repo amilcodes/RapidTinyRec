@@ -282,3 +282,36 @@ resulting budget before designing any later complete paired pilot.
 A distinct four-user FP32/TF32/TF32/FP32 pilot is being prepared after the successful setup diagnostic. The frozen [design](../benchmarks/preparation/quality-frontier/precision-paired-staged-protocol.json) plans 1500 seconds of child work under the existing 1620-second deadline, leaving nominal cleanup time within the 30-minute allocation. Repaired-logging FP32 setup remains unmeasured; this is a planning estimate, not a completion guarantee.
 
 The new phase manifests serialize the actual eleven release hashes already verified before model loading, including the checkpoint, and bind each phase to the frozen protocol. The previous setup benchmark already checked these hashes; its limitation was the absence of a serialized observed digest record. The distinct paired auditor additionally requires all four phase records and complete wrapper recovery before applying the original paired fidelity, dispatch, quality and performance gates. Generation, extraction and timing-loop ASTs remain identical to the original pilot. This source preparation has not submitted a new job: harness configuration, a one-time submission guard, source CI and final preflight review remain required. No full500 or promotion is implied.
+
+## BF16 against the audited TF32 baseline
+
+The next isolated experiment is `bf16-vs-tf32-pilot`, with fresh-process
+TF32/BF16/BF16/TF32 ordering and same-variant disk compiler reuse in the second
+half. The four frozen users and six paired trials retain beam 50, all five scored
+tokens, full-vocabulary normalization, HF output ownership, and the existing
+generation timing boundary. This is a pilot, not a population quality claim.
+
+The candidate loads BF16 weights and uses BF16 activations, KV storage and model
+logits. HF retains its existing copy to FP32 before normalization and beam-score
+accumulation. CUDA TF32 remains enabled for residual FP32 matmuls in both policies;
+cuDNN TF32 is off. BF16 reduced-precision accumulation is disabled, with the
+existing split-K permission preserved. There is no autocast or backend sweep.
+
+The exact control reference is the saved TF32 output from job 8007230, whose
+separate allocated recovery audit passed in job 8034953. The original generation
+job's post-generation audit failure is preserved. The pilot checks the recovered
+audit hash and saved raw TF32 row hashes rather than treating a failed original
+job as a completed audit. Catalog resource hashes are checked before model load.
+
+Dispatch evidence requires native BF16 operands and FP32 compute for actual MLP
+shapes, corroborated by BF16 kernels linked to the captured model graphs. Getter
+values or unrelated BF16 probe kernels cannot pass. Both policies must retain
+direct/replay/repeat/profile stability and independent FP32 score ownership.
+
+The run has a separate profile, frozen protocol, allocation identity, 1,620-second
+global work deadline and 1,500-second generation bound within one regular
+A6000/4-CPU/32-GB/30-minute allocation. Logs and failed evidence are preserved.
+A material incremental effect is screened at 10% median and p95 improvement
+overall, by length and by half, with no length-by-half regression. A valid
+material pilot can advance to a separately frozen 500-user experiment under the
+user's standing authorization. No promotion or noninferiority claim is automatic.

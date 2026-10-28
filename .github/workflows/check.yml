@@ -23,6 +23,9 @@ jobs:
       - run: bash -n benchmarks/preparation/quality-frontier/precision-setup.sh
       - run: python -m rapidtinyrec.audit_precision --help
       - run: python -m rapidtinyrec.quality_frontier --help
+      - run: python -m rapidtinyrec.audit_bf16 --help
+      - run: python -m rapidtinyrec.bf16_runner --help
+      - run: bash -n jobs/bf16-pilot.sh
       - run: python -m unittest discover -s tests -p test_evidence.py -v
       - run: python -m unittest discover -s tests -p test_folded_evidence.py -v
       - run: python -m unittest discover -s tests -p test_audit_decode_pilot.py -v
@@ -46,6 +49,7 @@ jobs:
       - run: pip install -e .
       - run: python -m unittest discover -s tests -v
       - run: python -m rapidtinyrec.benchmark_precision --help
+      - run: python -m rapidtinyrec.benchmark_bf16 --help
       - run: python -m rapidtinyrec.benchmark --help
       - run: python -m rapidtinyrec.benchmark_gqa --help
       - run: python -m rapidtinyrec.benchmark_folded_profile --help
