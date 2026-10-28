@@ -35,8 +35,13 @@ and reorder request caches, reject mismatched identities, and exercise existing
 50-beam generation with five independently stored FP32 score tensors. Tolerances
 in CPU arithmetic checks are not an exact GPU claim or quality-loss tolerance.
 
-Next: integrate a separate paired TF32 control/cached-TF32 pilot with original
-generation/scoring, capture and ownership checks, compilation freeze, cold-fill
-accounting, allocated audit and budget. The baseline choice can be revised only
+`benchmark_prompt_cache` now supplies the separate TF32 control/cached-TF32
+entrypoint with original scoring, retained output ownership checks, compilation
+freeze, cold-build accounting, and raw persistent-KV snapshots before/after
+warmup, timing and profiling. Initial prefix build includes any nested compilation;
+it is not a steady-state cold-cache latency estimate. Generation peaks are frozen
+before snapshot allocations. The allocated independent auditor, deadline runner
+and submission package are still pending, so this entrypoint is not ready to run.
+The baseline choice can be revised only
 after BF16 evidence is audited; do not combine precision and caching changes in
 the first experiment. No second GPU job while the BF16 job is active.

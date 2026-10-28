@@ -173,5 +173,9 @@ class FixedPromptCache:
                                              for pair in self._pairs for x in pair),
                     dtype=str(self.dtype), model_config_sha256=self._config,
                     identity=vars(self.identity), policy=self._policy,
+                    storage_inventory=[dict(layer=i,kind=kind,shape=list(x.shape),
+                        dtype=str(x.dtype),storage_ptr=x.untyped_storage().data_ptr(),
+                        storage_bytes=x.untyped_storage().nbytes())
+                        for i,pair in enumerate(self._pairs) for kind,x in zip(('key','value'),pair)],
                     prefix_token_sha256=hashlib.sha256(json.dumps(
-                        self._prefix_ids.cpu().tolist()).encode()).hexdigest())
+                        self._prefix_ids[0].cpu().tolist(),separators=(',', ':')).encode()).hexdigest())

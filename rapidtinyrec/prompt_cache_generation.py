@@ -81,7 +81,8 @@ class PromptCacheGenerator:
 
         try:
             with patch.object(self.model, 'forward', forward), PrefillPrefix(
-                    self.model, 50, cache_expander=self.arena.start_request), (
+                    self.model, 50, cache_expander=(self.arena.start_request
+                        if self.arena is not None else None)), (
                     self.reorder.install(self.model) if self.reorder is not None
                     else contextlib.nullcontext()):
                 output = self.model.generate(prepared.input_ids,

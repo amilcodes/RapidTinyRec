@@ -174,6 +174,13 @@ class PromptCacheTests(unittest.TestCase):
             self.assertEqual(len({s.untyped_storage().data_ptr() for s in output.scores}), 5)
         self.assertEqual(self.model.forward, original)
         self.assertFalse(generator.active)
+        # Dense prefill/decode reference uses the same adapter but no physical
+        # beam arena, providing a reference for replay stability comparisons.
+        dense = PromptCacheGenerator(cache, cfg, None, prefill_forward=prefill, decode_forward=decode)
+        dense_request = dense.prepare(request.input_ids)
+        dense_output = dense.generate(dense_request, LogitsProcessorList([GpuSidConstrainedLogitsProcessor(tables)]))
+        self.assertTrue(torch.equal(dense_output.sequences, retained))
+        torch.testing.assert_close(dense_output.sequences_scores, output.sequences_scores, atol=2e-6, rtol=2e-5)
         other = PromptCacheGenerator(cache, cfg, arena, prefill_forward=prefill, decode_forward=decode)
         with self.assertRaisesRegex(ValueError, 'another generator'):
             other.generate(request, LogitsProcessorList())
