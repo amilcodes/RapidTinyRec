@@ -21,7 +21,8 @@ from .precision_log_runner import supervise, recover_logs
 from .precision_log_staging import filesystem_for
 
 
-PROJECT='rapidtinyrec-bf16-full500'
+# New project prevents corrected execution from sharing the failed run namespace.
+PROJECT='rapidtinyrec-bf16-full500-corrected'
 PROFILE='bf16-vs-tf32-full500-quality'
 COMMAND=['bash','jobs/bf16-full500.sh']
 

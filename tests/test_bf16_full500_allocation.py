@@ -12,7 +12,7 @@ ROOT=Path(__file__).resolve().parents[1]
 
 class AllocationTests(unittest.TestCase):
     def setUp(self):
-        self.run=Path('/oscar/scratch/aagraw73/agent-runs/rapidtinyrec-bf16-full500/fixture')
+        self.run=Path('/oscar/scratch/aagraw73/agent-runs')/runner.PROJECT/'fixture'
         self.protocol=load_protocol(ROOT/PROTOCOL)
         resources=dict(self.protocol['resources'],setup=['module purge'],command=['bash','jobs/bf16-full500.sh'])
         self.manifest=dict(submission='prepared',job_id=None,project=runner.PROJECT,profile=runner.PROFILE,run_id='fixture',remote_dir=str(self.run),resources=resources,files=[PROTOCOL],sha256={PROTOCOL:PROTOCOL_SHA256},ssh_target='aagraw73@sshcampus.ccv.brown.edu')
@@ -32,6 +32,17 @@ class AllocationTests(unittest.TestCase):
         self.assertEqual(result['allocation_identity']['scheduler_fields']['JobState'],'RUNNING')
         self.raw=self.raw.replace('TresPerNode=gres/gpu:nvidia_rtx_a6000:1','TresPerNode=gres/gpu:1')
         with self.assertRaises(AssertionError):self.observe()
+
+    def test_original_failed_project_cannot_be_reused(self):
+        self.assertEqual(runner.PROJECT,'rapidtinyrec-bf16-full500-corrected')
+        old='rapidtinyrec-bf16-full500'
+        for record,key,value in ((self.manifest,'project',old),(self.config,'project',old),
+                (self.manifest,'remote_dir',str(self.run).replace(runner.PROJECT,old))):
+            before=record[key];record[key]=value
+            try:
+                with self.subTest(key=key),self.assertRaises(AssertionError):self.observe()
+            finally:record[key]=before
+        self.assertEqual(self.observe()['project'],runner.PROJECT)
 
     def test_pilot_identity_or_stale_source_rejected(self):
         for key,value in (('profile','bf16-vs-tf32-pilot'),('project','rapidtinyrec-bf16-pilot'),('job_id','122'),('files',[PROTOCOL,PROTOCOL])):
