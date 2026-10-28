@@ -43,6 +43,7 @@ def main():
     from .beam_wave_generation import PairGeneration
     from .beam_wave_measurement import measure_pair
     from .beam_wave_outputs import unpack_requests
+    from .beam_wave_storage import collect_inventory
     torch=b.torch
     validate_runtime(torch,b.importlib.metadata.version('transformers'))
     with precision_policy(torch,'folded_tf32') as numerical_policy,fold_decode_attention(True):
@@ -100,6 +101,8 @@ def main():
             precision_policy=numerical_policy,compiler_policy=compiler_policy,compiler_artifacts=dict(reused=args.reuse_compiler_artifacts,before=before),
             versions={n:b.importlib.metadata.version(n) for n in ('torch','transformers','tokenizers')},torch_git=torch.version.git_version,
             cuda_version=torch.version.cuda,hardware=torch.cuda.get_device_name(0),model_load_s=load_s,vocab_size=model.config.vocab_size,
+            kv_layout=dict(layers=model.config.num_hidden_layers,kv_heads=model.config.num_key_value_heads,
+                           head_dim=model.config.hidden_size//model.config.num_attention_heads),
             model_parameter_logical_bytes=sum(x.numel()*x.element_size() for x in model.parameters()),
             model_parameter_unique_bytes=sum({x.untyped_storage().data_ptr():x.untyped_storage().nbytes() for x in model.parameters()}.values()),
             source_sha256={p.name:b.digest(p) for p in b.ROOT.glob('*.py')},timing_contract=protocol['timing'])
@@ -132,6 +135,7 @@ def main():
         validate_state(policy_state(torch),'folded_tf32')
         b.save(out/'setup.json',dict(combined_setup_and_warmup_s=time.perf_counter()-setup,compiler_artifacts_after=inventory(),
             precision_policy=policy_state(torch),replay=engine.pool.report(),direct_reorder=engine.reorder.report(),memory=memory()))
+        b.save(out/'storage-before-measurement.json',collect_inventory(engine,model,'before-measurement'))
         torch.cuda.reset_peak_memory_stats();trials=[]
         for spec in phase_schedule(args.phase):
             trial=measure_pair(spec,engine.generate,torch.cuda.synchronize,time.perf_counter,unpack)
@@ -140,6 +144,7 @@ def main():
         b.save(out/'trials.json',trials);compiler.finish();validate_state(policy_state(torch),'folded_tf32')
         b.save(out/'summary.json',dict(complete=True,measured_pairs=6,measured_requests=12,precision_policy=policy_state(torch),
             replay=engine.pool.report(),direct_reorder=engine.reorder.report(),memory=memory()))
+        b.save(out/'storage-after-measurement.json',collect_inventory(engine,model,'after-measurement'))
         profiles=[]
         for pair in protocol['pairs']:
             group=pair['cohort_indices'];length=pair['prompt_tokens'];outputs=[]
@@ -156,6 +161,7 @@ def main():
             outputs.clear();del output
             name=f'profile-output-{length}.json';b.save(out/name,dict(users=group,requests=raw))
             profiles.append(dict(prompt_tokens=length,cohort_indices=group,trace=trace,output=name))
+        b.save(out/'storage-after-profiles.json',collect_inventory(engine,model,'after-profiles'))
         generated=out/'generated-code';generated.mkdir();code_records=[]
         for cache_name,cache_path in caches.items():
             for src in sorted(cache_path.rglob('*.py')):
