@@ -118,6 +118,25 @@ class WaveGenerationTests(unittest.TestCase):
         for before,after in zip(retained,actual.scores):self.assertTrue(torch.equal(before,after))
         self.assertEqual(arena.report()['waves_loaded'],2)
 
+    @torch.inference_mode()
+    def test_wave_output_extraction_preserves_global_ancestry_and_transitions(self):
+        from rapidtinyrec.beam_wave_outputs import unpack_requests
+        output,_=self.generate(self.ids,True)
+        rows=unpack_requests(self.model,output,[1,2],6)
+        expected=self.model.compute_transition_scores(output.sequences,output.scores,output.beam_indices,normalize_logits=False)
+        for slot,row in enumerate(rows):
+            self.assertEqual(row['transition_logp'],expected[slot*50:(slot+1)*50].tolist())
+            self.assertEqual(row['original_beam_row_offset'],slot*50)
+            self.assertTrue(all(v==-1 or slot*50<=v<(slot+1)*50 for a in row['global_beam_indices'] for v in a))
+            self.assertTrue(all(-1<=v<50 for a in row['beam_indices'] for v in a))
+        for a,b in zip(rows[0]['score_row_extents'],rows[1]['score_row_extents']):
+            self.assertEqual(a['storage_ptr'],b['storage_ptr']);self.assertLessEqual(a['byte_end'],b['byte_start'])
+        with self.assertRaisesRegex(ValueError,'independent'):
+            unpack_requests(self.model,output,[1,2],6,[output.scores[0].untyped_storage().data_ptr()])
+        output.beam_indices=output.beam_indices.clone();output.beam_indices[50,0]=0
+        with self.assertRaisesRegex(ValueError,'crosses'):
+            unpack_requests(self.model,output,[1,2],6)
+
     def test_context_exception_restores_model_and_excludes_nested_wave(self):
         original=self.model.forward
         with self.assertRaisesRegex(RuntimeError,'sentinel'):
