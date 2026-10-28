@@ -8,10 +8,19 @@ from rapidtinyrec.bf16_policy import validate_state
 from rapidtinyrec.bf16_protocol import load_protocol,PROTOCOL,PHASES,phase_record
 from rapidtinyrec.bf16_runner import allowance
 from rapidtinyrec.audit_bf16_dispatch import api_bf16_gemms,dispatch_evidence
+from rapidtinyrec.audit_bf16 import inspect_phases
 
 ROOT=Path(__file__).resolve().parents[1]
 
 class Bf16PolicyTests(unittest.TestCase):
+    def test_pilot_auditor_protocol_loader_is_not_shadowed_by_dead_full500_import(self):
+        # Regression: a function-local import in an unreachable full500 branch
+        # made the earlier pilot load_protocol call raise UnboundLocalError.
+        self.assertTrue({'load_protocol','PROTOCOL'}.isdisjoint(inspect_phases.__code__.co_varnames))
+        self.assertIn('load_protocol',inspect_phases.__code__.co_names)
+        for flag in ('setup_diagnostic','staged_pilot','full500_quality'):
+            with self.assertRaises(AssertionError):
+                inspect_phases(None,None,None,None,**{flag:True})
     def test_policy_rejects_tf32_or_reduction_changes(self):
         state=dict(matmul_tf32=True,cudnn_tf32=False,float32_matmul_precision='high',blas_preference='_BlasBackend.Cublas',
             bf16_reduced_precision_reduction=False,bf16_split_k=True,math_sdpa_reduced_precision_reduction=False)

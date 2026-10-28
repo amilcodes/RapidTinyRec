@@ -72,7 +72,6 @@ def inspect_phases(root,historical,snapshot,run_record,*,setup_diagnostic=False,
             from .precision_provenance import validate_release
             names.add('precision_provenance.py')
             validate_release(m['release_verification'],expected['release_sha256'])
-        if full500_quality:names.add('precision_full500.py')
         assert set(m['sha256'])==names
         for name,sha in m['sha256'].items():assert digest(snapshot/name)==sha,name
         users=reference['users'] if full else [u for n in (all_lengths[0],all_lengths[-1])
@@ -149,36 +148,6 @@ def inspect_phases(root,historical,snapshot,run_record,*,setup_diagnostic=False,
             assert old['cohort_index']==row['cohort_index'] and old['manifest_sha256']==reference['manifest_sha256']
             historical_pairs[variant].append((old['runs']['compiled_gqa'],run))
         repeat_check=None
-        if full500_quality:
-            from .precision_full500 import load_protocol, PROTOCOL, validate_phase, validate_repeats
-            protocol=load_protocol(snapshot.parent/PROTOCOL)
-            validate_phase(m,protocol,expected['release_sha256'])
-            repeats=read(path/'stability-requests.json')
-            repeat_check=validate_repeats(rows,repeats,protocol['phases'][phase])
-            saved=read(path/'stability-summary.json')
-            assert set(saved)==set(repeat_check)|{'replay','direct_reorder','memory'}
-            assert all(saved[k]==v for k,v in repeat_check.items())
-            assert sorted(p.name for p in (path/'stability-users').glob('*.json'))==sorted(f"{r['cohort_index']:04d}.json" for r in repeats)
-            by_index={r['cohort_index']:r for r in rows}
-            for r in repeats:
-                assert r==read(path/'stability-users'/f"{r['cohort_index']:04d}.json")
-                assert len(r['run']['graph_logit_storage_ptrs'])==graphs
-                repeated.append((by_index[r['cohort_index']]['run'],r['run']))
-            ancestry_stable &= repeat_check['ancestry_stable']
-            replay=saved['replay']; reorder=saved['direct_reorder']
-            assert replay['frozen'] and replay['graphs']==graphs
-            assert replay['events']==after['events'] and replay['capture_and_warmup_s']==after['capture_and_warmup_s']
-            assert replay['replays']-after['replays']==4*len(repeats)
-            assert replay['physical_prefix']['requests_loaded']-after['physical_prefix']['requests_loaded']==len(repeats)
-            assert replay['physical_prefix']['prefix_bytes_copied']-after['physical_prefix']['prefix_bytes_copied']==sum(bytes_per_token//50*r['prompt_tokens'] for r in repeats)
-            assert reorder['direct_calls']-last['direct_calls']==4*len(repeats)
-            assert reorder['fallback_calls']-last['fallback_calls']==len(repeats)
-            assert reorder['suffix_bytes_written']-last['suffix_bytes_written']==bytes_per_token*6*len(repeats)
-            assert reorder['prefix_bytes_reordered']==last['prefix_bytes_reordered']==0
-            mem=saved['memory']
-            assert 0<physical<=mem['allocated_bytes']<=mem['reserved_bytes']<46*1024**3
-            assert mem['allocated_bytes']<=mem['peak_allocated_bytes']<=mem['peak_reserved_bytes']
-            assert mem['reserved_bytes']<=mem['peak_reserved_bytes']
         warm_comparisons=[]; warm_historical=[]; warm_repeat=[]; profile_pairs=[]
         for index in warm:
             baseline=read(path/'warmup_outputs'/f'{index}_dense_forward.json')
@@ -225,7 +194,6 @@ def inspect_phases(root,historical,snapshot,run_record,*,setup_diagnostic=False,
             'dispatch':dispatch,'repeat_comparison':compare(warm_repeat),'profile_comparison':compare(profile_pairs),'warmup_comparison':compare(warm_comparisons),'warmup_historical_comparison':compare(warm_historical),
             'setup_s':w['combined_setup_and_warmup_s'],'backend_compile_s':c['backend_compile_total_s'],
             'capture_and_warmup_s':capture,'measurement_compilations':0,'measurement_captures':0})
-        if full500_quality:phases[-1]['untimed_repeat_check']=repeat_check
     return dict(record=record,expected=expected,users=users,lengths=lengths,full=full,
         phases=phases,joined=joined,repeated=repeated,ancestry_stable=ancestry_stable,
         historical_pairs=historical_pairs)
