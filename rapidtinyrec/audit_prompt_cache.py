@@ -1,12 +1,15 @@
 """Independent auditor for the distinct uncached/fixed69 TF32 pilot.
 
-Raw phases retain their declared identities. This does not invoke or relabel
-BF16, serving or full500 validators. Live allocation/deadline entrypoint and
-entrypoint integration remains required before submission.
+Raw phases retain their declared identities. Live source/allocation identity,
+global and audit-stage deadlines, and log recovery are checked before numerical
+evaluation. This does not relabel BF16, serving or full500 phases.
 """
 import json
 import math
 import os
+import argparse
+import time
+import traceback
 from pathlib import Path
 from .audit_decode_pilot import read,digest,json_digest,compare,latency
 from .audit_prefix_profile import exact
@@ -32,6 +35,7 @@ def validate_phase_header(manifest,phase,record,protocol):
 def inspect_phases(root,historical,snapshot,run_record,*,setup_diagnostic=False,staged_pilot=False,full500_quality=False):
     assert not setup_diagnostic and not staged_pilot and not full500_quality
     assert os.environ.get('SLURM_JOB_ID'),'Allocated prompt-cache audit only'
+    assert {p.name for p in root.glob('phase_*') if p.is_dir()}=={f'phase_{i}' for i in range(4)}
     record=read(run_record)
     assert record['resources']['gpus']==1 and record['resources']['gpu_type']=='nvidia_rtx_a6000'
     assert record['resources']['cpus']==4 and record['resources']['memory_gb']==32
@@ -296,3 +300,37 @@ def evaluate_phases(e,root,snapshot,release,*,wrapper,allocation_identity):
     result['execution_audit_passed']=all(result[k] for k in ('integrity_audit_passed','control_exact','stability_exact','dispatch_verified','validity_passed'))
     result['eligible_for_full500']=result['execution_audit_passed'] and speed
     return result
+
+
+def audit(root,historical,snapshot,run_record,release):
+    assert os.environ.get('SLURM_JOB_ID'),'Allocated prompt-cache audit only'
+    from .prompt_cache_runner import observe,validate_audit_start
+    from .audit_precision_setup import validate_wrapper
+    record=read(run_record)
+    live=observe(Path(os.environ['OSCAR_RUN_DIR']).resolve(),snapshot.parent.resolve(),root.resolve())
+    for key in ('run_id','job_id','files','sha256','resources'):assert record[key]==live[key],key
+    budget=validate_audit_start(root,record,time.monotonic())
+    wrapper=validate_wrapper(root,record,phases=(0,1,2,3),child_timeout_s=1500)
+    phases=inspect_phases(root,historical,snapshot,run_record)
+    result=evaluate_phases(phases,root,snapshot,release,wrapper=wrapper,allocation_identity=live['allocation_identity'])
+    assert time.monotonic()<budget['effective_deadline_monotonic'],'Audit exceeded original budget'
+    result['deadline_validation']=budget
+    return result
+
+
+def main():
+    parser=argparse.ArgumentParser(description=__doc__)
+    for name in ('root','historical','snapshot','run-record','release','output'):
+        parser.add_argument('--'+name,type=Path,required=True)
+    args=parser.parse_args();assert not args.output.exists(),'Preserve existing audit evidence'
+    try:result=audit(args.root,args.historical,args.snapshot,args.run_record,args.release)
+    except Exception as exc:
+        result=dict(schema='fixed-prompt-cache-pilot-audit-v1',integrity_audit_passed=False,
+            execution_audit_passed=False,error=repr(exc),traceback=traceback.format_exc(),
+            promotion=False,noninferiority_established=False)
+    with args.output.open('x') as f:json.dump(result,f,indent=2,allow_nan=False);f.write('\n')
+    print(json.dumps({k:result.get(k) for k in ('execution_audit_passed','eligible_for_full500','error')}))
+    if not result['execution_audit_passed']:raise SystemExit(1)
+
+
+if __name__=='__main__':main()

@@ -14,6 +14,10 @@ jobs:
       - run: python -m unittest discover -s tests -p test_quality_frontier.py -v
       - run: python -m unittest discover -s tests -p "test_precision*.py" -v
       - run: python -m unittest discover -s tests -p test_prompt_cache_protocol.py -v
+      - run: python -m unittest discover -s tests -p test_prompt_cache_runner.py -v
+      - run: python -m rapidtinyrec.prompt_cache_runner --help
+      - run: python -m rapidtinyrec.audit_prompt_cache --help
+      - run: bash -n jobs/prompt-cache-pilot.sh
       - run: python -m rapidtinyrec.precision_log_runner --help
       - run: python -m rapidtinyrec.audit_precision_setup --help
       - run: python -m rapidtinyrec.audit_precision_paired_staged --help
