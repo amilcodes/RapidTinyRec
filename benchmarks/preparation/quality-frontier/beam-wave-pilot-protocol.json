@@ -1,0 +1,129 @@
+{
+  "schema": "two-request-beam-wave-pilot-v1",
+  "experiment": "two_request_beam_wave_tf32_pilot",
+  "profile": "two-request-beam-wave-pilot",
+  "phases": [
+    {
+      "phase": 0,
+      "variant": "serial_pair_tf32",
+      "half": 0,
+      "reuse_disk_artifacts": false
+    },
+    {
+      "phase": 1,
+      "variant": "beam_wave_tf32",
+      "half": 0,
+      "reuse_disk_artifacts": false
+    },
+    {
+      "phase": 2,
+      "variant": "beam_wave_tf32",
+      "half": 1,
+      "reuse_disk_artifacts": true
+    },
+    {
+      "phase": 3,
+      "variant": "serial_pair_tf32",
+      "half": 1,
+      "reuse_disk_artifacts": true
+    }
+  ],
+  "pairs": [
+    {
+      "pair_index": 0,
+      "cohort_indices": [
+        1,
+        2
+      ],
+      "prompt_tokens": 76
+    },
+    {
+      "pair_index": 1,
+      "cohort_indices": [
+        6,
+        10
+      ],
+      "prompt_tokens": 121
+    }
+  ],
+  "repeats_per_half": 3,
+  "waves_per_phase": 6,
+  "requests_per_phase": 12,
+  "graphs_per_phase": 8,
+  "order": "Global repeat IDs0..5; each phase visits repeat-major then pair_index0,1. Reverse the two users on odd global repeats. Matched serial/wave phases use identical order; every user is first three times across both halves.",
+  "policy": {
+    "control": "Audited TF32 FP32-storage folded serial beam50 engine; two generation calls per simultaneously ready pair.",
+    "candidate": "Native HF batch2 with50beams per request, two physical histories,100request-major suffix rows and per-request parent offsets. No prompt-prefix cache or BF16.",
+    "both": "CUDA matmul TF32 true, cuDNN TF32 false, FP32 weights/KV/logits, original full-vocabulary normalization, constraints, five scored transitions and termination."
+  },
+  "timing": {
+    "arrival": "Both preprepared equal-length requests become ready at pair clock origin.",
+    "completion": "Monotonic host offsets after synchronization of each serial output or the whole wave. Each response includes within-pair waiting; both wave responses equal pair duration. No request admission wait before origin is modeled.",
+    "included": [
+      "generation wrappers",
+      "two-history prefill checks and prefix copies",
+      "decode staging and parent validation/reorder",
+      "original HF score clones",
+      "completion synchronization"
+    ],
+    "excluded": [
+      "model load",
+      "compile/capture/warmup",
+      "tokenization and input/mask preparation",
+      "transition extraction/quality audit",
+      "profiling/file IO"
+    ],
+    "throughput": "2*number_of_pairs/sum(pair_duration_s); finite sequential pairs, not saturation/HTTP throughput.",
+    "latency": "Pair makespan and both request response offsets. Never label wave duration/2 as request latency."
+  },
+  "resources": {
+    "partition": "gpu",
+    "qos": "norm-gpu",
+    "constraint": "ampere",
+    "gpu_type": "nvidia_rtx_a6000",
+    "gpus": 1,
+    "cpus": 4,
+    "memory_gb": 32,
+    "time": "00:30:00"
+  },
+  "budget": {
+    "global_work_deadline_s": 1620,
+    "generation_child_deadline_s": 1500,
+    "audit_maximum_s": 120,
+    "nominal_cleanup_s": 180,
+    "planning_note": "Previously observed1094.222s four-phase setup/generation is context only. Batch100 compile/capture, physical batch2 prefill and audit are unmeasured; budget is a deadline, not a runtime guarantee."
+  },
+  "baseline": {
+    "run_id": "precision-full500-quality-20261027T114104Z-82ab3f1230b7",
+    "job_id": "8007230",
+    "remote_dir": "/oscar/scratch/aagraw73/agent-runs/rapidtinyrec-precision-full500/precision-full500-quality-20261027T114104Z-82ab3f1230b7",
+    "raw_manifest_sha256": "f9056b9234ab75f3710771f6b4c009f482f13a88f32ab8706997eafd0cb50c44",
+    "recovered_audit_sha256": "f7142a8ad04ffbb587dbd531c86b605865bec5deb121cb5c5329b6f763665b95",
+    "recovered_audit_passed": true,
+    "recovered_audit_remote_path": "/oscar/scratch/aagraw73/agent-runs/rapidtinyrec-full500-audit-recovery/full500-audit-recovery-20261028T014425Z-0f34500ac483/outputs/recovery-audit.json"
+  },
+  "release_users_sha256": "f78097bfedff69f5928a8ccbe39d5a96e07f7e9dd4616209953cf4f51408f487",
+  "screening": {
+    "minimum_pair_throughput_gain_percent": 5,
+    "require_overall_lengths_halves": true,
+    "no_length_half_throughput_regression": true,
+    "overall_response_median_p95_no_regression": true,
+    "report_first_second_response_regressions": true,
+    "requires_complete_raw_integrity_dispatch_stability_validity_and_control_exactness": true,
+    "quality": "Four users only; primary NDCG10/Hit10 once per user, all repetitions checked for stability. Candidate bit differences reported. No population parity or promotion."
+  },
+  "mandatory_audit": [
+    "distinct original phase/run/job/source identity",
+    "actual GPU allocation plus global deadline and failure closure",
+    "both TF32 variants graph-linked dispatch",
+    "all100beam rows mapped to their owning request with no cross-request parent",
+    "independent HF score clones and graph-output/arena storage ownership",
+    "original TF32 saved control exactness",
+    "candidate reverse-order and repeated-output stability, retained outputs",
+    "all5scored transitions, ancestry and original SID catalog validity",
+    "paired host completion timestamps including both serial outputs",
+    "allocated quality audit with one primary observation per user"
+  ],
+  "promotion": false,
+  "noninferiority_established": false
+}
