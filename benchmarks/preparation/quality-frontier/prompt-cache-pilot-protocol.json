@@ -1,0 +1,198 @@
+{
+  "schema": "fixed-prompt-cache-pilot-v1",
+  "profile": "fixed-prompt-cache-pilot",
+  "experiment": "fixed_prompt_cache_tf32_pilot",
+  "cohort_indices": [
+    1,
+    2,
+    6,
+    10
+  ],
+  "prompt_lengths": [
+    76,
+    121
+  ],
+  "prefix_token_ids": [
+    38214,
+    374,
+    458,
+    7600,
+    429,
+    16555,
+    264,
+    3383,
+    11,
+    34426,
+    448,
+    458,
+    1946,
+    429,
+    5707,
+    4623,
+    2266,
+    13,
+    9645,
+    264,
+    2033,
+    429,
+    34901,
+    44595,
+    279,
+    1681,
+    13,
+    4710,
+    14374,
+    29051,
+    510,
+    6713,
+    498,
+    7023,
+    279,
+    1790,
+    3204,
+    1509,
+    429,
+    279,
+    1196,
+    1231,
+    1720,
+    1939,
+    14374,
+    2657,
+    5571,
+    25,
+    715,
+    6713,
+    498,
+    7023,
+    279,
+    1790,
+    3204,
+    1509,
+    279,
+    1196,
+    1231,
+    1720,
+    11,
+    2661,
+    279,
+    2701,
+    86534,
+    16230,
+    3840,
+    25,
+    220
+  ],
+  "prefix_tokens": 69,
+  "prefix_token_sha256": "057bff2b74ff27fed9256c0efb904005d919e74f54fce1992aa3a8e4e7db1d0c",
+  "phases": [
+    {
+      "phase": 0,
+      "variant": "uncached_tf32",
+      "half": 0,
+      "reuse_disk_artifacts": false
+    },
+    {
+      "phase": 1,
+      "variant": "fixed69_tf32",
+      "half": 0,
+      "reuse_disk_artifacts": false
+    },
+    {
+      "phase": 2,
+      "variant": "fixed69_tf32",
+      "half": 1,
+      "reuse_disk_artifacts": true
+    },
+    {
+      "phase": 3,
+      "variant": "uncached_tf32",
+      "half": 1,
+      "reuse_disk_artifacts": true
+    }
+  ],
+  "repeats_per_half": 3,
+  "requests_per_phase": 12,
+  "graphs_per_phase": 8,
+  "policy": {
+    "both": "FP32 parameters/activations/KV/logits; CUDA matmul TF32 true, cuDNN TF32 false",
+    "candidate": "Exactly69-token immutable common prompt cache; nonempty suffix with absolute positions and explicit offset causal mask",
+    "scoring": "Original full-vocabulary five scored transitions, beam50, FP32 HF score copies, original constraints and termination",
+    "request_timing_includes": [
+      "model/config/policy identity checks",
+      "persistent KV clones",
+      "suffix or full prompt prefill",
+      "decode staging/replay/reorder",
+      "HF wrappers and score clones"
+    ],
+    "excluded_from_warm_timing": [
+      "model load",
+      "initial prefix build and compilation",
+      "input preparation",
+      "mask preparation",
+      "output extraction and audit",
+      "profiling and file publication"
+    ],
+    "cold_reporting": "Initial prefix build including any compilation is separate, nested in setup; never claim warm latency for a cold request. Preserve initial first-request timing separately; do not sum nested compiler intervals."
+  },
+  "resources": {
+    "partition": "gpu",
+    "qos": "norm-gpu",
+    "constraint": "ampere",
+    "gpu_type": "nvidia_rtx_a6000",
+    "gpus": 1,
+    "cpus": 4,
+    "memory_gb": 32,
+    "time": "00:30:00"
+  },
+  "budget": {
+    "global_work_deadline_s": 1620,
+    "generation_child_deadline_s": 1500,
+    "audit_maximum_s": 120,
+    "nominal_cleanup_s": 180,
+    "planning_note": "Prior staged four-phase1094s is context only; cached suffix compilation and masked attention cost remain unmeasured. Generation1500s and audit120s are subordinate to inclusive1620s work deadline. No runtime guarantee."
+  },
+  "baseline": {
+    "run_id": "precision-full500-quality-20261027T114104Z-82ab3f1230b7",
+    "job_id": "8007230",
+    "remote_dir": "/oscar/scratch/aagraw73/agent-runs/rapidtinyrec-precision-full500/precision-full500-quality-20261027T114104Z-82ab3f1230b7",
+    "raw_manifest_sha256": "f9056b9234ab75f3710771f6b4c009f482f13a88f32ab8706997eafd0cb50c44",
+    "recovered_audit_sha256": "f7142a8ad04ffbb587dbd531c86b605865bec5deb121cb5c5329b6f763665b95",
+    "recovered_audit_passed": true,
+    "recovered_audit_remote_path": "/oscar/scratch/aagraw73/agent-runs/rapidtinyrec-full500-audit-recovery/full500-audit-recovery-20261028T014425Z-0f34500ac483/outputs/recovery-audit.json"
+  },
+  "screening": {
+    "minimum_warm_median_and_p95_reduction_percent": 5,
+    "require_all_lengths_and_halves": true,
+    "no_length_half_regression": true,
+    "control_exact_to_saved_tf32": true,
+    "candidate_vs_control_bits": "report, not assumed exact",
+    "within_policy_stability_required": true,
+    "no_invalid_or_duplicate_outputs": true,
+    "full500_after_valid_material_gain": true,
+    "pilot_quality_not_population_parity": true
+  },
+  "quality": {
+    "primary": [
+      "ndcg@10",
+      "hit_rate@10"
+    ],
+    "bootstrap_samples": 10000,
+    "seed": 20261026,
+    "loss_budget": null,
+    "exploratory": true
+  },
+  "mandatory_audit": [
+    "distinct phase/run identity and original69token hash",
+    "all source/resource hashes and live allocation",
+    "same cached identity across requests",
+    "persistent cache bit-unchanged before/after warmup,timing,profiling",
+    "owned request KV and retained HF score tensors",
+    "no recompilation after freeze; graph-linked replay and TF32 dispatch",
+    "all4phases and complete repeat/request inventory",
+    "raw exact control, candidate stability and all5 transitions",
+    "global deadline, log preservation and failure closure"
+  ],
+  "promotion": false,
+  "noninferiority_established": false
+}
