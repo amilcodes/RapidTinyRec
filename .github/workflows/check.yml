@@ -26,6 +26,9 @@ jobs:
       - run: python -m rapidtinyrec.quality_frontier --help
       - run: python -m rapidtinyrec.audit_bf16 --help
       - run: python -m rapidtinyrec.bf16_runner --help
+      - run: python -m rapidtinyrec.bf16_full500_runner --help
+      - run: python -m rapidtinyrec.audit_bf16_full500 --help
+      - run: bash -n jobs/bf16-full500.sh
       - run: bash -n jobs/bf16-pilot.sh
       - run: python -m unittest discover -s tests -p test_evidence.py -v
       - run: python -m unittest discover -s tests -p test_folded_evidence.py -v
