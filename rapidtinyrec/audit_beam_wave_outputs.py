@@ -48,8 +48,14 @@ def validate_request(row,user,slot,batch_requests,vocab_size):
 def validate_trial(trial,vocab_size):
     if trial['schema']!='two-request-beam-wave-trial-v1':raise ValueError('Distinct pair trial required')
     timing=validate_timing(trial['timing']);requests=trial['requests'];wave=timing['variant']=='beam_wave_tf32'
-    if len(requests)!=2:raise ValueError('Exactly two saved user outputs required')
-    for slot,(row,user) in enumerate(zip(requests,timing['cohort_indices'])):
+    validate_request_group(requests,timing['cohort_indices'],wave,vocab_size)
+    return timing
+
+
+def validate_request_group(requests,users,wave,vocab_size):
+    if len(requests)!=2 or len(users)!=2 or len(set(users))!=2:
+        raise ValueError('Exactly two distinct saved user outputs required')
+    for slot,(row,user) in enumerate(zip(requests,users)):
         validate_request(row,user,slot if wave else 0,2 if wave else 1,vocab_size)
     first,second=requests
     if wave:
@@ -60,7 +66,7 @@ def validate_trial(trial,vocab_size):
                 raise ValueError('Wave score request rows overlap or have a gap')
     elif set(first['saved_score_storage_ptrs'])&set(second['saved_score_storage_ptrs']):
         raise ValueError('Retained serial request outputs alias each other')
-    return timing
+    return True
 
 
 def validate_trials(phase,trials,vocab_size):
