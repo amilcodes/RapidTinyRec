@@ -20,6 +20,15 @@ inside warm-generation timing. Prefix fill, preparation and audit snapshots are
 separate; report cold first request and warm service separately. No cache eviction,
 general radix tree, model mutation, or concurrent use is supported.
 
+`PromptCacheGenerator` binds a prepared input to the unchanged HF generation
+loop, routes only its first call through masked suffix prefill, expands the
+complete prompt KV into the existing physical beam arena, and delegates four
+single-token calls to the supplied decode replay callable. It supports the
+existing direct reorder context. All wrapper and KV-copy costs stay inside its
+`generate` call. Exceptions restore the model's forward; no eager fallback is
+introduced. The eventual pilot must supply and freeze actual compiled/replay
+callables; CPU tests alone do not exercise CUDA graph capture.
+
 Tiny CPU tests compare suffix logits and every KV tensor to full prompt prefill,
 exercise different suffix lengths and repeat-after-other-user stability, mutate
 and reorder request caches, reject mismatched identities, and exercise existing

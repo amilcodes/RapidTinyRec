@@ -8,6 +8,7 @@ from transformers import Qwen2Config, Qwen2ForCausalLM, GenerationConfig, Logits
 
 from rapidtinyrec.decode_replay import cache_pairs
 from rapidtinyrec.prompt_cache import FixedPromptCache, PromptIdentity
+from rapidtinyrec.prompt_cache_generation import PromptCacheGenerator
 from rapidtinyrec.prefix_prefill import PrefillPrefix
 from rapidtinyrec.shared_prefix import PrefixArena
 from rapidtinyrec.gpu_constraints import GpuSidConstraintTables, GpuSidConstrainedLogitsProcessor
@@ -137,6 +138,60 @@ class PromptCacheTests(unittest.TestCase):
             self.assertTrue(torch.equal(results[0][0], results[1][0]))
             for a, b in zip(results[0][1:], results[1][1:]):
                 torch.testing.assert_close(a, b, atol=2e-6, rtol=2e-5)
+
+    @torch.inference_mode()
+    def test_generation_adapter_routes_masked_suffix_and_four_decode_steps(self):
+        cache = self.make_cache()
+        original = self.model.forward
+        arena = PrefixArena(12)
+        cfg = GenerationConfig(max_new_tokens=8, num_beams=50, num_return_sequences=50,
+            length_penalty=0., do_sample=False, use_cache=True, pad_token_id=511, eos_token_id=511)
+        tables = GpuSidConstraintTables(catalog(), (1, 2, 3), 510, 511, 'cpu')
+        events = []
+        def prefill(**kw):
+            self.assertEqual(kw['past_key_values'].get_seq_length(), 4)
+            self.assertIsNotNone(kw['attention_mask']['full_attention'])
+            self.assertEqual(kw['position_ids'][0, 0].item(), 4)
+            events.append('suffix')
+            return original(**kw)
+        def decode(**kw):
+            self.assertEqual(kw['input_ids'].shape, (50, 1))
+            self.assertIsNone(kw['attention_mask']['full_attention'])
+            events.append('decode')
+            return original(**kw)
+        generator = PromptCacheGenerator(cache, cfg, arena, prefill_forward=prefill, decode_forward=decode)
+        inputs = torch.tensor([[1, 17, 21, 33, 8, 1, 2, 3]])
+        request = generator.prepare(inputs)
+        inputs[0, 4] = 88  # Prepared generation owns its original request.
+        retained = None
+        for _ in range(2):
+            output = generator.generate(request, LogitsProcessorList([GpuSidConstrainedLogitsProcessor(tables)]))
+            self.assertEqual(events[-5:], ['suffix']+['decode']*4)
+            if retained is not None:
+                self.assertTrue(torch.equal(retained, output.sequences))
+            retained = output.sequences.clone()
+            self.assertEqual(output.sequences[:, 4].unique().tolist(), [8])
+            self.assertEqual(len({s.untyped_storage().data_ptr() for s in output.scores}), 5)
+        self.assertEqual(self.model.forward, original)
+        self.assertFalse(generator.active)
+        other = PromptCacheGenerator(cache, cfg, arena, prefill_forward=prefill, decode_forward=decode)
+        with self.assertRaisesRegex(ValueError, 'another generator'):
+            other.generate(request, LogitsProcessorList())
+
+    @torch.inference_mode()
+    def test_generation_adapter_restores_model_after_forward_failure(self):
+        cache = self.make_cache()
+        original = self.model.forward
+        cfg = GenerationConfig(max_new_tokens=8, num_beams=50, num_return_sequences=50,
+            length_penalty=0., do_sample=False, use_cache=True, pad_token_id=511, eos_token_id=511)
+        def fail(**kw): raise RuntimeError('simulated compiled failure')
+        generator = PromptCacheGenerator(cache, cfg, PrefixArena(12),
+            prefill_forward=fail, decode_forward=original)
+        request = generator.prepare(torch.tensor([[1, 17, 21, 33, 8, 1, 2, 3]]))
+        with self.assertRaisesRegex(RuntimeError, 'compiled failure'):
+            generator.generate(request, LogitsProcessorList())
+        self.assertEqual(self.model.forward, original)
+        self.assertFalse(generator.active)
 
 
 if __name__ == '__main__':
