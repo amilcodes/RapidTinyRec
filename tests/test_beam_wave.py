@@ -121,10 +121,12 @@ class WaveGenerationTests(unittest.TestCase):
     @torch.inference_mode()
     def test_wave_output_extraction_preserves_global_ancestry_and_transitions(self):
         from rapidtinyrec.beam_wave_outputs import unpack_requests
+        from rapidtinyrec.audit_beam_wave_outputs import validate_request
         output,_=self.generate(self.ids,True)
         rows=unpack_requests(self.model,output,[1,2],6)
         expected=self.model.compute_transition_scores(output.sequences,output.scores,output.beam_indices,normalize_logits=False)
         for slot,row in enumerate(rows):
+            validate_request(row,slot+1,slot,2,512)
             self.assertEqual(row['transition_logp'],expected[slot*50:(slot+1)*50].tolist())
             self.assertEqual(row['original_beam_row_offset'],slot*50)
             self.assertTrue(all(v==-1 or slot*50<=v<(slot+1)*50 for a in row['global_beam_indices'] for v in a))
