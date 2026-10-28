@@ -197,7 +197,7 @@ def evaluate_evidence(e,code,release,live):
 
 def audit(root,code,historical,release):
     if not os.environ.get('SLURM_JOB_ID'):raise ValueError('Allocated beam-wave audit only')
-    # Runner integration is mandatory; this draft cannot execute before it exists.
+    # Validate original generation/recovery stages and this audit's shorter deadline.
     from .beam_wave_runner import validate_audit_start
     from .audit_precision_setup import validate_wrapper
     root=Path(root).resolve();code=Path(code).resolve()
