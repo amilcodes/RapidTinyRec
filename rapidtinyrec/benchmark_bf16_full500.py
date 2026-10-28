@@ -15,7 +15,7 @@ from .compiled_forward import CompiledForward
 from .bf16_policy import PHASES, precision_policy, validate_runtime, policy_state, validate_state
 from .precision_log_staging import capture_session
 from .precision_provenance import verify_release
-from .bf16_full500 import PROTOCOL, load_protocol, phase_record, select_users, primary_trials, collect_repeats
+from .bf16_full500 import PROTOCOL, load_protocol, phase_record, select_users, primary_trials, collect_repeats, validate_reference
 from .prefix_prefill import PrefillPrefix
 from .folded_attention import fold_decode_attention
 from .decode_replay import DecodeReplayPool
@@ -53,13 +53,13 @@ def main():
         assert not any(compiler_policy.values()),'No algorithm sweep'
         torch.manual_seed(42);torch.set_num_threads(4)
         expected=json.loads((b.ROOT/'expected.json').read_text())
-        reference=json.loads((args.reference_results/'manifest.json').read_text())
+        reference=validate_reference((args.reference_results/'manifest.json').read_bytes(),protocol)
         assert reference['experiment']=='gqa_three_way' and reference['dtype']=='float32'
         content={k:v for k,v in reference.items() if k!='manifest_sha256'}
         assert hashlib.sha256(json.dumps(content,sort_keys=True).encode()).hexdigest()==reference['manifest_sha256']
         assert hashlib.sha256(json.dumps(reference['users'],sort_keys=True).encode()).hexdigest()==expected['users_sha256']
         assert expected['release_sha256']==protocol['provenance']['release_hashes']
-        assert reference['manifest_sha256']==protocol['cohort']['manifest_sha256']
+        assert reference['manifest_sha256']==protocol['cohort']['manifest_content_sha256']
         release_verification=verify_release(args.release_root,expected['release_sha256'],b.digest)
         quality_pins=json.loads((b.ROOT/'quality_resources.json').read_text())
         assert quality_pins==protocol['provenance']['resource_hashes']

@@ -16,7 +16,7 @@ import traceback
 from copy import deepcopy
 import subprocess
 from .precision_allocation import read,digest,scheduler_fields,validate_scheduler,verify_source
-from .bf16_full500 import PROTOCOL, PROTOCOL_SHA256, load_protocol
+from .bf16_full500 import PROTOCOL, PROTOCOL_SHA256, load_protocol, validate_reference
 from .precision_log_runner import supervise, recover_logs
 from .precision_log_staging import filesystem_for
 
@@ -183,7 +183,8 @@ def main():
         # Fail before generation on missing/mismatched catalog or held-out data.
         # This parses metadata only; the paired bootstrap runs later on allocation.
         from .audit_bf16_full500 import catalog_preflight
-        preflight=catalog_preflight(args.release_root,read(args.historical/'manifest.json')['users'],protocol)
+        reference=validate_reference((args.historical/'manifest.json').read_bytes(),protocol)
+        preflight=catalog_preflight(args.release_root,reference['users'],protocol)
         save(output/'bf16-full500-catalog-preflight.json',preflight)
         for name in ('source-manifest.json','job-id'):
             with (output/('submitted-'+name)).open('xb') as f:f.write((run/name).read_bytes())

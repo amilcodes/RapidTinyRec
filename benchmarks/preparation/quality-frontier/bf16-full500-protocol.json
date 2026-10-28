@@ -511,7 +511,6 @@
       498,
       499
     ],
-    "manifest_sha256": "9ebf231fcdfd5f92c31131d76cb41638f7f03d3d6258b8913e4c8da54d4b77fd",
     "users_sha256": "f78097bfedff69f5928a8ccbe39d5a96e07f7e9dd4616209953cf4f51408f487",
     "lengths": [
       76,
@@ -567,7 +566,10 @@
         16
       ]
     },
-    "selection": "All original frozen users, preserving original order. Half is cohort_index modulo 2. No exclusion or outcome-dependent routing. Four pilot users remain included; this cohort is exploratory, not independent confirmation."
+    "selection": "All original frozen users, preserving original order. Half is cohort_index modulo 2. No exclusion or outcome-dependent routing. Four pilot users remain included; this cohort is exploratory, not independent confirmation.",
+    "manifest_file_sha256": "9ebf231fcdfd5f92c31131d76cb41638f7f03d3d6258b8913e4c8da54d4b77fd",
+    "manifest_content_sha256": "503ba174a92cde0028fb6a9ad1742fc2bd5f61651ef9eb9d217f1b69990e5bcc",
+    "manifest_hash_encoding": "file: original bytes; content: json.dumps(sort_keys=True) excluding manifest_sha256"
   },
   "phases": [
     {

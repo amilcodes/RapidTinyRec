@@ -4,13 +4,15 @@ import hashlib
 import json
 from pathlib import Path
 PROTOCOL = 'benchmarks/preparation/quality-frontier/bf16-full500-protocol.json'
-PROTOCOL_SHA256 = '206890755848e417a4fb31b88598c352e6acd75083b7ccd1f96ec3fef521641f'
+PROTOCOL_SHA256 = 'c2bd251a8b9c34e23d2a14a85979fea8778d175485241fb650e04188e99f17cc'
 PROFILE = 'bf16-vs-tf32-full500-quality'
 PHASES = ('folded_tf32','folded_bf16','folded_bf16','folded_tf32')
 
 def validate_protocol(p):
     assert p['schema']=='bf16-vs-tf32-full500-protocol-v1' and p['profile']==PROFILE
     assert p['cohort']['indices']==list(range(500)) and p['cohort']['unique_users']==500
+    assert 'manifest_sha256' not in p['cohort'],'Ambiguous manifest hash field forbidden'
+    assert p['cohort']['manifest_file_sha256']!=p['cohort']['manifest_content_sha256']
     assert len(p['cohort']['lengths'])==10 and len(p['phases'])==4
     for i,s in enumerate(p['phases']):
         assert s['phase']==i and s['half']==i//2 and s['variant']==PHASES[i]
@@ -79,3 +81,17 @@ def validate_repeats(primary,repeats,phase_spec):
     assert all(r.get('measurement_role')=='primary_timed' for r in primary)
     result=validate_records(primary,repeats,phase_spec)
     return dict(result,schema='bf16-full500-untimed-repeats-v1')
+
+
+def validate_reference(raw,protocol):
+    """Bind original file bytes and its distinct canonical self-digest explicitly."""
+    validate_protocol(protocol)
+    assert isinstance(raw,bytes)
+    assert hashlib.sha256(raw).hexdigest()==protocol['cohort']['manifest_file_sha256'],'Historical manifest file bytes changed'
+    reference=json.loads(raw)
+    assert reference['experiment']=='gqa_three_way' and reference['dtype']=='float32'
+    content={k:v for k,v in reference.items() if k!='manifest_sha256'}
+    observed=hashlib.sha256(json.dumps(content,sort_keys=True).encode()).hexdigest()
+    assert observed==reference['manifest_sha256']==protocol['cohort']['manifest_content_sha256'],'Historical manifest content digest changed'
+    select_users(reference['users'],protocol)
+    return reference

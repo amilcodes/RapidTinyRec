@@ -13,7 +13,7 @@ from .audit_precision import validate_run,validate_output_storage,validate_log_s
 from .audit_bf16_dispatch import dispatch_evidence
 from .bf16_policy import validate_state
 from .bf16_full500 import (PROTOCOL,PROTOCOL_SHA256,load_protocol,validate_phase,
-                           validate_repeats,primary_trials,select_users,PHASES)
+                           validate_repeats,primary_trials,select_users,PHASES,validate_reference)
 from .precision_quality_adapter import quality_inputs
 from .quality_frontier import evaluate
 VARIANTS=('folded_tf32','folded_bf16')
@@ -55,7 +55,7 @@ def inspect_phases(root,historical,snapshot,run_record):
     assert {p.name for p in root.glob('phase_*') if p.is_dir()}=={f'phase_{i}' for i in range(4)}
     expected=read(snapshot/'expected.json')
     assert expected==read(Path(__file__).with_name('expected.json'))
-    reference=read(historical/'manifest.json')
+    reference=validate_reference((historical/'manifest.json').read_bytes(),protocol)
     assert reference['experiment']=='gqa_three_way' and reference['dtype']=='float32'
     assert json_digest({k:v for k,v in reference.items() if k!='manifest_sha256'})==reference['manifest_sha256']
     assert len(reference['users'])==500 and json_digest(reference['users'])==expected['users_sha256']
@@ -63,7 +63,7 @@ def inspect_phases(root,historical,snapshot,run_record):
     phases=[]; joined={}; historical_pairs={v:[] for v in VARIANTS}; seen={}; artifact_paths={}
     repeated=[]; ancestry_stable=True
     users,warm_users=select_users(reference['users'],protocol)
-    assert reference['manifest_sha256']==protocol['cohort']['manifest_sha256']
+    assert reference['manifest_sha256']==protocol['cohort']['manifest_content_sha256']
     assert expected['release_sha256']==protocol['provenance']['release_hashes']
     lengths=protocol['cohort']['lengths']
     for phase,variant in enumerate(PHASES):

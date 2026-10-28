@@ -30,10 +30,11 @@ class Full500RawAuditTests(unittest.TestCase):
         cls.protocol['cohort']['users_sha256']=json_digest(cls.users)
         reference=dict(experiment='gqa_three_way',dtype='float32',users=cls.users)
         reference['manifest_sha256']=json_digest(reference)
-        cls.protocol['cohort']['manifest_sha256']=reference['manifest_sha256']
+        cls.protocol['cohort']['manifest_content_sha256']=reference['manifest_sha256']
         cls.expected=json.loads((ROOT/'rapidtinyrec/expected.json').read_text())
         cls.expected['users_sha256']=json_digest(cls.users)
         save(cls.history/'manifest.json',reference)
+        cls.protocol['cohort']['manifest_file_sha256']=digest(cls.history/'manifest.json')
         raw=run_record();raw['graph_logit_storage_ptrs']=list(range(100,140))
         for u in cls.users:
             save(cls.history/'users'/f"{u['cohort_index']:04d}.json",dict(cohort_index=u['cohort_index'],manifest_sha256=reference['manifest_sha256'],runs={'compiled_gqa':raw}))

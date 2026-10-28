@@ -119,7 +119,7 @@ if stage=='generation':
 if stage=='recovery':
     (root/'log-recovery.json').write_text(json.dumps(dict(recovery_complete=True,locations=[{}, {}, {}, {}])))
 if stage=='audit':
-    (root/'bf16-full500-audit.json').write_text(json.dumps(dict(schema='bf16-vs-tf32-full500-audit-v1',protocol_sha256='206890755848e417a4fb31b88598c352e6acd75083b7ccd1f96ec3fef521641f',execution_audit_passed=True,job_id='fixture',run_id='synthetic',allocated_record_sha256=hashlib.sha256((root/'allocated-run-record.json').read_bytes()).hexdigest())))
+    (root/'bf16-full500-audit.json').write_text(json.dumps(dict(schema='bf16-vs-tf32-full500-audit-v1',protocol_sha256='c2bd251a8b9c34e23d2a14a85979fea8778d175485241fb650e04188e99f17cc',execution_audit_passed=True,job_id='fixture',run_id='synthetic',allocated_record_sha256=hashlib.sha256((root/'allocated-run-record.json').read_bytes()).hexdigest())))
 """)
                 commands={name:[sys.executable,str(child),str(root),name,str(int(failure))] for name in ('generation','recovery','audit')}
                 result=run_stages(root,started,commands,dict(os.environ))
