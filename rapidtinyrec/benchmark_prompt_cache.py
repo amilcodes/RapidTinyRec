@@ -295,6 +295,8 @@ def main():
             name=f'profile-output-{length}.json';b.save(out/name,raw)
             profiles.append(dict(prompt_tokens=length,cohort_index=user['cohort_index'],trace=trace,output=name))
         save_prefix_snapshot('after-profiles')
+        if candidate:
+            b.save(out/'prompt-cache-request-storage.json',prompt_cache.request_storage_records)
         # Preserve generated wrappers and kernels (not binary compiler caches).
         generated=out/'generated-code';generated.mkdir()
         code=[]

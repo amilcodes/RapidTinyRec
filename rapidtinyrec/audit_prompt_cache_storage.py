@@ -73,6 +73,31 @@ def validate_tensors(snapshots,*,layers,shape):
     return dict(stages_checked=4,tensors_per_stage=layers*2,bit_unchanged=True)
 
 
+def validate_request_storage(records,report,*,warm_lengths):
+    """Check storage observed while request KV and persistent KV were both live."""
+    assert len(warm_lengths)==4
+    lengths=[n for n in warm_lengths for _ in range(2)]+list(reversed(warm_lengths))
+    lengths+=warm_lengths*3+[min(warm_lengths),max(warm_lengths)]
+    assert len(records)==len(lengths)==26
+    for index,(record,length) in enumerate(zip(records,lengths)):
+        assert record['request_index']==index and record['prompt_tokens']==length
+        for mode,tokens in (('initial',report['shape'][2]),('complete',length)):
+            shape=list(report['shape']);shape[2]=tokens
+            entries=record[mode];assert len(entries)==report['layers']*2
+            ranges=list(report['storage_ranges'])
+            for i,entry in enumerate(entries):
+                assert (entry['layer'],entry['kind'])==(i//2,('key','value')[i%2])
+                assert entry['shape']==shape and entry['dtype']=='torch.float32'
+                ptr=entry['storage_ptr'];size=entry['storage_bytes']
+                assert type(ptr) is int and ptr>0 and ptr%4==0
+                assert type(size) is int and size==math.prod(shape)*4
+                assert all(ptr+size<=a or b<=ptr for a,b in ranges),'Request KV aliases live storage'
+                ranges.append((ptr,ptr+size))
+    return dict(requests_checked=26,initial_and_complete_kv_checked=True,
+                persistent_and_request_kv_disjoint=True,
+                scope='Simultaneous supplied KV storages; sequential request address reuse is allowed')
+
+
 def audit_snapshots(root,*,config,protocol,release_sha256):
     assert os.environ.get('SLURM_JOB_ID'),'Raw model snapshot audit requires allocated compute'
     import torch

@@ -112,6 +112,7 @@ class FixedPromptCache:
                 for pair in self._pairs for x in pair):
             raise ValueError('Unexpected populated prefix layout')
         self.requests = 0
+        self.request_storage_records = []
 
     def _check_owner(self):
         if (self.model.training or _config_key(self.model) != self._config
@@ -150,6 +151,7 @@ class FixedPromptCache:
             raise ValueError('Prepared prompt belongs to another cache')
         request_cache = cache_from_pairs(tuple(tuple(x.clone() for x in pair)
                                               for pair in self._pairs))
+        initial = self._request_storage(cache_pairs(request_cache))
         output = (self._forward if forward is None else forward)(
             input_ids=prepared.input_ids,
             attention_mask={'full_attention': prepared.attention_mask},
@@ -158,8 +160,26 @@ class FixedPromptCache:
             logits_to_keep=1)
         if output.past_key_values.get_seq_length() != prepared.total_tokens:
             raise ValueError('Suffix prefill returned the wrong cache length')
+        complete = self._request_storage(cache_pairs(output.past_key_values))
+        self.request_storage_records.append(dict(request_index=self.requests,
+            prompt_tokens=prepared.total_tokens, initial=initial, complete=complete))
         self.requests += 1
         return output
+
+    def _request_storage(self, pairs):
+        """Record actual live request storage; charge these checks to generation."""
+        persistent=[(x.untyped_storage().data_ptr(),x.untyped_storage().nbytes())
+                    for pair in self._pairs for x in pair]
+        records=[];ranges=[]
+        for layer,pair in enumerate(pairs):
+            for kind,x in zip(('key','value'),pair):
+                ptr=x.untyped_storage().data_ptr();size=x.untyped_storage().nbytes()
+                if any(ptr<b+n and b<ptr+size for b,n in persistent+ranges):
+                    raise ValueError('Request KV aliases persistent or another request KV tensor')
+                ranges.append((ptr,size))
+                records.append(dict(layer=layer,kind=kind,shape=list(x.shape),dtype=str(x.dtype),
+                                    storage_ptr=ptr,storage_bytes=size))
+        return records
 
     def snapshot(self):
         """Untimed audit copies; never expose persistent KV to request mutation."""

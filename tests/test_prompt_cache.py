@@ -82,6 +82,18 @@ class PromptCacheTests(unittest.TestCase):
         prepared = another.prepare(torch.tensor([[1, 17, 21, 33, 8]]))
         with self.assertRaisesRegex(ValueError, 'another cache'): cache.prefill(prepared)
 
+    def test_live_request_storage_checks_reject_persistent_alias(self):
+        cache=self.make_cache()
+        with self.assertRaisesRegex(ValueError,'aliases persistent'):
+            cache._request_storage(cache._pairs)
+        cache.prefill(cache.prepare(torch.tensor([[1,17,21,33,8,9]])))
+        self.assertEqual(len(cache.request_storage_records),1)
+        record=cache.request_storage_records[0]
+        self.assertEqual(record['request_index'],0)
+        self.assertEqual(record['prompt_tokens'],6)
+        self.assertEqual(len(record['initial']),4)
+        self.assertEqual(len(record['complete']),4)
+
     def test_policy_config_and_weight_changes_invalidate_cache(self):
         cache = self.make_cache()
         prepared = cache.prepare(torch.tensor([[1, 17, 21, 33, 8]]))
