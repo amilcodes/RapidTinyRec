@@ -1,0 +1,1818 @@
+{
+  "schema": "bf16-pilot-reconciled-review-v1",
+  "created_at_utc": "2026-10-28T08:18:13.124139+00:00",
+  "status": "AUDITED_VALID_MATERIAL_PILOT_FULL500_PREPARATION_AUTHORIZED",
+  "original_job_id": "8040768",
+  "recovery_job_id": "8045135",
+  "recovery_audit": "/Users/AmilAgrawal/Documents/Codex/2026-10-18/let/work/rapidtinyrec_bf16_audit_recovery/.oscar/results/bf16-saved-output-audit-recovery-20261028T075746Z-f70410149b29/outputs/recovery-audit.json",
+  "recovery_audit_sha256": "d35b4637873545e1124a27612575a363edde417c94b6b58b2b29e25a8ddb1de5",
+  "raw_files": 8,
+  "raw_bytes": 7104433,
+  "submitted_files_verified": 69,
+  "submitted_bytes": 685837,
+  "original_raw_files_verified": 456,
+  "source_identity_and_cpu_allocation_reconciled": true,
+  "original_failure_preserved": true,
+  "original_raw_unchanged": true,
+  "numerical_work_executed_locally": false,
+  "independent_review": "Same-agent metadata reconciliation of allocated independent raw auditor; not a separate reviewer",
+  "users": 4,
+  "paired_requests": 24,
+  "overall": {
+    "tf32": {
+      "n": 24,
+      "median_ms": 83.41647312045097,
+      "p95_ms": 84.07696671783924
+    },
+    "bf16": {
+      "n": 24,
+      "median_ms": 56.80336058139801,
+      "p95_ms": 58.0137500539422
+    },
+    "change_percent": {
+      "median_ms": -31.90390524018487,
+      "p95_ms": -30.999235202388686
+    }
+  },
+  "by_length": {
+    "76": {
+      "tf32": {
+        "n": 12,
+        "median_ms": 82.19966851174831,
+        "p95_ms": 83.07084422558546
+      },
+      "bf16": {
+        "n": 12,
+        "median_ms": 56.80336058139801,
+        "p95_ms": 57.12863691151142
+      },
+      "change_percent": {
+        "median_ms": -30.89587633400317,
+        "p95_ms": -31.229016095738615
+      }
+    },
+    "121": {
+      "tf32": {
+        "n": 12,
+        "median_ms": 83.84038135409355,
+        "p95_ms": 84.25309620797634
+      },
+      "bf16": {
+        "n": 12,
+        "median_ms": 56.82522989809513,
+        "p95_ms": 58.27680602669716
+      },
+      "change_percent": {
+        "median_ms": -32.22212377816122,
+        "p95_ms": -30.831258850306764
+      }
+    }
+  },
+  "by_half": {
+    "0": {
+      "tf32": {
+        "n": 12,
+        "median_ms": 83.41647312045097,
+        "p95_ms": 83.83874595165253
+      },
+      "bf16": {
+        "n": 12,
+        "median_ms": 57.00698308646679,
+        "p95_ms": 57.645401544868946
+      },
+      "change_percent": {
+        "median_ms": -31.65980177062826,
+        "p95_ms": -31.242528868321283
+      }
+    },
+    "1": {
+      "tf32": {
+        "n": 12,
+        "median_ms": 83.39646458625793,
+        "p95_ms": 84.25309620797634
+      },
+      "bf16": {
+        "n": 12,
+        "median_ms": 56.73641338944435,
+        "p95_ms": 58.27680602669716
+      },
+      "change_percent": {
+        "median_ms": -31.96784339609359,
+        "p95_ms": -30.831258850306764
+      }
+    }
+  },
+  "by_length_half": {
+    "76:0": {
+      "tf32": {
+        "n": 6,
+        "median_ms": 82.10490085184574,
+        "p95_ms": 83.03841017186642
+      },
+      "bf16": {
+        "n": 6,
+        "median_ms": 57.00698308646679,
+        "p95_ms": 57.13767372071743
+      },
+      "change_percent": {
+        "median_ms": -30.56811165348937,
+        "p95_ms": -31.19127208425795
+      }
+    },
+    "76:1": {
+      "tf32": {
+        "n": 6,
+        "median_ms": 82.33052492141724,
+        "p95_ms": 82.93535374104977
+      },
+      "bf16": {
+        "n": 6,
+        "median_ms": 56.73641338944435,
+        "p95_ms": 57.00397025793791
+      },
+      "change_percent": {
+        "median_ms": -31.087025810174207,
+        "p95_ms": -31.266983636529467
+      }
+    },
+    "121:0": {
+      "tf32": {
+        "n": 6,
+        "median_ms": 83.79187807440758,
+        "p95_ms": 83.84855836629868
+      },
+      "bf16": {
+        "n": 6,
+        "median_ms": 56.82522989809513,
+        "p95_ms": 57.81533848494291
+      },
+      "change_percent": {
+        "median_ms": -32.18289027054142,
+        "p95_ms": -31.047903969472802
+      }
+    },
+    "121:1": {
+      "tf32": {
+        "n": 6,
+        "median_ms": 83.96354131400585,
+        "p95_ms": 84.3664351850748
+      },
+      "bf16": {
+        "n": 6,
+        "median_ms": 56.87009170651436,
+        "p95_ms": 58.44549462199211
+      },
+      "change_percent": {
+        "median_ms": -32.268112068031684,
+        "p95_ms": -30.724233525121548
+      }
+    }
+  },
+  "quality": {
+    "schema": "paired-sid-quality-v1",
+    "primary_metrics": [
+      "ndcg@10",
+      "hit_rate@10"
+    ],
+    "overall": {
+      "independent_users": 4,
+      "metrics": {
+        "control": {
+          "1": {
+            "hit_rate": 0.25,
+            "ndcg": 0.25,
+            "mrr": 0.25
+          },
+          "5": {
+            "hit_rate": 0.25,
+            "ndcg": 0.25,
+            "mrr": 0.25
+          },
+          "10": {
+            "hit_rate": 0.25,
+            "ndcg": 0.25,
+            "mrr": 0.25
+          },
+          "20": {
+            "hit_rate": 0.25,
+            "ndcg": 0.25,
+            "mrr": 0.25
+          },
+          "50": {
+            "hit_rate": 0.5,
+            "ndcg": 0.29526064919501005,
+            "mrr": 0.25555555555555554
+          }
+        },
+        "candidate": {
+          "1": {
+            "hit_rate": 0.25,
+            "ndcg": 0.25,
+            "mrr": 0.25
+          },
+          "5": {
+            "hit_rate": 0.25,
+            "ndcg": 0.25,
+            "mrr": 0.25
+          },
+          "10": {
+            "hit_rate": 0.25,
+            "ndcg": 0.25,
+            "mrr": 0.25
+          },
+          "20": {
+            "hit_rate": 0.25,
+            "ndcg": 0.25,
+            "mrr": 0.25
+          },
+          "50": {
+            "hit_rate": 0.5,
+            "ndcg": 0.29526064919501005,
+            "mrr": 0.25555555555555554
+          }
+        }
+      },
+      "paired_mean_changes": {
+        "1": {
+          "hit_rate": 0.0,
+          "ndcg": 0.0,
+          "mrr": 0.0
+        },
+        "5": {
+          "hit_rate": 0.0,
+          "ndcg": 0.0,
+          "mrr": 0.0
+        },
+        "10": {
+          "hit_rate": 0.0,
+          "ndcg": 0.0,
+          "mrr": 0.0
+        },
+        "20": {
+          "hit_rate": 0.0,
+          "ndcg": 0.0,
+          "mrr": 0.0
+        },
+        "50": {
+          "hit_rate": 0.0,
+          "ndcg": 0.0,
+          "mrr": 0.0
+        }
+      },
+      "paired_user_bootstrap_95pct": {
+        "1": {
+          "hit_rate": {
+            "lower": 0.0,
+            "upper": 0.0
+          },
+          "ndcg": {
+            "lower": 0.0,
+            "upper": 0.0
+          },
+          "mrr": {
+            "lower": 0.0,
+            "upper": 0.0
+          }
+        },
+        "5": {
+          "hit_rate": {
+            "lower": 0.0,
+            "upper": 0.0
+          },
+          "ndcg": {
+            "lower": 0.0,
+            "upper": 0.0
+          },
+          "mrr": {
+            "lower": 0.0,
+            "upper": 0.0
+          }
+        },
+        "10": {
+          "hit_rate": {
+            "lower": 0.0,
+            "upper": 0.0
+          },
+          "ndcg": {
+            "lower": 0.0,
+            "upper": 0.0
+          },
+          "mrr": {
+            "lower": 0.0,
+            "upper": 0.0
+          }
+        },
+        "20": {
+          "hit_rate": {
+            "lower": 0.0,
+            "upper": 0.0
+          },
+          "ndcg": {
+            "lower": 0.0,
+            "upper": 0.0
+          },
+          "mrr": {
+            "lower": 0.0,
+            "upper": 0.0
+          }
+        },
+        "50": {
+          "hit_rate": {
+            "lower": 0.0,
+            "upper": 0.0
+          },
+          "ndcg": {
+            "lower": 0.0,
+            "upper": 0.0
+          },
+          "mrr": {
+            "lower": 0.0,
+            "upper": 0.0
+          }
+        }
+      },
+      "changed_users": {
+        "1": {
+          "hit_rate": {
+            "improved": 0,
+            "regressed": 0,
+            "unchanged": 4
+          },
+          "ndcg": {
+            "improved": 0,
+            "regressed": 0,
+            "unchanged": 4
+          },
+          "mrr": {
+            "improved": 0,
+            "regressed": 0,
+            "unchanged": 4
+          }
+        },
+        "5": {
+          "hit_rate": {
+            "improved": 0,
+            "regressed": 0,
+            "unchanged": 4
+          },
+          "ndcg": {
+            "improved": 0,
+            "regressed": 0,
+            "unchanged": 4
+          },
+          "mrr": {
+            "improved": 0,
+            "regressed": 0,
+            "unchanged": 4
+          }
+        },
+        "10": {
+          "hit_rate": {
+            "improved": 0,
+            "regressed": 0,
+            "unchanged": 4
+          },
+          "ndcg": {
+            "improved": 0,
+            "regressed": 0,
+            "unchanged": 4
+          },
+          "mrr": {
+            "improved": 0,
+            "regressed": 0,
+            "unchanged": 4
+          }
+        },
+        "20": {
+          "hit_rate": {
+            "improved": 0,
+            "regressed": 0,
+            "unchanged": 4
+          },
+          "ndcg": {
+            "improved": 0,
+            "regressed": 0,
+            "unchanged": 4
+          },
+          "mrr": {
+            "improved": 0,
+            "regressed": 0,
+            "unchanged": 4
+          }
+        },
+        "50": {
+          "hit_rate": {
+            "improved": 0,
+            "regressed": 0,
+            "unchanged": 4
+          },
+          "ndcg": {
+            "improved": 0,
+            "regressed": 0,
+            "unchanged": 4
+          },
+          "mrr": {
+            "improved": 0,
+            "regressed": 0,
+            "unchanged": 4
+          }
+        }
+      }
+    },
+    "by_prompt_length": {
+      "76": {
+        "independent_users": 2,
+        "metrics": {
+          "control": {
+            "1": {
+              "hit_rate": 0.5,
+              "ndcg": 0.5,
+              "mrr": 0.5
+            },
+            "5": {
+              "hit_rate": 0.5,
+              "ndcg": 0.5,
+              "mrr": 0.5
+            },
+            "10": {
+              "hit_rate": 0.5,
+              "ndcg": 0.5,
+              "mrr": 0.5
+            },
+            "20": {
+              "hit_rate": 0.5,
+              "ndcg": 0.5,
+              "mrr": 0.5
+            },
+            "50": {
+              "hit_rate": 0.5,
+              "ndcg": 0.5,
+              "mrr": 0.5
+            }
+          },
+          "candidate": {
+            "1": {
+              "hit_rate": 0.5,
+              "ndcg": 0.5,
+              "mrr": 0.5
+            },
+            "5": {
+              "hit_rate": 0.5,
+              "ndcg": 0.5,
+              "mrr": 0.5
+            },
+            "10": {
+              "hit_rate": 0.5,
+              "ndcg": 0.5,
+              "mrr": 0.5
+            },
+            "20": {
+              "hit_rate": 0.5,
+              "ndcg": 0.5,
+              "mrr": 0.5
+            },
+            "50": {
+              "hit_rate": 0.5,
+              "ndcg": 0.5,
+              "mrr": 0.5
+            }
+          }
+        },
+        "paired_mean_changes": {
+          "1": {
+            "hit_rate": 0.0,
+            "ndcg": 0.0,
+            "mrr": 0.0
+          },
+          "5": {
+            "hit_rate": 0.0,
+            "ndcg": 0.0,
+            "mrr": 0.0
+          },
+          "10": {
+            "hit_rate": 0.0,
+            "ndcg": 0.0,
+            "mrr": 0.0
+          },
+          "20": {
+            "hit_rate": 0.0,
+            "ndcg": 0.0,
+            "mrr": 0.0
+          },
+          "50": {
+            "hit_rate": 0.0,
+            "ndcg": 0.0,
+            "mrr": 0.0
+          }
+        },
+        "paired_user_bootstrap_95pct": {
+          "1": {
+            "hit_rate": {
+              "lower": 0.0,
+              "upper": 0.0
+            },
+            "ndcg": {
+              "lower": 0.0,
+              "upper": 0.0
+            },
+            "mrr": {
+              "lower": 0.0,
+              "upper": 0.0
+            }
+          },
+          "5": {
+            "hit_rate": {
+              "lower": 0.0,
+              "upper": 0.0
+            },
+            "ndcg": {
+              "lower": 0.0,
+              "upper": 0.0
+            },
+            "mrr": {
+              "lower": 0.0,
+              "upper": 0.0
+            }
+          },
+          "10": {
+            "hit_rate": {
+              "lower": 0.0,
+              "upper": 0.0
+            },
+            "ndcg": {
+              "lower": 0.0,
+              "upper": 0.0
+            },
+            "mrr": {
+              "lower": 0.0,
+              "upper": 0.0
+            }
+          },
+          "20": {
+            "hit_rate": {
+              "lower": 0.0,
+              "upper": 0.0
+            },
+            "ndcg": {
+              "lower": 0.0,
+              "upper": 0.0
+            },
+            "mrr": {
+              "lower": 0.0,
+              "upper": 0.0
+            }
+          },
+          "50": {
+            "hit_rate": {
+              "lower": 0.0,
+              "upper": 0.0
+            },
+            "ndcg": {
+              "lower": 0.0,
+              "upper": 0.0
+            },
+            "mrr": {
+              "lower": 0.0,
+              "upper": 0.0
+            }
+          }
+        },
+        "changed_users": {
+          "1": {
+            "hit_rate": {
+              "improved": 0,
+              "regressed": 0,
+              "unchanged": 2
+            },
+            "ndcg": {
+              "improved": 0,
+              "regressed": 0,
+              "unchanged": 2
+            },
+            "mrr": {
+              "improved": 0,
+              "regressed": 0,
+              "unchanged": 2
+            }
+          },
+          "5": {
+            "hit_rate": {
+              "improved": 0,
+              "regressed": 0,
+              "unchanged": 2
+            },
+            "ndcg": {
+              "improved": 0,
+              "regressed": 0,
+              "unchanged": 2
+            },
+            "mrr": {
+              "improved": 0,
+              "regressed": 0,
+              "unchanged": 2
+            }
+          },
+          "10": {
+            "hit_rate": {
+              "improved": 0,
+              "regressed": 0,
+              "unchanged": 2
+            },
+            "ndcg": {
+              "improved": 0,
+              "regressed": 0,
+              "unchanged": 2
+            },
+            "mrr": {
+              "improved": 0,
+              "regressed": 0,
+              "unchanged": 2
+            }
+          },
+          "20": {
+            "hit_rate": {
+              "improved": 0,
+              "regressed": 0,
+              "unchanged": 2
+            },
+            "ndcg": {
+              "improved": 0,
+              "regressed": 0,
+              "unchanged": 2
+            },
+            "mrr": {
+              "improved": 0,
+              "regressed": 0,
+              "unchanged": 2
+            }
+          },
+          "50": {
+            "hit_rate": {
+              "improved": 0,
+              "regressed": 0,
+              "unchanged": 2
+            },
+            "ndcg": {
+              "improved": 0,
+              "regressed": 0,
+              "unchanged": 2
+            },
+            "mrr": {
+              "improved": 0,
+              "regressed": 0,
+              "unchanged": 2
+            }
+          }
+        }
+      },
+      "121": {
+        "independent_users": 2,
+        "metrics": {
+          "control": {
+            "1": {
+              "hit_rate": 0.0,
+              "ndcg": 0.0,
+              "mrr": 0.0
+            },
+            "5": {
+              "hit_rate": 0.0,
+              "ndcg": 0.0,
+              "mrr": 0.0
+            },
+            "10": {
+              "hit_rate": 0.0,
+              "ndcg": 0.0,
+              "mrr": 0.0
+            },
+            "20": {
+              "hit_rate": 0.0,
+              "ndcg": 0.0,
+              "mrr": 0.0
+            },
+            "50": {
+              "hit_rate": 0.5,
+              "ndcg": 0.0905212983900201,
+              "mrr": 0.011111111111111112
+            }
+          },
+          "candidate": {
+            "1": {
+              "hit_rate": 0.0,
+              "ndcg": 0.0,
+              "mrr": 0.0
+            },
+            "5": {
+              "hit_rate": 0.0,
+              "ndcg": 0.0,
+              "mrr": 0.0
+            },
+            "10": {
+              "hit_rate": 0.0,
+              "ndcg": 0.0,
+              "mrr": 0.0
+            },
+            "20": {
+              "hit_rate": 0.0,
+              "ndcg": 0.0,
+              "mrr": 0.0
+            },
+            "50": {
+              "hit_rate": 0.5,
+              "ndcg": 0.0905212983900201,
+              "mrr": 0.011111111111111112
+            }
+          }
+        },
+        "paired_mean_changes": {
+          "1": {
+            "hit_rate": 0.0,
+            "ndcg": 0.0,
+            "mrr": 0.0
+          },
+          "5": {
+            "hit_rate": 0.0,
+            "ndcg": 0.0,
+            "mrr": 0.0
+          },
+          "10": {
+            "hit_rate": 0.0,
+            "ndcg": 0.0,
+            "mrr": 0.0
+          },
+          "20": {
+            "hit_rate": 0.0,
+            "ndcg": 0.0,
+            "mrr": 0.0
+          },
+          "50": {
+            "hit_rate": 0.0,
+            "ndcg": 0.0,
+            "mrr": 0.0
+          }
+        },
+        "paired_user_bootstrap_95pct": {
+          "1": {
+            "hit_rate": {
+              "lower": 0.0,
+              "upper": 0.0
+            },
+            "ndcg": {
+              "lower": 0.0,
+              "upper": 0.0
+            },
+            "mrr": {
+              "lower": 0.0,
+              "upper": 0.0
+            }
+          },
+          "5": {
+            "hit_rate": {
+              "lower": 0.0,
+              "upper": 0.0
+            },
+            "ndcg": {
+              "lower": 0.0,
+              "upper": 0.0
+            },
+            "mrr": {
+              "lower": 0.0,
+              "upper": 0.0
+            }
+          },
+          "10": {
+            "hit_rate": {
+              "lower": 0.0,
+              "upper": 0.0
+            },
+            "ndcg": {
+              "lower": 0.0,
+              "upper": 0.0
+            },
+            "mrr": {
+              "lower": 0.0,
+              "upper": 0.0
+            }
+          },
+          "20": {
+            "hit_rate": {
+              "lower": 0.0,
+              "upper": 0.0
+            },
+            "ndcg": {
+              "lower": 0.0,
+              "upper": 0.0
+            },
+            "mrr": {
+              "lower": 0.0,
+              "upper": 0.0
+            }
+          },
+          "50": {
+            "hit_rate": {
+              "lower": 0.0,
+              "upper": 0.0
+            },
+            "ndcg": {
+              "lower": 0.0,
+              "upper": 0.0
+            },
+            "mrr": {
+              "lower": 0.0,
+              "upper": 0.0
+            }
+          }
+        },
+        "changed_users": {
+          "1": {
+            "hit_rate": {
+              "improved": 0,
+              "regressed": 0,
+              "unchanged": 2
+            },
+            "ndcg": {
+              "improved": 0,
+              "regressed": 0,
+              "unchanged": 2
+            },
+            "mrr": {
+              "improved": 0,
+              "regressed": 0,
+              "unchanged": 2
+            }
+          },
+          "5": {
+            "hit_rate": {
+              "improved": 0,
+              "regressed": 0,
+              "unchanged": 2
+            },
+            "ndcg": {
+              "improved": 0,
+              "regressed": 0,
+              "unchanged": 2
+            },
+            "mrr": {
+              "improved": 0,
+              "regressed": 0,
+              "unchanged": 2
+            }
+          },
+          "10": {
+            "hit_rate": {
+              "improved": 0,
+              "regressed": 0,
+              "unchanged": 2
+            },
+            "ndcg": {
+              "improved": 0,
+              "regressed": 0,
+              "unchanged": 2
+            },
+            "mrr": {
+              "improved": 0,
+              "regressed": 0,
+              "unchanged": 2
+            }
+          },
+          "20": {
+            "hit_rate": {
+              "improved": 0,
+              "regressed": 0,
+              "unchanged": 2
+            },
+            "ndcg": {
+              "improved": 0,
+              "regressed": 0,
+              "unchanged": 2
+            },
+            "mrr": {
+              "improved": 0,
+              "regressed": 0,
+              "unchanged": 2
+            }
+          },
+          "50": {
+            "hit_rate": {
+              "improved": 0,
+              "regressed": 0,
+              "unchanged": 2
+            },
+            "ndcg": {
+              "improved": 0,
+              "regressed": 0,
+              "unchanged": 2
+            },
+            "mrr": {
+              "improved": 0,
+              "regressed": 0,
+              "unchanged": 2
+            }
+          }
+        }
+      }
+    },
+    "by_target_ambiguity": {
+      "unambiguous": {
+        "independent_users": 4,
+        "metrics": {
+          "control": {
+            "1": {
+              "hit_rate": 0.25,
+              "ndcg": 0.25,
+              "mrr": 0.25
+            },
+            "5": {
+              "hit_rate": 0.25,
+              "ndcg": 0.25,
+              "mrr": 0.25
+            },
+            "10": {
+              "hit_rate": 0.25,
+              "ndcg": 0.25,
+              "mrr": 0.25
+            },
+            "20": {
+              "hit_rate": 0.25,
+              "ndcg": 0.25,
+              "mrr": 0.25
+            },
+            "50": {
+              "hit_rate": 0.5,
+              "ndcg": 0.29526064919501005,
+              "mrr": 0.25555555555555554
+            }
+          },
+          "candidate": {
+            "1": {
+              "hit_rate": 0.25,
+              "ndcg": 0.25,
+              "mrr": 0.25
+            },
+            "5": {
+              "hit_rate": 0.25,
+              "ndcg": 0.25,
+              "mrr": 0.25
+            },
+            "10": {
+              "hit_rate": 0.25,
+              "ndcg": 0.25,
+              "mrr": 0.25
+            },
+            "20": {
+              "hit_rate": 0.25,
+              "ndcg": 0.25,
+              "mrr": 0.25
+            },
+            "50": {
+              "hit_rate": 0.5,
+              "ndcg": 0.29526064919501005,
+              "mrr": 0.25555555555555554
+            }
+          }
+        },
+        "paired_mean_changes": {
+          "1": {
+            "hit_rate": 0.0,
+            "ndcg": 0.0,
+            "mrr": 0.0
+          },
+          "5": {
+            "hit_rate": 0.0,
+            "ndcg": 0.0,
+            "mrr": 0.0
+          },
+          "10": {
+            "hit_rate": 0.0,
+            "ndcg": 0.0,
+            "mrr": 0.0
+          },
+          "20": {
+            "hit_rate": 0.0,
+            "ndcg": 0.0,
+            "mrr": 0.0
+          },
+          "50": {
+            "hit_rate": 0.0,
+            "ndcg": 0.0,
+            "mrr": 0.0
+          }
+        },
+        "paired_user_bootstrap_95pct": {
+          "1": {
+            "hit_rate": {
+              "lower": 0.0,
+              "upper": 0.0
+            },
+            "ndcg": {
+              "lower": 0.0,
+              "upper": 0.0
+            },
+            "mrr": {
+              "lower": 0.0,
+              "upper": 0.0
+            }
+          },
+          "5": {
+            "hit_rate": {
+              "lower": 0.0,
+              "upper": 0.0
+            },
+            "ndcg": {
+              "lower": 0.0,
+              "upper": 0.0
+            },
+            "mrr": {
+              "lower": 0.0,
+              "upper": 0.0
+            }
+          },
+          "10": {
+            "hit_rate": {
+              "lower": 0.0,
+              "upper": 0.0
+            },
+            "ndcg": {
+              "lower": 0.0,
+              "upper": 0.0
+            },
+            "mrr": {
+              "lower": 0.0,
+              "upper": 0.0
+            }
+          },
+          "20": {
+            "hit_rate": {
+              "lower": 0.0,
+              "upper": 0.0
+            },
+            "ndcg": {
+              "lower": 0.0,
+              "upper": 0.0
+            },
+            "mrr": {
+              "lower": 0.0,
+              "upper": 0.0
+            }
+          },
+          "50": {
+            "hit_rate": {
+              "lower": 0.0,
+              "upper": 0.0
+            },
+            "ndcg": {
+              "lower": 0.0,
+              "upper": 0.0
+            },
+            "mrr": {
+              "lower": 0.0,
+              "upper": 0.0
+            }
+          }
+        },
+        "changed_users": {
+          "1": {
+            "hit_rate": {
+              "improved": 0,
+              "regressed": 0,
+              "unchanged": 4
+            },
+            "ndcg": {
+              "improved": 0,
+              "regressed": 0,
+              "unchanged": 4
+            },
+            "mrr": {
+              "improved": 0,
+              "regressed": 0,
+              "unchanged": 4
+            }
+          },
+          "5": {
+            "hit_rate": {
+              "improved": 0,
+              "regressed": 0,
+              "unchanged": 4
+            },
+            "ndcg": {
+              "improved": 0,
+              "regressed": 0,
+              "unchanged": 4
+            },
+            "mrr": {
+              "improved": 0,
+              "regressed": 0,
+              "unchanged": 4
+            }
+          },
+          "10": {
+            "hit_rate": {
+              "improved": 0,
+              "regressed": 0,
+              "unchanged": 4
+            },
+            "ndcg": {
+              "improved": 0,
+              "regressed": 0,
+              "unchanged": 4
+            },
+            "mrr": {
+              "improved": 0,
+              "regressed": 0,
+              "unchanged": 4
+            }
+          },
+          "20": {
+            "hit_rate": {
+              "improved": 0,
+              "regressed": 0,
+              "unchanged": 4
+            },
+            "ndcg": {
+              "improved": 0,
+              "regressed": 0,
+              "unchanged": 4
+            },
+            "mrr": {
+              "improved": 0,
+              "regressed": 0,
+              "unchanged": 4
+            }
+          },
+          "50": {
+            "hit_rate": {
+              "improved": 0,
+              "regressed": 0,
+              "unchanged": 4
+            },
+            "ndcg": {
+              "improved": 0,
+              "regressed": 0,
+              "unchanged": 4
+            },
+            "mrr": {
+              "improved": 0,
+              "regressed": 0,
+              "unchanged": 4
+            }
+          }
+        }
+      }
+    },
+    "per_user": [
+      {
+        "cohort_index": 1,
+        "prompt_tokens": 76,
+        "repeats": 6,
+        "representative_repeat": 0,
+        "variants": {
+          "control": {
+            "target_rank": null,
+            "valid_outputs": 50,
+            "invalid_outputs": 0,
+            "duplicate_valid_sids": 0,
+            "stable_token_ranks_across_repeats": true,
+            "metrics": {
+              "1": {
+                "hit_rate": 0.0,
+                "ndcg": 0.0,
+                "mrr": 0.0
+              },
+              "5": {
+                "hit_rate": 0.0,
+                "ndcg": 0.0,
+                "mrr": 0.0
+              },
+              "10": {
+                "hit_rate": 0.0,
+                "ndcg": 0.0,
+                "mrr": 0.0
+              },
+              "20": {
+                "hit_rate": 0.0,
+                "ndcg": 0.0,
+                "mrr": 0.0
+              },
+              "50": {
+                "hit_rate": 0.0,
+                "ndcg": 0.0,
+                "mrr": 0.0
+              }
+            }
+          },
+          "candidate": {
+            "target_rank": null,
+            "valid_outputs": 50,
+            "invalid_outputs": 0,
+            "duplicate_valid_sids": 0,
+            "stable_token_ranks_across_repeats": true,
+            "metrics": {
+              "1": {
+                "hit_rate": 0.0,
+                "ndcg": 0.0,
+                "mrr": 0.0
+              },
+              "5": {
+                "hit_rate": 0.0,
+                "ndcg": 0.0,
+                "mrr": 0.0
+              },
+              "10": {
+                "hit_rate": 0.0,
+                "ndcg": 0.0,
+                "mrr": 0.0
+              },
+              "20": {
+                "hit_rate": 0.0,
+                "ndcg": 0.0,
+                "mrr": 0.0
+              },
+              "50": {
+                "hit_rate": 0.0,
+                "ndcg": 0.0,
+                "mrr": 0.0
+              }
+            }
+          }
+        },
+        "target_item_count": 1,
+        "fidelity": {
+          "identical_token_rank_positions": 41,
+          "compared_rank_positions": 50,
+          "top1_token_match": true,
+          "sid_set_jaccard": 1.0,
+          "note": "Overlap includes original outputs; validity reported separately. No score-bit test here."
+        },
+        "paired_changes": {
+          "1": {
+            "hit_rate": 0.0,
+            "ndcg": 0.0,
+            "mrr": 0.0
+          },
+          "5": {
+            "hit_rate": 0.0,
+            "ndcg": 0.0,
+            "mrr": 0.0
+          },
+          "10": {
+            "hit_rate": 0.0,
+            "ndcg": 0.0,
+            "mrr": 0.0
+          },
+          "20": {
+            "hit_rate": 0.0,
+            "ndcg": 0.0,
+            "mrr": 0.0
+          },
+          "50": {
+            "hit_rate": 0.0,
+            "ndcg": 0.0,
+            "mrr": 0.0
+          }
+        }
+      },
+      {
+        "cohort_index": 2,
+        "prompt_tokens": 76,
+        "repeats": 6,
+        "representative_repeat": 0,
+        "variants": {
+          "control": {
+            "target_rank": 1,
+            "valid_outputs": 50,
+            "invalid_outputs": 0,
+            "duplicate_valid_sids": 0,
+            "stable_token_ranks_across_repeats": true,
+            "metrics": {
+              "1": {
+                "hit_rate": 1.0,
+                "ndcg": 1.0,
+                "mrr": 1.0
+              },
+              "5": {
+                "hit_rate": 1.0,
+                "ndcg": 1.0,
+                "mrr": 1.0
+              },
+              "10": {
+                "hit_rate": 1.0,
+                "ndcg": 1.0,
+                "mrr": 1.0
+              },
+              "20": {
+                "hit_rate": 1.0,
+                "ndcg": 1.0,
+                "mrr": 1.0
+              },
+              "50": {
+                "hit_rate": 1.0,
+                "ndcg": 1.0,
+                "mrr": 1.0
+              }
+            }
+          },
+          "candidate": {
+            "target_rank": 1,
+            "valid_outputs": 50,
+            "invalid_outputs": 0,
+            "duplicate_valid_sids": 0,
+            "stable_token_ranks_across_repeats": true,
+            "metrics": {
+              "1": {
+                "hit_rate": 1.0,
+                "ndcg": 1.0,
+                "mrr": 1.0
+              },
+              "5": {
+                "hit_rate": 1.0,
+                "ndcg": 1.0,
+                "mrr": 1.0
+              },
+              "10": {
+                "hit_rate": 1.0,
+                "ndcg": 1.0,
+                "mrr": 1.0
+              },
+              "20": {
+                "hit_rate": 1.0,
+                "ndcg": 1.0,
+                "mrr": 1.0
+              },
+              "50": {
+                "hit_rate": 1.0,
+                "ndcg": 1.0,
+                "mrr": 1.0
+              }
+            }
+          }
+        },
+        "target_item_count": 1,
+        "fidelity": {
+          "identical_token_rank_positions": 30,
+          "compared_rank_positions": 50,
+          "top1_token_match": true,
+          "sid_set_jaccard": 0.9607843137254902,
+          "note": "Overlap includes original outputs; validity reported separately. No score-bit test here."
+        },
+        "paired_changes": {
+          "1": {
+            "hit_rate": 0.0,
+            "ndcg": 0.0,
+            "mrr": 0.0
+          },
+          "5": {
+            "hit_rate": 0.0,
+            "ndcg": 0.0,
+            "mrr": 0.0
+          },
+          "10": {
+            "hit_rate": 0.0,
+            "ndcg": 0.0,
+            "mrr": 0.0
+          },
+          "20": {
+            "hit_rate": 0.0,
+            "ndcg": 0.0,
+            "mrr": 0.0
+          },
+          "50": {
+            "hit_rate": 0.0,
+            "ndcg": 0.0,
+            "mrr": 0.0
+          }
+        }
+      },
+      {
+        "cohort_index": 6,
+        "prompt_tokens": 121,
+        "repeats": 6,
+        "representative_repeat": 0,
+        "variants": {
+          "control": {
+            "target_rank": 45,
+            "valid_outputs": 50,
+            "invalid_outputs": 0,
+            "duplicate_valid_sids": 0,
+            "stable_token_ranks_across_repeats": true,
+            "metrics": {
+              "1": {
+                "hit_rate": 0.0,
+                "ndcg": 0.0,
+                "mrr": 0.0
+              },
+              "5": {
+                "hit_rate": 0.0,
+                "ndcg": 0.0,
+                "mrr": 0.0
+              },
+              "10": {
+                "hit_rate": 0.0,
+                "ndcg": 0.0,
+                "mrr": 0.0
+              },
+              "20": {
+                "hit_rate": 0.0,
+                "ndcg": 0.0,
+                "mrr": 0.0
+              },
+              "50": {
+                "hit_rate": 1.0,
+                "ndcg": 0.1810425967800402,
+                "mrr": 0.022222222222222223
+              }
+            }
+          },
+          "candidate": {
+            "target_rank": 45,
+            "valid_outputs": 50,
+            "invalid_outputs": 0,
+            "duplicate_valid_sids": 0,
+            "stable_token_ranks_across_repeats": true,
+            "metrics": {
+              "1": {
+                "hit_rate": 0.0,
+                "ndcg": 0.0,
+                "mrr": 0.0
+              },
+              "5": {
+                "hit_rate": 0.0,
+                "ndcg": 0.0,
+                "mrr": 0.0
+              },
+              "10": {
+                "hit_rate": 0.0,
+                "ndcg": 0.0,
+                "mrr": 0.0
+              },
+              "20": {
+                "hit_rate": 0.0,
+                "ndcg": 0.0,
+                "mrr": 0.0
+              },
+              "50": {
+                "hit_rate": 1.0,
+                "ndcg": 0.1810425967800402,
+                "mrr": 0.022222222222222223
+              }
+            }
+          }
+        },
+        "target_item_count": 1,
+        "fidelity": {
+          "identical_token_rank_positions": 38,
+          "compared_rank_positions": 50,
+          "top1_token_match": true,
+          "sid_set_jaccard": 0.9607843137254902,
+          "note": "Overlap includes original outputs; validity reported separately. No score-bit test here."
+        },
+        "paired_changes": {
+          "1": {
+            "hit_rate": 0.0,
+            "ndcg": 0.0,
+            "mrr": 0.0
+          },
+          "5": {
+            "hit_rate": 0.0,
+            "ndcg": 0.0,
+            "mrr": 0.0
+          },
+          "10": {
+            "hit_rate": 0.0,
+            "ndcg": 0.0,
+            "mrr": 0.0
+          },
+          "20": {
+            "hit_rate": 0.0,
+            "ndcg": 0.0,
+            "mrr": 0.0
+          },
+          "50": {
+            "hit_rate": 0.0,
+            "ndcg": 0.0,
+            "mrr": 0.0
+          }
+        }
+      },
+      {
+        "cohort_index": 10,
+        "prompt_tokens": 121,
+        "repeats": 6,
+        "representative_repeat": 0,
+        "variants": {
+          "control": {
+            "target_rank": null,
+            "valid_outputs": 50,
+            "invalid_outputs": 0,
+            "duplicate_valid_sids": 0,
+            "stable_token_ranks_across_repeats": true,
+            "metrics": {
+              "1": {
+                "hit_rate": 0.0,
+                "ndcg": 0.0,
+                "mrr": 0.0
+              },
+              "5": {
+                "hit_rate": 0.0,
+                "ndcg": 0.0,
+                "mrr": 0.0
+              },
+              "10": {
+                "hit_rate": 0.0,
+                "ndcg": 0.0,
+                "mrr": 0.0
+              },
+              "20": {
+                "hit_rate": 0.0,
+                "ndcg": 0.0,
+                "mrr": 0.0
+              },
+              "50": {
+                "hit_rate": 0.0,
+                "ndcg": 0.0,
+                "mrr": 0.0
+              }
+            }
+          },
+          "candidate": {
+            "target_rank": null,
+            "valid_outputs": 50,
+            "invalid_outputs": 0,
+            "duplicate_valid_sids": 0,
+            "stable_token_ranks_across_repeats": true,
+            "metrics": {
+              "1": {
+                "hit_rate": 0.0,
+                "ndcg": 0.0,
+                "mrr": 0.0
+              },
+              "5": {
+                "hit_rate": 0.0,
+                "ndcg": 0.0,
+                "mrr": 0.0
+              },
+              "10": {
+                "hit_rate": 0.0,
+                "ndcg": 0.0,
+                "mrr": 0.0
+              },
+              "20": {
+                "hit_rate": 0.0,
+                "ndcg": 0.0,
+                "mrr": 0.0
+              },
+              "50": {
+                "hit_rate": 0.0,
+                "ndcg": 0.0,
+                "mrr": 0.0
+              }
+            }
+          }
+        },
+        "target_item_count": 1,
+        "fidelity": {
+          "identical_token_rank_positions": 23,
+          "compared_rank_positions": 50,
+          "top1_token_match": true,
+          "sid_set_jaccard": 0.9230769230769231,
+          "note": "Overlap includes original outputs; validity reported separately. No score-bit test here."
+        },
+        "paired_changes": {
+          "1": {
+            "hit_rate": 0.0,
+            "ndcg": 0.0,
+            "mrr": 0.0
+          },
+          "5": {
+            "hit_rate": 0.0,
+            "ndcg": 0.0,
+            "mrr": 0.0
+          },
+          "10": {
+            "hit_rate": 0.0,
+            "ndcg": 0.0,
+            "mrr": 0.0
+          },
+          "20": {
+            "hit_rate": 0.0,
+            "ndcg": 0.0,
+            "mrr": 0.0
+          },
+          "50": {
+            "hit_rate": 0.0,
+            "ndcg": 0.0,
+            "mrr": 0.0
+          }
+        }
+      }
+    ],
+    "catalog_size": 3444,
+    "catalog_coverage": {
+      "control": 0.05574912891986063,
+      "candidate": 0.05545876887340302
+    },
+    "output_validity": {
+      "control": {
+        "invalid_outputs": 0,
+        "duplicate_valid_sids": 0
+      },
+      "candidate": {
+        "invalid_outputs": 0,
+        "duplicate_valid_sids": 0
+      }
+    },
+    "token_repeat_stability": true,
+    "bootstrap": {
+      "samples": 10000,
+      "seed": 20261026,
+      "unit": "unique user; paired variants resampled together",
+      "method": "two-sided percentile 95%, linear interpolation; descriptive, unadjusted multiple comparisons"
+    },
+    "limitations": [
+      "One held-out SID per user; no item-collision disambiguation.",
+      "First matched repeat determines quality; all repeats checked for token-rank stability separately.",
+      "Intervals describe sampling uncertainty on observed users; tiny/all-zero samples cannot exclude unseen harms.",
+      "No numerical-fidelity, provenance, performance, production-equivalence or noninferiority gate is decided here."
+    ],
+    "promotion": false,
+    "noninferiority_established": false
+  },
+  "checks": {
+    "control_exact": true,
+    "stability_exact": true,
+    "dispatch_verified": true,
+    "validity_passed": true,
+    "integrity_audit_passed": true,
+    "execution_audit_passed": true,
+    "performance_gate": {
+      "passed": true,
+      "minimum_incremental_reduction_percent": 10
+    },
+    "eligible_for_full500": true
+  },
+  "comparison": {
+    "requests": 24,
+    "rank_positions": 1200,
+    "sequence_values": 1200,
+    "transition_values": 6000,
+    "matching_rank_lists": 0,
+    "matching_rank_positions": 792,
+    "matching_sequence_vectors": 0,
+    "matching_transition_arrays": 0,
+    "matching_sequence_values": 0,
+    "matching_transition_values": 0,
+    "max_sequence_difference_common": 0.4011268615722656,
+    "max_transition_difference_common": 0.2215714454650879
+  },
+  "repeated_comparison": {
+    "requests": 88,
+    "rank_positions": 4400,
+    "sequence_values": 4400,
+    "transition_values": 22000,
+    "matching_rank_lists": 88,
+    "matching_rank_positions": 4400,
+    "matching_sequence_vectors": 88,
+    "matching_transition_arrays": 88,
+    "matching_sequence_values": 4400,
+    "matching_transition_values": 22000,
+    "max_sequence_difference_common": 0.0,
+    "max_transition_difference_common": 0.0
+  },
+  "phase_memory": [
+    {
+      "phase": 0,
+      "variant": "folded_tf32",
+      "memory": {
+        "allocated_bytes": 6595040256,
+        "reserved_bytes": 8313110528,
+        "peak_allocated_bytes": 6913109504,
+        "peak_reserved_bytes": 8313110528
+      },
+      "setup_memory": {
+        "allocated_bytes": 6595040256,
+        "reserved_bytes": 8313110528,
+        "peak_allocated_bytes": 8411338752,
+        "peak_reserved_bytes": 9219080192
+      },
+      "model_load_s": 2.2008282840251923,
+      "model_parameter_logical_bytes": 6176878592,
+      "model_parameter_unique_bytes": 6176878592,
+      "unique_input_storage_bytes": 15546688,
+      "logical_input_bytes": 79599936,
+      "physical_prefix": {
+        "requests_loaded": 20,
+        "prefix_bytes_copied": 112967680,
+        "prefix_capacity_bytes": 6938624,
+        "suffix_capacity_bytes": 8601600,
+        "max_prefix_tokens": 121,
+        "max_suffix_tokens": 3,
+        "physical_prefix_batch": 1,
+        "suffix_batch": 50,
+        "attention_materialization": "Temporary dense exact-length K/V per layer; unchanged SDPA"
+      }
+    },
+    {
+      "phase": 1,
+      "variant": "folded_bf16",
+      "memory": {
+        "allocated_bytes": 3335676928,
+        "reserved_bytes": 4836032512,
+        "peak_allocated_bytes": 3648660480,
+        "peak_reserved_bytes": 4836032512
+      },
+      "setup_memory": {
+        "allocated_bytes": 3335676928,
+        "reserved_bytes": 4836032512,
+        "peak_allocated_bytes": 4264743424,
+        "peak_reserved_bytes": 4836032512
+      },
+      "model_load_s": 1.0721981525421143,
+      "model_parameter_logical_bytes": 3088439296,
+      "model_parameter_unique_bytes": 3088439296,
+      "unique_input_storage_bytes": 7776576,
+      "logical_input_bytes": 39803200,
+      "physical_prefix": {
+        "requests_loaded": 20,
+        "prefix_bytes_copied": 56483840,
+        "prefix_capacity_bytes": 3469312,
+        "suffix_capacity_bytes": 4300800,
+        "max_prefix_tokens": 121,
+        "max_suffix_tokens": 3,
+        "physical_prefix_batch": 1,
+        "suffix_batch": 50,
+        "attention_materialization": "Temporary dense exact-length K/V per layer; unchanged SDPA"
+      }
+    },
+    {
+      "phase": 2,
+      "variant": "folded_bf16",
+      "memory": {
+        "allocated_bytes": 3335676928,
+        "reserved_bytes": 4844421120,
+        "peak_allocated_bytes": 3651850752,
+        "peak_reserved_bytes": 4844421120
+      },
+      "setup_memory": {
+        "allocated_bytes": 3335676928,
+        "reserved_bytes": 4844421120,
+        "peak_allocated_bytes": 4224453632,
+        "peak_reserved_bytes": 4844421120
+      },
+      "model_load_s": 1.0566246062517166,
+      "model_parameter_logical_bytes": 3088439296,
+      "model_parameter_unique_bytes": 3088439296,
+      "unique_input_storage_bytes": 7776576,
+      "logical_input_bytes": 39803200,
+      "physical_prefix": {
+        "requests_loaded": 20,
+        "prefix_bytes_copied": 56483840,
+        "prefix_capacity_bytes": 3469312,
+        "suffix_capacity_bytes": 4300800,
+        "max_prefix_tokens": 121,
+        "max_suffix_tokens": 3,
+        "physical_prefix_batch": 1,
+        "suffix_batch": 50,
+        "attention_materialization": "Temporary dense exact-length K/V per layer; unchanged SDPA"
+      }
+    },
+    {
+      "phase": 3,
+      "variant": "folded_tf32",
+      "memory": {
+        "allocated_bytes": 6595040256,
+        "reserved_bytes": 8552185856,
+        "peak_allocated_bytes": 6916948480,
+        "peak_reserved_bytes": 8552185856
+      },
+      "setup_memory": {
+        "allocated_bytes": 6595040256,
+        "reserved_bytes": 8552185856,
+        "peak_allocated_bytes": 7867450880,
+        "peak_reserved_bytes": 8552185856
+      },
+      "model_load_s": 2.4575864784419537,
+      "model_parameter_logical_bytes": 6176878592,
+      "model_parameter_unique_bytes": 6176878592,
+      "unique_input_storage_bytes": 15546688,
+      "logical_input_bytes": 79599936,
+      "physical_prefix": {
+        "requests_loaded": 20,
+        "prefix_bytes_copied": 112967680,
+        "prefix_capacity_bytes": 6938624,
+        "suffix_capacity_bytes": 8601600,
+        "max_prefix_tokens": 121,
+        "max_suffix_tokens": 3,
+        "physical_prefix_batch": 1,
+        "suffix_batch": 50,
+        "attention_materialization": "Temporary dense exact-length K/V per layer; unchanged SDPA"
+      }
+    }
+  ],
+  "promotion": false,
+  "noninferiority_established": false,
+  "limitations": [
+    "Only four users; unchanged Hit/NDCG/MRR and degenerate paired bootstrap intervals cannot establish population quality parity.",
+    "SID-level only; preserve catalog collision ambiguity.",
+    "BF16 rank lists and score bits change substantially despite stable repeated outputs.",
+    "No cross-run compounded speedup; comparison is current paired TF32 versus BF16."
+  ],
+  "decision": "Proceed to separately frozen BF16/TF32 full500 design, implementation, source tests/CI/guard and one authorized submission. Keep prompt-cache and wave queued in sequence; precision_stage_complete remains false until full500 review."
+}

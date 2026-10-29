@@ -1,0 +1,14 @@
+{
+  "schema": "precision-allocation-reconciliation-v1",
+  "matched": true,
+  "run_id": "bf16-vs-tf32-full500-quality-20261029T001048Z-32acac83dd02",
+  "job_id": "8078579",
+  "files": 82,
+  "bootstrap_executed": false,
+  "work": {
+    "passed": true,
+    "elapsed_s": 1444.6111765690148,
+    "audit_sha256": "b210e818d45ba47ee3c044fd5d97eaad0109c4ff42a93de57a69655c08a5b30d",
+    "bootstrap_executed": false
+  }
+}

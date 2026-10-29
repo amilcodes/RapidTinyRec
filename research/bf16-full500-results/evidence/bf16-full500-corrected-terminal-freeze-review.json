@@ -1,0 +1,18 @@
+{
+  "schema": "bf16-corrected-full500-terminal-freeze-v1",
+  "created_at_utc": "2026-10-29T02:50:11.450786+00:00",
+  "run_id": "bf16-vs-tf32-full500-quality-20261029T001048Z-32acac83dd02",
+  "job_id": "8078579",
+  "terminal_state": "COMPLETED",
+  "raw_manifest": "/Users/AmilAgrawal/Documents/Codex/2026-10-18/let/outputs/rapidtinyrec_bf16_full500_corrected_raw_manifest.json",
+  "raw_manifest_sha256": "3ec7436b05e3f4241ee55fb5bef89dd41420e1629ec79e43adf1aa5f32f5f323",
+  "raw_files": 2523,
+  "raw_bytes": 1106793278,
+  "submitted_files_verified": 82,
+  "submitted_bytes": 1238035,
+  "metadata_reconciliation_exit_code": 0,
+  "metadata_reconciliation_path": "/Users/AmilAgrawal/Documents/Codex/2026-10-18/let/outputs/quality_frontier/bf16-full500-corrected-local-reconciliation.json",
+  "numerical_audit_executed_locally": false,
+  "allocated_audit_exists": true,
+  "review_pending": true
+}
