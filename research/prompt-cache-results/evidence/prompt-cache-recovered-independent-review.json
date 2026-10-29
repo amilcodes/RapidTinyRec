@@ -1,0 +1,1846 @@
+{
+  "schema": "prompt-cache-recovered-independent-review-v1",
+  "reviewed_at_utc": "2026-10-29T18:53:49.334876+00:00",
+  "status": "AUDIT_PASSED_RESEARCH_COMPLETE_PERFORMANCE_REJECTED",
+  "original_run_id": "fixed-prompt-cache-pilot-20261029T143213Z-b93f5fc45e45",
+  "original_job_id": "8093515",
+  "recovery_run_id": "prompt-cache-saved-output-audit-recovery-20261029T182441Z-cc0993a51983",
+  "recovery_job_id": "8099804",
+  "original_generation_status": "FAILED_1:0_ORIGINAL_AUDIT_REMAINS_FAILED",
+  "separate_recovery_status": "COMPLETED_0:0_AUDIT_PASSED",
+  "source_commit": "50a70be009c52e0f3300f3936cc8fd0523116c3e",
+  "corrected_auditor_sha256": "046b13ad46292eed6c4d7f2d2ce0f6d200752553ce9bd31dae6427774dcf5284",
+  "protocol_sha256": "a19324cbd8c0b990f2f84f64c1332f7f7f5e7e901b184a10b96e30acd6680fca",
+  "allocated_audit": "/Users/AmilAgrawal/Documents/Codex/2026-10-18/let/work/rapidtinyrec_prep/prompt_cache_audit_recovery/.oscar/results/prompt-cache-saved-output-audit-recovery-20261029T182441Z-cc0993a51983/outputs/recovery-audit.json",
+  "allocated_audit_sha256": "ae59b9285618698ab61e8771ffebf0fb21e03efd00ccdea031558d6fba1d4cc0",
+  "reconciliation": {
+    "schema": "prompt-cache-recovery-metadata-reconciliation-v1",
+    "matched": true,
+    "local_numerical_audit_executed": false,
+    "environment_mutated": false,
+    "recovery_run_id": "prompt-cache-saved-output-audit-recovery-20261029T182441Z-cc0993a51983",
+    "recovery_job_id": "8099804",
+    "frozen_source_files": 70,
+    "frozen_source_bytes": 734550,
+    "raw_files": 8,
+    "raw_bytes": 500736,
+    "original_source_files": 77,
+    "original_source_bytes": 1089939,
+    "original_raw_files": 524,
+    "original_raw_bytes": 328570064,
+    "original_provenance": {
+      "schema": "precision-allocation-reconciliation-v1",
+      "matched": true,
+      "run_id": "fixed-prompt-cache-pilot-20261029T143213Z-b93f5fc45e45",
+      "job_id": "8093515",
+      "files": 77,
+      "bootstrap_executed": false
+    },
+    "saved_scheduler_validated": true,
+    "terminal_scheduler_sha256": "a0a84f4fae2ae1ea4063601167829d2285b5f5fa69972ebeea9479c08d0f6698",
+    "deadline_s": 1620,
+    "elapsed_s": 25.91038590669632,
+    "original_failed_audit_preserved": true,
+    "raw_manifest_sha256": "edc69686506ca891c87a0120a2575ae8cc5d760c968dddf2e5f97c50bc988c74",
+    "reproducer_sha256": "a0e961150a880e814693aebc17d2c26c43af5644fc157b9536ddc411fbbfc8e2"
+  },
+  "original_stages": {
+    "schema": "prompt-cache-saved-prerequisite-stages-v1",
+    "original_job_id": "8093515",
+    "original_started_monotonic": 18846606.87789211,
+    "original_deadline_monotonic": 18848226.87789211,
+    "generation_ended_monotonic": 18847879.79449599,
+    "recovery_ended_monotonic": 18847881.25741186,
+    "original_audit_certified": false
+  },
+  "original_failed_audit_sha256": "ec9ef5db1cc65b44cf7893299ece7ea9d4196c1547e5f03dbdad1df05f5f6c02",
+  "checks": {
+    "integrity_audit_passed": true,
+    "control_exact": true,
+    "stability_exact": true,
+    "dispatch_verified": true,
+    "validity_passed": true,
+    "execution_audit_passed": true
+  },
+  "performance_gate": {
+    "passed": false,
+    "minimum_incremental_reduction_percent": 5
+  },
+  "eligible_for_full500": false,
+  "latency_ms": {
+    "uncached_tf32": {
+      "n": 24,
+      "median_ms": 83.40611308813095,
+      "p95_ms": 83.6436191573739
+    },
+    "fixed69_tf32": {
+      "n": 24,
+      "median_ms": 87.87737041711807,
+      "p95_ms": 88.55495639145374
+    }
+  },
+  "latency_by_length_ms": {
+    "76": {
+      "uncached_tf32": {
+        "n": 12,
+        "median_ms": 81.59691654145718,
+        "p95_ms": 83.54780916124582
+      },
+      "fixed69_tf32": {
+        "n": 12,
+        "median_ms": 86.77196502685547,
+        "p95_ms": 87.69222311675549
+      }
+    },
+    "121": {
+      "uncached_tf32": {
+        "n": 12,
+        "median_ms": 83.47506634891033,
+        "p95_ms": 83.99125020951033
+      },
+      "fixed69_tf32": {
+        "n": 12,
+        "median_ms": 88.13976123929024,
+        "p95_ms": 88.86010628193617
+      }
+    }
+  },
+  "latency_by_half_ms": {
+    "0": {
+      "uncached_tf32": {
+        "n": 12,
+        "median_ms": 83.48630554974079,
+        "p95_ms": 84.0313944965601
+      },
+      "fixed69_tf32": {
+        "n": 12,
+        "median_ms": 88.10729719698429,
+        "p95_ms": 88.5448444634676
+      }
+    },
+    "1": {
+      "uncached_tf32": {
+        "n": 12,
+        "median_ms": 82.92815461754799,
+        "p95_ms": 83.46862122416496
+      },
+      "fixed69_tf32": {
+        "n": 12,
+        "median_ms": 87.27164193987846,
+        "p95_ms": 88.60345371067524
+      }
+    }
+  },
+  "latency_by_length_half_ms": {
+    "76:0": {
+      "uncached_tf32": {
+        "n": 6,
+        "median_ms": 82.09067769348621,
+        "p95_ms": 83.60604103654623
+      },
+      "fixed69_tf32": {
+        "n": 6,
+        "median_ms": 86.95333451032639,
+        "p95_ms": 88.15108425915241
+      }
+    },
+    "76:1": {
+      "uncached_tf32": {
+        "n": 6,
+        "median_ms": 81.50236867368221,
+        "p95_ms": 82.5696149840951
+      },
+      "fixed69_tf32": {
+        "n": 6,
+        "median_ms": 86.33780665695667,
+        "p95_ms": 86.6289334371686
+      }
+    },
+    "121:0": {
+      "uncached_tf32": {
+        "n": 6,
+        "median_ms": 83.53173173964024,
+        "p95_ms": 84.26436502486467
+      },
+      "fixed69_tf32": {
+        "n": 6,
+        "median_ms": 88.30410055816174,
+        "p95_ms": 88.51949032396078
+      }
+    },
+    "121:1": {
+      "uncached_tf32": {
+        "n": 6,
+        "median_ms": 83.4263376891613,
+        "p95_ms": 83.47203209996223
+      },
+      "fixed69_tf32": {
+        "n": 6,
+        "median_ms": 87.92641758918762,
+        "p95_ms": 88.94435130059719
+      }
+    }
+  },
+  "comparison": {
+    "requests": 24,
+    "rank_positions": 1200,
+    "sequence_values": 1200,
+    "transition_values": 6000,
+    "matching_rank_lists": 18,
+    "matching_rank_positions": 1170,
+    "matching_sequence_vectors": 0,
+    "matching_transition_arrays": 0,
+    "matching_sequence_values": 0,
+    "matching_transition_values": 30,
+    "max_sequence_difference_common": 0.012395858764648438,
+    "max_transition_difference_common": 0.006406307220458984
+  },
+  "repeated_comparison": {
+    "requests": 88,
+    "rank_positions": 4400,
+    "sequence_values": 4400,
+    "transition_values": 22000,
+    "matching_rank_lists": 88,
+    "matching_rank_positions": 4400,
+    "matching_sequence_vectors": 88,
+    "matching_transition_arrays": 88,
+    "matching_sequence_values": 4400,
+    "matching_transition_values": 22000,
+    "max_sequence_difference_common": 0.0,
+    "max_transition_difference_common": 0.0
+  },
+  "control_comparison": {
+    "requests": 48,
+    "rank_positions": 2400,
+    "sequence_values": 2400,
+    "transition_values": 12000,
+    "matching_rank_lists": 48,
+    "matching_rank_positions": 2400,
+    "matching_sequence_vectors": 48,
+    "matching_transition_arrays": 48,
+    "matching_sequence_values": 2400,
+    "matching_transition_values": 12000,
+    "max_sequence_difference_common": 0.0,
+    "max_transition_difference_common": 0.0
+  },
+  "quality": {
+    "schema": "paired-sid-quality-v1",
+    "primary_metrics": [
+      "ndcg@10",
+      "hit_rate@10"
+    ],
+    "overall": {
+      "independent_users": 4,
+      "metrics": {
+        "control": {
+          "1": {
+            "hit_rate": 0.25,
+            "ndcg": 0.25,
+            "mrr": 0.25
+          },
+          "5": {
+            "hit_rate": 0.25,
+            "ndcg": 0.25,
+            "mrr": 0.25
+          },
+          "10": {
+            "hit_rate": 0.25,
+            "ndcg": 0.25,
+            "mrr": 0.25
+          },
+          "20": {
+            "hit_rate": 0.25,
+            "ndcg": 0.25,
+            "mrr": 0.25
+          },
+          "50": {
+            "hit_rate": 0.5,
+            "ndcg": 0.29526064919501005,
+            "mrr": 0.25555555555555554
+          }
+        },
+        "candidate": {
+          "1": {
+            "hit_rate": 0.25,
+            "ndcg": 0.25,
+            "mrr": 0.25
+          },
+          "5": {
+            "hit_rate": 0.25,
+            "ndcg": 0.25,
+            "mrr": 0.25
+          },
+          "10": {
+            "hit_rate": 0.25,
+            "ndcg": 0.25,
+            "mrr": 0.25
+          },
+          "20": {
+            "hit_rate": 0.25,
+            "ndcg": 0.25,
+            "mrr": 0.25
+          },
+          "50": {
+            "hit_rate": 0.5,
+            "ndcg": 0.29526064919501005,
+            "mrr": 0.25555555555555554
+          }
+        }
+      },
+      "paired_mean_changes": {
+        "1": {
+          "hit_rate": 0.0,
+          "ndcg": 0.0,
+          "mrr": 0.0
+        },
+        "5": {
+          "hit_rate": 0.0,
+          "ndcg": 0.0,
+          "mrr": 0.0
+        },
+        "10": {
+          "hit_rate": 0.0,
+          "ndcg": 0.0,
+          "mrr": 0.0
+        },
+        "20": {
+          "hit_rate": 0.0,
+          "ndcg": 0.0,
+          "mrr": 0.0
+        },
+        "50": {
+          "hit_rate": 0.0,
+          "ndcg": 0.0,
+          "mrr": 0.0
+        }
+      },
+      "paired_user_bootstrap_95pct": {
+        "1": {
+          "hit_rate": {
+            "lower": 0.0,
+            "upper": 0.0
+          },
+          "ndcg": {
+            "lower": 0.0,
+            "upper": 0.0
+          },
+          "mrr": {
+            "lower": 0.0,
+            "upper": 0.0
+          }
+        },
+        "5": {
+          "hit_rate": {
+            "lower": 0.0,
+            "upper": 0.0
+          },
+          "ndcg": {
+            "lower": 0.0,
+            "upper": 0.0
+          },
+          "mrr": {
+            "lower": 0.0,
+            "upper": 0.0
+          }
+        },
+        "10": {
+          "hit_rate": {
+            "lower": 0.0,
+            "upper": 0.0
+          },
+          "ndcg": {
+            "lower": 0.0,
+            "upper": 0.0
+          },
+          "mrr": {
+            "lower": 0.0,
+            "upper": 0.0
+          }
+        },
+        "20": {
+          "hit_rate": {
+            "lower": 0.0,
+            "upper": 0.0
+          },
+          "ndcg": {
+            "lower": 0.0,
+            "upper": 0.0
+          },
+          "mrr": {
+            "lower": 0.0,
+            "upper": 0.0
+          }
+        },
+        "50": {
+          "hit_rate": {
+            "lower": 0.0,
+            "upper": 0.0
+          },
+          "ndcg": {
+            "lower": 0.0,
+            "upper": 0.0
+          },
+          "mrr": {
+            "lower": 0.0,
+            "upper": 0.0
+          }
+        }
+      },
+      "changed_users": {
+        "1": {
+          "hit_rate": {
+            "improved": 0,
+            "regressed": 0,
+            "unchanged": 4
+          },
+          "ndcg": {
+            "improved": 0,
+            "regressed": 0,
+            "unchanged": 4
+          },
+          "mrr": {
+            "improved": 0,
+            "regressed": 0,
+            "unchanged": 4
+          }
+        },
+        "5": {
+          "hit_rate": {
+            "improved": 0,
+            "regressed": 0,
+            "unchanged": 4
+          },
+          "ndcg": {
+            "improved": 0,
+            "regressed": 0,
+            "unchanged": 4
+          },
+          "mrr": {
+            "improved": 0,
+            "regressed": 0,
+            "unchanged": 4
+          }
+        },
+        "10": {
+          "hit_rate": {
+            "improved": 0,
+            "regressed": 0,
+            "unchanged": 4
+          },
+          "ndcg": {
+            "improved": 0,
+            "regressed": 0,
+            "unchanged": 4
+          },
+          "mrr": {
+            "improved": 0,
+            "regressed": 0,
+            "unchanged": 4
+          }
+        },
+        "20": {
+          "hit_rate": {
+            "improved": 0,
+            "regressed": 0,
+            "unchanged": 4
+          },
+          "ndcg": {
+            "improved": 0,
+            "regressed": 0,
+            "unchanged": 4
+          },
+          "mrr": {
+            "improved": 0,
+            "regressed": 0,
+            "unchanged": 4
+          }
+        },
+        "50": {
+          "hit_rate": {
+            "improved": 0,
+            "regressed": 0,
+            "unchanged": 4
+          },
+          "ndcg": {
+            "improved": 0,
+            "regressed": 0,
+            "unchanged": 4
+          },
+          "mrr": {
+            "improved": 0,
+            "regressed": 0,
+            "unchanged": 4
+          }
+        }
+      }
+    },
+    "by_prompt_length": {
+      "76": {
+        "independent_users": 2,
+        "metrics": {
+          "control": {
+            "1": {
+              "hit_rate": 0.5,
+              "ndcg": 0.5,
+              "mrr": 0.5
+            },
+            "5": {
+              "hit_rate": 0.5,
+              "ndcg": 0.5,
+              "mrr": 0.5
+            },
+            "10": {
+              "hit_rate": 0.5,
+              "ndcg": 0.5,
+              "mrr": 0.5
+            },
+            "20": {
+              "hit_rate": 0.5,
+              "ndcg": 0.5,
+              "mrr": 0.5
+            },
+            "50": {
+              "hit_rate": 0.5,
+              "ndcg": 0.5,
+              "mrr": 0.5
+            }
+          },
+          "candidate": {
+            "1": {
+              "hit_rate": 0.5,
+              "ndcg": 0.5,
+              "mrr": 0.5
+            },
+            "5": {
+              "hit_rate": 0.5,
+              "ndcg": 0.5,
+              "mrr": 0.5
+            },
+            "10": {
+              "hit_rate": 0.5,
+              "ndcg": 0.5,
+              "mrr": 0.5
+            },
+            "20": {
+              "hit_rate": 0.5,
+              "ndcg": 0.5,
+              "mrr": 0.5
+            },
+            "50": {
+              "hit_rate": 0.5,
+              "ndcg": 0.5,
+              "mrr": 0.5
+            }
+          }
+        },
+        "paired_mean_changes": {
+          "1": {
+            "hit_rate": 0.0,
+            "ndcg": 0.0,
+            "mrr": 0.0
+          },
+          "5": {
+            "hit_rate": 0.0,
+            "ndcg": 0.0,
+            "mrr": 0.0
+          },
+          "10": {
+            "hit_rate": 0.0,
+            "ndcg": 0.0,
+            "mrr": 0.0
+          },
+          "20": {
+            "hit_rate": 0.0,
+            "ndcg": 0.0,
+            "mrr": 0.0
+          },
+          "50": {
+            "hit_rate": 0.0,
+            "ndcg": 0.0,
+            "mrr": 0.0
+          }
+        },
+        "paired_user_bootstrap_95pct": {
+          "1": {
+            "hit_rate": {
+              "lower": 0.0,
+              "upper": 0.0
+            },
+            "ndcg": {
+              "lower": 0.0,
+              "upper": 0.0
+            },
+            "mrr": {
+              "lower": 0.0,
+              "upper": 0.0
+            }
+          },
+          "5": {
+            "hit_rate": {
+              "lower": 0.0,
+              "upper": 0.0
+            },
+            "ndcg": {
+              "lower": 0.0,
+              "upper": 0.0
+            },
+            "mrr": {
+              "lower": 0.0,
+              "upper": 0.0
+            }
+          },
+          "10": {
+            "hit_rate": {
+              "lower": 0.0,
+              "upper": 0.0
+            },
+            "ndcg": {
+              "lower": 0.0,
+              "upper": 0.0
+            },
+            "mrr": {
+              "lower": 0.0,
+              "upper": 0.0
+            }
+          },
+          "20": {
+            "hit_rate": {
+              "lower": 0.0,
+              "upper": 0.0
+            },
+            "ndcg": {
+              "lower": 0.0,
+              "upper": 0.0
+            },
+            "mrr": {
+              "lower": 0.0,
+              "upper": 0.0
+            }
+          },
+          "50": {
+            "hit_rate": {
+              "lower": 0.0,
+              "upper": 0.0
+            },
+            "ndcg": {
+              "lower": 0.0,
+              "upper": 0.0
+            },
+            "mrr": {
+              "lower": 0.0,
+              "upper": 0.0
+            }
+          }
+        },
+        "changed_users": {
+          "1": {
+            "hit_rate": {
+              "improved": 0,
+              "regressed": 0,
+              "unchanged": 2
+            },
+            "ndcg": {
+              "improved": 0,
+              "regressed": 0,
+              "unchanged": 2
+            },
+            "mrr": {
+              "improved": 0,
+              "regressed": 0,
+              "unchanged": 2
+            }
+          },
+          "5": {
+            "hit_rate": {
+              "improved": 0,
+              "regressed": 0,
+              "unchanged": 2
+            },
+            "ndcg": {
+              "improved": 0,
+              "regressed": 0,
+              "unchanged": 2
+            },
+            "mrr": {
+              "improved": 0,
+              "regressed": 0,
+              "unchanged": 2
+            }
+          },
+          "10": {
+            "hit_rate": {
+              "improved": 0,
+              "regressed": 0,
+              "unchanged": 2
+            },
+            "ndcg": {
+              "improved": 0,
+              "regressed": 0,
+              "unchanged": 2
+            },
+            "mrr": {
+              "improved": 0,
+              "regressed": 0,
+              "unchanged": 2
+            }
+          },
+          "20": {
+            "hit_rate": {
+              "improved": 0,
+              "regressed": 0,
+              "unchanged": 2
+            },
+            "ndcg": {
+              "improved": 0,
+              "regressed": 0,
+              "unchanged": 2
+            },
+            "mrr": {
+              "improved": 0,
+              "regressed": 0,
+              "unchanged": 2
+            }
+          },
+          "50": {
+            "hit_rate": {
+              "improved": 0,
+              "regressed": 0,
+              "unchanged": 2
+            },
+            "ndcg": {
+              "improved": 0,
+              "regressed": 0,
+              "unchanged": 2
+            },
+            "mrr": {
+              "improved": 0,
+              "regressed": 0,
+              "unchanged": 2
+            }
+          }
+        }
+      },
+      "121": {
+        "independent_users": 2,
+        "metrics": {
+          "control": {
+            "1": {
+              "hit_rate": 0.0,
+              "ndcg": 0.0,
+              "mrr": 0.0
+            },
+            "5": {
+              "hit_rate": 0.0,
+              "ndcg": 0.0,
+              "mrr": 0.0
+            },
+            "10": {
+              "hit_rate": 0.0,
+              "ndcg": 0.0,
+              "mrr": 0.0
+            },
+            "20": {
+              "hit_rate": 0.0,
+              "ndcg": 0.0,
+              "mrr": 0.0
+            },
+            "50": {
+              "hit_rate": 0.5,
+              "ndcg": 0.0905212983900201,
+              "mrr": 0.011111111111111112
+            }
+          },
+          "candidate": {
+            "1": {
+              "hit_rate": 0.0,
+              "ndcg": 0.0,
+              "mrr": 0.0
+            },
+            "5": {
+              "hit_rate": 0.0,
+              "ndcg": 0.0,
+              "mrr": 0.0
+            },
+            "10": {
+              "hit_rate": 0.0,
+              "ndcg": 0.0,
+              "mrr": 0.0
+            },
+            "20": {
+              "hit_rate": 0.0,
+              "ndcg": 0.0,
+              "mrr": 0.0
+            },
+            "50": {
+              "hit_rate": 0.5,
+              "ndcg": 0.0905212983900201,
+              "mrr": 0.011111111111111112
+            }
+          }
+        },
+        "paired_mean_changes": {
+          "1": {
+            "hit_rate": 0.0,
+            "ndcg": 0.0,
+            "mrr": 0.0
+          },
+          "5": {
+            "hit_rate": 0.0,
+            "ndcg": 0.0,
+            "mrr": 0.0
+          },
+          "10": {
+            "hit_rate": 0.0,
+            "ndcg": 0.0,
+            "mrr": 0.0
+          },
+          "20": {
+            "hit_rate": 0.0,
+            "ndcg": 0.0,
+            "mrr": 0.0
+          },
+          "50": {
+            "hit_rate": 0.0,
+            "ndcg": 0.0,
+            "mrr": 0.0
+          }
+        },
+        "paired_user_bootstrap_95pct": {
+          "1": {
+            "hit_rate": {
+              "lower": 0.0,
+              "upper": 0.0
+            },
+            "ndcg": {
+              "lower": 0.0,
+              "upper": 0.0
+            },
+            "mrr": {
+              "lower": 0.0,
+              "upper": 0.0
+            }
+          },
+          "5": {
+            "hit_rate": {
+              "lower": 0.0,
+              "upper": 0.0
+            },
+            "ndcg": {
+              "lower": 0.0,
+              "upper": 0.0
+            },
+            "mrr": {
+              "lower": 0.0,
+              "upper": 0.0
+            }
+          },
+          "10": {
+            "hit_rate": {
+              "lower": 0.0,
+              "upper": 0.0
+            },
+            "ndcg": {
+              "lower": 0.0,
+              "upper": 0.0
+            },
+            "mrr": {
+              "lower": 0.0,
+              "upper": 0.0
+            }
+          },
+          "20": {
+            "hit_rate": {
+              "lower": 0.0,
+              "upper": 0.0
+            },
+            "ndcg": {
+              "lower": 0.0,
+              "upper": 0.0
+            },
+            "mrr": {
+              "lower": 0.0,
+              "upper": 0.0
+            }
+          },
+          "50": {
+            "hit_rate": {
+              "lower": 0.0,
+              "upper": 0.0
+            },
+            "ndcg": {
+              "lower": 0.0,
+              "upper": 0.0
+            },
+            "mrr": {
+              "lower": 0.0,
+              "upper": 0.0
+            }
+          }
+        },
+        "changed_users": {
+          "1": {
+            "hit_rate": {
+              "improved": 0,
+              "regressed": 0,
+              "unchanged": 2
+            },
+            "ndcg": {
+              "improved": 0,
+              "regressed": 0,
+              "unchanged": 2
+            },
+            "mrr": {
+              "improved": 0,
+              "regressed": 0,
+              "unchanged": 2
+            }
+          },
+          "5": {
+            "hit_rate": {
+              "improved": 0,
+              "regressed": 0,
+              "unchanged": 2
+            },
+            "ndcg": {
+              "improved": 0,
+              "regressed": 0,
+              "unchanged": 2
+            },
+            "mrr": {
+              "improved": 0,
+              "regressed": 0,
+              "unchanged": 2
+            }
+          },
+          "10": {
+            "hit_rate": {
+              "improved": 0,
+              "regressed": 0,
+              "unchanged": 2
+            },
+            "ndcg": {
+              "improved": 0,
+              "regressed": 0,
+              "unchanged": 2
+            },
+            "mrr": {
+              "improved": 0,
+              "regressed": 0,
+              "unchanged": 2
+            }
+          },
+          "20": {
+            "hit_rate": {
+              "improved": 0,
+              "regressed": 0,
+              "unchanged": 2
+            },
+            "ndcg": {
+              "improved": 0,
+              "regressed": 0,
+              "unchanged": 2
+            },
+            "mrr": {
+              "improved": 0,
+              "regressed": 0,
+              "unchanged": 2
+            }
+          },
+          "50": {
+            "hit_rate": {
+              "improved": 0,
+              "regressed": 0,
+              "unchanged": 2
+            },
+            "ndcg": {
+              "improved": 0,
+              "regressed": 0,
+              "unchanged": 2
+            },
+            "mrr": {
+              "improved": 0,
+              "regressed": 0,
+              "unchanged": 2
+            }
+          }
+        }
+      }
+    },
+    "by_target_ambiguity": {
+      "unambiguous": {
+        "independent_users": 4,
+        "metrics": {
+          "control": {
+            "1": {
+              "hit_rate": 0.25,
+              "ndcg": 0.25,
+              "mrr": 0.25
+            },
+            "5": {
+              "hit_rate": 0.25,
+              "ndcg": 0.25,
+              "mrr": 0.25
+            },
+            "10": {
+              "hit_rate": 0.25,
+              "ndcg": 0.25,
+              "mrr": 0.25
+            },
+            "20": {
+              "hit_rate": 0.25,
+              "ndcg": 0.25,
+              "mrr": 0.25
+            },
+            "50": {
+              "hit_rate": 0.5,
+              "ndcg": 0.29526064919501005,
+              "mrr": 0.25555555555555554
+            }
+          },
+          "candidate": {
+            "1": {
+              "hit_rate": 0.25,
+              "ndcg": 0.25,
+              "mrr": 0.25
+            },
+            "5": {
+              "hit_rate": 0.25,
+              "ndcg": 0.25,
+              "mrr": 0.25
+            },
+            "10": {
+              "hit_rate": 0.25,
+              "ndcg": 0.25,
+              "mrr": 0.25
+            },
+            "20": {
+              "hit_rate": 0.25,
+              "ndcg": 0.25,
+              "mrr": 0.25
+            },
+            "50": {
+              "hit_rate": 0.5,
+              "ndcg": 0.29526064919501005,
+              "mrr": 0.25555555555555554
+            }
+          }
+        },
+        "paired_mean_changes": {
+          "1": {
+            "hit_rate": 0.0,
+            "ndcg": 0.0,
+            "mrr": 0.0
+          },
+          "5": {
+            "hit_rate": 0.0,
+            "ndcg": 0.0,
+            "mrr": 0.0
+          },
+          "10": {
+            "hit_rate": 0.0,
+            "ndcg": 0.0,
+            "mrr": 0.0
+          },
+          "20": {
+            "hit_rate": 0.0,
+            "ndcg": 0.0,
+            "mrr": 0.0
+          },
+          "50": {
+            "hit_rate": 0.0,
+            "ndcg": 0.0,
+            "mrr": 0.0
+          }
+        },
+        "paired_user_bootstrap_95pct": {
+          "1": {
+            "hit_rate": {
+              "lower": 0.0,
+              "upper": 0.0
+            },
+            "ndcg": {
+              "lower": 0.0,
+              "upper": 0.0
+            },
+            "mrr": {
+              "lower": 0.0,
+              "upper": 0.0
+            }
+          },
+          "5": {
+            "hit_rate": {
+              "lower": 0.0,
+              "upper": 0.0
+            },
+            "ndcg": {
+              "lower": 0.0,
+              "upper": 0.0
+            },
+            "mrr": {
+              "lower": 0.0,
+              "upper": 0.0
+            }
+          },
+          "10": {
+            "hit_rate": {
+              "lower": 0.0,
+              "upper": 0.0
+            },
+            "ndcg": {
+              "lower": 0.0,
+              "upper": 0.0
+            },
+            "mrr": {
+              "lower": 0.0,
+              "upper": 0.0
+            }
+          },
+          "20": {
+            "hit_rate": {
+              "lower": 0.0,
+              "upper": 0.0
+            },
+            "ndcg": {
+              "lower": 0.0,
+              "upper": 0.0
+            },
+            "mrr": {
+              "lower": 0.0,
+              "upper": 0.0
+            }
+          },
+          "50": {
+            "hit_rate": {
+              "lower": 0.0,
+              "upper": 0.0
+            },
+            "ndcg": {
+              "lower": 0.0,
+              "upper": 0.0
+            },
+            "mrr": {
+              "lower": 0.0,
+              "upper": 0.0
+            }
+          }
+        },
+        "changed_users": {
+          "1": {
+            "hit_rate": {
+              "improved": 0,
+              "regressed": 0,
+              "unchanged": 4
+            },
+            "ndcg": {
+              "improved": 0,
+              "regressed": 0,
+              "unchanged": 4
+            },
+            "mrr": {
+              "improved": 0,
+              "regressed": 0,
+              "unchanged": 4
+            }
+          },
+          "5": {
+            "hit_rate": {
+              "improved": 0,
+              "regressed": 0,
+              "unchanged": 4
+            },
+            "ndcg": {
+              "improved": 0,
+              "regressed": 0,
+              "unchanged": 4
+            },
+            "mrr": {
+              "improved": 0,
+              "regressed": 0,
+              "unchanged": 4
+            }
+          },
+          "10": {
+            "hit_rate": {
+              "improved": 0,
+              "regressed": 0,
+              "unchanged": 4
+            },
+            "ndcg": {
+              "improved": 0,
+              "regressed": 0,
+              "unchanged": 4
+            },
+            "mrr": {
+              "improved": 0,
+              "regressed": 0,
+              "unchanged": 4
+            }
+          },
+          "20": {
+            "hit_rate": {
+              "improved": 0,
+              "regressed": 0,
+              "unchanged": 4
+            },
+            "ndcg": {
+              "improved": 0,
+              "regressed": 0,
+              "unchanged": 4
+            },
+            "mrr": {
+              "improved": 0,
+              "regressed": 0,
+              "unchanged": 4
+            }
+          },
+          "50": {
+            "hit_rate": {
+              "improved": 0,
+              "regressed": 0,
+              "unchanged": 4
+            },
+            "ndcg": {
+              "improved": 0,
+              "regressed": 0,
+              "unchanged": 4
+            },
+            "mrr": {
+              "improved": 0,
+              "regressed": 0,
+              "unchanged": 4
+            }
+          }
+        }
+      }
+    },
+    "per_user": [
+      {
+        "cohort_index": 1,
+        "prompt_tokens": 76,
+        "repeats": 6,
+        "representative_repeat": 0,
+        "variants": {
+          "control": {
+            "target_rank": null,
+            "valid_outputs": 50,
+            "invalid_outputs": 0,
+            "duplicate_valid_sids": 0,
+            "stable_token_ranks_across_repeats": true,
+            "metrics": {
+              "1": {
+                "hit_rate": 0.0,
+                "ndcg": 0.0,
+                "mrr": 0.0
+              },
+              "5": {
+                "hit_rate": 0.0,
+                "ndcg": 0.0,
+                "mrr": 0.0
+              },
+              "10": {
+                "hit_rate": 0.0,
+                "ndcg": 0.0,
+                "mrr": 0.0
+              },
+              "20": {
+                "hit_rate": 0.0,
+                "ndcg": 0.0,
+                "mrr": 0.0
+              },
+              "50": {
+                "hit_rate": 0.0,
+                "ndcg": 0.0,
+                "mrr": 0.0
+              }
+            }
+          },
+          "candidate": {
+            "target_rank": null,
+            "valid_outputs": 50,
+            "invalid_outputs": 0,
+            "duplicate_valid_sids": 0,
+            "stable_token_ranks_across_repeats": true,
+            "metrics": {
+              "1": {
+                "hit_rate": 0.0,
+                "ndcg": 0.0,
+                "mrr": 0.0
+              },
+              "5": {
+                "hit_rate": 0.0,
+                "ndcg": 0.0,
+                "mrr": 0.0
+              },
+              "10": {
+                "hit_rate": 0.0,
+                "ndcg": 0.0,
+                "mrr": 0.0
+              },
+              "20": {
+                "hit_rate": 0.0,
+                "ndcg": 0.0,
+                "mrr": 0.0
+              },
+              "50": {
+                "hit_rate": 0.0,
+                "ndcg": 0.0,
+                "mrr": 0.0
+              }
+            }
+          }
+        },
+        "target_item_count": 1,
+        "fidelity": {
+          "identical_token_rank_positions": 50,
+          "compared_rank_positions": 50,
+          "top1_token_match": true,
+          "sid_set_jaccard": 1.0,
+          "note": "Overlap includes original outputs; validity reported separately. No score-bit test here."
+        },
+        "paired_changes": {
+          "1": {
+            "hit_rate": 0.0,
+            "ndcg": 0.0,
+            "mrr": 0.0
+          },
+          "5": {
+            "hit_rate": 0.0,
+            "ndcg": 0.0,
+            "mrr": 0.0
+          },
+          "10": {
+            "hit_rate": 0.0,
+            "ndcg": 0.0,
+            "mrr": 0.0
+          },
+          "20": {
+            "hit_rate": 0.0,
+            "ndcg": 0.0,
+            "mrr": 0.0
+          },
+          "50": {
+            "hit_rate": 0.0,
+            "ndcg": 0.0,
+            "mrr": 0.0
+          }
+        }
+      },
+      {
+        "cohort_index": 2,
+        "prompt_tokens": 76,
+        "repeats": 6,
+        "representative_repeat": 0,
+        "variants": {
+          "control": {
+            "target_rank": 1,
+            "valid_outputs": 50,
+            "invalid_outputs": 0,
+            "duplicate_valid_sids": 0,
+            "stable_token_ranks_across_repeats": true,
+            "metrics": {
+              "1": {
+                "hit_rate": 1.0,
+                "ndcg": 1.0,
+                "mrr": 1.0
+              },
+              "5": {
+                "hit_rate": 1.0,
+                "ndcg": 1.0,
+                "mrr": 1.0
+              },
+              "10": {
+                "hit_rate": 1.0,
+                "ndcg": 1.0,
+                "mrr": 1.0
+              },
+              "20": {
+                "hit_rate": 1.0,
+                "ndcg": 1.0,
+                "mrr": 1.0
+              },
+              "50": {
+                "hit_rate": 1.0,
+                "ndcg": 1.0,
+                "mrr": 1.0
+              }
+            }
+          },
+          "candidate": {
+            "target_rank": 1,
+            "valid_outputs": 50,
+            "invalid_outputs": 0,
+            "duplicate_valid_sids": 0,
+            "stable_token_ranks_across_repeats": true,
+            "metrics": {
+              "1": {
+                "hit_rate": 1.0,
+                "ndcg": 1.0,
+                "mrr": 1.0
+              },
+              "5": {
+                "hit_rate": 1.0,
+                "ndcg": 1.0,
+                "mrr": 1.0
+              },
+              "10": {
+                "hit_rate": 1.0,
+                "ndcg": 1.0,
+                "mrr": 1.0
+              },
+              "20": {
+                "hit_rate": 1.0,
+                "ndcg": 1.0,
+                "mrr": 1.0
+              },
+              "50": {
+                "hit_rate": 1.0,
+                "ndcg": 1.0,
+                "mrr": 1.0
+              }
+            }
+          }
+        },
+        "target_item_count": 1,
+        "fidelity": {
+          "identical_token_rank_positions": 50,
+          "compared_rank_positions": 50,
+          "top1_token_match": true,
+          "sid_set_jaccard": 1.0,
+          "note": "Overlap includes original outputs; validity reported separately. No score-bit test here."
+        },
+        "paired_changes": {
+          "1": {
+            "hit_rate": 0.0,
+            "ndcg": 0.0,
+            "mrr": 0.0
+          },
+          "5": {
+            "hit_rate": 0.0,
+            "ndcg": 0.0,
+            "mrr": 0.0
+          },
+          "10": {
+            "hit_rate": 0.0,
+            "ndcg": 0.0,
+            "mrr": 0.0
+          },
+          "20": {
+            "hit_rate": 0.0,
+            "ndcg": 0.0,
+            "mrr": 0.0
+          },
+          "50": {
+            "hit_rate": 0.0,
+            "ndcg": 0.0,
+            "mrr": 0.0
+          }
+        }
+      },
+      {
+        "cohort_index": 6,
+        "prompt_tokens": 121,
+        "repeats": 6,
+        "representative_repeat": 0,
+        "variants": {
+          "control": {
+            "target_rank": 45,
+            "valid_outputs": 50,
+            "invalid_outputs": 0,
+            "duplicate_valid_sids": 0,
+            "stable_token_ranks_across_repeats": true,
+            "metrics": {
+              "1": {
+                "hit_rate": 0.0,
+                "ndcg": 0.0,
+                "mrr": 0.0
+              },
+              "5": {
+                "hit_rate": 0.0,
+                "ndcg": 0.0,
+                "mrr": 0.0
+              },
+              "10": {
+                "hit_rate": 0.0,
+                "ndcg": 0.0,
+                "mrr": 0.0
+              },
+              "20": {
+                "hit_rate": 0.0,
+                "ndcg": 0.0,
+                "mrr": 0.0
+              },
+              "50": {
+                "hit_rate": 1.0,
+                "ndcg": 0.1810425967800402,
+                "mrr": 0.022222222222222223
+              }
+            }
+          },
+          "candidate": {
+            "target_rank": 45,
+            "valid_outputs": 50,
+            "invalid_outputs": 0,
+            "duplicate_valid_sids": 0,
+            "stable_token_ranks_across_repeats": true,
+            "metrics": {
+              "1": {
+                "hit_rate": 0.0,
+                "ndcg": 0.0,
+                "mrr": 0.0
+              },
+              "5": {
+                "hit_rate": 0.0,
+                "ndcg": 0.0,
+                "mrr": 0.0
+              },
+              "10": {
+                "hit_rate": 0.0,
+                "ndcg": 0.0,
+                "mrr": 0.0
+              },
+              "20": {
+                "hit_rate": 0.0,
+                "ndcg": 0.0,
+                "mrr": 0.0
+              },
+              "50": {
+                "hit_rate": 1.0,
+                "ndcg": 0.1810425967800402,
+                "mrr": 0.022222222222222223
+              }
+            }
+          }
+        },
+        "target_item_count": 1,
+        "fidelity": {
+          "identical_token_rank_positions": 45,
+          "compared_rank_positions": 50,
+          "top1_token_match": true,
+          "sid_set_jaccard": 0.9607843137254902,
+          "note": "Overlap includes original outputs; validity reported separately. No score-bit test here."
+        },
+        "paired_changes": {
+          "1": {
+            "hit_rate": 0.0,
+            "ndcg": 0.0,
+            "mrr": 0.0
+          },
+          "5": {
+            "hit_rate": 0.0,
+            "ndcg": 0.0,
+            "mrr": 0.0
+          },
+          "10": {
+            "hit_rate": 0.0,
+            "ndcg": 0.0,
+            "mrr": 0.0
+          },
+          "20": {
+            "hit_rate": 0.0,
+            "ndcg": 0.0,
+            "mrr": 0.0
+          },
+          "50": {
+            "hit_rate": 0.0,
+            "ndcg": 0.0,
+            "mrr": 0.0
+          }
+        }
+      },
+      {
+        "cohort_index": 10,
+        "prompt_tokens": 121,
+        "repeats": 6,
+        "representative_repeat": 0,
+        "variants": {
+          "control": {
+            "target_rank": null,
+            "valid_outputs": 50,
+            "invalid_outputs": 0,
+            "duplicate_valid_sids": 0,
+            "stable_token_ranks_across_repeats": true,
+            "metrics": {
+              "1": {
+                "hit_rate": 0.0,
+                "ndcg": 0.0,
+                "mrr": 0.0
+              },
+              "5": {
+                "hit_rate": 0.0,
+                "ndcg": 0.0,
+                "mrr": 0.0
+              },
+              "10": {
+                "hit_rate": 0.0,
+                "ndcg": 0.0,
+                "mrr": 0.0
+              },
+              "20": {
+                "hit_rate": 0.0,
+                "ndcg": 0.0,
+                "mrr": 0.0
+              },
+              "50": {
+                "hit_rate": 0.0,
+                "ndcg": 0.0,
+                "mrr": 0.0
+              }
+            }
+          },
+          "candidate": {
+            "target_rank": null,
+            "valid_outputs": 50,
+            "invalid_outputs": 0,
+            "duplicate_valid_sids": 0,
+            "stable_token_ranks_across_repeats": true,
+            "metrics": {
+              "1": {
+                "hit_rate": 0.0,
+                "ndcg": 0.0,
+                "mrr": 0.0
+              },
+              "5": {
+                "hit_rate": 0.0,
+                "ndcg": 0.0,
+                "mrr": 0.0
+              },
+              "10": {
+                "hit_rate": 0.0,
+                "ndcg": 0.0,
+                "mrr": 0.0
+              },
+              "20": {
+                "hit_rate": 0.0,
+                "ndcg": 0.0,
+                "mrr": 0.0
+              },
+              "50": {
+                "hit_rate": 0.0,
+                "ndcg": 0.0,
+                "mrr": 0.0
+              }
+            }
+          }
+        },
+        "target_item_count": 1,
+        "fidelity": {
+          "identical_token_rank_positions": 50,
+          "compared_rank_positions": 50,
+          "top1_token_match": true,
+          "sid_set_jaccard": 1.0,
+          "note": "Overlap includes original outputs; validity reported separately. No score-bit test here."
+        },
+        "paired_changes": {
+          "1": {
+            "hit_rate": 0.0,
+            "ndcg": 0.0,
+            "mrr": 0.0
+          },
+          "5": {
+            "hit_rate": 0.0,
+            "ndcg": 0.0,
+            "mrr": 0.0
+          },
+          "10": {
+            "hit_rate": 0.0,
+            "ndcg": 0.0,
+            "mrr": 0.0
+          },
+          "20": {
+            "hit_rate": 0.0,
+            "ndcg": 0.0,
+            "mrr": 0.0
+          },
+          "50": {
+            "hit_rate": 0.0,
+            "ndcg": 0.0,
+            "mrr": 0.0
+          }
+        }
+      }
+    ],
+    "catalog_size": 3444,
+    "catalog_coverage": {
+      "control": 0.05574912891986063,
+      "candidate": 0.05574912891986063
+    },
+    "output_validity": {
+      "control": {
+        "invalid_outputs": 0,
+        "duplicate_valid_sids": 0
+      },
+      "candidate": {
+        "invalid_outputs": 0,
+        "duplicate_valid_sids": 0
+      }
+    },
+    "token_repeat_stability": true,
+    "bootstrap": {
+      "samples": 10000,
+      "seed": 20261026,
+      "unit": "unique user; paired variants resampled together",
+      "method": "two-sided percentile 95%, linear interpolation; descriptive, unadjusted multiple comparisons"
+    },
+    "limitations": [
+      "One held-out SID per user; no item-collision disambiguation.",
+      "First matched repeat determines quality; all repeats checked for token-rank stability separately.",
+      "Intervals describe sampling uncertainty on observed users; tiny/all-zero samples cannot exclude unseen harms.",
+      "No numerical-fidelity, provenance, performance, production-equivalence or noninferiority gate is decided here."
+    ],
+    "promotion": false,
+    "noninferiority_established": false
+  },
+  "prefix_storage": [
+    {
+      "phase": 1,
+      "persistent_kv_bytes": 3956736,
+      "request_kv_copy_bytes": 3956736,
+      "shape": [
+        1,
+        2,
+        69,
+        128
+      ],
+      "layers": 28,
+      "stages_checked": 4,
+      "tensors_per_stage": 56,
+      "bit_unchanged": true,
+      "request_counts": [
+        0,
+        12,
+        24,
+        26
+      ],
+      "scope": "Persistent prefix snapshots only; no complete-pilot or request-ownership claim",
+      "request_storage": {
+        "requests_checked": 26,
+        "initial_and_complete_kv_checked": true,
+        "persistent_and_request_kv_disjoint": true,
+        "scope": "Simultaneous supplied KV storages; sequential request address reuse is allowed"
+      }
+    },
+    {
+      "phase": 2,
+      "persistent_kv_bytes": 3956736,
+      "request_kv_copy_bytes": 3956736,
+      "shape": [
+        1,
+        2,
+        69,
+        128
+      ],
+      "layers": 28,
+      "stages_checked": 4,
+      "tensors_per_stage": 56,
+      "bit_unchanged": true,
+      "request_counts": [
+        0,
+        12,
+        24,
+        26
+      ],
+      "scope": "Persistent prefix snapshots only; no complete-pilot or request-ownership claim",
+      "request_storage": {
+        "requests_checked": 26,
+        "initial_and_complete_kv_checked": true,
+        "persistent_and_request_kv_disjoint": true,
+        "scope": "Simultaneous supplied KV storages; sequential request address reuse is allowed"
+      }
+    }
+  ],
+  "phase_setup_and_memory": [
+    {
+      "phase": 0,
+      "variant": "uncached_tf32",
+      "memory": {
+        "allocated_bytes": 6586438656,
+        "reserved_bytes": 8313110528,
+        "peak_allocated_bytes": 6904507904,
+        "peak_reserved_bytes": 8313110528
+      },
+      "setup_memory": {
+        "allocated_bytes": 6586438656,
+        "reserved_bytes": 8313110528,
+        "peak_allocated_bytes": 8411338752,
+        "peak_reserved_bytes": 9219080192
+      },
+      "setup_s": 358.58941297233105,
+      "initial_prefix_build_including_compile_s": null,
+      "measurement_compilations": 0,
+      "measurement_captures": 0
+    },
+    {
+      "phase": 1,
+      "variant": "fixed69_tf32",
+      "memory": {
+        "allocated_bytes": 6599139328,
+        "reserved_bytes": 8313110528,
+        "peak_allocated_bytes": 6917208576,
+        "peak_reserved_bytes": 8313110528
+      },
+      "setup_memory": {
+        "allocated_bytes": 6599139328,
+        "reserved_bytes": 8313110528,
+        "peak_allocated_bytes": 8415437824,
+        "peak_reserved_bytes": 9223274496
+      },
+      "setup_s": 466.73553443700075,
+      "initial_prefix_build_including_compile_s": 71.58276660740376,
+      "measurement_compilations": 0,
+      "measurement_captures": 0
+    },
+    {
+      "phase": 2,
+      "variant": "fixed69_tf32",
+      "memory": {
+        "allocated_bytes": 6599139328,
+        "reserved_bytes": 8552185856,
+        "peak_allocated_bytes": 6921047552,
+        "peak_reserved_bytes": 8552185856
+      },
+      "setup_memory": {
+        "allocated_bytes": 6599139328,
+        "reserved_bytes": 8552185856,
+        "peak_allocated_bytes": 7871549952,
+        "peak_reserved_bytes": 8552185856
+      },
+      "setup_s": 197.044412240386,
+      "initial_prefix_build_including_compile_s": 32.049778152257204,
+      "measurement_compilations": 0,
+      "measurement_captures": 0
+    },
+    {
+      "phase": 3,
+      "variant": "uncached_tf32",
+      "memory": {
+        "allocated_bytes": 6595040256,
+        "reserved_bytes": 8552185856,
+        "peak_allocated_bytes": 6916948480,
+        "peak_reserved_bytes": 8552185856
+      },
+      "setup_memory": {
+        "allocated_bytes": 6595040256,
+        "reserved_bytes": 8552185856,
+        "peak_allocated_bytes": 7867450880,
+        "peak_reserved_bytes": 8552185856
+      },
+      "setup_s": 152.3366511873901,
+      "initial_prefix_build_including_compile_s": null,
+      "measurement_compilations": 0,
+      "measurement_captures": 0
+    }
+  ],
+  "prompt_cache_stage_complete": true,
+  "stage_completion_meaning": "Successful allocated audit and independent metadata/evidence review close research as a negative result. This is not a passed performance gate, adoption, full500 eligibility or quality equivalence. Independent original serial TF32 beam-wave comparison may follow after serialization.",
+  "decision": "Reject fixed69 prompt cache for speed; do not expand to full500 or stack with BF16. Both lengths, both halves and all four crossed cells regress median and p95.",
+  "limitations": [
+    "Four independent quality users, not 24; unchanged observed quality and zero bootstrap interval cannot establish population equivalence or noninferiority.",
+    "One of four rank lists differs; all candidate sequence vectors differ.",
+    "Separate recovery corrects only the uncached None schema assertion; original failed job and audit remain failed.",
+    "No local numerical audit, generation rerun or automatic promotion."
+  ],
+  "promotion": false,
+  "noninferiority_established": false,
+  "median_change_percent": 5.360826878795533,
+  "p95_change_percent": 5.8717416624922025
+}

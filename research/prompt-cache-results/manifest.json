@@ -1,0 +1,42 @@
+{
+  "schema": "retrospective-research-publication-v1",
+  "published_at_utc": "2026-10-31T06:25:37.282271+00:00",
+  "evidence_date": "2026-10-29T18:53:49.334876+00:00",
+  "base_commit": "50a70be009c52e0f3300f3936cc8fd0523116c3e",
+  "snapshot_counts": {},
+  "raw_archive_included": false,
+  "numerical_reaudit": false,
+  "promotion": false,
+  "files": {
+    "README.md": {
+      "bytes": 2924,
+      "sha256": "1a72bb2d01ef6f15e5ffcdff845ada734b903e625a209385f0541ec70cbbf691",
+      "origin": "publication-generated"
+    },
+    "evidence/prompt-cache-recovered-independent-review.json": {
+      "bytes": 47326,
+      "sha256": "84ef3c2c0bab7423020f2e12adac9798e70f128307928a58437f957db827d0fc",
+      "origin": "outputs/quality_frontier/prompt-cache-recovered-independent-review.json"
+    },
+    "evidence/prompt-cache-recovery-metadata-reconciliation.json": {
+      "bytes": 1196,
+      "sha256": "f14a023367ebd817cbb96a2afb91596ab90ed88cf450a658a5646b91e3202b16",
+      "origin": "outputs/quality_frontier/prompt-cache-recovery-metadata-reconciliation.json"
+    },
+    "evidence/prompt-cache-recovery-raw-manifest.json": {
+      "bytes": 1377,
+      "sha256": "edc69686506ca891c87a0120a2575ae8cc5d760c968dddf2e5f97c50bc988c74",
+      "origin": "outputs/quality_frontier/prompt-cache-recovery-raw-manifest.json"
+    },
+    "evidence/prompt-cache-terminal-raw-manifest.json": {
+      "bytes": 108583,
+      "sha256": "7b2927daea7262ab2ede36fc1a373e10830d46453e38486b05a1ee368e97077f",
+      "origin": "outputs/quality_frontier/prompt-cache-terminal-raw-manifest.json"
+    },
+    "verify_publication.py": {
+      "bytes": 714,
+      "sha256": "98a3fbb950c7751463a016d00e381e286ba44d3aaacdfea7ff20c342c24f3dca",
+      "origin": "publication-generated"
+    }
+  }
+}

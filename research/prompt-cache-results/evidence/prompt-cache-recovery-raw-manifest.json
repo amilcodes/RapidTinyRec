@@ -1,0 +1,47 @@
+{
+  "run_id": "prompt-cache-saved-output-audit-recovery-20261029T182441Z-cc0993a51983",
+  "job_id": "8099804",
+  "files": [
+    {
+      "path": "job-id",
+      "bytes": 8,
+      "sha256": "7cca1b983ebde883ac97c9f3de4cc99f33a40055c903bab5d3114f4dfdd1fc01"
+    },
+    {
+      "path": "job.sh",
+      "bytes": 1091,
+      "sha256": "853cae5099b7cb520b9c63018de948f854f351ed85db24ca5e94498d1ed750cf"
+    },
+    {
+      "path": "logs/stderr.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "logs/stdout.log",
+      "bytes": 626,
+      "sha256": "9b441cbdb8bd33dc9e638d3cd2bf2aeadd4ab22a1132f346fd9e9b1bfff86fde"
+    },
+    {
+      "path": "outputs/recovery-allocation.json",
+      "bytes": 12700,
+      "sha256": "cd1276b61b9101cfba6ed1f1a70081ef182357370682d9fdc11bc696101d61e2"
+    },
+    {
+      "path": "outputs/recovery-audit.json",
+      "bytes": 474712,
+      "sha256": "ae59b9285618698ab61e8771ffebf0fb21e03efd00ccdea031558d6fba1d4cc0"
+    },
+    {
+      "path": "outputs/recovery-start.json",
+      "bytes": 90,
+      "sha256": "c0375827ee30d45afbb760a2541b03ab1ab465d83356bc04dc045b4f8d4bd6b9"
+    },
+    {
+      "path": "source-manifest.json",
+      "bytes": 11509,
+      "sha256": "0a4ef71917b5959a597ec544e965d1b28f798293bd338cfeb08f57d78f5caf13"
+    }
+  ],
+  "total_bytes": 500736
+}

@@ -1,0 +1,31 @@
+{
+  "schema": "prompt-cache-recovery-metadata-reconciliation-v1",
+  "matched": true,
+  "local_numerical_audit_executed": false,
+  "environment_mutated": false,
+  "recovery_run_id": "prompt-cache-saved-output-audit-recovery-20261029T182441Z-cc0993a51983",
+  "recovery_job_id": "8099804",
+  "frozen_source_files": 70,
+  "frozen_source_bytes": 734550,
+  "raw_files": 8,
+  "raw_bytes": 500736,
+  "original_source_files": 77,
+  "original_source_bytes": 1089939,
+  "original_raw_files": 524,
+  "original_raw_bytes": 328570064,
+  "original_provenance": {
+    "schema": "precision-allocation-reconciliation-v1",
+    "matched": true,
+    "run_id": "fixed-prompt-cache-pilot-20261029T143213Z-b93f5fc45e45",
+    "job_id": "8093515",
+    "files": 77,
+    "bootstrap_executed": false
+  },
+  "saved_scheduler_validated": true,
+  "terminal_scheduler_sha256": "a0a84f4fae2ae1ea4063601167829d2285b5f5fa69972ebeea9479c08d0f6698",
+  "deadline_s": 1620,
+  "elapsed_s": 25.91038590669632,
+  "original_failed_audit_preserved": true,
+  "raw_manifest_sha256": "edc69686506ca891c87a0120a2575ae8cc5d760c968dddf2e5f97c50bc988c74",
+  "reproducer_sha256": "a0e961150a880e814693aebc17d2c26c43af5644fc157b9536ddc411fbbfc8e2"
+}
