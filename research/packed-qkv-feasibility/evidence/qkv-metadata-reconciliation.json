@@ -1,0 +1,30 @@
+{
+  "schema": "qkv-metadata-reconciliation-v1",
+  "at_utc": "2026-10-30T20:39:20.439309+00:00",
+  "records": [
+    {
+      "schema": "packed-qkv-allocation-reconciliation-v1",
+      "matched": true,
+      "run_id": "packed-qkv-bf16-pilot-v1-20261030T172711Z-910e49a96046",
+      "job_id": "8135405",
+      "files": 130,
+      "bootstrap_executed": false
+    },
+    {
+      "schema": "packed-qkv-allocation-reconciliation-v1",
+      "matched": true,
+      "run_id": "packed-qkv-bf16-pilot-v1-20261030T172711Z-910e49a96046",
+      "job_id": "8135405",
+      "files": 130,
+      "bootstrap_executed": false
+    }
+  ],
+  "frozen_source_files": 130,
+  "frozen_source_bytes": 1758636,
+  "source_hashes_match_uploaded_manifest": true,
+  "raw_hashes_before_match": true,
+  "stage_failure_receipts_consistent": true,
+  "available_native_logs_recovered_and_hash_matched": true,
+  "numerical_audit_executed_locally": false,
+  "note": "Recovery certifies available published bytes only, not buffers lost on termination. Prolog CPUs1 retained; both captured scheduler records NumCPUs4 and typed A6000 allocation validated."
+}

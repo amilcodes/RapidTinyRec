@@ -1,0 +1,43 @@
+{
+  "schema": "qkv-inventory-schema-preparation-v1",
+  "at_utc": "2026-10-30T07:46:58.594066+00:00",
+  "remote_submission_ready": false,
+  "harness": "/Users/AmilAgrawal/Documents/Codex/2026-10-18/let/work/rapidtinyrec_prep/autoresearch_v2/packed_qkv_pilot",
+  "source_sha256": {
+    "rapidtinyrec/qkv_inventory.py": "0742ecf091aaa31a4d111c9e9928eec4ef3f0c03664b5dbd7faa933949d0c049",
+    "rapidtinyrec/qkv_inventory_schema.py": "8c06277a22dda3561ff7c276de71d57607c4dd8fa3a49d1c8b7b4f2dbc1ab911",
+    "release-config.json": "c2b98b1986dc97a0ee19f6216fc2f7a13f70a78954d5a5957b9d308e35ab56cd"
+  },
+  "tests": {
+    "new_checks": 4,
+    "passed": 4,
+    "skipped": 0,
+    "test_source": "/Users/AmilAgrawal/Documents/Codex/2026-10-18/let/work/rapidtinyrec_prep/autoresearch_v2/test_qkv_inventory_schema.py",
+    "test_sha256": "c7aa45da9717c20b478fa8127305bf38ac317f64bd7ab3be4c71187be96c2381",
+    "final_log": "/Users/AmilAgrawal/Documents/Codex/2026-10-18/let/outputs/autoresearch_v2/qkv-inventory-schema-tests-attempt2.txt",
+    "final_log_sha256": "9d5822f16af9b5fe0e4ad15771f3fd6c5f0262b26a6ebc83b6ec6bd52bf2d655",
+    "earlier_log": "/Users/AmilAgrawal/Documents/Codex/2026-10-18/let/outputs/autoresearch_v2/qkv-inventory-schema-tests-attempt1.txt",
+    "rerun_reason": "Schema changed to linear-time independent SID width calculation and original from_pretrained BF16 initialization; replaced all-BF16 tiny fixture with saved/reloaded tiny random model."
+  },
+  "review": {
+    "coverage": "Independent schema derives named parameters (including tied aliases) and registered buffers from config-only meta model; inputs/masks from declared users; all12 exact constraint paths/shapes from catalog. Observed inventory never supplies required paths/shapes.",
+    "source_config_sha256": "c2b98b1986dc97a0ee19f6216fc2f7a13f70a78954d5a5957b9d308e35ab56cd",
+    "parent_package_files_unchanged": 69,
+    "packing": "Complete all-layer six-slice proofs bound to original Q/K/V hashes; exact extra byte count, shape/order/offsets and disjoint storage; original snapshots must match across packing.",
+    "immutable": "Snapshot binds byte SHA256, shape/dtype/stride, logicalbytes, storageextent/offset/pointer, object identity/device; omission of any expected entry, extras and mutation rejected.",
+    "important_dtype_correction": "Source inspection and tiny from_pretrained test show rotary inv_freq remains FP32 with torch_dtype=BF16. Meta schema now uses BF16 default initialization without model.bfloat16(), preserving explicitly FP32 buffers. Previous tiny generation tests used model.bfloat16(); they are bounded synthetic evidence only.",
+    "complexity": "Catalog width derivation linear in SID count; tensor hashes use bounded row chunks. Logical inventory bytes count tied aliases; not unique residency/peak RSS.",
+    "limits": [
+      "No CUDA, released weights, latency or full protocol result",
+      "New inventory/proof modules are not yet wired into fourphase producer/allocated auditor",
+      "Actual output-view strides, native BF16 dispatch and generated-source/graph matching remain required",
+      "Buffer8120807 frozen99files unchanged; original reviewhold remains; no replacement"
+    ]
+  },
+  "next": [
+    "Implement distinct QKV fourphase producer using original BF16 precision_policy and fold_decode_attention(True), verbatim qkv_generation closure including GenerationConfig inside timer",
+    "Wire independent schema and beforepacking original snapshot; compare postsetup/measurement/profiles within installed packedcontext; runtimeverify176275456extra bytes",
+    "Integrate allocated audit and source/dispatch/graph checks, runner/deadline/config/guard; new tests for new integrated producer using from_pretrained-equivalent rotary buffer dtype",
+    "Keep next remote row diagnostic serialized after current buffer review"
+  ]
+}

@@ -1,0 +1,102 @@
+{
+  "schema": "qkv-filtered-independent-review-v1",
+  "at_utc": "2026-10-30T23:28:12.468738+00:00",
+  "job_id": "8144136",
+  "run_id": "packed-qkv-bf16-filtered-v1-20261030T212958Z-75bd90fa07ef",
+  "status": "CLOSED_ORIGINAL_ARM_CAPTURE_ATTESTATION_FAILURE_NO_CANDIDATE_MEASUREMENT",
+  "terminal": {
+    "state": "FAILED",
+    "exit_code": "1:0",
+    "elapsed": "00:16:20"
+  },
+  "successful_fetches": 1,
+  "raw_files": 80,
+  "raw_bytes": 15832306,
+  "source_files": 130,
+  "source_bytes": 1759614,
+  "metadata_reconciliation": "/Users/AmilAgrawal/Documents/Codex/2026-10-18/let/outputs/autoresearch_v2/qkv-filtered-metadata-reconciliation.json",
+  "failure": {
+    "phase": 0,
+    "arm": "original_bf16",
+    "stage": "replay setup capture attestation",
+    "exception": "ValueError: One completed actual static runner required",
+    "generation_elapsed_s": 951.1987768821418,
+    "generation_returncode": 1,
+    "generation_reason": "exited",
+    "generation_within_deadline": true,
+    "recovery_elapsed_s": 9.463320925831795,
+    "recovery_success": true,
+    "global_elapsed_s": 960.8507706485689,
+    "global_budget_s": 1620,
+    "global_within_budget": true,
+    "audit_skipped": true,
+    "phase_0_complete": false,
+    "later_phases_started": false
+  },
+  "compilation_evidence": {
+    "events": [
+      {
+        "index": 0,
+        "success": false,
+        "backend_compile_s": 71.3083205036819,
+        "error": "TensorifyScalarRestartAnalysis()",
+        "expected_restart": true
+      },
+      {
+        "index": 1,
+        "success": true,
+        "backend_compile_s": 162.65228402242064
+      },
+      {
+        "index": 2,
+        "success": false,
+        "backend_compile_s": 60.34779664129019,
+        "error": "TensorifyScalarRestartAnalysis()",
+        "expected_restart": true
+      },
+      {
+        "index": 3,
+        "success": true,
+        "backend_compile_s": 168.3499795421958
+      },
+      {
+        "index": 4,
+        "success": false,
+        "backend_compile_s": 66.32450686395168,
+        "error": "TensorifyScalarRestartAnalysis()",
+        "expected_restart": true
+      },
+      {
+        "index": 5,
+        "success": true,
+        "backend_compile_s": 173.95814399048686
+      }
+    ],
+    "successful_graphs": 3,
+    "expected_restarts": 3,
+    "backend_compile_total_s": 702.9410315640271,
+    "completed_direct_warmups": [
+      {
+        "variant": "direct",
+        "elapsed_s": 602.3818376176059,
+        "prompt_tokens": 76
+      }
+    ],
+    "completed_replay_warmups": 0
+  },
+  "conclusions": [
+    "Actual runtime capture evidence did not meet the required one-completed-static-runner gate. The exception alone does not distinguish missing, multiple or incomplete observations; no raw in-memory runner record survived for that distinction.",
+    "Original BF16 control reached replay setup and failed before candidate phases. No candidate latency, full-score equality, quality or numerical failure conclusion is available.",
+    "This run exited on a provenance/capture gate failure within deadline, rather than the earlier setup deadline. More compilation progressed, but these unpaired failed runs do not causally quantify the filter speedup or establish whole-protocol feasibility.",
+    "Three TensorifyScalarRestartAnalysis entries are expected restarts; three graphs completed. Setup timings are not production latency.",
+    "Two failed distinct feasibility interventions now park this QKV observation approach. No automatic retry, longer deadline, relaxed provenance or third allocation without new causal evidence and a fresh review. Continue independent normalization preparation."
+  ],
+  "execution_audit_passed": false,
+  "complete_protocol_certified": false,
+  "reviewed_full500_eligible": false,
+  "promotion": false,
+  "numerical_reaudit": false,
+  "raw_hashes_unchanged_after_review": true,
+  "mechanism_parked": true,
+  "next": "Continue independent request-block normalization preparation; QKV remains parked absent new causal evidence. Never poll/fetch/submit/audit/generate8144136 again."
+}

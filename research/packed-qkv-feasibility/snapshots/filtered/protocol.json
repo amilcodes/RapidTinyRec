@@ -1,0 +1,140 @@
+{
+  "schema": "packed-qkv-bf16-pilot-v1",
+  "status": "REVIEWED_DISTINCT_FILTERED_OBSERVER_FEASIBILITY_PILOT",
+  "created_at_utc": "2026-10-30T07:18:59.138617+00:00",
+  "hypothesis": "Replacing three independent native BF16 Q/K/V projections per layer by one packed native BF16 projection preserves all same-policy output bits and reduces end-to-end request cost.",
+  "falsifiers": [
+    "Any changed output/full-score bit, ancestry, request/repeat/retention invariance, input/weight/constraint bytes or score ownership",
+    "Missing packed native BF16 dispatch / changed original attention math or prefill optimization",
+    "Less than5percent median reduction or p95regression in any frozen stratum"
+  ],
+  "arms": [
+    "original_bf16",
+    "packed_qkv_bf16"
+  ],
+  "phases": [
+    {
+      "phase": 0,
+      "arm": "original_bf16",
+      "half": 0,
+      "reuse_disk_artifacts": false
+    },
+    {
+      "phase": 1,
+      "arm": "packed_qkv_bf16",
+      "half": 0,
+      "reuse_disk_artifacts": false
+    },
+    {
+      "phase": 2,
+      "arm": "packed_qkv_bf16",
+      "half": 1,
+      "reuse_disk_artifacts": true
+    },
+    {
+      "phase": 3,
+      "arm": "original_bf16",
+      "half": 1,
+      "reuse_disk_artifacts": true
+    }
+  ],
+  "parent": {
+    "run_id": "bf16-vs-tf32-full500-quality-20261029T001048Z-32acac83dd02",
+    "job_id": "8078579",
+    "source_commit": "94fc90f300ef3704576133f0992bc6b9d9902bb3",
+    "generation_source_sha256": "8431260f376ddbbc4cc95fe16d854590e7db5edbbb692ec66168e26a72b567f3",
+    "never_reexecute_parent_job": true
+  },
+  "objective": "Same original BF16 full-vocabulary normalization/EOSfallback/nativebeam50/lengthpenalty0/five ownedFP32scores. No buffer reuse, cache, wave or other component.",
+  "cohort_indices": [
+    1,
+    2,
+    6,
+    10
+  ],
+  "prompt_lengths": [
+    76,
+    121
+  ],
+  "repeats_per_half": 3,
+  "paired_observations": 24,
+  "independent_users": 4,
+  "ordering": "Individual requests, repeat-major; reverse within equal-length pairs on odd repeats; same matched sequence both arms. Untimed reverse traversal and retained outputs.",
+  "timing": {
+    "included": "Verbatim BF16 parent generate closure including percall GenerationConfig, freshprocessor/wrappers/prefill/input staging/reorder/HFscoreclones plus completionsync",
+    "excluded_equal": "Model load/tokenization/input/tableprep/compile/capture/warmup/outputextraction/hash/qualityaudit/profiling",
+    "candidate_setup": "Pack Q/K/V weights+biases and install instance forward context before compiler construction, outside timing; measure/report setup and extra memory; no online repacking."
+  },
+  "packed_layout": {
+    "layers": 28,
+    "input_width": 1536,
+    "output_widths": [
+      1536,
+      256,
+      256
+    ],
+    "weight_dtype": "bfloat16",
+    "bias_dtype": "bfloat16",
+    "extra_parameter_copy_bytes": 176275456,
+    "qkv_matrix_calls_before_per_forward": 84,
+    "after_per_forward": 28,
+    "latency_claim": false
+  },
+  "mandatory_checks": [
+    "Original parent control selectedscore/token/ancestry match frozen BF16 baseline for sameusers; new same-run original/candidate five FULL scorematrix bit hashes exact",
+    "Complete recursive namedparams/buffers/preparedinputs/all12constrainttensors inventory before/after setup,measurement,profiles; schema declares tensor paths and exact count/bytes; no arbitrary nonempty acceptance",
+    "Original Q/K/V parameters untouched; packed weights/bias bit equal exactconcatenation; pack storage disjoint originals; fullsource/runtimepackingfingerprints",
+    "Candidate disjoint Q/K/V column views cover all2048outputs with correct offsets/strides and nativeattention semantics; originalRotary/cache/attention/o_proj body unchanged",
+    "Fresh ABBA processes/compiler caches; finiteeightgraphs/bothlengths; no measurementcompilation/capture",
+    "Actualcaptured nativeBF16packed2048x50x1536projection corroborated bygeneratedwrappers and graph-correlatedkernels; originalMLPdispatchretained",
+    "Direct/replay/reverse/retainedoutputs exact; all5scores independentgraph/model/otherretainedoutputs; originalancestryownership",
+    "Allocatednumericalauditonly; source/allocation/jobid/schedulerbinding, globaldeadline/logrecoveryclosure and successfulfetchonce",
+    "Untimed actual eager requests for both lengths in both arms before compiler construction; candidate hooks record all28layers and5forwardsteps packed Q/K/V views, removed before compilation. Eager output fullscore/token/ancestry must match same-policy compiled/direct/replay evidence. Eager view proof is separate from compiled graph/generated-wrapper layout proof.",
+    "Three frozen storage inventories bind all expected immutable paths to prior byte/identity snapshots, every arena capacity and all8graph token/KV/logit owners; all5score owners disjoint from every supplied live immutable/graph owner and retained outputs. No hidden allocator/stream completeness claim."
+  ],
+  "gate": {
+    "minimum_median_reduction_percent": 5,
+    "p95_no_regression": true,
+    "all_overall_length_half_cross_strata": true,
+    "exact_engineering": true,
+    "full500_requires_review": true,
+    "promotion": false
+  },
+  "resources": {
+    "gpu": "regular RTX A6000",
+    "cpus": 4,
+    "memory_gb": 32,
+    "max_minutes": 30,
+    "concurrency": 1
+  },
+  "budget": {
+    "global_s": 1620,
+    "generation_max_s": 1500,
+    "audit_max_s": 120,
+    "status": "Second bounded setup-feasibility attempt after closed8135405. Generation1500/audit120/global1620 unchanged. Observer-filter contribution and actual compile/audit cost unmeasured; no completion guarantee. Preserve failure and park mechanism after second feasibility failure absent new causal evidence."
+  },
+  "remaining": [
+    "Actual allocated CUDA compatibility, full numerical exactness and native/runtime/map evidence",
+    "Actual generation/audit deadlines and terminal exit/log publication closure",
+    "Terminal fetch once and independent metadata/result review before any full500 decision"
+  ],
+  "remote_submission_ready": true,
+  "historical_control": {
+    "reference": "historical_bf16/reference.json",
+    "reference_sha256": "a2ca4057281f30a0c68daf54eb86a60647a71ed8a5c465ced6fe2e215e849464",
+    "scope": "Four immutable original BF16 primary rows; selected token/sequence/transition FP32 bits and ancestry. Historical fullscore matrices unavailable; require allfive fresh same-run fullscore hashes.",
+    "parent_numerical_reaudit": false
+  },
+  "experiment_revision": {
+    "id": "packed-qkv-bf16-filtered-v1",
+    "closed_parent_job": "8135405",
+    "mechanism": "Skip inert profile event types and function names before downstream observer dispatch; setup-wide observation and all recognized events retained.",
+    "hypothesis": "Reduced observer dispatch overhead may allow unchanged cold compilation and four phases within the existing generation budget.",
+    "limitations": [
+      "Global Python profile callback still receives every event.",
+      "Contribution to parent timeout and actual CUDA compile/audit feasibility remain unmeasured."
+    ],
+    "feasibility_attempt": 2,
+    "failure_policy": "Retain all failures; no automatic retry or deadline expansion. Park this observer-filter feasibility mechanism after a second failure absent new causal evidence."
+  }
+}

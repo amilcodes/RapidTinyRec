@@ -1,0 +1,44 @@
+{
+  "schema": "qkv-historical-bf16-reference-v1",
+  "job_id": "8078579",
+  "run_id": "bf16-vs-tf32-full500-quality-20261029T001048Z-32acac83dd02",
+  "parent_source": "94fc90f300ef3704576133f0992bc6b9d9902bb3",
+  "parent_protocol_sha256": "c2bd251a8b9c34e23d2a14a85979fea8778d175485241fb650e04188e99f17cc",
+  "review_sha256": "3848cadd43b7bba9bf049c53332a2381ffce96c4b9e89a53195850eb76c272a5",
+  "raw_manifest_sha256": "3ec7436b05e3f4241ee55fb5bef89dd41420e1629ec79e43adf1aa5f32f5f323",
+  "files": {
+    "manifest.json": {
+      "sha256": "4a7f21275637aa95844be8b762e2dabe4a4aae37665e34ee81d49f1baf8b4893",
+      "bytes": 754063,
+      "original_path": "outputs/phase_1/manifest.json"
+    },
+    "0001.json": {
+      "sha256": "016be67ee95a76000e3559218417534dc4e905b6cb40ecb6ab682b2694f17ebc",
+      "bytes": 19198,
+      "original_path": "outputs/phase_2/users/0_0001.json"
+    },
+    "0002.json": {
+      "sha256": "127d088442c37fa57ccdc3294f3fb3debeea211c74b115de679d86a9a6bca4e5",
+      "bytes": 19147,
+      "original_path": "outputs/phase_1/users/0_0002.json"
+    },
+    "0006.json": {
+      "sha256": "213337bae32f4e0cfc116ced788826a8edccbea809f3b0ed51f384c87028eb1c",
+      "bytes": 19248,
+      "original_path": "outputs/phase_1/users/0_0006.json"
+    },
+    "0010.json": {
+      "sha256": "f3964d1ad8495c738e855c3e51f96da08d6c582062fbcd8f91d399d7eb46ace0",
+      "bytes": 19140,
+      "original_path": "outputs/phase_1/users/0_0010.json"
+    }
+  },
+  "cohort_indices": [
+    1,
+    2,
+    6,
+    10
+  ],
+  "comparison_scope": "Original BF16 selected token ranks/sequence and transition FP32 bits/ancestry only. Old run did not record five full-score hashes. Fresh same-run QKV arms require all five full-score hashes.",
+  "numerical_audit_rerun": false
+}
