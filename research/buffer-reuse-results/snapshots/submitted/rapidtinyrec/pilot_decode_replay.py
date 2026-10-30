@@ -1,0 +1,211 @@
+"""Paired A6000 replay pilot, or explicit full-cohort confirmation after a pilot."""
+import argparse
+import collections
+import contextlib
+import functools
+import hashlib
+import itertools
+import json
+from pathlib import Path
+import time
+from unittest.mock import patch
+
+from . import benchmark as b
+from .compiled_forward import CompiledForward
+from .decode_replay import DecodeReplayPool
+from .gpu_constraints import GpuSidConstraintTables,GpuSidConstrainedLogitsProcessor
+
+torch=b.torch
+
+
+def select_users(reference_users, full_cohort):
+    assert len(reference_users)==500
+    lengths=sorted({u['prompt_tokens'] for u in reference_users})
+    if full_cohort:
+        assert len(lengths)==10
+        return reference_users,[next(u for u in reference_users if u['prompt_tokens']==n) for n in lengths]
+    users=[u for length in (lengths[0],lengths[-1])
+           for u in [x for x in reference_users if x['prompt_tokens']==length][:2]]
+    assert len(users)==4
+    return users,users
+
+
+def execution_order(variants, repeat, index, full_cohort):
+    if len(variants)==3:
+        return list(itertools.permutations(variants))[(index if full_cohort else repeat)%6]
+    return variants if repeat%2==0 else tuple(reversed(variants))
+
+
+def main():
+    ap=argparse.ArgumentParser(description=__doc__)
+    ap.add_argument('--release-root',type=Path,required=True)
+    ap.add_argument('--reference-results',type=Path,required=True)
+    ap.add_argument('--output-root',type=Path,required=True)
+    ap.add_argument('--repeats',type=int,default=8)
+    ap.add_argument('--profile',action='store_true',help='Profile only after all uninstrumented measurements')
+    ap.add_argument('--direct-reorder',action='store_true',help='Add a third, paired direct-KV-reorder variant')
+    ap.add_argument('--full-cohort',action='store_true',help='After a successful pilot: all 500 users, exactly one request per variant/user')
+    args=ap.parse_args()
+    if args.full_cohort:
+        assert args.direct_reorder and args.repeats==1
+    else:
+        assert args.repeats>=2 and args.repeats%2==0
+    assert not (args.profile and args.direct_reorder), 'Use the existing two-way diagnostic separately'
+    if args.direct_reorder and not args.full_cohort:
+        assert args.repeats%6==0, 'Balance all six three-way execution orders'
+    variants=('compiled_gqa','replay','direct_replay') if args.direct_reorder else ('compiled_gqa','replay')
+    assert torch.cuda.is_available() and torch.cuda.device_count()==1
+    assert torch.cuda.get_device_name(0)=='NVIDIA RTX A6000'
+    torch.manual_seed(42);torch.set_num_threads(4)
+    torch.backends.cuda.matmul.allow_tf32=False
+    torch.backends.cudnn.allow_tf32=False
+    expected=json.loads((b.ROOT/'expected.json').read_text())
+    reference=json.loads((args.reference_results/'manifest.json').read_text())
+    assert reference['experiment']=='gqa_three_way' and reference['dtype']=='float32'
+    content={k:v for k,v in reference.items() if k!='manifest_sha256'}
+    assert hashlib.sha256(json.dumps(content,sort_keys=True).encode()).hexdigest()==reference['manifest_sha256']
+    assert hashlib.sha256(json.dumps(reference['users'],sort_keys=True).encode()).hexdigest()==expected['users_sha256']
+    for name,want in expected['release_sha256'].items():assert b.digest(args.release_root/name)==want,name
+    lengths=sorted({u['prompt_tokens'] for u in reference['users']})
+    users,warm_users=select_users(reference['users'],args.full_cohort)
+    out=args.output_root/('decode_replay_500' if args.full_cohort else 'decode_replay_pilot')
+    out.mkdir(parents=True,exist_ok=True)
+    assert not (out/'manifest.json').exists(),'Use a new output directory'
+    if args.full_cohort:
+        (out/'users').mkdir()
+    tok=b.AutoTokenizer.from_pretrained(args.release_root/'Office_ckpt',local_files_only=True)
+    tok.pad_token=tok.eos_token;tok.padding_side='left'
+    constraints=collections.defaultdict(set)
+    for line in (args.release_root/'Amazon/info/Office_Products_5_2016-10-2018-11.txt').read_text().splitlines():
+        ids=tok('### Response:\n'+line.split('\t')[0].strip()+'\n').input_ids+[tok.eos_token_id]
+        assert all(u['prompt_token_ids'][-3:]==ids[:3] for u in users)
+        for j in range(3,len(ids)):constraints[tuple(ids[:j] if j==3 else ids[3:j])].add(ids[j])
+    tables=GpuSidConstraintTables({k:list(v) for k,v in constraints.items()},users[0]['prompt_token_ids'][-3:],198,tok.eos_token_id,'cuda')
+    model=b.AutoModelForCausalLM.from_pretrained(args.release_root/'Office_ckpt',torch_dtype=torch.float32,
+        local_files_only=True,attn_implementation='sdpa').to('cuda').eval()
+    assert model.config.model_type=='qwen2' and not model.model.has_sliding_layers
+    assert set(model.config.layer_types)=={'full_attention'}
+    model.config.pad_token_id=tok.eos_token_id;model.config.eos_token_id=tok.eos_token_id;model.config.bos_token_id=tok.bos_token_id
+    assert all(p.dtype==torch.float32 for p in model.parameters())
+    inputs={u['cohort_index']:torch.tensor([u['prompt_token_ids']],device='cuda') for u in users}
+    masks={i:torch.ones_like(x) for i,x in inputs.items()}
+    manifest={'experiment':'decode_replay_500' if args.full_cohort else 'decode_replay_pilot',
+        'scope':'Frozen 500-user cohort, one request per variant/user.' if args.full_cohort else 'Four representative users, repeated trials; not a 500-user estimate.',
+        'users':users,'dtype':'float32','tf32':False,'hardware':torch.cuda.get_device_name(0),
+        'cohort_sha256':expected['users_sha256'],'reference_manifest_sha256':reference['manifest_sha256'],
+        'versions':{n:b.importlib.metadata.version(n) for n in ['torch','transformers','tokenizers']},
+        'profile_after_measurement':args.profile,
+        'variants':variants,
+        'sha256':{n:b.digest(b.ROOT/n) for n in ['pilot_decode_replay.py','decode_replay.py','compiled_forward.py','shared_prefill.py','gpu_constraints.py','expected.json']+
+            (['profile_decode_replay.py','profile_shared.py'] if args.profile else [])+
+            (['direct_reorder.py'] if args.direct_reorder else [])},
+        'protocol':'FP32 beam50. Same compiled GQA forward for all variants. CUDA synchronization around each request. Prefill, staging copies, graph replay, constraints and beam cache reordering included. Compilation, capture, warmup and output extraction excluded. Balanced two-way alternation or all six three-way orders.'}
+    b.save(out/'manifest.json',manifest)
+    compiler=CompiledForward(model,out,b.announce)
+    pool=DecodeReplayPool(compiler.compiled,max_graphs=40 if args.full_cohort else 8)
+    if args.direct_reorder:
+        from .direct_reorder import ReorderIntoReplay
+        direct=ReorderIntoReplay(pool)
+    else:
+        direct=None
+
+    @torch.inference_mode()
+    def generate(user,replay,direct_reorder=False):
+        calls=0
+        @functools.wraps(compiler.eager)
+        def forward(*a,**kw):
+            nonlocal calls
+            assert not a
+            step=calls;calls+=1
+            ids,cache=kw['input_ids'],kw['past_key_values']
+            assert ids.shape==((1,user['prompt_tokens']) if step==0 else (50,1))
+            assert cache.get_seq_length()==(0 if step==0 else user['prompt_tokens']+step-1)
+            kw['attention_mask']={'full_attention':None}
+            return pool(**kw) if replay and step else compiler.compiled(**kw)
+        cfg=b.GenerationConfig(max_new_tokens=8,length_penalty=0.,num_beams=50,num_return_sequences=50,
+            pad_token_id=tok.eos_token_id,eos_token_id=tok.eos_token_id,bos_token_id=tok.bos_token_id,
+            do_sample=False,top_k=None,top_p=None,use_cache=True)
+        with patch.object(model,'forward',forward),b.PrefillOnce(model,50), \
+                (direct.install(model) if direct_reorder else contextlib.nullcontext()):
+            output=model.generate(inputs[user['cohort_index']],attention_mask=masks[user['cohort_index']],
+                generation_config=cfg,return_dict_in_generate=True,output_scores=True,
+                logits_processor=b.LogitsProcessorList([GpuSidConstrainedLogitsProcessor(tables)]))
+        assert calls==5
+        return output
+
+    def unpack(output,user):
+        return {'token_ids':output.sequences[:,user['prompt_tokens']:].cpu().tolist(),
+            'sequence_logp':output.sequences_scores.float().cpu().tolist(),
+            'transition_logp':model.compute_transition_scores(output.sequences,output.scores,output.beam_indices,normalize_logits=False).float().cpu().tolist()}
+
+    setup_started=time.perf_counter()
+    warm_outputs={}
+    for user in warm_users:
+        for variant in variants:
+            torch.cuda.synchronize();started=time.perf_counter()
+            output=generate(user,variant!='compiled_gqa',variant=='direct_replay')
+            torch.cuda.synchronize();elapsed=time.perf_counter()-started
+            warm_outputs[(user['cohort_index'],variant)]=unpack(output,user)
+            del output
+            compiler.add_warmup({'variant':variant,'elapsed_s':elapsed,'prompt_tokens':user['prompt_tokens']})
+    for user in warm_users:
+        for variant in variants:
+            output=generate(user,variant!='compiled_gqa',variant=='direct_replay')
+            assert unpack(output,user)==warm_outputs[(user['cohort_index'],variant)],'Warmup instability'
+            del output
+    torch.cuda.synchronize()
+    # Full-cohort warmup captures every exact length before measurement. Keep
+    # explicit headroom on the 48GiB A6000; an overflow is a failed experiment.
+    assert torch.cuda.memory_allocated() < 40*1024**3
+    assert torch.cuda.memory_reserved() < 46*1024**3
+    pool.freeze();compiler.freeze()
+    b.save(out/'setup.json',{'combined_setup_and_warmup_s':time.perf_counter()-setup_started,'replay':pool.report(),
+        'direct_reorder':direct.report() if direct else None,
+        'warmup_cohort_indices':[u['cohort_index'] for u in warm_users],
+        'allocated_bytes':torch.cuda.memory_allocated(),'reserved_bytes':torch.cuda.memory_reserved(),
+        'note':'Replay preparation includes warmup calls that can compile. Timings are nested and must not be added. All setup is excluded from measured requests.'})
+    rows=[]
+    for repeat in range(args.repeats):
+        for index,user in enumerate(users):
+            order=execution_order(variants,repeat,index,args.full_cohort)
+            runs={}
+            for variant in order:
+                torch.cuda.synchronize();started=time.perf_counter()
+                output=generate(user,variant!='compiled_gqa',variant=='direct_replay')
+                torch.cuda.synchronize();elapsed=time.perf_counter()-started
+                raw=unpack(output,user);del output
+                if (user['cohort_index'],variant) in warm_outputs:
+                    assert raw==warm_outputs[(user['cohort_index'],variant)],'Replay or control drifted'
+                runs[variant]={'elapsed_s':elapsed,**raw}
+            old=json.loads((args.reference_results/'users'/f"{user['cohort_index']:04d}.json").read_text())
+            row={'repeat':repeat,'cohort_index':user['cohort_index'],'prompt_tokens':user['prompt_tokens'],
+                'order':order,'runs':runs,'comparison':b.compare(runs['compiled_gqa'],runs['replay']),
+                'comparisons':{v:b.compare(runs['compiled_gqa'],runs[v]) for v in variants[1:]},
+                'historical_control':b.compare(old['runs']['compiled_gqa'],runs['compiled_gqa'])}
+            rows.append(row)
+            if args.full_cohort:
+                b.save(out/'users'/f"{user['cohort_index']:04d}.json",row)
+            else:
+                b.save(out/'requests.json',rows)
+            b.announce({'stage':'measured','repeat':repeat,'cohort_index':user['cohort_index'],
+                'rankings_equal':row['comparison']['ranked_tokens_equal'],
+                'scores_equal':row['comparison']['sequence_scores_equal_in_rank_order']})
+    if args.full_cohort:
+        b.save(out/'requests.json',rows)
+    compiler.finish()
+    summary={'complete':True,'scope':manifest['scope'],'measured_pairs':len(rows),
+        'latency':{v:b.distribution([r['runs'][v]['elapsed_s'] for r in rows]) for v in variants},
+        'matching_rank_lists':sum(r['comparison']['ranked_tokens_equal'] for r in rows),
+        'matching_sequence_vectors':sum(r['comparison']['sequence_scores_equal_in_rank_order'] for r in rows),
+        'matching_transition_arrays':sum(r['comparison']['transition_scores_equal_in_rank_order'] for r in rows),
+        'replay':pool.report(),'allocated_bytes':torch.cuda.memory_allocated(),'reserved_bytes':torch.cuda.memory_reserved(),
+        'direct_reorder':direct.report() if direct else None,
+        'latency_by_length':{str(length):{v:b.distribution([r['runs'][v]['elapsed_s'] for r in rows if r['prompt_tokens']==length])
+            for v in variants} for length in sorted({u['prompt_tokens'] for u in users})}}
+    b.save(out/'summary.json',summary);b.announce(summary)
+    if args.profile:
+        from .profile_decode_replay import profile
+        profile(model,compiler,pool,users,generate,unpack,warm_outputs,out)
+
+
+if __name__=='__main__':main()

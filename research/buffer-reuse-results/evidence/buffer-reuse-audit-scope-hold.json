@@ -1,0 +1,12 @@
+{
+  "schema": "buffer-reuse-post-submission-audit-scope-review-v1",
+  "at_utc": "2026-10-30T07:05:18.352428+00:00",
+  "job_id": "8120807",
+  "submitted_source_preserved": true,
+  "finding": "immutable_inventory enumerates direct table tensors but omits tables[1,2] and strides[1,2,3]. Synthetic fixture test did not expose the nested-container omission.",
+  "omitted_tensor_count": 5,
+  "impact": "Do not certify complete table byte immutability or full protocol completion even if allocated auditor execution_audit_passed/eligible_for_full500 are true. Record their raw values but final reviewed full500 eligibility false. Same-run full-score/rank/timing evidence may still be informative, subject to other gates.",
+  "reviewed_full500_eligible": false,
+  "automatic_replacement": false,
+  "next": "Prepare recursive inventory and regression tests outside frozen submitted harness; preserve original job/source/results and do not modify or resubmit this run."
+}

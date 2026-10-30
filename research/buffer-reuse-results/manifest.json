@@ -1,0 +1,549 @@
+{
+  "schema": "retrospective-research-publication-v1",
+  "published_at_utc": "2026-10-31T06:25:37.656278+00:00",
+  "evidence_date": "2026-10-30T07:59:18.044877+00:00",
+  "base_commit": "51b213413101a86a592208018870d9c7e25a590a",
+  "snapshot_counts": {
+    "submitted": 99
+  },
+  "raw_archive_included": false,
+  "numerical_reaudit": false,
+  "promotion": false,
+  "files": {
+    "README.md": {
+      "bytes": 2991,
+      "sha256": "200a02715ba19d51f8d2e57549d109ff5f33d699b08f612232fa8bb6448c4014",
+      "origin": "publication-generated"
+    },
+    "evidence/buffer-reuse-adapter-preparation.json": {
+      "bytes": 3101,
+      "sha256": "6acc144d2366b408fcfd8cba077ec32180bb9d05d610d2458f74d09d4d4ae59d",
+      "origin": "outputs/autoresearch_v2/buffer-reuse-adapter-preparation.json"
+    },
+    "evidence/buffer-reuse-audit-scope-hold.json": {
+      "bytes": 963,
+      "sha256": "2234270aedf2f71a098d547e44c676382b9c83af7173a0b8d3740430c1c5a1f2",
+      "origin": "outputs/autoresearch_v2/buffer-reuse-audit-scope-hold.json"
+    },
+    "evidence/buffer-reuse-independent-review.json": {
+      "bytes": 48802,
+      "sha256": "cefe598a4eeadfb32fe73ba23940103528aab90f9edc3ea05b9fa1f8edf57ea9",
+      "origin": "outputs/autoresearch_v2/buffer-reuse-independent-review.json"
+    },
+    "evidence/buffer-reuse-metadata-reconciliation.json": {
+      "bytes": 1958,
+      "sha256": "013763f11ed55597de2f4c454c8973c648d36732f092e037e0fe54d688ad31cb",
+      "origin": "outputs/autoresearch_v2/buffer-reuse-metadata-reconciliation.json"
+    },
+    "evidence/buffer-reuse-source-lock.json": {
+      "bytes": 10866,
+      "sha256": "6c98a2f514c29ce05753ae0f5fe8182446e9d7f0bd5ed6840d9c142b726a4f08",
+      "origin": "outputs/autoresearch_v2/buffer-reuse-source-lock.json"
+    },
+    "evidence/buffer-reuse-terminal-raw-manifest.json": {
+      "bytes": 107284,
+      "sha256": "b83097163f9d5c7a1a34fdedc2a73b1ad8e8e3f68112c6509a3df4d8e41140ad",
+      "origin": "outputs/autoresearch_v2/buffer-reuse-terminal-raw-manifest.json"
+    },
+    "snapshots/submitted/baseline-raw-manifest.json": {
+      "bytes": 450439,
+      "sha256": "f9056b9234ab75f3710771f6b4c009f482f13a88f32ab8706997eafd0cb50c44",
+      "origin": "work/rapidtinyrec_prep/autoresearch_v2/buffer_reuse_pilot/frozen/baseline-raw-manifest.json"
+    },
+    "snapshots/submitted/jobs/buffer-reuse-pilot.sh": {
+      "bytes": 1468,
+      "sha256": "63b23cfb92258d066a1991ce3df4b83c2ed156bc7239874e1e9e2746a7761613",
+      "origin": "work/rapidtinyrec_prep/autoresearch_v2/buffer_reuse_pilot/frozen/jobs/buffer-reuse-pilot.sh"
+    },
+    "snapshots/submitted/oscar.json": {
+      "bytes": 870,
+      "sha256": "8db87f423694b80b915426163c87a3c774627580d07507003685277e9cd87c64",
+      "origin": "work/rapidtinyrec_prep/autoresearch_v2/buffer_reuse_pilot/frozen/oscar.json"
+    },
+    "snapshots/submitted/parent-source-lock.json": {
+      "bytes": 8035,
+      "sha256": "f8e0292d87155bd2439af2f3c3e5fe0eec73c6c998013d50710d5bee871353b8",
+      "origin": "work/rapidtinyrec_prep/autoresearch_v2/buffer_reuse_pilot/frozen/parent-source-lock.json"
+    },
+    "snapshots/submitted/protocol.json": {
+      "bytes": 5241,
+      "sha256": "f484617583ff74b99bd1949b857563af9c395cf0f87229a13ae02f86d4d1782c",
+      "origin": "work/rapidtinyrec_prep/autoresearch_v2/buffer_reuse_pilot/frozen/protocol.json"
+    },
+    "snapshots/submitted/rapidtinyrec/__init__.py": {
+      "bytes": 96,
+      "sha256": "b199f072828413c59c95580d6aa7f16b01636f44653870c1d4a86da3b197c762",
+      "origin": "work/rapidtinyrec_prep/autoresearch_v2/buffer_reuse_pilot/frozen/rapidtinyrec/__init__.py"
+    },
+    "snapshots/submitted/rapidtinyrec/audit.py": {
+      "bytes": 5184,
+      "sha256": "baadb1b535f9bcfe3020c7bd7ba4156398e93e9077a0d094f029406b68e10ed7",
+      "origin": "work/rapidtinyrec_prep/autoresearch_v2/buffer_reuse_pilot/frozen/rapidtinyrec/audit.py"
+    },
+    "snapshots/submitted/rapidtinyrec/audit_beam_wave.py": {
+      "bytes": 17000,
+      "sha256": "b39d66f8cc522f4302eef06410dfffed918ab515234d53b980079ed9375fcf5b",
+      "origin": "work/rapidtinyrec_prep/autoresearch_v2/buffer_reuse_pilot/frozen/rapidtinyrec/audit_beam_wave.py"
+    },
+    "snapshots/submitted/rapidtinyrec/audit_beam_wave_dispatch.py": {
+      "bytes": 4342,
+      "sha256": "239d14d797dcd7812e07442590890894f4225e921ed174a311c9cde750779fb0",
+      "origin": "work/rapidtinyrec_prep/autoresearch_v2/buffer_reuse_pilot/frozen/rapidtinyrec/audit_beam_wave_dispatch.py"
+    },
+    "snapshots/submitted/rapidtinyrec/audit_beam_wave_outputs.py": {
+      "bytes": 5593,
+      "sha256": "0c1795e860286c7e6d6f862e2c0725b327fcdf70231cc937da285dbb18ccd974",
+      "origin": "work/rapidtinyrec_prep/autoresearch_v2/buffer_reuse_pilot/frozen/rapidtinyrec/audit_beam_wave_outputs.py"
+    },
+    "snapshots/submitted/rapidtinyrec/audit_buffer_reuse.py": {
+      "bytes": 17973,
+      "sha256": "b3a4f941548cb5efc3c26afe0b1ed97e2e5073295d525c5de8372f7b2b7f0ec9",
+      "origin": "work/rapidtinyrec_prep/autoresearch_v2/buffer_reuse_pilot/frozen/rapidtinyrec/audit_buffer_reuse.py"
+    },
+    "snapshots/submitted/rapidtinyrec/audit_buffer_reuse_dispatch.py": {
+      "bytes": 4319,
+      "sha256": "733c0c9089017b4119511ac0547d2913139f7188ccba1b39fe8889737892de13",
+      "origin": "work/rapidtinyrec_prep/autoresearch_v2/buffer_reuse_pilot/frozen/rapidtinyrec/audit_buffer_reuse_dispatch.py"
+    },
+    "snapshots/submitted/rapidtinyrec/audit_buffer_reuse_outputs.py": {
+      "bytes": 1827,
+      "sha256": "e454e0a6785ef5ea830928bf41a4e16723da26ac6ca500ad1e29cb4b48e1d412",
+      "origin": "work/rapidtinyrec_prep/autoresearch_v2/buffer_reuse_pilot/frozen/rapidtinyrec/audit_buffer_reuse_outputs.py"
+    },
+    "snapshots/submitted/rapidtinyrec/audit_decode_pilot.py": {
+      "bytes": 13920,
+      "sha256": "3f90d7ebdd8c39ea1d8a013f261ca4439ea9c5b759160bd74c987743655d8399",
+      "origin": "work/rapidtinyrec_prep/autoresearch_v2/buffer_reuse_pilot/frozen/rapidtinyrec/audit_decode_pilot.py"
+    },
+    "snapshots/submitted/rapidtinyrec/audit_folded_prefix.py": {
+      "bytes": 13064,
+      "sha256": "9258af9fdc59d847fe830bed7d792e56c4845b148228bc7b0d62d138366effe4",
+      "origin": "work/rapidtinyrec_prep/autoresearch_v2/buffer_reuse_pilot/frozen/rapidtinyrec/audit_folded_prefix.py"
+    },
+    "snapshots/submitted/rapidtinyrec/audit_folded_profile.py": {
+      "bytes": 14781,
+      "sha256": "3fd09798db667990eadca66809bfae8dbd19064615793095411f193df1619495",
+      "origin": "work/rapidtinyrec_prep/autoresearch_v2/buffer_reuse_pilot/frozen/rapidtinyrec/audit_folded_profile.py"
+    },
+    "snapshots/submitted/rapidtinyrec/audit_input_arena.py": {
+      "bytes": 9379,
+      "sha256": "a351e222eead05acdc762b5a64791dd579d3c50e4b8b55a79f4d1ad70eb6e983",
+      "origin": "work/rapidtinyrec_prep/autoresearch_v2/buffer_reuse_pilot/frozen/rapidtinyrec/audit_input_arena.py"
+    },
+    "snapshots/submitted/rapidtinyrec/audit_precision.py": {
+      "bytes": 26010,
+      "sha256": "47f86da7d5961d25db9c6a758cef9b2775a1b4ec2203eebd2799de0e03d038b9",
+      "origin": "work/rapidtinyrec_prep/autoresearch_v2/buffer_reuse_pilot/frozen/rapidtinyrec/audit_precision.py"
+    },
+    "snapshots/submitted/rapidtinyrec/audit_precision_dispatch.py": {
+      "bytes": 3648,
+      "sha256": "4e932600a261c302f9028430c0f8a6735e3e8fd443195baf449032759741999e",
+      "origin": "work/rapidtinyrec_prep/autoresearch_v2/buffer_reuse_pilot/frozen/rapidtinyrec/audit_precision_dispatch.py"
+    },
+    "snapshots/submitted/rapidtinyrec/audit_precision_full500.py": {
+      "bytes": 4836,
+      "sha256": "cc7fef5679e39392570fc9f63c06178e0d00c56526dc530bba62e4241389ca60",
+      "origin": "work/rapidtinyrec_prep/autoresearch_v2/buffer_reuse_pilot/frozen/rapidtinyrec/audit_precision_full500.py"
+    },
+    "snapshots/submitted/rapidtinyrec/audit_precision_paired_staged.py": {
+      "bytes": 4112,
+      "sha256": "1496339d5bab5e03559aaaf999ed552f1f93b51d6c24f13d3ada7a4653fa4c33",
+      "origin": "work/rapidtinyrec_prep/autoresearch_v2/buffer_reuse_pilot/frozen/rapidtinyrec/audit_precision_paired_staged.py"
+    },
+    "snapshots/submitted/rapidtinyrec/audit_precision_setup.py": {
+      "bytes": 8616,
+      "sha256": "723171112d5efc1604aa9226e8653ff94790ecaf68cc305e9e134f860cb9e482",
+      "origin": "work/rapidtinyrec_prep/autoresearch_v2/buffer_reuse_pilot/frozen/rapidtinyrec/audit_precision_setup.py"
+    },
+    "snapshots/submitted/rapidtinyrec/audit_prefix_profile.py": {
+      "bytes": 12793,
+      "sha256": "dd95bd1e80598df70d05e6ae70349cf9dc7febb8516eca21a146e90b99c078e2",
+      "origin": "work/rapidtinyrec_prep/autoresearch_v2/buffer_reuse_pilot/frozen/rapidtinyrec/audit_prefix_profile.py"
+    },
+    "snapshots/submitted/rapidtinyrec/audit_replay_profile.py": {
+      "bytes": 7338,
+      "sha256": "df1f67d02f0c8a3ef8ae8022cf4106b45bf3e3f792b81631748581a450f6b39f",
+      "origin": "work/rapidtinyrec_prep/autoresearch_v2/buffer_reuse_pilot/frozen/rapidtinyrec/audit_replay_profile.py"
+    },
+    "snapshots/submitted/rapidtinyrec/audit_results.py": {
+      "bytes": 8370,
+      "sha256": "0cce231b214cfcd38e888286eadab7592ca0606e10a6c552352a686602d001a4",
+      "origin": "work/rapidtinyrec_prep/autoresearch_v2/buffer_reuse_pilot/frozen/rapidtinyrec/audit_results.py"
+    },
+    "snapshots/submitted/rapidtinyrec/audit_shared_prefix.py": {
+      "bytes": 12298,
+      "sha256": "2f5908f94e21b8d93ef44aaaea0bd393ddf0898f27a1c1747f4ec5cd15b1b88c",
+      "origin": "work/rapidtinyrec_prep/autoresearch_v2/buffer_reuse_pilot/frozen/rapidtinyrec/audit_shared_prefix.py"
+    },
+    "snapshots/submitted/rapidtinyrec/beam_wave.py": {
+      "bytes": 7758,
+      "sha256": "08d75e87be7d85c89569b37732e29faeddcd9619b55b9b899ee5af8e3c2dee83",
+      "origin": "work/rapidtinyrec_prep/autoresearch_v2/buffer_reuse_pilot/frozen/rapidtinyrec/beam_wave.py"
+    },
+    "snapshots/submitted/rapidtinyrec/beam_wave_allocation.py": {
+      "bytes": 7442,
+      "sha256": "e8b88279b3483b212d819ba8030c41dde6b714090e9057df9190e805dd9a633c",
+      "origin": "work/rapidtinyrec_prep/autoresearch_v2/buffer_reuse_pilot/frozen/rapidtinyrec/beam_wave_allocation.py"
+    },
+    "snapshots/submitted/rapidtinyrec/beam_wave_arena.py": {
+      "bytes": 8032,
+      "sha256": "cfa8f6e30cc3ee4886d455c09e8b5faa689dbd0b8c82f3a0c2040278fa67eda6",
+      "origin": "work/rapidtinyrec_prep/autoresearch_v2/buffer_reuse_pilot/frozen/rapidtinyrec/beam_wave_arena.py"
+    },
+    "snapshots/submitted/rapidtinyrec/beam_wave_generation.py": {
+      "bytes": 5292,
+      "sha256": "a7166c40ded2d29d1f6be8c0e455f26327d2dcc2f4324ada358bbecd6fc6fdc5",
+      "origin": "work/rapidtinyrec_prep/autoresearch_v2/buffer_reuse_pilot/frozen/rapidtinyrec/beam_wave_generation.py"
+    },
+    "snapshots/submitted/rapidtinyrec/beam_wave_measurement.py": {
+      "bytes": 1759,
+      "sha256": "b22b65a2b79933fb1186922d9bfd15b895f25cf6d875f4c68a2d1551872922b1",
+      "origin": "work/rapidtinyrec_prep/autoresearch_v2/buffer_reuse_pilot/frozen/rapidtinyrec/beam_wave_measurement.py"
+    },
+    "snapshots/submitted/rapidtinyrec/beam_wave_outputs.py": {
+      "bytes": 3665,
+      "sha256": "c3ac2f24e0275eae052fb8a197ae4ef0f56cb018981f4f2d93ca2d540a77e0cf",
+      "origin": "work/rapidtinyrec_prep/autoresearch_v2/buffer_reuse_pilot/frozen/rapidtinyrec/beam_wave_outputs.py"
+    },
+    "snapshots/submitted/rapidtinyrec/beam_wave_protocol.py": {
+      "bytes": 6604,
+      "sha256": "b33f4a623c1ff36014cd8a7f86b135243ccaa83c53880af6bd34fbc5ee4fa032",
+      "origin": "work/rapidtinyrec_prep/autoresearch_v2/buffer_reuse_pilot/frozen/rapidtinyrec/beam_wave_protocol.py"
+    },
+    "snapshots/submitted/rapidtinyrec/beam_wave_replay.py": {
+      "bytes": 5507,
+      "sha256": "d6512824c105347b680da386d2a2bd7a9e4457c93e1720ce3b361827e71c25f5",
+      "origin": "work/rapidtinyrec_prep/autoresearch_v2/buffer_reuse_pilot/frozen/rapidtinyrec/beam_wave_replay.py"
+    },
+    "snapshots/submitted/rapidtinyrec/beam_wave_runner.py": {
+      "bytes": 9430,
+      "sha256": "39223b8173e6ba03631852847d0f4eeb132bb0613de61dfec82bdc818355851a",
+      "origin": "work/rapidtinyrec_prep/autoresearch_v2/buffer_reuse_pilot/frozen/rapidtinyrec/beam_wave_runner.py"
+    },
+    "snapshots/submitted/rapidtinyrec/beam_wave_storage.py": {
+      "bytes": 7342,
+      "sha256": "712d0d671ed0e5da847481741aa6ba04370f4c7c306b009f2120e177d4feaf95",
+      "origin": "work/rapidtinyrec_prep/autoresearch_v2/buffer_reuse_pilot/frozen/rapidtinyrec/beam_wave_storage.py"
+    },
+    "snapshots/submitted/rapidtinyrec/benchmark.py": {
+      "bytes": 23663,
+      "sha256": "1a90a2440a6b01926779a6582c19b3d1f4ea436375c6dfb7e6b69b7f8aa614c6",
+      "origin": "work/rapidtinyrec_prep/autoresearch_v2/buffer_reuse_pilot/frozen/rapidtinyrec/benchmark.py"
+    },
+    "snapshots/submitted/rapidtinyrec/benchmark_beam_wave.py": {
+      "bytes": 13704,
+      "sha256": "bb9f782ec16540defcb3609d9a349aeeddaa4ec17648b5c6bce8fdcb1b9284d5",
+      "origin": "work/rapidtinyrec_prep/autoresearch_v2/buffer_reuse_pilot/frozen/rapidtinyrec/benchmark_beam_wave.py"
+    },
+    "snapshots/submitted/rapidtinyrec/benchmark_buffer_reuse.py": {
+      "bytes": 14259,
+      "sha256": "bce5b7de13ad79093821348894d4020f35bd5a783fefbf6401bcb15d41db6e19",
+      "origin": "work/rapidtinyrec_prep/autoresearch_v2/buffer_reuse_pilot/frozen/rapidtinyrec/benchmark_buffer_reuse.py"
+    },
+    "snapshots/submitted/rapidtinyrec/benchmark_folded_prefix.py": {
+      "bytes": 13257,
+      "sha256": "47925842d794afa854f3f6b0e12c47656346d61eaec1b719d327e9776c170190",
+      "origin": "work/rapidtinyrec_prep/autoresearch_v2/buffer_reuse_pilot/frozen/rapidtinyrec/benchmark_folded_prefix.py"
+    },
+    "snapshots/submitted/rapidtinyrec/benchmark_folded_profile.py": {
+      "bytes": 11937,
+      "sha256": "68bd51c52c302794b534825b26072031390526e1de41b50382fe2c39e4fd1377",
+      "origin": "work/rapidtinyrec_prep/autoresearch_v2/buffer_reuse_pilot/frozen/rapidtinyrec/benchmark_folded_profile.py"
+    },
+    "snapshots/submitted/rapidtinyrec/benchmark_gqa.py": {
+      "bytes": 15576,
+      "sha256": "5175532144b38989138c9a87c003de9189800184ec642383971e05b56fbb8ab0",
+      "origin": "work/rapidtinyrec_prep/autoresearch_v2/buffer_reuse_pilot/frozen/rapidtinyrec/benchmark_gqa.py"
+    },
+    "snapshots/submitted/rapidtinyrec/benchmark_input_arena.py": {
+      "bytes": 10495,
+      "sha256": "4666df2dce59a13f81a5d73b105400c89b70cd45975583d4a091a4c50aa5a624",
+      "origin": "work/rapidtinyrec_prep/autoresearch_v2/buffer_reuse_pilot/frozen/rapidtinyrec/benchmark_input_arena.py"
+    },
+    "snapshots/submitted/rapidtinyrec/benchmark_precision.py": {
+      "bytes": 21327,
+      "sha256": "84b3855a20c02de94b9742ef680ba26f763f9828cab579ad2d76bf8a209885a8",
+      "origin": "work/rapidtinyrec_prep/autoresearch_v2/buffer_reuse_pilot/frozen/rapidtinyrec/benchmark_precision.py"
+    },
+    "snapshots/submitted/rapidtinyrec/benchmark_shared_prefix.py": {
+      "bytes": 13722,
+      "sha256": "ac8a36a50f80f04a2d5bb3013b0d79009baa0c7e9fbfec5d769252a6a7260f4f",
+      "origin": "work/rapidtinyrec_prep/autoresearch_v2/buffer_reuse_pilot/frozen/rapidtinyrec/benchmark_shared_prefix.py"
+    },
+    "snapshots/submitted/rapidtinyrec/buffer_reuse_allocation.py": {
+      "bytes": 7460,
+      "sha256": "1331ebaa1afcde78c20a0b07911d71515e9a6e363293e16814b630e785d5299e",
+      "origin": "work/rapidtinyrec_prep/autoresearch_v2/buffer_reuse_pilot/frozen/rapidtinyrec/buffer_reuse_allocation.py"
+    },
+    "snapshots/submitted/rapidtinyrec/buffer_reuse_generation.py": {
+      "bytes": 5585,
+      "sha256": "41919712efe93f24f2222f2b0df5f17c1744114666885a9baf3c80e171799fb1",
+      "origin": "work/rapidtinyrec_prep/autoresearch_v2/buffer_reuse_pilot/frozen/rapidtinyrec/buffer_reuse_generation.py"
+    },
+    "snapshots/submitted/rapidtinyrec/buffer_reuse_measurement.py": {
+      "bytes": 740,
+      "sha256": "7b9124ee833ff55e6829b745a9f1b31281c74b8cd8d9beb8a151ad2490021099",
+      "origin": "work/rapidtinyrec_prep/autoresearch_v2/buffer_reuse_pilot/frozen/rapidtinyrec/buffer_reuse_measurement.py"
+    },
+    "snapshots/submitted/rapidtinyrec/buffer_reuse_outputs.py": {
+      "bytes": 1990,
+      "sha256": "36db8147eb22d7bcad3d02e2cf369191a4549e2ff339ef2c2d7b5aab5a77649c",
+      "origin": "work/rapidtinyrec_prep/autoresearch_v2/buffer_reuse_pilot/frozen/rapidtinyrec/buffer_reuse_outputs.py"
+    },
+    "snapshots/submitted/rapidtinyrec/buffer_reuse_processor.py": {
+      "bytes": 815,
+      "sha256": "398f0726f58ef0225bef6cba65e558b8e8d561257e2dbb9279bff69d88a09083",
+      "origin": "work/rapidtinyrec_prep/autoresearch_v2/buffer_reuse_pilot/frozen/rapidtinyrec/buffer_reuse_processor.py"
+    },
+    "snapshots/submitted/rapidtinyrec/buffer_reuse_protocol.py": {
+      "bytes": 3570,
+      "sha256": "bfeface507a60acdb1adc4224f642d665402a35c2be0c6fd95d1efdbf46e0ed6",
+      "origin": "work/rapidtinyrec_prep/autoresearch_v2/buffer_reuse_pilot/frozen/rapidtinyrec/buffer_reuse_protocol.py"
+    },
+    "snapshots/submitted/rapidtinyrec/buffer_reuse_runner.py": {
+      "bytes": 9474,
+      "sha256": "f3259bdab46ef1c6b4ab3b742da22bd2cdb693f72dad1d4881cfe0a9b65d67e2",
+      "origin": "work/rapidtinyrec_prep/autoresearch_v2/buffer_reuse_pilot/frozen/rapidtinyrec/buffer_reuse_runner.py"
+    },
+    "snapshots/submitted/rapidtinyrec/buffer_reuse_storage.py": {
+      "bytes": 7312,
+      "sha256": "0a0380a0ddf44e3e0281e654139ee838991bf56aedb20aa8d1d89a9f864528eb",
+      "origin": "work/rapidtinyrec_prep/autoresearch_v2/buffer_reuse_pilot/frozen/rapidtinyrec/buffer_reuse_storage.py"
+    },
+    "snapshots/submitted/rapidtinyrec/bulk_constraints.py": {
+      "bytes": 1455,
+      "sha256": "aa9b40445fdb45572f5adff31ba9dfca7f5fe03d367fb0975cee694b6ba838ec",
+      "origin": "work/rapidtinyrec_prep/autoresearch_v2/buffer_reuse_pilot/frozen/rapidtinyrec/bulk_constraints.py"
+    },
+    "snapshots/submitted/rapidtinyrec/compiled_forward.py": {
+      "bytes": 6637,
+      "sha256": "98c35f16f01a007ffc5896264b7c190bf8bf6da7c4cae153f1a8f98b4f6d125f",
+      "origin": "work/rapidtinyrec_prep/autoresearch_v2/buffer_reuse_pilot/frozen/rapidtinyrec/compiled_forward.py"
+    },
+    "snapshots/submitted/rapidtinyrec/decode_replay.py": {
+      "bytes": 9335,
+      "sha256": "82c0dc0a615d6fd6f83d942c13912e261ccd4f1a3cf52cdb79d14f24f2f8b53f",
+      "origin": "work/rapidtinyrec_prep/autoresearch_v2/buffer_reuse_pilot/frozen/rapidtinyrec/decode_replay.py"
+    },
+    "snapshots/submitted/rapidtinyrec/direct_reorder.py": {
+      "bytes": 3712,
+      "sha256": "954dc6adef4c125d4d384b1e37ce116088c7a05ed74e6699f959555bfa5db11e",
+      "origin": "work/rapidtinyrec_prep/autoresearch_v2/buffer_reuse_pilot/frozen/rapidtinyrec/direct_reorder.py"
+    },
+    "snapshots/submitted/rapidtinyrec/expected.json": {
+      "bytes": 1798,
+      "sha256": "fca32f80a6c8f85ca40c071b6579e1770e4b5058ad330f23570c987cfdadbe1e",
+      "origin": "work/rapidtinyrec_prep/autoresearch_v2/buffer_reuse_pilot/frozen/rapidtinyrec/expected.json"
+    },
+    "snapshots/submitted/rapidtinyrec/folded_attention.py": {
+      "bytes": 1805,
+      "sha256": "3af11f5563a1f520f85731b23328fa08a3bfeefeaff6ae2331fa6c97c659b441",
+      "origin": "work/rapidtinyrec_prep/autoresearch_v2/buffer_reuse_pilot/frozen/rapidtinyrec/folded_attention.py"
+    },
+    "snapshots/submitted/rapidtinyrec/gpu_constraints.py": {
+      "bytes": 5461,
+      "sha256": "0a5e903b7251c067456377c7f09f569ccdbbf6f2c456b6a4b072d3a2f26f710c",
+      "origin": "work/rapidtinyrec_prep/autoresearch_v2/buffer_reuse_pilot/frozen/rapidtinyrec/gpu_constraints.py"
+    },
+    "snapshots/submitted/rapidtinyrec/gqa_benchmark_protocol.py": {
+      "bytes": 2100,
+      "sha256": "b2495bd756ffd0efc9f42753e8ccb7e4beabf928072e6bbcc54230ed710688d2",
+      "origin": "work/rapidtinyrec_prep/autoresearch_v2/buffer_reuse_pilot/frozen/rapidtinyrec/gqa_benchmark_protocol.py"
+    },
+    "snapshots/submitted/rapidtinyrec/input_arena.py": {
+      "bytes": 2080,
+      "sha256": "d8631c73344d956b076c0a10de0fc0736095d3f5ff21de8f42c03293c5dea3f1",
+      "origin": "work/rapidtinyrec_prep/autoresearch_v2/buffer_reuse_pilot/frozen/rapidtinyrec/input_arena.py"
+    },
+    "snapshots/submitted/rapidtinyrec/pilot_decode_replay.py": {
+      "bytes": 13148,
+      "sha256": "9b09986bb7f138dbcbe8c43d4ab9be84f6d5539f19b14074f6c5536d27482716",
+      "origin": "work/rapidtinyrec_prep/autoresearch_v2/buffer_reuse_pilot/frozen/rapidtinyrec/pilot_decode_replay.py"
+    },
+    "snapshots/submitted/rapidtinyrec/precision_allocation.py": {
+      "bytes": 7420,
+      "sha256": "1c81140359db7a6c9dbfb5f5fb19c687d9737bf2451dfb094ce4576946905f22",
+      "origin": "work/rapidtinyrec_prep/autoresearch_v2/buffer_reuse_pilot/frozen/rapidtinyrec/precision_allocation.py"
+    },
+    "snapshots/submitted/rapidtinyrec/precision_dispatch.py": {
+      "bytes": 2325,
+      "sha256": "5c3af11ac71a27c49119a45beda9a74dc1b70619726e911de4cda8f8604d19ee",
+      "origin": "work/rapidtinyrec_prep/autoresearch_v2/buffer_reuse_pilot/frozen/rapidtinyrec/precision_dispatch.py"
+    },
+    "snapshots/submitted/rapidtinyrec/precision_full500.py": {
+      "bytes": 6458,
+      "sha256": "5ca6753ae990fdb1feea36ed4fb4d7a75ae0e37b562ceba4199d8753e50b7e00",
+      "origin": "work/rapidtinyrec_prep/autoresearch_v2/buffer_reuse_pilot/frozen/rapidtinyrec/precision_full500.py"
+    },
+    "snapshots/submitted/rapidtinyrec/precision_full500_runner.py": {
+      "bytes": 10037,
+      "sha256": "1373a4126d33e274f070752c4e857e2db948f6bd1f0bc96f5e8d0c1b04069ebb",
+      "origin": "work/rapidtinyrec_prep/autoresearch_v2/buffer_reuse_pilot/frozen/rapidtinyrec/precision_full500_runner.py"
+    },
+    "snapshots/submitted/rapidtinyrec/precision_log_runner.py": {
+      "bytes": 6724,
+      "sha256": "96236c69be3af2fcc72b0cc189e0ffed2a766bc0c8f5b01b258ba1411ec615e0",
+      "origin": "work/rapidtinyrec_prep/autoresearch_v2/buffer_reuse_pilot/frozen/rapidtinyrec/precision_log_runner.py"
+    },
+    "snapshots/submitted/rapidtinyrec/precision_log_staging.py": {
+      "bytes": 9143,
+      "sha256": "33b37b38c4f42ef3c583fd4c638a6482b254693674fc7539bd4e74106ba03088",
+      "origin": "work/rapidtinyrec_prep/autoresearch_v2/buffer_reuse_pilot/frozen/rapidtinyrec/precision_log_staging.py"
+    },
+    "snapshots/submitted/rapidtinyrec/precision_policy.py": {
+      "bytes": 3843,
+      "sha256": "ced97e7808cb0fa4d8ad87d7d8f43767b301b6bf9ef79b9a9955e58dddb5e79a",
+      "origin": "work/rapidtinyrec_prep/autoresearch_v2/buffer_reuse_pilot/frozen/rapidtinyrec/precision_policy.py"
+    },
+    "snapshots/submitted/rapidtinyrec/precision_provenance.py": {
+      "bytes": 2679,
+      "sha256": "f58da258b7ab10c0587b0fe52435f6f5833fd88b85780161b163efb08ffed200",
+      "origin": "work/rapidtinyrec_prep/autoresearch_v2/buffer_reuse_pilot/frozen/rapidtinyrec/precision_provenance.py"
+    },
+    "snapshots/submitted/rapidtinyrec/precision_quality_adapter.py": {
+      "bytes": 2313,
+      "sha256": "fec0bd3dba493f4b9f7bb944011d13770836348c80ac9c38deb93b63edf06f18",
+      "origin": "work/rapidtinyrec_prep/autoresearch_v2/buffer_reuse_pilot/frozen/rapidtinyrec/precision_quality_adapter.py"
+    },
+    "snapshots/submitted/rapidtinyrec/prefix_prefill.py": {
+      "bytes": 3350,
+      "sha256": "fe66809e94986e5adc1b72c93b77097f5cd37d886f81dd0d1b1963b56e03cc90",
+      "origin": "work/rapidtinyrec_prep/autoresearch_v2/buffer_reuse_pilot/frozen/rapidtinyrec/prefix_prefill.py"
+    },
+    "snapshots/submitted/rapidtinyrec/prefix_replay.py": {
+      "bytes": 6349,
+      "sha256": "11f776c6789ac014282010831ddca0a432aeca9491c1181fb888d9b03af7f4cb",
+      "origin": "work/rapidtinyrec_prep/autoresearch_v2/buffer_reuse_pilot/frozen/rapidtinyrec/prefix_replay.py"
+    },
+    "snapshots/submitted/rapidtinyrec/prepare_release.py": {
+      "bytes": 1307,
+      "sha256": "d3f783a92316289386ee43cc484289115f7c4d89685db9c556fdfa972af85be7",
+      "origin": "work/rapidtinyrec_prep/autoresearch_v2/buffer_reuse_pilot/frozen/rapidtinyrec/prepare_release.py"
+    },
+    "snapshots/submitted/rapidtinyrec/profile_compiled.py": {
+      "bytes": 16994,
+      "sha256": "60b4ede2ec386ba1434c4f0c5ad030e9e36553da62a2536e88e4d5558a14fb75",
+      "origin": "work/rapidtinyrec_prep/autoresearch_v2/buffer_reuse_pilot/frozen/rapidtinyrec/profile_compiled.py"
+    },
+    "snapshots/submitted/rapidtinyrec/profile_decode_replay.py": {
+      "bytes": 6539,
+      "sha256": "b40cb860156ffa0c6fc538a47b7674e569ba23b84b73c5e2f0cd0cf9f5b4f477",
+      "origin": "work/rapidtinyrec_prep/autoresearch_v2/buffer_reuse_pilot/frozen/rapidtinyrec/profile_decode_replay.py"
+    },
+    "snapshots/submitted/rapidtinyrec/profile_prefix.py": {
+      "bytes": 9445,
+      "sha256": "090e8649e23c848e64cb26bdfb9f84537ab51934b247a49df1aa0077eb92eba7",
+      "origin": "work/rapidtinyrec_prep/autoresearch_v2/buffer_reuse_pilot/frozen/rapidtinyrec/profile_prefix.py"
+    },
+    "snapshots/submitted/rapidtinyrec/profile_shared.py": {
+      "bytes": 17419,
+      "sha256": "c7ad8afbe06d3bdd4faf692d28def678f759c6d786ec452232cffc1807acc7af",
+      "origin": "work/rapidtinyrec_prep/autoresearch_v2/buffer_reuse_pilot/frozen/rapidtinyrec/profile_shared.py"
+    },
+    "snapshots/submitted/rapidtinyrec/quality_frontier.py": {
+      "bytes": 10071,
+      "sha256": "60631b8a063d63e16a1973168f9651f456496bf4c0759c1de37eadfa05bcb137",
+      "origin": "work/rapidtinyrec_prep/autoresearch_v2/buffer_reuse_pilot/frozen/rapidtinyrec/quality_frontier.py"
+    },
+    "snapshots/submitted/rapidtinyrec/quality_resources.json": {
+      "bytes": 577,
+      "sha256": "74e526fe99359431f906e81c8e406ca4488570cc8d5a8eef057ebd6131b123c4",
+      "origin": "work/rapidtinyrec_prep/autoresearch_v2/buffer_reuse_pilot/frozen/rapidtinyrec/quality_resources.json"
+    },
+    "snapshots/submitted/rapidtinyrec/requirements.txt": {
+      "bytes": 140,
+      "sha256": "5976ae1ce277513a5df2f83713791f5fddd22bc8e34def280406f52a7954ec23",
+      "origin": "work/rapidtinyrec_prep/autoresearch_v2/buffer_reuse_pilot/frozen/rapidtinyrec/requirements.txt"
+    },
+    "snapshots/submitted/rapidtinyrec/run.py": {
+      "bytes": 1502,
+      "sha256": "543a4129e8b21a20a1a8681ee7bea82ff50ea044d10b4be0fc4b44bf1975466d",
+      "origin": "work/rapidtinyrec_prep/autoresearch_v2/buffer_reuse_pilot/frozen/rapidtinyrec/run.py"
+    },
+    "snapshots/submitted/rapidtinyrec/shared_prefill.py": {
+      "bytes": 3104,
+      "sha256": "ada528219c8f11ea54ff55db463c4c390e8e7073b60ae6fda01ce47f23665baa",
+      "origin": "work/rapidtinyrec_prep/autoresearch_v2/buffer_reuse_pilot/frozen/rapidtinyrec/shared_prefill.py"
+    },
+    "snapshots/submitted/rapidtinyrec/shared_prefix.py": {
+      "bytes": 6384,
+      "sha256": "5479370d129466574376c62a81125909b1673bca76ff3d257ee915443dbcfd9f",
+      "origin": "work/rapidtinyrec_prep/autoresearch_v2/buffer_reuse_pilot/frozen/rapidtinyrec/shared_prefix.py"
+    },
+    "snapshots/submitted/rapidtinyrec/source/LogitProcessor.py": {
+      "bytes": 2985,
+      "sha256": "13ab33ff0ed3f769370478a86624499ccc0f8813de9d63e3dc4e2fa25ec59eb8",
+      "origin": "work/rapidtinyrec_prep/autoresearch_v2/buffer_reuse_pilot/frozen/rapidtinyrec/source/LogitProcessor.py"
+    },
+    "snapshots/submitted/rapidtinyrec/source/__init__.py": {
+      "bytes": 69,
+      "sha256": "d72e9591bbafb1089e30f86ba31f1c9994dbfdbdcee8f3daa838c52a5f5ec801",
+      "origin": "work/rapidtinyrec_prep/autoresearch_v2/buffer_reuse_pilot/frozen/rapidtinyrec/source/__init__.py"
+    },
+    "snapshots/submitted/rapidtinyrec/source/data.py": {
+      "bytes": 74953,
+      "sha256": "85edcb6b1e7d1124c204bbdcb312d70903920b3cb5f00bc3fc1414f3df03b555",
+      "origin": "work/rapidtinyrec_prep/autoresearch_v2/buffer_reuse_pilot/frozen/rapidtinyrec/source/data.py"
+    },
+    "snapshots/submitted/rapidtinyrec/validate_gpu_constraints.py": {
+      "bytes": 3435,
+      "sha256": "45fea3b3ce38fcc24837efc64ef7ffdfe6ac96371124b24242e2d8890ec08867",
+      "origin": "work/rapidtinyrec_prep/autoresearch_v2/buffer_reuse_pilot/frozen/rapidtinyrec/validate_gpu_constraints.py"
+    },
+    "snapshots/submitted/release-config.json": {
+      "bytes": 1322,
+      "sha256": "c2b98b1986dc97a0ee19f6216fc2f7a13f70a78954d5a5957b9d308e35ab56cd",
+      "origin": "work/rapidtinyrec_prep/autoresearch_v2/buffer_reuse_pilot/frozen/release-config.json"
+    },
+    "snapshots/submitted/tests/fixture_dispatch.py": {
+      "bytes": 2130,
+      "sha256": "456b36dc5427fd13b1bfcd9c478613c90a69e82a6bde610b4ebe71d660561db1",
+      "origin": "work/rapidtinyrec_prep/autoresearch_v2/buffer_reuse_pilot/frozen/tests/fixture_dispatch.py"
+    },
+    "snapshots/submitted/tests/fixture_outputs.py": {
+      "bytes": 828,
+      "sha256": "402b4d6401857d0f7152f3231da13b797f98e713dbc96da685f88cc071bf7aa5",
+      "origin": "work/rapidtinyrec_prep/autoresearch_v2/buffer_reuse_pilot/frozen/tests/fixture_outputs.py"
+    },
+    "snapshots/submitted/tests/fixture_storage.py": {
+      "bytes": 1768,
+      "sha256": "b1b5231b985bf863e253f70d56f5dd97e6e382cd4dd93c1d251fcaf4514568c1",
+      "origin": "work/rapidtinyrec_prep/autoresearch_v2/buffer_reuse_pilot/frozen/tests/fixture_storage.py"
+    },
+    "snapshots/submitted/tests/test_audit_buffer_reuse.py": {
+      "bytes": 6202,
+      "sha256": "7d73a20a4bf0148cad9067bf931e52d27230baa02e4350165795af0d64a1d52e",
+      "origin": "work/rapidtinyrec_prep/autoresearch_v2/buffer_reuse_pilot/frozen/tests/test_audit_buffer_reuse.py"
+    },
+    "snapshots/submitted/tests/test_buffer_artifact_integration.py": {
+      "bytes": 8214,
+      "sha256": "8a5fc0e0511d958a4e905fde0f8eb340e3104be1525d35a918216e294a37ae88",
+      "origin": "work/rapidtinyrec_prep/autoresearch_v2/buffer_reuse_pilot/frozen/tests/test_buffer_artifact_integration.py"
+    },
+    "snapshots/submitted/tests/test_buffer_contract.py": {
+      "bytes": 4891,
+      "sha256": "f17f76c92d6e8c793c4f12053a49ce6b92601278f368d5f7b143d3f69db29ef6",
+      "origin": "work/rapidtinyrec_prep/autoresearch_v2/buffer_reuse_pilot/frozen/tests/test_buffer_contract.py"
+    },
+    "snapshots/submitted/tests/test_buffer_new_gates.py": {
+      "bytes": 2819,
+      "sha256": "53bd479817dff8d246a7130f1e7e2e46cea46b8a6026c5282d9e6be30c142fbc",
+      "origin": "work/rapidtinyrec_prep/autoresearch_v2/buffer_reuse_pilot/frozen/tests/test_buffer_new_gates.py"
+    },
+    "snapshots/submitted/tests/test_buffer_reuse_allocation.py": {
+      "bytes": 7383,
+      "sha256": "c6c8b79deb87f7411365f08bc008e9404a5b9625feb3510e2e6d991964fc4362",
+      "origin": "work/rapidtinyrec_prep/autoresearch_v2/buffer_reuse_pilot/frozen/tests/test_buffer_reuse_allocation.py"
+    },
+    "snapshots/submitted/tests/test_buffer_reuse_runner.py": {
+      "bytes": 6839,
+      "sha256": "01271195d27b0b098b06699a8909b1ab7a2c7c86cbc4672fa6371186145571b5",
+      "origin": "work/rapidtinyrec_prep/autoresearch_v2/buffer_reuse_pilot/frozen/tests/test_buffer_reuse_runner.py"
+    },
+    "verify_publication.py": {
+      "bytes": 714,
+      "sha256": "98a3fbb950c7751463a016d00e381e286ba44d3aaacdfea7ff20c342c24f3dca",
+      "origin": "publication-generated"
+    }
+  }
+}
