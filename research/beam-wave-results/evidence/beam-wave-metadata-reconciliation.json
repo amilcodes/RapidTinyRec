@@ -1,0 +1,61 @@
+{
+  "records": [
+    {
+      "stage": "work",
+      "schema": "beam-wave-allocation-reconciliation-v1",
+      "matched": true,
+      "run_id": "two-request-beam-wave-pilot-20261030T025208Z-31824f7daf15",
+      "job_id": "8114773",
+      "files": 93,
+      "bootstrap_executed": false
+    },
+    {
+      "stage": "audit",
+      "schema": "beam-wave-allocation-reconciliation-v1",
+      "matched": true,
+      "run_id": "two-request-beam-wave-pilot-20261030T025208Z-31824f7daf15",
+      "job_id": "8114773",
+      "files": 93,
+      "bootstrap_executed": false
+    },
+    {
+      "stage": "phase_0",
+      "schema": "beam-wave-allocation-reconciliation-v1",
+      "matched": true,
+      "run_id": "two-request-beam-wave-pilot-20261030T025208Z-31824f7daf15",
+      "job_id": "8114773",
+      "files": 93,
+      "bootstrap_executed": false
+    },
+    {
+      "stage": "phase_1",
+      "schema": "beam-wave-allocation-reconciliation-v1",
+      "matched": true,
+      "run_id": "two-request-beam-wave-pilot-20261030T025208Z-31824f7daf15",
+      "job_id": "8114773",
+      "files": 93,
+      "bootstrap_executed": false
+    },
+    {
+      "stage": "phase_2",
+      "schema": "beam-wave-allocation-reconciliation-v1",
+      "matched": true,
+      "run_id": "two-request-beam-wave-pilot-20261030T025208Z-31824f7daf15",
+      "job_id": "8114773",
+      "files": 93,
+      "bootstrap_executed": false
+    },
+    {
+      "stage": "phase_3",
+      "schema": "beam-wave-allocation-reconciliation-v1",
+      "matched": true,
+      "run_id": "two-request-beam-wave-pilot-20261030T025208Z-31824f7daf15",
+      "job_id": "8114773",
+      "files": 93,
+      "bootstrap_executed": false
+    }
+  ],
+  "local_numerical_audit": false,
+  "source_files": 93,
+  "source_bytes": 1161824
+}
