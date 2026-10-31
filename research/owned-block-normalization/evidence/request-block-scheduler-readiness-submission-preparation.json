@@ -1,0 +1,44 @@
+{
+  "schema": "request-block-scheduler-readiness-submission-preparation-v1",
+  "at_utc": "2026-10-31T04:58:28.113093+00:00",
+  "status": "DISTINCT_SCHEDULER_SUCCESSOR_SUBMITTED",
+  "job_id": "8162473",
+  "run_id": "owned-block-normalization-scheduler-v2-20261031T045753Z-10611c1b7108",
+  "new_tests_passed": 3,
+  "new_tests_seconds": 0.418,
+  "new_tests_first_attempt": true,
+  "previous_new_capture_tests_carried": 4,
+  "source_files": 22,
+  "source_bytes": 110979,
+  "unchanged_parent_components": 14,
+  "files": {
+    "/Users/AmilAgrawal/Documents/Codex/2026-10-18/let/work/rapidtinyrec_prep/autoresearch_v2/test_request_block_scheduler_integration.py": "bfdaa3244a33ff1b6b91568c7f1c3bc8ebccd5f862ddaab23e091d640d4a72f1",
+    "/Users/AmilAgrawal/Documents/Codex/2026-10-18/let/work/rapidtinyrec_prep/autoresearch_v2/request_block_scheduler_fixture.py": "5d04b4adc35222b95f94e5cf6f136a5fe7303812d230fea609d9ab33b1166d70",
+    "/Users/AmilAgrawal/Documents/Codex/2026-10-18/let/work/rapidtinyrec_prep/autoresearch_v2/submit_request_block_scheduler.py": "d7ab7994f2f6349e1a8ae1f1ac254e75345366f346022403d4e3050a1548814a",
+    "/Users/AmilAgrawal/Documents/Codex/2026-10-18/let/work/rapidtinyrec_prep/autoresearch_v2/review_request_block_scheduler.py": "4a0d7ff694501c9ac75c46491bcc63b25412520579e49e905be82f2482bbb3f4",
+    "/Users/AmilAgrawal/Documents/Codex/2026-10-18/let/outputs/autoresearch_v2/request-block-scheduler-integration-tests.txt": "b82caea70898a2191303c5459b030187793d6ef7c16fcaa6d7c54cf3f5204c4c",
+    "/Users/AmilAgrawal/Documents/Codex/2026-10-18/let/outputs/autoresearch_v2/request-block-scheduler-review-execution.txt": "5453fdd84d3a6d64dc67bcdec658b19ff9df9254232cfcb1c70a48e214627d0c",
+    "/Users/AmilAgrawal/Documents/Codex/2026-10-18/let/outputs/autoresearch_v2/request-block-scheduler-guard-dryrun.txt": "f34f8cb85e57f623b608d6969b92ac04f7699948c9dce080b82e9724490a90e5",
+    "/Users/AmilAgrawal/Documents/Codex/2026-10-18/let/outputs/autoresearch_v2/request-block-scheduler-submit-command.txt": "b36228907946c7eb0bb849eca20028f8db51340f354a4fde6e3cf7b39bf70486"
+  },
+  "validation": [
+    "Current observe() wrote actual before/after fsynced captures in temp fixture with explicit mocked scheduler transport; worker allocation auditor/parent finalizer/terminal consumer joined29worker/33ownedfiles. Numerical auditor boundary explicitlymocked with16schema-onlyrecords; positive andstrictnegativeoutcomes preserved. No tensors/model/CUDA proof.",
+    "Missing/swapped/capturehash/job/stdout/stage/boolreturncode negatives rejected.18actualloadedmodulebindings/disabledall3entrymodes/distinctprofile/newintent/closedparentintent/sharedbatchguard checks passed. No old suites rerun.",
+    "Separate complete22file source/config/protocol/runner/audit/submissionguard review; original14unchangedcomponents and old test evidence bound by hash. Four previous newcapture tests carried withoutrepeat. Freshreadiness lock110979B and localonlyguarddryrun passed.",
+    "One full liveuserqueue observation empty; exclusivefsyncedintent before frozen snapshot/upload, one distinctsubmission8162473. No immediate status/log/fetch. Batch6of6 original24hwindow unchanged.",
+    "Bothnewharness/frozen22filesreadonly/hashverified; oldparent22filesimmutable. All480/540/600andnumericalgates unchanged."
+  ],
+  "limitations": [
+    "ActualCUDA/graph/fullwidthbits/wholeauditcost unknown.",
+    "Readiness authorizes thisbounded syntheticexperiment only, not adoption/modelrepair/performance claim.",
+    "No nextallocation until batchwindow reviewed; unknown/busy/auth neverempty."
+  ],
+  "remote_actions": {
+    "full_userqueue_observations": 1,
+    "submissions": 1,
+    "owned_status_queries": 0,
+    "fetches": 0
+  },
+  "execution_passed": false,
+  "next": "Monitor ONLY8162473 at next spaced wake using exact scheduler-v2 harness/config/run; no immediate status/log/fetch/newjob. Terminal fetch successfully ONCE/freeze/hash/review with scheduler-v2 frozen terminal_metadata. While queued prepare distinct exact-run fetch/closure helpers including before/after raw scheduler captures on partial failure, without invoking old wrappers. No numerical re-audit/resubmit. Batch6of6 originalwindow until2026-10-31T06:30:00.400699UTC; explicit next-batch review required after window, never automatic reset. QKV parked; all closedjobs untouched."
+}

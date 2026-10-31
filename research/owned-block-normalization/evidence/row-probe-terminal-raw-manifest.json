@@ -1,0 +1,74 @@
+{
+  "at_utc": "2026-10-30T10:18:37.871050+00:00",
+  "run_id": "row-permutation-diagnostic-v1-20261030T075948Z-01d802230590",
+  "job_id": "8122167",
+  "raw_root": "/Users/AmilAgrawal/Documents/Codex/2026-10-18/let/work/rapidtinyrec_prep/autoresearch_v2/cuda_row_probe/.oscar/results/row-permutation-diagnostic-v1-20261030T075948Z-01d802230590",
+  "raw": {
+    "files": 9,
+    "bytes": 81653,
+    "entries": {
+      "job-id": {
+        "bytes": 8,
+        "sha256": "38b40b4b42a75087edb9092c273df64af6d02b8de01d5306c9d495feb874de5f"
+      },
+      "job.sh": {
+        "bytes": 965,
+        "sha256": "0b62cb6179a974ea736794e0747a8aa27f939896d02174ab773f990f7162e534"
+      },
+      "logs/stderr.log": {
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      "logs/stdout.log": {
+        "bytes": 577,
+        "sha256": "8df39eeef2cf585015fe77a0033d3a20d29ac3f414699f05153aac252bbde1e5"
+      },
+      "outputs/probe-exit-code": {
+        "bytes": 2,
+        "sha256": "9a271f2a916b0b6ee6cecb2426f0b3206ef074578be55d9bc94f6f3fe3ab86aa"
+      },
+      "outputs/probe.json": {
+        "bytes": 75139,
+        "sha256": "6f3e113abe59070cb30c10fa8cafbe0529a798b4d3d2fb8569b543eccac14710"
+      },
+      "outputs/scheduler-after.txt": {
+        "bytes": 1800,
+        "sha256": "5e880ca3466afe795d90181e2b79f04c1baf1c128e177f3ed47ff2c35525657d"
+      },
+      "outputs/scheduler-before.txt": {
+        "bytes": 1800,
+        "sha256": "7dcbe3aa5d74d947254706b51886f2a6ba3c9032090ad63e8c19bca147d7f977"
+      },
+      "source-manifest.json": {
+        "bytes": 1362,
+        "sha256": "b754ee77310781a438c41e020ce29ad2d2f8558a70917a29a89a37cb1d52b8aa"
+      }
+    }
+  },
+  "submitted": {
+    "files": 5,
+    "bytes": 10873,
+    "entries": {
+      "job.sh": {
+        "bytes": 580,
+        "sha256": "b7287ac17d3c3197ce621e5a508bb69b864078f8789cab71468232d103fc443e"
+      },
+      "oscar.json": {
+        "bytes": 667,
+        "sha256": "69bbda42670264cf129aec5b6ff9c9355d1ca3f5ee973c2e6cabeb6dd5c6251f"
+      },
+      "probe.py": {
+        "bytes": 4839,
+        "sha256": "d36176fd4ca59a55336967891609c2158a14f5a193144bb93cbff6c1d6d07077"
+      },
+      "protocol.json": {
+        "bytes": 1511,
+        "sha256": "b8fd7bc2b44314e0b5669d7c359b31b41082f7d29f8038ddb92e5f9bfa9c0715"
+      },
+      "provenance.py": {
+        "bytes": 3276,
+        "sha256": "a1f8e60395f07782d9b1e784e9f5a930a4b3735cf94ef4eed8b7c2954833aab4"
+      }
+    }
+  }
+}

@@ -1,0 +1,35 @@
+{
+  "schema": "request-block-scheduler-fetch-closure-preparation-v1",
+  "at_utc": "2026-10-31T05:16:49.043859+00:00",
+  "status": "OWNED_JOB_PENDING_CLOSURE_READY",
+  "job_id": "8162473",
+  "new_tests_passed": 3,
+  "test_seconds": 0.012,
+  "first_attempt": true,
+  "files": {
+    "/Users/AmilAgrawal/Documents/Codex/2026-10-18/let/work/rapidtinyrec_prep/autoresearch_v2/fetch_request_block_scheduler_once.py": "5aab0967484f9de1029462267599bf3fe87f804460790a8cb59d8d102463716a",
+    "/Users/AmilAgrawal/Documents/Codex/2026-10-18/let/work/rapidtinyrec_prep/autoresearch_v2/close_request_block_scheduler_once.py": "86f1fb978d7fad7571c3a7f310be95e525ad525454ec12114b531e05a534d87b",
+    "/Users/AmilAgrawal/Documents/Codex/2026-10-18/let/work/rapidtinyrec_prep/autoresearch_v2/test_request_block_scheduler_closure.py": "6a685ef0cf031f2deb43b61f0aa3e882aa607989c902a0a32146cb8c6d0cacd3",
+    "/Users/AmilAgrawal/Documents/Codex/2026-10-18/let/outputs/autoresearch_v2/request-block-scheduler-closure-tests.txt": "7471c46d94546509a8cdcba19c57187ea1fa079270d511cd4db75c0540f037b6",
+    "/Users/AmilAgrawal/Documents/Codex/2026-10-18/let/outputs/autoresearch_v2/request-block-scheduler-status-20261031T0514.json": "3b03006140824860d8dde76eff42b16c7389f58e5e1b94b14451d42192d953fb",
+    "/Users/AmilAgrawal/Documents/Codex/2026-10-18/let/outputs/autoresearch_v2/request-block-scheduler-status-20261031T0514.stderr": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  "validation": [
+    "One ownedstatus8162473 PENDING(Priority); no fetch/log/retry/secondquery/newsubmission. Batch6of6samewindow.",
+    "New exact-run fetch wrapper binds8162473/run/profile/new22files110979B source lock, exclusivefsyncedattempt beforeonefetch, successfulcountbeforefreeze; ambiguousattemptblocksretry. NewclosureimportsONLYfrozenmetadata, complete0:0calls frozenconsumer, failurecapturecollectedbeforevalidation and malformedJSONretainedwithrawhash/text; anyavailable allocationrecordboundtoitsbeforeafterrawcapture.",
+    "ThreeNEWpuremetadata checks passfirstattempt.012s: actualnewimmutable22source/identity plusold8155234refusal; partialfailedcommand+malformedcapture preserved; malformedallocation stillretainsrawscheduler+casefilename. No realfetch/closure invoked.",
+    "Oldwrapper/test/source artifacts unchanged; no oldtests/numericalreaudit/Torch/model/GPU work. Submitted22filesreadonly/hashunchanged."
+  ],
+  "limitations": [
+    "Stillpending; no CUDA/strictbits/fullprotocol execution evidence.",
+    "Newfetchtransport/state mechanics unchanged frompreviousreviewedwrapper carriedbysource; newtestscover changedidentity/partialcapture handling, not an actualfetch.",
+    "Actualfuturepartialfailure orcompleteclosure may produce explicitmetadatahold, neverautomaticretry."
+  ],
+  "remote_actions": {
+    "owned_status_queries": 1,
+    "fetches": 0,
+    "submissions": 0
+  },
+  "execution_passed": false,
+  "next": "At next spaced wake query ONLY8162473 using exact scheduler-v2 harness/config/run. If terminal, use fetch_request_block_scheduler_once.py --status saved-owned-status --fetch ONCE, then close_request_block_scheduler_once.py ONCE after successful freeze. Preserve partial raw scheduler captures/metadata holds; never invoke8155234 wrappers. Pending staysquiet; no repetitive localwork. After currenttest closes, rank biggest remaining bottleneck per latest_human_steering; synthetic pass is not speedup. Original batch6of6 cannot reset until06:30UTC and explicit next-batch review."
+}

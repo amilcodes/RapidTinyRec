@@ -1,0 +1,70 @@
+{
+  "schema": "owned-request-block-normalization-intervention-v1",
+  "status": "REVIEWED_DISTINCT_NATIVE_NORMALIZATION_INTERVENTION",
+  "submission_ready": true,
+  "hypothesis": "Fresh aligned owned50-row inputs at both native normalization sites may preserve fresh serial50-row reference bits across request-block positions.",
+  "vocabulary": 152265,
+  "rows_per_request": 50,
+  "requests": 2,
+  "dtype": "float32",
+  "seeds": [
+    17,
+    29
+  ],
+  "source_element_offsets": [
+    0,
+    1,
+    2,
+    3
+  ],
+  "modes": [
+    "eager",
+    "cuda_graph"
+  ],
+  "declared_cases": 16,
+  "orders": [
+    "forward",
+    "repeat",
+    "reverse",
+    "restored"
+  ],
+  "sites": [
+    "first",
+    "second"
+  ],
+  "inputs": "New seeded finite random logits directly; no GEMM/TF32/model/released weights. Same exact input bits for fresh aligned serial50-row controls and candidate.",
+  "control": "Two independent aligned50-row inputs, native log_softmax twice each; first and second site bits retained. Control repeat required. No candidate copies inside control normalizations.",
+  "candidate": "Exact owned_blocks.py fresh empty+copy/native fullwidth log_softmax per50-row block then ordered concat at BOTH sites.",
+  "strict_gate": "All per-site forward/repeat/reverse-restored/restored fullFP32 bits, control repeats, retained outputs and source-untouched comparisons exact. Validate geometry/dtype/finite outputs and actual live storage disjointness/alignment/site coverage. Never relax on failure.",
+  "capture_requirements": [
+    "Preallocated source tensors; documented side-stream warmup before capture and explicit dependencies.",
+    "Capture exact same two-site implementation including allocations/copies/concat/checks. Observe capture-time owned-input metadata outside timed replay; stable graph-owned input/output bindings.",
+    "Fresh replay input staging outside primitive timing; clone retained outputs after synchronization outside timing; replay/reverse/restore compare against fresh serial controls.",
+    "Unsupported helper CUDAgraph behavior is retained as failure; never silently drop graph cases."
+  ],
+  "timing": "No production latency claim. Optional primitive complete two-site candidate vs serial pair wall time must include all new copies/concat/checks and synchronization, separate from metadata/hash/audit. No timing currently implemented.",
+  "resources": {
+    "gpu": "regular RTX A6000",
+    "cpus": 4,
+    "memory_gb": 32,
+    "max_allocation_minutes": 10,
+    "concurrency": 1
+  },
+  "budget": {
+    "compute_max_s": 480,
+    "global_max_s": 540,
+    "allocation_s": 600,
+    "status": "Hard480compute/540global under independent guardian;600allocationbackstop. ActualCUDA/graph/auditcost unverified until this one bounded experiment; preserve failures, no automatic retry."
+  },
+  "retention": "Preserve every declared result and failed comparison; independent allocated auditor recomputes gate from complete exact case/comparison schema. Terminal fetch once and metadata-only local reconciliation.",
+  "not_claimed": [
+    "Old wave repair",
+    "Model score equivalence",
+    "Population quality",
+    "Performance improvement"
+  ],
+  "remaining": [
+    "One full live userqueue observation after exclusiveguard review before submission",
+    "Allocated CUDA/fullwidth/graph/strictbit results and terminal metadata reconciliation"
+  ]
+}
