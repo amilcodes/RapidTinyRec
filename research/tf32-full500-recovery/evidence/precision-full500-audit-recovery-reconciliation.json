@@ -1,0 +1,29 @@
+{
+  "schema": "precision-full500-recovery-reconciliation-v1",
+  "passed": true,
+  "run_id": "full500-audit-recovery-20261028T014425Z-0f34500ac483",
+  "job_id": "8034953",
+  "source_files_verified": 7,
+  "source_bytes_verified": 3190380,
+  "original_provenance": {
+    "schema": "precision-allocation-reconciliation-v1",
+    "matched": true,
+    "run_id": "precision-full500-quality-20261027T114104Z-82ab3f1230b7",
+    "job_id": "8007230",
+    "files": 85,
+    "bootstrap_executed": false
+  },
+  "original_execution_status": "FAILED",
+  "recovery_audit_passed": true,
+  "generation_executed": false,
+  "bootstrap_executed_locally": false,
+  "audit_sha256": "f7142a8ad04ffbb587dbd531c86b605865bec5deb121cb5c5329b6f763665b95",
+  "terminal": [
+    "8034953",
+    "COMPLETED",
+    "0:0",
+    "00:00:54",
+    ""
+  ],
+  "recovery_elapsed_s": 51.35495678707957
+}

@@ -1,0 +1,89 @@
+{
+  "schema": "precision-setup-feasibility-v1",
+  "purpose": "Measure feasibility of node-local native API logging for cold and disk-reuse TF32 setup; not a paired FP32/TF32 performance or quality evaluation.",
+  "phases": [
+    {
+      "phase": 1,
+      "variant": "folded_tf32",
+      "disk_cache": "cold",
+      "repeats": [
+        0,
+        1,
+        2
+      ]
+    },
+    {
+      "phase": 2,
+      "variant": "folded_tf32",
+      "disk_cache": "same-variant-reuse",
+      "repeats": [
+        3,
+        4,
+        5
+      ]
+    }
+  ],
+  "cohort_indices": [
+    1,
+    2,
+    6,
+    10
+  ],
+  "prompt_lengths": [
+    76,
+    121
+  ],
+  "requests_per_phase": 12,
+  "graphs_per_phase": 8,
+  "fresh_processes": true,
+  "resources": {
+    "partition": "gpu",
+    "qos": "norm-gpu",
+    "constraint": "ampere",
+    "gpu_type": "nvidia_rtx_a6000",
+    "gpus": 1,
+    "cpus": 4,
+    "memory_gb": 32,
+    "time": "00:30:00"
+  },
+  "supervisor_child_deadline_s": 1620,
+  "minimum_reserved_cleanup_s": 180,
+  "budget_basis": "Original cold TF32 setup782.936s plus model load/profiles and one reuse phase; same-variant reuse is less compilation but unbounded by prior incomplete run.1620second supervisor deadline is an execution cap, not a promise of completion. Do not add nested setup/compiler/capture intervals.",
+  "change": "Identical native API logging level and complete setup/capture coverage; only sink changes to verified local storage with copied hashes. Generation operations unchanged.",
+  "retain": [
+    "all raw outputs, failures, APIlogs and profiles",
+    "both cold/reuse setup, memory and compiler records",
+    "all24 TF32 request rows,1200ranks/scores,6000transitions, ancestry",
+    "warm/dense/graph/repeated/retained/profile outputs",
+    "source/config/resource/runtime and wrapper/recovery records"
+  ],
+  "audit": [
+    "all identity/source/resource/build hashes",
+    "phase schedule and cold/reuse cache paths",
+    "native logger disable/flush/copy and process recovery",
+    "8frozen graphs each, no measured compile/capture",
+    "exact within-policy stability across phases and all ownership checks",
+    "compare every request against preserved original TF32 outputs; no numerical change intended",
+    "historical FP32 fidelity reported separately, not required for this TF32 diagnostic",
+    "actual model TF32 dispatch for both lengths in both phases"
+  ],
+  "report": [
+    "cold/reuse setup and model load; nested compiler/capture intervals separately",
+    "wrapper elapsed/termination/copy status and preserved bytes",
+    "generation latency descriptively byphase/length/user; no FP32pairedspeedclaim",
+    "memory,graphownership,all numerical differences and failure gates"
+  ],
+  "eligible_for_full_quality_review": false,
+  "promotion": false,
+  "noninferiority_established": false,
+  "full_abba_retry_authorized_by_diagnostic_alone": false,
+  "interpretation": "A completed setup diagnostic does not complete the missing ABBA pilot, establish logging causality across historical runs, or establish quality equivalence. Review resulting timing budget and all integrity/stability/dispatch evidence before separately freezing any full paired pilot.",
+  "failure_policy": "Preserve and diagnose once; no automatic replacement. Never resubmit original job7958148/runprecision-pilot-20261026T053441Z-f040754d1743.",
+  "prior_tf32_reference": {
+    "run_id": "precision-pilot-20261026T053441Z-f040754d1743",
+    "source_commit": "674983e3ebc39906ae8606d06b382212cb8203a3",
+    "phase": 1,
+    "raw_manifest_sha256": "6f02d896a03073ced4bc040a777f77273c90c59a13796c2f16f86ea5d53e35b1",
+    "diagnostic_review_sha256": "0b5d83573a3e136ce56aecc3052f45c317f4400c13376eef4cba7c624b88cfab"
+  }
+}

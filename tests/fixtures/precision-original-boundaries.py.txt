@@ -1,0 +1,57 @@
+# Extracted from original pilot source674983e3ebc39906ae8606d06b382212cb8203a3; AST only, never executed.
+
+def select_users(reference_users, full_cohort):
+    assert len(reference_users) == 500
+    lengths = sorted({u['prompt_tokens'] for u in reference_users})
+    if full_cohort:
+        assert len(lengths) == 10
+        return (reference_users, [next((u for u in reference_users if u['prompt_tokens'] == n)) for n in lengths])
+    users = [u for length in (lengths[0], lengths[-1]) for u in [x for x in reference_users if x['prompt_tokens'] == length][:2]]
+    assert len(users) == 4
+    return (users, users)
+
+@torch.inference_mode()
+def generate(user, replay, direct_reorder=False):
+    calls = 0
+
+    @functools.wraps(compiler.eager)
+    def forward(*a, **kw):
+        nonlocal calls
+        assert not a
+        step = calls
+        calls += 1
+        ids, cache = (kw['input_ids'], kw['past_key_values'])
+        assert ids.shape == ((1, user['prompt_tokens']) if step == 0 else (50, 1))
+        assert cache.get_seq_length() == (0 if step == 0 else user['prompt_tokens'] + step - 1)
+        kw['attention_mask'] = {'full_attention': None}
+        result = pool(**kw) if replay and step else compiler.compiled(**kw)
+        assert result.logits.dtype == torch.float32, 'Model logits must remain FP32'
+        return result
+    cfg = b.GenerationConfig(max_new_tokens=8, length_penalty=0.0, num_beams=50, num_return_sequences=50, pad_token_id=tok.eos_token_id, eos_token_id=tok.eos_token_id, bos_token_id=tok.bos_token_id, do_sample=False, top_k=None, top_p=None, use_cache=True)
+    with patch.object(model, 'forward', forward), PrefillPrefix(model, 50, cache_expander=arena.start_request) if prefix_mode and replay else b.PrefillOnce(model, 50), direct.install(model) if direct_reorder else contextlib.nullcontext():
+        output = model.generate(inputs[user['cohort_index']], attention_mask=masks[user['cohort_index']], generation_config=cfg, return_dict_in_generate=True, output_scores=True, logits_processor=b.LogitsProcessorList([GpuSidConstrainedLogitsProcessor(tables)]))
+    assert calls == 5
+    return output
+
+def unpack(output, user):
+    assert output.sequences_scores.dtype == torch.float32 and all((s.dtype == torch.float32 for s in output.scores))
+    saved_ptrs = [s.untyped_storage().data_ptr() for s in output.scores]
+    graph_ptrs = {entry[2].logits.untyped_storage().data_ptr() for entry in pool.entries.values()}
+    assert len(saved_ptrs) == len(set(saved_ptrs)) == 5 and (not set(saved_ptrs) & graph_ptrs)
+    return {'graph_logit_storage_ptrs': sorted(graph_ptrs), 'saved_score_storage_ptrs': saved_ptrs, 'saved_score_dtypes': [str(s.dtype) for s in output.scores], 'beam_indices': output.beam_indices.cpu().tolist(), 'token_ids': output.sequences[:, user['prompt_tokens']:].cpu().tolist(), 'sequence_logp': output.sequences_scores.float().cpu().tolist(), 'transition_logp': model.compute_transition_scores(output.sequences, output.scores, output.beam_indices, normalize_logits=False).float().cpu().tolist()}
+
+def memory():
+    return {'allocated_bytes': torch.cuda.memory_allocated(), 'reserved_bytes': torch.cuda.memory_reserved(), 'peak_allocated_bytes': torch.cuda.max_memory_allocated(), 'peak_reserved_bytes': torch.cuda.max_memory_reserved()}
+
+for repeat, user in trials:
+    torch.cuda.synchronize()
+    started = time.perf_counter()
+    output = generate(user, True, True)
+    torch.cuda.synchronize()
+    elapsed = time.perf_counter() - started
+    raw = unpack(output, user)
+    del output
+    row = {'repeat': repeat, 'cohort_index': user['cohort_index'], 'prompt_tokens': user['prompt_tokens'], 'variant': variant, 'run': {'elapsed_s': elapsed, **raw}}
+    rows.append(row)
+    b.save(out / 'users' / f"{repeat}_{user['cohort_index']:04d}.json", row)
+    b.announce({'stage': 'measured', 'variant': variant, 'repeat': repeat, 'cohort_index': user['cohort_index']})
