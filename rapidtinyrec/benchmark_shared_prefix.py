@@ -37,10 +37,14 @@ def main():
     ap.add_argument('--reference-results',type=Path,required=True)
     ap.add_argument('--output-root',type=Path,required=True)
     ap.add_argument('--full-cohort',action='store_true')
+    ap.add_argument('--profile-prefix',action='store_true',
+        help='Profile ten representatives with all 40 shapes resident; no 500-user timing claim')
     ap.add_argument('--phase',type=int,choices=range(4),required=True)
     ap.add_argument('--reuse-compiler-artifacts',action='store_true',
         help='Reuse this variant\'s earlier on-disk compiler artifacts; GPU process and graphs are still fresh')
     args=ap.parse_args()
+    if args.profile_prefix:
+        assert args.full_cohort and args.phase==1 and not args.reuse_compiler_artifacts
     variant=('arena_replay','prefix_replay','prefix_replay','arena_replay')[args.phase]
     half=0 if args.phase<2 else 1
     assert not args.reuse_compiler_artifacts or args.phase in (2,3)
@@ -83,7 +87,7 @@ def main():
     assert all(p.dtype==torch.float32 for p in model.parameters())
     inputs={u['cohort_index']:torch.tensor([u['prompt_token_ids']],device='cuda') for u in users}
     masks={i:torch.ones_like(x) for i,x in inputs.items()}
-    manifest={'experiment':'shared_prefix_500' if args.full_cohort else 'shared_prefix_pilot',
+    manifest={'experiment':'shared_prefix_profile' if args.profile_prefix else ('shared_prefix_500' if args.full_cohort else 'shared_prefix_pilot'),
         'phase':args.phase,'variant':variant,'half':half,
         'compiler_artifacts':{'reused':args.reuse_compiler_artifacts,'before':artifacts_before},
         'users':users,'dtype':'float32','tf32':False,'hardware':torch.cuda.get_device_name(0),
@@ -92,6 +96,8 @@ def main():
         'sha256':{n:b.digest(b.ROOT/n) for n in ['benchmark_shared_prefix.py','shared_prefix.py','prefix_replay.py','prefix_prefill.py','input_arena.py','decode_replay.py',
             'compiled_forward.py','shared_prefill.py','gpu_constraints.py','expected.json','direct_reorder.py']},
         'protocol':'Four isolated processes on one GPU allocation: arena half0, prefix half0, prefix half1, arena half1. Full cohort halves use even/odd cohort positions; pilot halves use repeats 0-2/3-5. Every phase warms all selected history lengths. Phases0/1 have cold disk compiler caches; phases2/3 reuse their own variant artifacts when requested. All processes, CUDA graphs and GPU memory are fresh. FP32 beam50, all five scored tokens, full-vocabulary normalization. Same Qwen2 weights and native GQA operations; candidate keeps a single-row physical prefix and temporarily materializes dense exact-length attention K/V per layer. Only suffixes are retained and reordered. Compilation, capture, warmup and output extraction excluded; prefill, staging, replay, constraints and cache reordering included. No per-request process switching.'}
+    if args.profile_prefix:
+        manifest['protocol']='One isolated A6000 process, cold compiler caches, 40 warmed prefix decode graphs. Six uninstrumented sweeps of ten representatives from the frozen 500-user cohort, then light scopes and short/medium/long CPU/CUDA traces. Uncaptured compiled-prefix diagnostics expose operation attribution only. FP32 TF32 off, beam50, five scored probabilities, both full-vocabulary normalizations. All setup, compilation, graph preparation, warmup and output extraction excluded from inference. This is not a 500-user latency estimate.'
     b.save(out/'manifest.json',manifest)
     compiler=CompiledForward(model,out,b.announce)
     from .input_arena import SharedInputArena
@@ -161,6 +167,9 @@ def main():
         previous=json.loads((out/'warmup_outputs'/f'{key}_{variant}.json').read_text())
         assert raw==previous, 'Mixed-length candidate instability'
         warm_outputs[key]=raw
+    if args.profile_prefix:
+        from .profile_prefix import warm_diagnostic
+        warm_diagnostic(pool,warm_users,generate,unpack,out)
     torch.cuda.synchronize()
     assert torch.cuda.memory_allocated()<40*1024**3
     assert torch.cuda.memory_reserved()<46*1024**3
@@ -171,6 +180,10 @@ def main():
         'warmup_cohort_indices':[u['cohort_index'] for u in warm_users],'memory':memory(),
         'note':'Isolated process residency. Setup includes nested compiler and capture timings; do not add. Peak measurement counters reset after this record.'})
     torch.cuda.reset_peak_memory_stats()
+    if args.profile_prefix:
+        from .profile_prefix import profile
+        profile(model,compiler,pool,direct,warm_users,generate,unpack,out,memory)
+        return
     rows=[]
     trials=[(0,u) for i,u in enumerate(users) if i%2==half] if args.full_cohort else [
         (repeat,u) for repeat in range(half*3,half*3+3) for u in users]

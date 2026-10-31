@@ -1,0 +1,145 @@
+{
+  "scope": "Six sweeps of ten history-length representatives; not the frozen500 distribution",
+  "requests": 60,
+  "representatives": 10,
+  "latency_ms": {
+    "median": 130.66012226045132,
+    "p95": 133.8397115468979
+  },
+  "requests_sha256": "8ad67970478e58c01b88728ed10d4dd6fc04f1e706242cf78a5ff7d89934028e",
+  "exactness_passed": true,
+  "comparisons": {
+    "uninstrumented": {
+      "requests": 60,
+      "rank_positions": 3000,
+      "sequence_values": 3000,
+      "transition_values": 15000,
+      "matching_rank_lists": 60,
+      "matching_rank_positions": 3000,
+      "matching_sequence_vectors": 60,
+      "matching_transition_arrays": 60,
+      "matching_sequence_values": 3000,
+      "matching_transition_values": 15000,
+      "max_sequence_difference_common": 0.0,
+      "max_transition_difference_common": 0.0
+    },
+    "light_profiles": {
+      "requests": 30,
+      "rank_positions": 1500,
+      "sequence_values": 1500,
+      "transition_values": 7500,
+      "matching_rank_lists": 30,
+      "matching_rank_positions": 1500,
+      "matching_sequence_vectors": 30,
+      "matching_transition_arrays": 30,
+      "matching_sequence_values": 1500,
+      "matching_transition_values": 7500,
+      "max_sequence_difference_common": 0.0,
+      "max_transition_difference_common": 0.0
+    },
+    "torch_profiles": {
+      "requests": 6,
+      "rank_positions": 300,
+      "sequence_values": 300,
+      "transition_values": 1500,
+      "matching_rank_lists": 6,
+      "matching_rank_positions": 300,
+      "matching_sequence_vectors": 6,
+      "matching_transition_arrays": 6,
+      "matching_sequence_values": 300,
+      "matching_transition_values": 1500,
+      "max_sequence_difference_common": 0.0,
+      "max_transition_difference_common": 0.0
+    },
+    "diagnostic_warmup": {
+      "requests": 10,
+      "rank_positions": 500,
+      "sequence_values": 500,
+      "transition_values": 2500,
+      "matching_rank_lists": 10,
+      "matching_rank_positions": 500,
+      "matching_sequence_vectors": 10,
+      "matching_transition_arrays": 10,
+      "matching_sequence_values": 500,
+      "matching_transition_values": 2500,
+      "max_sequence_difference_common": 0.0,
+      "max_transition_difference_common": 0.0
+    },
+    "warmup": {
+      "requests": 30,
+      "rank_positions": 1500,
+      "sequence_values": 1500,
+      "transition_values": 7500,
+      "matching_rank_lists": 30,
+      "matching_rank_positions": 1500,
+      "matching_sequence_vectors": 30,
+      "matching_transition_arrays": 30,
+      "matching_sequence_values": 1500,
+      "matching_transition_values": 7500,
+      "max_sequence_difference_common": 0.0,
+      "max_transition_difference_common": 0.0
+    }
+  },
+  "replay_gpu_ms": {
+    "76": {
+      "kernel_sum": 112.861847,
+      "activity_union": 113.97115966796875,
+      "instrumented_wall": 158.256366,
+      "prefill": 21.66391,
+      "decode": 84.13285800000001,
+      "categories": {
+        "matrix_multiplication": 83.47223199999999,
+        "attention": 17.409252,
+        "softmax": 1.811464,
+        "fused_cat_layout_rope": 2.6703989999999993,
+        "other": 5.4464630000000005,
+        "gpu_memcpy": 0.9825639999999998,
+        "silu_elementwise": 0.7846470000000001,
+        "gpu_memset": 0.23426300000000042,
+        "normalization": 0.9376219999999998,
+        "copy_or_cat": 0.305288,
+        "indexing": 0.024480000000000002
+      }
+    },
+    "101": {
+      "kernel_sum": 118.97976,
+      "activity_union": 120.1458896484375,
+      "instrumented_wall": 140.883354,
+      "prefill": 25.933609,
+      "decode": 86.08071799999999,
+      "categories": {
+        "matrix_multiplication": 87.10213800000005,
+        "attention": 19.279785,
+        "fused_cat_layout_rope": 3.142426,
+        "softmax": 1.8096370000000002,
+        "other": 5.426759000000001,
+        "gpu_memcpy": 0.9825989999999999,
+        "silu_elementwise": 0.9045149999999998,
+        "gpu_memset": 0.3082320000000005,
+        "normalization": 0.9792919999999999,
+        "copy_or_cat": 0.31092000000000003,
+        "indexing": 0.024288
+      }
+    },
+    "121": {
+      "kernel_sum": 121.628745,
+      "activity_union": 122.79813500976563,
+      "instrumented_wall": 143.27505100000002,
+      "prefill": 27.075096000000002,
+      "decode": 87.54639599999999,
+      "categories": {
+        "matrix_multiplication": 88.59775900000005,
+        "attention": 19.81720899999999,
+        "fused_cat_layout_rope": 3.531224000000001,
+        "softmax": 1.811239,
+        "other": 5.474625000000003,
+        "gpu_memcpy": 0.9829479999999999,
+        "silu_elementwise": 1.016326,
+        "gpu_memset": 0.30936000000000075,
+        "normalization": 1.0403559999999998,
+        "copy_or_cat": 0.31575099999999995,
+        "indexing": 0.024256
+      }
+    }
+  }
+}
