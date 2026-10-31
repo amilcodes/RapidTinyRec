@@ -1,0 +1,54 @@
+{
+  "schema": "qkv-filtered-metadata-reconciliation-v1",
+  "at_utc": "2026-10-30T23:28:12.468738+00:00",
+  "job_id": "8144136",
+  "run_id": "packed-qkv-bf16-filtered-v1-20261030T212958Z-75bd90fa07ef",
+  "records": [
+    {
+      "schema": "packed-qkv-allocation-reconciliation-v1",
+      "matched": true,
+      "run_id": "packed-qkv-bf16-filtered-v1-20261030T212958Z-75bd90fa07ef",
+      "job_id": "8144136",
+      "files": 130,
+      "bootstrap_executed": false
+    },
+    {
+      "schema": "packed-qkv-allocation-reconciliation-v1",
+      "matched": true,
+      "run_id": "packed-qkv-bf16-filtered-v1-20261030T212958Z-75bd90fa07ef",
+      "job_id": "8144136",
+      "files": 130,
+      "bootstrap_executed": false
+    }
+  ],
+  "source_files": 130,
+  "source_bytes": 1759614,
+  "dependency_coverage": {
+    "required_dependencies": 129,
+    "python_only_coverage": false
+  },
+  "source_hashes_unchanged": true,
+  "uploaded_manifest_sha256": "020592683ac8d2098eb9eeb243d9c651d6b7e3d4e1dbe4ead6bcd9674dc64d40",
+  "actual_run_sha256": "335857b5772c663ecbb3fc8900a3e7ff767d078c83f5213b73cba0a033dd8f22",
+  "discrepancy": {
+    "slurm_prolog_cpus": 1,
+    "authoritative_scheduler_NumCPUs": 4,
+    "note": "Prolog discrepancy retained; both captured scheduler records validate4CPUs and typedA6000."
+  },
+  "raw_files": 80,
+  "raw_bytes": 15832306,
+  "native_log_publication_verified": [
+    {
+      "path": "capture-cublas.log",
+      "bytes": 6248748,
+      "sha256": "54fc358ab0f8d1cc000e58e95b33545fe238c7b767f09d23cbe2785751bf4232"
+    },
+    {
+      "path": "capture-cublaslt.log",
+      "bytes": 5631292,
+      "sha256": "a6d9d971322cebfa615912647f18cd492bf9ede74fc9e2a776edd5e14a46ccf3"
+    }
+  ],
+  "bootstrap_executed": false,
+  "numerical_reaudit": false
+}
