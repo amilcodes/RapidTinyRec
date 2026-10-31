@@ -1,0 +1,11 @@
+{
+  "closed_at_utc": "2026-10-30T03:33:13.629178+00:00",
+  "run_id": "two-request-beam-wave-pilot-20261030T025208Z-31824f7daf15",
+  "job_id": "8114773",
+  "status": "CLOSED_RESEARCH_SCORE_STABILITY_REJECTED",
+  "failure_mapping": "All20 allocated score-bit failures correspond to reversed request order;60 serial comparisons pass. Metadata mapping only, no local score recomputation. Root cause not established.",
+  "all_authorized_directions_resolved": true,
+  "no_replacement_authorized": true,
+  "review": "/Users/AmilAgrawal/Documents/Codex/2026-10-18/let/outputs/quality_frontier/beam-wave-independent-review.json",
+  "raw_manifest": "/Users/AmilAgrawal/Documents/Codex/2026-10-18/let/outputs/quality_frontier/beam-wave-terminal-raw-manifest.json"
+}

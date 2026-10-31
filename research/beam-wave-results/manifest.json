@@ -1,0 +1,42 @@
+{
+  "schema": "retrospective-research-publication-v1",
+  "published_at_utc": "2026-10-31T06:25:37.464316+00:00",
+  "evidence_date": "2026-10-30T03:32:40.523321+00:00",
+  "base_commit": "6befcba76c5eefd9f580dba1911c28afe354bcd3",
+  "snapshot_counts": {},
+  "raw_archive_included": false,
+  "numerical_reaudit": false,
+  "promotion": false,
+  "files": {
+    "README.md": {
+      "bytes": 2881,
+      "sha256": "a008b08895d7d16c2c6b454622d0934a7ffa8266688fbba5646a79543049d3e8",
+      "origin": "publication-generated"
+    },
+    "evidence/beam-wave-closure.json": {
+      "bytes": 755,
+      "sha256": "44fc5c2c2cd0222edb05cdb8c6f4ee62d8678e86f0eea8e609e61ab931cee18e",
+      "origin": "outputs/quality_frontier/beam-wave-closure.json"
+    },
+    "evidence/beam-wave-independent-review.json": {
+      "bytes": 432192,
+      "sha256": "f4f0df183d70c5386ecb5d28eb8284ac22235b217614368d74350a0c803ef114",
+      "origin": "outputs/quality_frontier/beam-wave-independent-review.json"
+    },
+    "evidence/beam-wave-metadata-reconciliation.json": {
+      "bytes": 1762,
+      "sha256": "820cb981114f723f34fc6e76e33fc240198ab4069eae3f0ba6e437255ed68bcf",
+      "origin": "outputs/quality_frontier/beam-wave-metadata-reconciliation.json"
+    },
+    "evidence/beam-wave-terminal-raw-manifest.json": {
+      "bytes": 90623,
+      "sha256": "490038fc8ddbd02fd0e4d8a35ed17aa5460dfdf899d21a77740ebd7793957272",
+      "origin": "outputs/quality_frontier/beam-wave-terminal-raw-manifest.json"
+    },
+    "verify_publication.py": {
+      "bytes": 714,
+      "sha256": "98a3fbb950c7751463a016d00e381e286ba44d3aaacdfea7ff20c342c24f3dca",
+      "origin": "publication-generated"
+    }
+  }
+}

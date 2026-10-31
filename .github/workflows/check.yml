@@ -21,6 +21,12 @@ jobs:
       - run: bash -n benchmarks/preparation/quality-frontier/precision-full500.sh
       - run: bash -n benchmarks/preparation/quality-frontier/precision-paired-staged.sh
       - run: bash -n benchmarks/preparation/quality-frontier/precision-setup.sh
+      - run: python -m unittest discover -s tests -p test_beam_wave_artifact_integration.py -v
+      - run: python -m rapidtinyrec.beam_wave_runner --help
+      - run: bash -n jobs/beam-wave-pilot.sh
+      - run: python -m unittest discover -s tests -p test_beam_wave_runner.py -v
+      - run: python -m rapidtinyrec.audit_beam_wave --help
+      - run: python -m unittest discover -s tests -p test_audit_beam_wave.py -v
       - run: python -m rapidtinyrec.audit_precision --help
       - run: python -m rapidtinyrec.quality_frontier --help
       - run: python -m unittest discover -s tests -p test_evidence.py -v
