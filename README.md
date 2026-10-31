@@ -12,6 +12,10 @@ and the historical compiled-GQA baseline. [Supported scope and setup costs](docs
 The earlier shared-prefill change reduced median latency **869 ms → 188 ms
 (4.63×)** with all 25,000 ranked positions unchanged.
 
+Reduced-precision research reached **82.3 ms with TF32** and **56.5 ms with
+BF16**. These change rankings and are not enabled on main; see the
+[precision and quality comparison](#reduced-precision-results) below.
+
 ## Performance
 
 Office checkpoint · RTX A6000 · FP32 · batch 1 · beam 50. Each row is a separate
@@ -44,6 +48,29 @@ increases **140 → 350 s**. [Shared-prefix results](docs/shared-prefix.md).
 Packing decode query heads into attention rows reduces median/p95 latency
 **9.71% / 10.28%**, with unchanged memory. Cold setup rises **347 → 370 s**.
 [Exactness checks and setup costs](docs/folded-query-heads.md).
+
+### Reduced-precision results
+
+Same Office checkpoint, RTX A6000, 500 users, batch 1 and beam 50. Each row is
+a separate paired experiment; its control timings must not be substituted
+with those from another row. Setup, compilation and capture are excluded.
+TF32/BF16 are floating-point precision modes, not INT8/INT4 quantization.
+
+| Paired precision change | Median, ms | p95, ms | HitRate@10 | NDCG@10 | Changed full rank lists |
+| :--- | ---: | ---: | ---: | ---: | ---: |
+| FP32/TF32 off → TF32 | 114.43 → 82.30 | 119.52 → 83.65 | 11.4% → 11.4% | 0.079595 → 0.079595 | 142 / 500 |
+| TF32 → BF16 | 82.21 → **56.53** | 83.60 → **57.64** | 11.4% → 11.4% | 0.079595 → 0.079855 | 500 / 500 |
+
+BF16 reduced median latency **31.23%** against its paired TF32 control. At
+HitRate@10, one user improved and one regressed; the paired 95% interval for
+the change is **−0.6 to +0.6 percentage points**. NDCG@10 changed by +0.000260
+(95% interval −0.001515 to +0.002012). Some prompt-length groups regressed.
+These results support a speed/quality tradeoff, not a claim of equivalent
+quality or exact rankings. The comparison is BF16 versus TF32, not a direct
+paired BF16-versus-FP32 experiment.
+
+These are completed research measurements, not selectable modes on main.
+[Precision recipe, quality limits and source evidence](docs/precision-results.md).
 
 ## Run
 
