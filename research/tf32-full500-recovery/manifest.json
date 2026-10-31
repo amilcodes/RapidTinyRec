@@ -1,0 +1,47 @@
+{
+  "schema": "retrospective-research-publication-v1",
+  "published_at_utc": "2026-10-31T06:25:36.799064+00:00",
+  "evidence_date": "2026-10-27\u201328 (original measurement and separate recovery)",
+  "base_commit": "51b213413101a86a592208018870d9c7e25a590a",
+  "snapshot_counts": {},
+  "raw_archive_included": false,
+  "numerical_reaudit": false,
+  "promotion": false,
+  "files": {
+    "README.md": {
+      "bytes": 2964,
+      "sha256": "025ae2ef555bbba53f026b8ded9aded762b0731d65852c6c5c8c3494fcb94989",
+      "origin": "publication-generated"
+    },
+    "evidence/precision-full500-audit-recovery-reconciliation.json": {
+      "bytes": 855,
+      "sha256": "c6c026dafd753346f0d77f7faf72280f5eaf328625469497427b4882ce933570",
+      "origin": "outputs/quality_frontier/precision-full500-audit-recovery-reconciliation.json"
+    },
+    "evidence/precision-full500-audit-recovery-terminal.json": {
+      "bytes": 614,
+      "sha256": "66ecd71ea581ce282608eada8742eb296e70143f4ac9ac45c81b8e72c5563155",
+      "origin": "outputs/quality_frontier/precision-full500-audit-recovery-terminal.json"
+    },
+    "evidence/precision-full500-failure-review.json": {
+      "bytes": 827477,
+      "sha256": "bcb10df74a58f2beb8e78bf7176964909cd6527faaa5c968c20dc210cf188b57",
+      "origin": "outputs/quality_frontier/precision-full500-failure-review.json"
+    },
+    "evidence/precision-full500-terminal-scheduler.json": {
+      "bytes": 638,
+      "sha256": "f8a8f0507f31d5c568c3ffb5040ccaff8d21ce7901a121c37799258aad3baaca",
+      "origin": "outputs/quality_frontier/precision-full500-terminal-scheduler.json"
+    },
+    "evidence/recovery-audit.json": {
+      "bytes": 2049078,
+      "sha256": "f7142a8ad04ffbb587dbd531c86b605865bec5deb121cb5c5329b6f763665b95",
+      "origin": "work/rapidtinyrec_full500_audit_recovery/.oscar/results/full500-audit-recovery-20261028T014425Z-0f34500ac483/outputs/recovery-audit.json"
+    },
+    "verify_publication.py": {
+      "bytes": 714,
+      "sha256": "98a3fbb950c7751463a016d00e381e286ba44d3aaacdfea7ff20c342c24f3dca",
+      "origin": "publication-generated"
+    }
+  }
+}

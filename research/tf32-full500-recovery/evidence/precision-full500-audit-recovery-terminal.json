@@ -1,0 +1,42 @@
+{
+  "job_id": "8034953",
+  "queue": [],
+  "accounting_columns": [
+    "job_id",
+    "state",
+    "exit_code",
+    "elapsed",
+    "max_rss"
+  ],
+  "accounting": [
+    [
+      "8034953",
+      "COMPLETED",
+      "0:0",
+      "00:00:54",
+      ""
+    ],
+    [
+      "8034953.batch",
+      "COMPLETED",
+      "0:0",
+      "00:00:54",
+      "6056K"
+    ],
+    [
+      "8034953.extern",
+      "COMPLETED",
+      "0:0",
+      "00:00:54",
+      ""
+    ],
+    [
+      "8034953.0",
+      "COMPLETED",
+      "0:0",
+      "00:00:52",
+      "1364800K"
+    ]
+  ],
+  "source": "OSCAR kit status tool output confirmed terminal"
+}

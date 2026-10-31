@@ -1,0 +1,43 @@
+{
+  "observed_at_utc": "2026-10-27T20:10:18.371398+00:00",
+  "job_id": "8007230",
+  "queue": [],
+  "accounting_columns": [
+    "job_id",
+    "state",
+    "exit_code",
+    "elapsed",
+    "max_rss"
+  ],
+  "accounting": [
+    [
+      "8007230",
+      "FAILED",
+      "1:0",
+      "00:23:51",
+      ""
+    ],
+    [
+      "8007230.batch",
+      "FAILED",
+      "1:0",
+      "00:23:51",
+      "8308K"
+    ],
+    [
+      "8007230.extern",
+      "COMPLETED",
+      "0:0",
+      "00:23:51",
+      ""
+    ],
+    [
+      "8007230.0",
+      "FAILED",
+      "1:0",
+      "00:23:49",
+      "11421776K"
+    ]
+  ],
+  "source": "OSCAR kit status/sacct"
+}
