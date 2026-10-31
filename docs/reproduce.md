@@ -1,5 +1,12 @@
 # Reproduce
 
+The promoted FP32 stack is replay, shared input storage, physical-prefix KV and
+folded-query attention. Its existing entry point is
+`python -m rapidtinyrec.benchmark_folded_prefix`; use the complete phase commands
+in [folded-query reproduction](folded-query-heads.md). The `run prefill` example
+below reproduces the earlier shared-prefill ablation, not the final folded path.
+See [release scope](release-scope.md) before using the wrappers.
+
 Use Python 3.11 on Linux and an Ampere CUDA GPU. The published measurements used
 an RTX A6000, PyTorch 2.14.0+cu126, Transformers 4.55.4, four CPU threads and FP32
 with TF32 disabled. GPU inference needs a compute allocation on shared clusters.

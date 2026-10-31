@@ -4,8 +4,13 @@ Faster inference for [MiniOneRec](https://github.com/AkaliKong/MiniOneRec).
 Reuse history computation across beams, keep SID constraints on the GPU, and
 remove unnecessary KV-head expansion from compiled attention.
 
-**Shared prefill: 869 ms → 188 ms median (4.63×)**, with all 25,000 ranked
-positions unchanged on 500 users.
+**Validated FP32 stack: 114.8 ms median / 119.9 ms p95**, with 7.49 GiB
+allocated GPU memory on the 500-user Office/A6000 benchmark. The folded path
+preserves every rank and score bit against its paired physical-prefix control
+and the historical compiled-GQA baseline. [Supported scope and setup costs](docs/release-scope.md).
+
+The earlier shared-prefill change reduced median latency **869 ms → 188 ms
+(4.63×)** with all 25,000 ranked positions unchanged.
 
 ## Performance
 
@@ -18,10 +23,10 @@ paired run on the same 500 users; improvements should not be multiplied together
 | Batch constraint transfers | 186.2 → 166.6 | 187.9 → 168.1 | Bitwise exact |
 | GPU constraint lookup | 167.8 → 160.8 | 169.2 → 163.0 | Bitwise exact |
 | Restore native GQA in compiled forward | 174.4 → 159.7 | 188.2 → 169.8 | Bitwise exact |
-| Replay + direct KV reorder (experimental) | 136.5 → 131.1 | 144.6 → 138.8 | Bitwise exact |
-| Reuse graph input storage (experimental) | 130.1 → 130.2 | 138.0 → 138.3 | Bitwise exact |
-| Share physical history KV (experimental) | 129.3 → 126.7 | 137.2 → 133.3 | Bitwise exact |
-| Fold decode query heads into rows (experimental) | 127.2 → 114.8 | 133.6 → 119.9 | Bitwise exact |
+| Replay + direct KV reorder | 136.5 → 131.1 | 144.6 → 138.8 | Bitwise exact |
+| Reuse graph input storage | 130.1 → 130.2 | 138.0 → 138.3 | Bitwise exact |
+| Share physical history KV | 129.3 → 126.7 | 137.2 → 133.3 | Bitwise exact |
+| Fold decode query heads into rows | 127.2 → 114.8 | 133.6 → 119.9 | Bitwise exact |
 
 Every row preserves all 50 ranks for every user against its paired control.
 Compilation, capture and warmup are excluded. Full-vocabulary normalization, newline/EOS
