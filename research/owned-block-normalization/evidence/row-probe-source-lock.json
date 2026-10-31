@@ -1,0 +1,12 @@
+{
+  "sha256": {
+    "probe.py": "d36176fd4ca59a55336967891609c2158a14f5a193144bb93cbff6c1d6d07077",
+    "provenance.py": "a1f8e60395f07782d9b1e784e9f5a930a4b3735cf94ef4eed8b7c2954833aab4",
+    "job.sh": "b7287ac17d3c3197ce621e5a508bb69b864078f8789cab71468232d103fc443e",
+    "protocol.json": "b8fd7bc2b44314e0b5669d7c359b31b41082f7d29f8038ddb92e5f9bfa9c0715",
+    "oscar.json": "69bbda42670264cf129aec5b6ff9c9355d1ca3f5ee973c2e6cabeb6dd5c6251f"
+  },
+  "files": 5,
+  "bytes": 10873,
+  "created_at_utc": "2026-10-30T06:30:00.400699+00:00"
+}

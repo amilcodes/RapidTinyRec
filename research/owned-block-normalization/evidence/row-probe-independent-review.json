@@ -1,0 +1,377 @@
+{
+  "schema": "row-permutation-independent-review-v1",
+  "at_utc": "2026-10-30T10:18:37.871050+00:00",
+  "run_id": "row-permutation-diagnostic-v1-20261030T075948Z-01d802230590",
+  "job_id": "8122167",
+  "status": "CLOSED_DIAGNOSTIC_ORDER_DEPENDENT_NORMALIZATION_OBSERVED",
+  "execution_complete": true,
+  "successful_fetches": 1,
+  "raw_files": 9,
+  "raw_bytes": 81653,
+  "submitted_files": 5,
+  "submitted_bytes": 10873,
+  "allocation_elapsed_s": 9,
+  "stored_compute_elapsed_s": 1.0228350162506104,
+  "work_timeout_s": 480,
+  "allocated_minutes_limit": 10,
+  "source_identity_and_metadata_reconciliation_passed": true,
+  "log_closure_passed": true,
+  "cases": 32,
+  "comparison_counts": {
+    "projection": {
+      "same_order": {
+        "exact": 32,
+        "not_exact": 0
+      },
+      "reversed_order": {
+        "exact": 32,
+        "not_exact": 0
+      },
+      "reverse_repeat": {
+        "exact": 32,
+        "not_exact": 0
+      },
+      "restored_order": {
+        "exact": 32,
+        "not_exact": 0
+      }
+    },
+    "first_log_softmax": {
+      "same_order": {
+        "exact": 32,
+        "not_exact": 0
+      },
+      "reversed_order": {
+        "exact": 24,
+        "not_exact": 8
+      },
+      "reverse_repeat": {
+        "exact": 32,
+        "not_exact": 0
+      },
+      "restored_order": {
+        "exact": 32,
+        "not_exact": 0
+      }
+    },
+    "second_log_softmax": {
+      "same_order": {
+        "exact": 32,
+        "not_exact": 0
+      },
+      "reversed_order": {
+        "exact": 24,
+        "not_exact": 8
+      },
+      "reverse_repeat": {
+        "exact": 32,
+        "not_exact": 0
+      },
+      "restored_order": {
+        "exact": 32,
+        "not_exact": 0
+      }
+    }
+  },
+  "failed_comparisons": [
+    {
+      "shape": [
+        100,
+        1536,
+        152265
+      ],
+      "seed": 17,
+      "tf32": false,
+      "mode": "eager",
+      "stage": "first_log_softmax",
+      "order": "reversed_order",
+      "stored_comparison": {
+        "bit_exact": false,
+        "different_values": 454014,
+        "different_rows": 3,
+        "max_abs": 1.9073486328125e-06
+      }
+    },
+    {
+      "shape": [
+        100,
+        1536,
+        152265
+      ],
+      "seed": 17,
+      "tf32": false,
+      "mode": "eager",
+      "stage": "second_log_softmax",
+      "order": "reversed_order",
+      "stored_comparison": {
+        "bit_exact": false,
+        "different_values": 304506,
+        "different_rows": 3,
+        "max_abs": 1.9073486328125e-06
+      }
+    },
+    {
+      "shape": [
+        100,
+        1536,
+        152265
+      ],
+      "seed": 17,
+      "tf32": false,
+      "mode": "graph",
+      "stage": "first_log_softmax",
+      "order": "reversed_order",
+      "stored_comparison": {
+        "bit_exact": false,
+        "different_values": 454014,
+        "different_rows": 3,
+        "max_abs": 1.9073486328125e-06
+      }
+    },
+    {
+      "shape": [
+        100,
+        1536,
+        152265
+      ],
+      "seed": 17,
+      "tf32": false,
+      "mode": "graph",
+      "stage": "second_log_softmax",
+      "order": "reversed_order",
+      "stored_comparison": {
+        "bit_exact": false,
+        "different_values": 304506,
+        "different_rows": 3,
+        "max_abs": 1.9073486328125e-06
+      }
+    },
+    {
+      "shape": [
+        100,
+        1536,
+        152265
+      ],
+      "seed": 17,
+      "tf32": true,
+      "mode": "eager",
+      "stage": "first_log_softmax",
+      "order": "reversed_order",
+      "stored_comparison": {
+        "bit_exact": false,
+        "different_values": 453890,
+        "different_rows": 3,
+        "max_abs": 1.9073486328125e-06
+      }
+    },
+    {
+      "shape": [
+        100,
+        1536,
+        152265
+      ],
+      "seed": 17,
+      "tf32": true,
+      "mode": "eager",
+      "stage": "second_log_softmax",
+      "order": "reversed_order",
+      "stored_comparison": {
+        "bit_exact": false,
+        "different_values": 310318,
+        "different_rows": 5,
+        "max_abs": 9.5367431640625e-07
+      }
+    },
+    {
+      "shape": [
+        100,
+        1536,
+        152265
+      ],
+      "seed": 17,
+      "tf32": true,
+      "mode": "graph",
+      "stage": "first_log_softmax",
+      "order": "reversed_order",
+      "stored_comparison": {
+        "bit_exact": false,
+        "different_values": 453890,
+        "different_rows": 3,
+        "max_abs": 1.9073486328125e-06
+      }
+    },
+    {
+      "shape": [
+        100,
+        1536,
+        152265
+      ],
+      "seed": 17,
+      "tf32": true,
+      "mode": "graph",
+      "stage": "second_log_softmax",
+      "order": "reversed_order",
+      "stored_comparison": {
+        "bit_exact": false,
+        "different_values": 310318,
+        "different_rows": 5,
+        "max_abs": 9.5367431640625e-07
+      }
+    },
+    {
+      "shape": [
+        100,
+        1536,
+        152265
+      ],
+      "seed": 29,
+      "tf32": false,
+      "mode": "eager",
+      "stage": "first_log_softmax",
+      "order": "reversed_order",
+      "stored_comparison": {
+        "bit_exact": false,
+        "different_values": 302425,
+        "different_rows": 2,
+        "max_abs": 1.9073486328125e-06
+      }
+    },
+    {
+      "shape": [
+        100,
+        1536,
+        152265
+      ],
+      "seed": 29,
+      "tf32": false,
+      "mode": "eager",
+      "stage": "second_log_softmax",
+      "order": "reversed_order",
+      "stored_comparison": {
+        "bit_exact": false,
+        "different_values": 454690,
+        "different_rows": 3,
+        "max_abs": 1.9073486328125e-06
+      }
+    },
+    {
+      "shape": [
+        100,
+        1536,
+        152265
+      ],
+      "seed": 29,
+      "tf32": false,
+      "mode": "graph",
+      "stage": "first_log_softmax",
+      "order": "reversed_order",
+      "stored_comparison": {
+        "bit_exact": false,
+        "different_values": 302425,
+        "different_rows": 2,
+        "max_abs": 1.9073486328125e-06
+      }
+    },
+    {
+      "shape": [
+        100,
+        1536,
+        152265
+      ],
+      "seed": 29,
+      "tf32": false,
+      "mode": "graph",
+      "stage": "second_log_softmax",
+      "order": "reversed_order",
+      "stored_comparison": {
+        "bit_exact": false,
+        "different_values": 454690,
+        "different_rows": 3,
+        "max_abs": 1.9073486328125e-06
+      }
+    },
+    {
+      "shape": [
+        100,
+        1536,
+        152265
+      ],
+      "seed": 29,
+      "tf32": true,
+      "mode": "eager",
+      "stage": "first_log_softmax",
+      "order": "reversed_order",
+      "stored_comparison": {
+        "bit_exact": false,
+        "different_values": 453806,
+        "different_rows": 3,
+        "max_abs": 1.9073486328125e-06
+      }
+    },
+    {
+      "shape": [
+        100,
+        1536,
+        152265
+      ],
+      "seed": 29,
+      "tf32": true,
+      "mode": "eager",
+      "stage": "second_log_softmax",
+      "order": "reversed_order",
+      "stored_comparison": {
+        "bit_exact": false,
+        "different_values": 456511,
+        "different_rows": 4,
+        "max_abs": 1.9073486328125e-06
+      }
+    },
+    {
+      "shape": [
+        100,
+        1536,
+        152265
+      ],
+      "seed": 29,
+      "tf32": true,
+      "mode": "graph",
+      "stage": "first_log_softmax",
+      "order": "reversed_order",
+      "stored_comparison": {
+        "bit_exact": false,
+        "different_values": 453806,
+        "different_rows": 3,
+        "max_abs": 1.9073486328125e-06
+      }
+    },
+    {
+      "shape": [
+        100,
+        1536,
+        152265
+      ],
+      "seed": 29,
+      "tf32": true,
+      "mode": "graph",
+      "stage": "second_log_softmax",
+      "order": "reversed_order",
+      "stored_comparison": {
+        "bit_exact": false,
+        "different_values": 456511,
+        "different_rows": 4,
+        "max_abs": 1.9073486328125e-06
+      }
+    }
+  ],
+  "interpretation": "All32projection row-permutation comparisons exact. Both log-softmax stages fail row-permutation exactness in all8cases of100x1536to152265, across bothseeds,TF32off/on,eager/graph. Other24cases exact. Allsameorder/reverse-repeat/restored comparisons exact. This supports a row-dependent normalization mechanism in these synthetic CUDA tests; it does not prove the old full-model wave failure cause or repair it.",
+  "limitations": [
+    "Summary of stored numerical flags only; no numerical recomputation/model run locally.",
+    "Random primitive data, not releasedweights or end-to-end recommendations.",
+    "Aggregate max_abs is not an ULP bound or quality guarantee. No tolerance introduced.",
+    "Slurm prolog header reports CPUs1 while explicit scheduler NumCPUs4,CPUs/Task4 and wrapper cpus-per-task4 agree; header preserved and not used as resource authority."
+  ],
+  "old_wave_failure_cleared": false,
+  "performance_claim": false,
+  "adoption": false,
+  "complete_research_review": true
+}

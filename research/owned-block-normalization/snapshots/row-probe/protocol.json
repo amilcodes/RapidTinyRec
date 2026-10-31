@@ -1,0 +1,75 @@
+{
+  "schema": "row-permutation-diagnostic-v1",
+  "purpose": "Test whether synthetic native projections or double normalization depend on physical request row position.",
+  "shapes": [
+    [
+      100,
+      1536,
+      8960
+    ],
+    [
+      100,
+      8960,
+      1536
+    ],
+    [
+      100,
+      1536,
+      152265
+    ],
+    [
+      2,
+      1536,
+      152265
+    ]
+  ],
+  "seeds": [
+    17,
+    29
+  ],
+  "tf32": [
+    false,
+    true
+  ],
+  "modes": [
+    "eager",
+    "graph"
+  ],
+  "cases": 32,
+  "orders": [
+    "original",
+    "original",
+    "reversed_request_blocks",
+    "reversed_request_blocks",
+    "restored"
+  ],
+  "stage_comparisons": [
+    "projection",
+    "first_log_softmax",
+    "second_log_softmax"
+  ],
+  "max_work_s": 480,
+  "resources": {
+    "partition": "gpu",
+    "qos": "norm-gpu",
+    "constraint": "ampere",
+    "gpu_type": "nvidia_rtx_a6000",
+    "gpus": 1,
+    "cpus": 4,
+    "memory_gb": 32,
+    "time": "00:10:00",
+    "setup": [
+      "module purge"
+    ],
+    "command": [
+      "bash",
+      "job.sh"
+    ]
+  },
+  "weights": "seeded random only",
+  "no_timing_claim": true,
+  "no_generation": true,
+  "no_promotion": true,
+  "interpretation": "An observed primitive failure supports a mechanism hypothesis; a pass does not clear the original failed beam-wave audit.",
+  "shape_evidence": "PR21 frozen beam-wave dispatch required_shape_calls (8960,100,1536)/(1536,100,8960); released hidden1536/vocab152265. Synthetic prefill last-logit batch2 is not full prefill."
+}

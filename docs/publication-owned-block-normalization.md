@@ -1,0 +1,5 @@
+# Archive row-normalization evidence and guarded scheduler correction
+
+The synthetic row-permutation probe8122167 found exact projections in32/32 cases but first and second log-softmax reversal mismatches in8/32 cases each, all at100rows and full vocabulary152265. This motivates fresh owned50-row normalization at both sites, without changing the scoring objective. Primitive8155234 stopped before numerics because its scheduler parser expected CPUsPerTask instead of the actual CPUs/Task field. The isolated successor preserves raw scheduler stdout/environment before validation and retains strict4CPU, native binding, live ownership, finite-output, input-regeneration, exact-bit and480/540/600-second gates. Successor8162473 was pending in the last saved observation at06:14UTC October31; no CUDA normalization result or production speedup is claimed. Historical lock files refer only to their original runs and are not permission to resubmit.
+
+[Saved evidence, source snapshots and provenance](../research/owned-block-normalization/README.md). Publication on2026-10-31; historical work dates are retained. No adoption or automatic merge.

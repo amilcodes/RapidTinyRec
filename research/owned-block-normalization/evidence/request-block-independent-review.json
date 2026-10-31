@@ -1,0 +1,118 @@
+{
+  "schema": "owned-block-independent-review-v1",
+  "at_utc": "2026-10-31T04:15:49.834828+00:00",
+  "job_id": "8155234",
+  "run_id": "owned-block-normalization-v1-20261031T020139Z-c03ad4830342",
+  "status": "CLOSED_PRIMITIVE_EXECUTION_FAILURE",
+  "terminal": {
+    "job_id": "8155234",
+    "state": "FAILED",
+    "exit_code": "1:0",
+    "elapsed_seconds": 8
+  },
+  "successful_fetches": 1,
+  "raw_files": 12,
+  "raw_bytes": 9647,
+  "source_files": 22,
+  "source_bytes": 107567,
+  "metadata": null,
+  "partial_allocation_reconciliations": [],
+  "partial_failure_evidence": {
+    "outputs/owned-block/whole-exit.json": {
+      "schema": "owned-block-whole-exit-v2",
+      "command": [
+        "/oscar/scratch/aagraw73/minionerec-shared-prefill/envs/torch214-cu126-transformers4554/bin/python",
+        "/oscar/scratch/aagraw73/agent-runs/rapidtinyrec-owned-block-normalization/owned-block-normalization-v1-20261031T020139Z-c03ad4830342/code/allocated_entry.py",
+        "worker"
+      ],
+      "pid": 1051279,
+      "guardian_pid": 1051278,
+      "returncode": 1,
+      "reason": "exited",
+      "error": null,
+      "started_monotonic": 18981455.13369185,
+      "ended_monotonic": 18981460.496964633,
+      "global_deadline": 18981995.13369185,
+      "remaining_group_terminated": false,
+      "logs": {
+        "whole.stdout": {
+          "bytes": 0,
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        },
+        "whole.stderr": {
+          "bytes": 0,
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        }
+      },
+      "completed_normally": false,
+      "guardian_closure_required": true,
+      "execution_certified": false,
+      "submission_ready": false,
+      "finalization": {
+        "worker_closure_passed": false,
+        "records_passed": false,
+        "execution_certified": false
+      },
+      "publication_monotonic": 18981460.498836137
+    },
+    "outputs/owned-block/guardian-exit.json": {
+      "schema": "owned-block-guardian-exit-v1",
+      "guardian_pid": 1051278,
+      "parent_pid": 1051275,
+      "worker": {
+        "event": "worker_closed",
+        "pid": 1051279,
+        "returncode": 1,
+        "remaining_group_terminated": false,
+        "ended_monotonic": 18981460.496964633
+      },
+      "started_monotonic": 18981455.13369185,
+      "global_deadline": 18981995.13369185,
+      "closed_monotonic": 18981460.505180113,
+      "reason": "publication_closed",
+      "error": null,
+      "execution_certified": false,
+      "submission_ready": false
+    },
+    "outputs/owned-block/worker/member-exit.json": {
+      "schema": "owned-block-member-exit-v1",
+      "command": [
+        "/oscar/scratch/aagraw73/minionerec-shared-prefill/envs/torch214-cu126-transformers4554/bin/python",
+        "/oscar/scratch/aagraw73/agent-runs/rapidtinyrec-owned-block-normalization/owned-block-normalization-v1-20261031T020139Z-c03ad4830342/code/allocated_entry.py",
+        "compute"
+      ],
+      "pid": 1051285,
+      "group_id": 1051279,
+      "returncode": 1,
+      "reason": "exited",
+      "started_monotonic": 18981455.291448865,
+      "ended_monotonic": 18981460.471408103,
+      "compute_deadline": 18981935.291448865,
+      "global_deadline": 18981995.13369185,
+      "group_closure_deferred_to_outer": true,
+      "completed_normally": false,
+      "logs": {
+        "child.stdout": {
+          "bytes": 0,
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        },
+        "child.stderr": {
+          "bytes": 1943,
+          "sha256": "2e9ba9eee95d69f942ec586f1ba6280bfa65abe0354dc9c690b3b85f65322114"
+        }
+      },
+      "execution_certified": false
+    },
+    "completed_case_files": [],
+    "logs/stderr.log": "srun: error: gpu1503: task 0: Exited with exit code 1\n",
+    "outputs/owned-block/whole.stderr": "",
+    "outputs/owned-block/worker/child.stderr": "Traceback (most recent call last):\n  File \"/oscar/scratch/aagraw73/agent-runs/rapidtinyrec-owned-block-normalization/owned-block-normalization-v1-20261031T020139Z-c03ad4830342/code/allocated_entry.py\", line 107, in <module>\n    raise SystemExit(main())\n                     ^^^^^^\n  File \"/oscar/scratch/aagraw73/agent-runs/rapidtinyrec-owned-block-normalization/owned-block-normalization-v1-20261031T020139Z-c03ad4830342/code/allocated_entry.py\", line 96, in main\n    if mode=='compute':return compute(root,output/'worker')\n                              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/oscar/scratch/aagraw73/agent-runs/rapidtinyrec-owned-block-normalization/owned-block-normalization-v1-20261031T020139Z-c03ad4830342/code/allocated_entry.py\", line 34, in compute\n    before=observe();save(output/'compute-allocation-before.json',before)\n           ^^^^^^^^^\n  File \"/oscar/scratch/aagraw73/agent-runs/rapidtinyrec-owned-block-normalization/owned-block-normalization-v1-20261031T020139Z-c03ad4830342/code/allocation.py\", line 80, in observe\n    fields=scheduler_fields(stdout);validate_metadata(prepared,config,protocol,job,os.environ,fields);verify_source(code,prepared)\n                                    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/oscar/scratch/aagraw73/agent-runs/rapidtinyrec-owned-block-normalization/owned-block-normalization-v1-20261031T020139Z-c03ad4830342/code/allocation.py\", line 52, in validate_metadata\n    for k,v in required.items():require(fields.get(k)==v,'Scheduler differs: '+k)\n                                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/oscar/scratch/aagraw73/agent-runs/rapidtinyrec-owned-block-normalization/owned-block-normalization-v1-20261031T020139Z-c03ad4830342/code/allocation.py\", line 17, in require\n    if not ok:raise ValueError(message)\n              ^^^^^^^^^^^^^^^^^^^^^^^^^\nValueError: Scheduler differs: CPUsPerTask\n"
+  },
+  "metadata_review_error": null,
+  "source_and_raw_hashes_unchanged_after_review": true,
+  "numerical_reaudit": false,
+  "old_wave_failure_cleared": false,
+  "model_beam_lineage_verified": false,
+  "production_latency_claim": false,
+  "promotion": false
+}

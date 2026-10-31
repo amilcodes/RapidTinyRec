@@ -1,0 +1,45 @@
+{
+  "schema": "owned-block-failure-source-analysis-v1",
+  "at_utc": "2026-10-31T04:18:12.527260+00:00",
+  "job_id": "8155234",
+  "terminal": {
+    "job_id": "8155234",
+    "state": "FAILED",
+    "exit_code": "1:0",
+    "elapsed_seconds": 8
+  },
+  "successful_fetches": 1,
+  "raw_files": 12,
+  "raw_bytes": 9647,
+  "source_files": 22,
+  "source_bytes": 107567,
+  "finding": "Allocation metadata guard failed before publication or any normalization case: Scheduler differs: CPUsPerTask.",
+  "source_defect": "Validator requires CPUsPerTask; parser excludes slash-containing keys. Existing hash-verified captured scheduler output uses CPUs/Task=4. Local fixtures invented CPUsPerTask=4 and did not cover actual spelling.",
+  "evidence": {
+    "failed_source_sha256": "b93c791c291aa2c503965dfa1e39e7b7da7b7f2d60cdf4493fb890af365a9754",
+    "previous_saved_scheduler_file": "/Users/AmilAgrawal/Documents/Codex/2026-10-18/let/work/rapidtinyrec_prep/autoresearch_v2/packed_qkv_filtered_pilot/.oscar/results/packed-qkv-bf16-filtered-v1-20261030T212958Z-75bd90fa07ef/outputs/allocated-run-record.json",
+    "previous_saved_scheduler_sha256": "6a7e058fe0089f582aa1c3bca32f50f0b172f7d22d67da5f81db0129113d9e3f",
+    "real_field": "CPUs/Task=4",
+    "frozen_parser_omits_real_field": true,
+    "frozen_required_field_absent": true
+  },
+  "limits": [
+    "Actual8155234 scheduler stdout was discarded by observe() before returning, so exact missing-versus-different observed field cannot be reconstructed.",
+    "No allocation observation was published; requested4CPU is not independently certified by this failed run. PrologCPUs1 is preserved.",
+    "No CUDA normalization cases, strict-bit results, model, latency, or mechanism rejection evidence.",
+    "Guardian/log/group receipt consistency checked; not formal host-failure proof."
+  ],
+  "metadata_checks": {
+    "closed_log_hashes_match": true,
+    "group_and_guardian_identity_match": true,
+    "deadline_and_event_order_match": true,
+    "member_seconds": 5.179959237575531,
+    "whole_seconds": 5.363272782415152,
+    "through_guardian_seconds": 5.371488261967897,
+    "raw_readonly_hashes_unchanged": true
+  },
+  "local_validation": "One NEW pure source/regex reproduction against existing saved scheduler bytes, plus new failed-run scalar/log receipt checks. No Torch/numerical re-audit/old-test rerun/remote actions.",
+  "next": "Prepare a DISTINCT isolated scheduler-metadata correction: parse and require actual CPUs/Task=4, retain failed scheduler stdout/environment before validation, add new real-format parser/negative/publication tests. Do not edit submitted22files or rerun8155234/closure/tests. Preserve all resource/numerical/deadline gates; complete fresh review/hashlock/exclusiveintent before any new allocation. No queue query until candidate ready. Batch5of6 originalwindow unchanged; QKV parked.",
+  "submission_ready": false,
+  "promotion": false
+}

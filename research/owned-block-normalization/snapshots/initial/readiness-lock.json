@@ -1,0 +1,30 @@
+{
+  "schema": "owned-block-readiness-v1",
+  "profile": "owned-block-normalization-v1",
+  "reviewed_at_utc": "2026-10-31T02:01:20.694811+00:00",
+  "submission_ready": true,
+  "scope": "One distinct synthetic normalization intervention; not model/performance/adoption approval",
+  "sha256": {
+    "owned_blocks.py": "ae83b278b28495789bca4afa687cd87a110d0aa033b3461f9c55929007d72922",
+    "compare_intervention.py": "e1c0eea92e6071b7582c739bfdbf3619e1455138fa9341f03a6677319ff86493",
+    "graph_intervention.py": "737dcaa6b8490bcd48b0cb0b615fde70e598e943174b0f9ffaa499c397f69eb4",
+    "produce_cases.py": "ac28f1b30ffab52d8a5f19c1b57fa80361d533093fcf5e992c435dffc8db399f",
+    "audit_evidence.py": "738013b3856c84377a9bdce36a6660a451f8ebddcdbac1b3d7d4dcee507fe27d",
+    "audit_inputs.py": "863773a8ae7c99086d1df86759772a706f9606eaf03fc2beeff81b90f1800d67",
+    "native_binding.py": "c92e5a6ff1a45be2e9d684dfe88eee85ee4ca0e1731b20dbd6eaea43998977dd",
+    "audit_live.py": "23a8eefcf549c10aebb1557c2010a1063ecd62282ddac0efc414775500304aae",
+    "loaded_binding.py": "20f57e8f6c25b6b44d75a0990bf0fb8a5c4e893ad2fd0df9dd23db2daeaaa59d",
+    "publication.py": "acb12b309bdf0c5801399366c59a5c006c1f176c43eca12dfbc469d0446a52b8",
+    "final_audit.py": "ee856c90f82758cc21101b881b06292a46b5aaa78add53d03b8808fc70146f69",
+    "allocation_contract.py": "e2f60672c3f06a6f7150741d693d2c147bf0359fdc3a651a01f3cb332d2b6fe8",
+    "allocation.py": "b93c791c291aa2c503965dfa1e39e7b7da7b7f2d60cdf4493fb890af365a9754",
+    "bounded_runner.py": "8d185a7ab3fe9440ebdd424d1d04ea463f4401c7229162ddd650dab5525f0a2e",
+    "whole_run.py": "12cc3b92302ba522e494fe9fcd3cbf883fa8e1aa39528194e80600a93a26dc79",
+    "guarded_whole.py": "f317ceb8838ac57b9a5a2a2860d26842a74c061afed2a809bc2f6aa36331a0d2",
+    "terminal_metadata.py": "f7e9d04584113c99478777f94e456b2c3d083de7a034cac4cf6f5d5472961157",
+    "allocated_entry.py": "a1eed0290351d309047ab80fc7a67eed37ef04e1cc3243f4f1d41e8e72080584",
+    "jobs/owned-block.sh": "fd614b7ea2768dbd723d782374781dc2b20794cb0000d5163b266bcc709c1294",
+    "oscar.json": "98007e7f9471d0a8d0b4d5f83dfce18c5a7a2c744a4b2faad04c21502aa0ad4c",
+    "protocol.json": "292cca06af36b08dd12f4997f06767d7a16545771cee149459bc0b6eb5747c94"
+  }
+}
