@@ -12,12 +12,14 @@ jobs:
           python-version: '3.11'
       - run: python -m compileall -q rapidtinyrec
       - run: python -m unittest discover -s tests -p test_evidence.py -v
+      - run: python -m unittest discover -s tests -p test_folded_evidence.py -v
       - run: python -m unittest discover -s tests -p test_audit_decode_pilot.py -v
       - run: python -m unittest discover -s tests -p test_prefix_profile_audit.py -v
       - run: python -m rapidtinyrec.audit_decode_pilot --help
       - run: python -m rapidtinyrec.audit_input_arena --help
       - run: python -m rapidtinyrec.audit_shared_prefix --help
       - run: python -m rapidtinyrec.audit_prefix_profile --help
+      - run: python -m rapidtinyrec.audit_folded_prefix --help
   decoding:
     runs-on: ubuntu-latest
     steps:

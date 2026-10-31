@@ -36,6 +36,7 @@ Replay cycles all six three-way orders across the cohort (83 or 84 users per ord
 | Native GQA → replay with direct KV reorder | 136.508 → 131.101 | 144.643 → 138.838 | 0 |
 | Direct reorder → shared graph input storage | 130.052 → 130.240 | 137.956 → 138.305 | 0 |
 | Shared inputs → physical shared-prefix KV | 129.278 → 126.697 | 137.210 → 133.267 | 0 |
+| Physical prefix → folded query heads | 127.198 → 114.841 | 133.628 → 119.898 | 0 |
 
 Each comparison preserved 500/500 full rank lists and 25,000/25,000 ranked
 positions. Batched constraints, GPU lookup and GQA also preserved all 25,000
@@ -100,6 +101,22 @@ setup/warmup rises 139.682 → 349.860 s; with disk artifacts reused, setup is
 graph preparation timings overlap within setup and remain outside inference.
 The four-phase ABBA run completed in 16m07s. Both earlier 15-minute timeouts
 and their incomplete outputs are retained. [Full record](shared-prefix.md).
+
+Folding the six query heads sharing each KV head into six query rows reduces
+median/p95 by 9.71%/10.28% in a separate full-cohort comparison. All 500 requests
+improve, by 10.100–15.703 ms; both cohort halves and all ten history lengths
+improve. All 25,000 rank positions, 25,000 sequence FP32 values and 125,000
+transition FP32 values match both the paired control and historical compiled
+GQA bit for bit, with zero maximum deltas. All 120 saved warmups are exact too.
+
+Allocated memory remains 7.485 GiB, reserved 9.313–9.779 GiB and inference peak
+allocated 7.779–7.784 GiB for both variants. The 40 graphs retain the same unique
+input storage and temporary dense K/V. Cold setup increases 346.870 → 369.764 s;
+with compiler disk artifacts reused, 148.152 → 157.549 s. Four fresh ABBA
+processes pair users across even/odd halves; this is not adjacent interleaving
+or a run-to-run variance study. Setup and its nested compilation/graph preparation
+remain outside inference, with zero measured compilation or capture. The run
+completed in 20m50s. [Full exactness, memory and setup record](folded-query-heads.md).
 
 ## Evidence
 

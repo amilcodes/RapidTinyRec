@@ -1,5 +1,12 @@
 # Reproduce
 
+The promoted FP32 stack is replay, shared input storage, physical-prefix KV and
+folded-query attention. Its existing entry point is
+`python -m rapidtinyrec.benchmark_folded_prefix`; use the complete phase commands
+in [folded-query reproduction](folded-query-heads.md). The `run prefill` example
+below reproduces the earlier shared-prefill ablation, not the final folded path.
+See [release scope](release-scope.md) before using the wrappers.
+
 Use Python 3.11 on Linux and an Ampere CUDA GPU. The published measurements used
 an RTX A6000, PyTorch 2.14.0+cu126, Transformers 4.55.4, four CPU threads and FP32
 with TF32 disabled. GPU inference needs a compute allocation on shared clusters.
@@ -90,3 +97,9 @@ The [physical-prefix protocol](shared-prefix.md) compares shared inputs against
 one stored history KV row per layer. Run its pilot first, then all four full
 phases in one 30-minute A6000 allocation; the completed comparison took 16m07s.
 The full audit requires all 500 paired controls and never accepts partial output.
+
+The [folded-query protocol](folded-query-heads.md) compares native GQA against
+packing its single-token query heads into rows. Both use physical-prefix storage.
+Use the four-phase pilot before the frozen 500-user run; the latter completed
+in 20m50s within one 30-minute A6000 allocation. The audit checks every FP32 bit
+against both the paired control and historical GQA, with setup excluded.
