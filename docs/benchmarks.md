@@ -22,6 +22,7 @@ Pair order alternates for the first four ablations. The GQA experiment balances
 three-way order globally and within history lengths. Retain all 500 requests,
 including outliers. p95 is linear interpolation at sorted index `(N-1)*0.95`.
 Latency describes isolated requests across users, not concurrent serving throughput.
+Replay cycles all six three-way orders across the cohort (83 or 84 users per order).
 
 ## Results and score checks
 
@@ -32,6 +33,7 @@ Latency describes isolated requests across users, not concurrent serving through
 | Batched → GPU constraints | 167.792 → 160.766 | 169.247 → 163.028 | 0 |
 | Eager → initial compilation | 175.161 → 171.704 | 180.492 → 185.022 | 0.000116348 |
 | Initial compilation → native GQA | 174.418 → 159.687 | 188.198 → 169.783 | 0 |
+| Native GQA → replay with direct KV reorder | 136.508 → 131.101 | 144.643 → 138.838 | 0 |
 
 Each comparison preserved 500/500 full rank lists and 25,000/25,000 ranked
 positions. Batched constraints, GPU lookup and GQA also preserved all 25,000
@@ -52,6 +54,21 @@ In the three-way run, original compilation took 187.967 s in the compiler;
 GQA added 118.945 s with the same process/cache already warm. Total setup and
 warmup took 320.889 s. These nested timings must not be summed. No compilation
 occurred during measurement; unexpected recompilation raises an error.
+
+Replay's full-cohort run also includes a staged-copy control: 134.942 ms median /
+143.908 ms p95. Direct reorder improves median/p95 by 3.96%/4.01% versus GQA and
+2.85%/3.52% versus staged replay. Every user is faster than both controls, with
+improved median/p95 at all ten history lengths. All 25,000 ranks, 25,000 sequence
+scores and 125,000 transition scores match both controls and historical GQA bit
+for bit; maximum differences are zero.
+
+The cost is residency: 40 graphs hold 10.68 GiB of input buffers, with 29.16 GiB
+total allocated and 34.90 GiB reserved. Setup/warmup took 145.488 s; backend
+compilation 104.440 s and capture/warmup 3.965 s are nested within that time.
+No compilation or capture occurred during measurement. This is a sequential
+inference experiment, not a concurrent serving implementation. Earlier replay
+pilots include a p95 regression and a long-history median regression; see
+[the full experiment record](decode-replay.md).
 
 ## Evidence
 
@@ -74,6 +91,8 @@ record snapshot times; committer and GitHub PR dates record publication. Relativ
 imports, local output paths, FP32 defaults and launch metadata were adapted for
 this repository. The original frozen sources produced the reported GPU numbers;
 packaging does not constitute a new 500-user GPU run.
+The later replay result was run directly from the repository sources pinned in
+its evidence directory, then independently audited against the frozen snapshot.
 
 ## Scope
 

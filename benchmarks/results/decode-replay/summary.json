@@ -1,0 +1,55 @@
+{
+  "experiment": "decode-replay",
+  "experiment_date": "2026-10-23",
+  "hardware": "NVIDIA RTX A6000",
+  "dtype": "float32",
+  "tf32": false,
+  "users": 500,
+  "beams": 50,
+  "cohort_sha256": "f78097bfedff69f5928a8ccbe39d5a96e07f7e9dd4616209953cf4f51408f487",
+  "original_manifest_sha256": "c64a1219777ee72fc4575103bb62fa8263f448ec392882569fad0140ea8078ed",
+  "versions": {
+    "torch": "2.14.0+cu126",
+    "transformers": "4.55.4",
+    "tokenizers": "0.21.4"
+  },
+  "control": "compiled_gqa",
+  "candidate": "direct_replay",
+  "requests_sha256": "7db8258c99c98ee2fe201784ee6141cc0f80734714a4982a1e697442a52733e2",
+  "latency_ms": {
+    "compiled_gqa": {
+      "median": 136.50792092084885,
+      "p95": 144.64293029159307
+    },
+    "replay": {
+      "median": 134.9421013146639,
+      "p95": 143.9080886542797
+    },
+    "direct_replay": {
+      "median": 131.1014275997877,
+      "p95": 138.83774429559708
+    }
+  },
+  "matching_rank_lists": 500,
+  "score_note": "Every rank, sequence score and transition score bit matches both controls and historical compiled GQA. Five probabilities and full-vocabulary normalization preserved.",
+  "scope": "One request per variant per user. Six three-way orders cycled; all40 exact shapes warmed and frozen. Sequential inference only.",
+  "memory_bytes": {
+    "allocated_bytes": 31311372800,
+    "reserved_bytes": 37474009088,
+    "graph_input_buffers": 11468832320
+  },
+  "setup_seconds": {
+    "combined_setup_and_warmup": 145.48763320967555,
+    "backend_compile": 104.43952654674649,
+    "capture_and_warmup": 3.96469284594059,
+    "note": "Nested costs, excluded from inference; do not sum."
+  },
+  "measurement_compilations": 0,
+  "measurement_captures": 0,
+  "cross_run_note": "Use only these paired controls. Do not multiply by suffix or historical gains.",
+  "matching_rank_positions": 25000,
+  "matching_sequence_values": 25000,
+  "matching_transition_values": 125000,
+  "max_sequence_difference": 0.0,
+  "max_transition_difference": 0.0
+}
