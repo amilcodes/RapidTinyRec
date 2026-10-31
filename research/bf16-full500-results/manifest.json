@@ -1,0 +1,47 @@
+{
+  "schema": "retrospective-research-publication-v1",
+  "published_at_utc": "2026-10-31T06:25:37.112505+00:00",
+  "evidence_date": "2026-10-29T02:51:44.941442+00:00",
+  "base_commit": "94fc90f300ef3704576133f0992bc6b9d9902bb3",
+  "snapshot_counts": {},
+  "raw_archive_included": false,
+  "numerical_reaudit": false,
+  "promotion": false,
+  "files": {
+    "README.md": {
+      "bytes": 3004,
+      "sha256": "2c72e27ba2d88bf67692aa56039cc0170a00bd234300cb2095247fbc6045f68f",
+      "origin": "publication-generated"
+    },
+    "evidence/bf16-full500-corrected-independent-review.json": {
+      "bytes": 102680,
+      "sha256": "3848cadd43b7bba9bf049c53332a2381ffce96c4b9e89a53195850eb76c272a5",
+      "origin": "outputs/quality_frontier/bf16-full500-corrected-independent-review.json"
+    },
+    "evidence/bf16-full500-corrected-local-reconciliation.json": {
+      "bytes": 413,
+      "sha256": "a729b6e669788b4643dc329d4f149b0feffc57b809419e6b611611204d08f6e8",
+      "origin": "outputs/quality_frontier/bf16-full500-corrected-local-reconciliation.json"
+    },
+    "evidence/bf16-full500-corrected-terminal-freeze-review.json": {
+      "bytes": 892,
+      "sha256": "cda151c3979288ba1b6421ef15281a83afccb6d790aead25e916c0e7a46f0882",
+      "origin": "outputs/quality_frontier/bf16-full500-corrected-terminal-freeze-review.json"
+    },
+    "evidence/bf16-full500-startup-failure-review.json": {
+      "bytes": 4611,
+      "sha256": "a05091829ffd9baa455067378aa3c8266e59e9c33928056d3244876454d50c84",
+      "origin": "outputs/quality_frontier/bf16-full500-startup-failure-review.json"
+    },
+    "evidence/bf16-pilot-independent-review.json": {
+      "bytes": 45860,
+      "sha256": "675e8c198c28ed2cdc390108f6f62a9776d318beebfcc030f6068036a88487fa",
+      "origin": "outputs/quality_frontier/bf16-pilot-independent-review.json"
+    },
+    "verify_publication.py": {
+      "bytes": 714,
+      "sha256": "98a3fbb950c7751463a016d00e381e286ba44d3aaacdfea7ff20c342c24f3dca",
+      "origin": "publication-generated"
+    }
+  }
+}

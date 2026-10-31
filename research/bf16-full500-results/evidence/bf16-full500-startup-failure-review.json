@@ -1,0 +1,102 @@
+{
+  "schema": "bf16-full500-startup-failure-review-v1",
+  "created_at_utc": "2026-10-28T09:39:39.561388+00:00",
+  "status": "FAILED_BEFORE_MODEL_LOAD_NO_GENERATION",
+  "job_id": "8046248",
+  "run_id": "bf16-vs-tf32-full500-quality-20261028T091933Z-f48fd6221951",
+  "raw_manifest": "/Users/AmilAgrawal/Documents/Codex/2026-10-18/let/outputs/rapidtinyrec_bf16_full500_raw_manifest.json",
+  "raw_manifest_sha256": "88bf9b3923da85d4cfbb816f575431b971e192d0e8da6f03e8a2e0c804cdf7fd",
+  "raw_files": 19,
+  "raw_bytes": 57971,
+  "submitted_files_verified": 79,
+  "submitted_bytes": 1169124,
+  "identity": {
+    "schema": "precision-allocation-reconciliation-v1",
+    "matched": true,
+    "run_id": "bf16-vs-tf32-full500-quality-20261028T091933Z-f48fd6221951",
+    "job_id": "8046248",
+    "files": 79,
+    "bootstrap_executed": false
+  },
+  "catalog_preflight": {
+    "schema": "bf16-full500-catalog-preflight-v1",
+    "unique_users": 500,
+    "catalog_sids": 3444,
+    "resource_sha256": {
+      "Amazon/index/Office_Products.index.json": "f599d2b858beb5a2f660d6253896746c25a65f3a7d0c2f3ae6fd4ec2091eebc8",
+      "Amazon/index/Office_Products.item.json": "398cb2bb7868bedf2ed8ed6b24d25e172f21b7022554d1f8ea52200478494c1c",
+      "Amazon/info/Office_Products_5_2016-10-2018-11.txt": "7e8bae0a051a377713364b9e669590f86feb869fc269157c64b2189c0f4bcfa4",
+      "Amazon/test/Office_Products_5_2016-10-2018-11.csv": "c1967034e197a7837a8962f2556efaabc12eb5bb84e1fdc79cd0accbce71add5",
+      "Office_ckpt/added_tokens.json": "682f42f571bea18c1fa3f4dd8161b0696a5ef802e716d21669742c7f9e678f1e"
+    },
+    "ambiguous_targets": 7,
+    "bootstrap_executed": false
+  },
+  "work": {
+    "schema": "bf16-full500-work-exit-v1",
+    "stages": [
+      {
+        "name": "generation",
+        "started_monotonic": 18741356.45404964,
+        "timeout_s": 1500,
+        "command": [
+          "bash",
+          "/oscar/scratch/aagraw73/agent-runs/rapidtinyrec-bf16-full500/bf16-vs-tf32-full500-quality-20261028T091933Z-f48fd6221951/code/jobs/bf16-full500.sh",
+          "--child",
+          "/tmp/rapidtinyrec-bf16-full500-iv05_cg6"
+        ],
+        "ended_monotonic": 18741367.022207215,
+        "child": {
+          "schema": "precision-child-exit-v1",
+          "returncode": 1,
+          "reason": "exited",
+          "signal": null,
+          "elapsed_s": 10.564331747591496,
+          "completed_normally": false
+        },
+        "within_deadline": true
+      },
+      {
+        "name": "recovery",
+        "started_monotonic": 18741367.028645966,
+        "timeout_s": 1607.6598878316581,
+        "command": [
+          "/oscar/scratch/aagraw73/minionerec-shared-prefill/envs/torch214-cu126-transformers4554/bin/python",
+          "-u",
+          "-m",
+          "rapidtinyrec.bf16_full500_runner",
+          "recover",
+          "--run-root",
+          "/oscar/scratch/aagraw73/agent-runs/rapidtinyrec-bf16-full500/bf16-vs-tf32-full500-quality-20261028T091933Z-f48fd6221951"
+        ],
+        "ended_monotonic": 18741367.184675224,
+        "child": {
+          "schema": "precision-child-exit-v1",
+          "returncode": 1,
+          "reason": "exited",
+          "signal": null,
+          "elapsed_s": 0.151236854493618,
+          "completed_normally": false
+        },
+        "within_deadline": true
+      }
+    ],
+    "completed_normally": false,
+    "ended_monotonic": 18741367.195305713,
+    "elapsed_s": 12.50677191466093
+  },
+  "failure_log": "/Users/AmilAgrawal/Documents/Codex/2026-10-18/let/work/rapidtinyrec_bf16_full500/.oscar/results/bf16-vs-tf32-full500-quality-20261028T091933Z-f48fd6221951/logs/stderr.log",
+  "failure_log_sha256": "cf0ce6fe7b8c71317d5085236cc7e51aefde8e186061dc52ce4f14e49affc55e",
+  "metadata_reconciliation_exit_code": 1,
+  "metadata_failure_preserved": "/Users/AmilAgrawal/Documents/Codex/2026-10-18/let/outputs/rapidtinyrec_bf16_full500_reconciliation.json",
+  "numerical_audit_executed_locally": false,
+  "allocated_audit_exists": false,
+  "phase_directories": [],
+  "generation_results_available": false,
+  "diagnosis": "Protocol cohort.manifest_sha256 contains SHA256 of the complete historical manifest file; benchmark compares it to the manifest self-digest excluding its own manifest_sha256 field. File bytes pin9ebf231f and embedded content pin503ba174 are distinct. Check fails before tokenizer/model load, before phase directory creation. Catalog preflight and live allocation/source verification passed.",
+  "missing_results": [
+    "All500 BF16/TF32 paired generation timings",
+    "All500 BF16 quality metrics and confidence intervals"
+  ],
+  "replacement_submitted": false
+}
