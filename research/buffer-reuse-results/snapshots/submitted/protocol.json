@@ -1,0 +1,134 @@
+{
+  "schema": "released-normalized-buffer-reuse-cuda-v1",
+  "status": "IMPLEMENTED_PENDING_FOCUSED_REVIEW",
+  "objective": "Original released single-request full-vocabulary normalization, EOS fallback, native beam50, length penalty0, all five owned FP32 score matrices.",
+  "arms": [
+    "released_tf32",
+    "reuse_normalized_tf32"
+  ],
+  "phases": [
+    {
+      "phase": 0,
+      "variant": "released_tf32",
+      "half": 0,
+      "reuse_disk_artifacts": false
+    },
+    {
+      "phase": 1,
+      "variant": "reuse_normalized_tf32",
+      "half": 0,
+      "reuse_disk_artifacts": false
+    },
+    {
+      "phase": 2,
+      "variant": "reuse_normalized_tf32",
+      "half": 1,
+      "reuse_disk_artifacts": true
+    },
+    {
+      "phase": 3,
+      "variant": "released_tf32",
+      "half": 1,
+      "reuse_disk_artifacts": true
+    }
+  ],
+  "precision": "FP32 model storage with pinned native TF32 policy; do not stack BF16/cache/waves",
+  "model_source": "PR21 serial_pair_tf32 engine from6befcba76c5eefd9f580dba1911c28afe354bcd3, with only processor factory selection in timed generate",
+  "candidate_change": "Fresh processor-local normalized scores.add_(mask) instead of scores+mask; no other mathematical or timing boundary change",
+  "cohort_indices": [
+    1,
+    2,
+    6,
+    10
+  ],
+  "prompt_lengths": [
+    76,
+    121
+  ],
+  "repeats_per_user_per_half": 3,
+  "timed_requests_per_phase": 12,
+  "independent_users": 4,
+  "paired_observations": 24,
+  "ordering": "Repeat-major 0..5 then users1,2,6,10, reversed within each equal-length pair on odd repeats; identical between paired arms. Each timer covers one complete request.",
+  "timing": {
+    "start": "Immediately before synchronous full engine.generate including fresh processor, model wrapper, prefill/KV work, input staging, HF clones and beam processing",
+    "end": "After generated output completion and CUDA synchronization, before equal output extraction/validation",
+    "outside_both": [
+      "release loading",
+      "constraint-table compilation",
+      "prepared immutable inputs/masks",
+      "warmup/compilation/graph capture",
+      "output extraction",
+      "full correctness/quality checks"
+    ]
+  },
+  "controls": [
+    "New control and candidate each must match same-run control scorebits/ranks/ancestry exactly",
+    "Control must match frozen historical TF32 baseline for sameusers",
+    "Direct/replay/reversed request order and retained outputs bitstable",
+    "Model/input/table immutability, five retained score matrices disjoint from graphlogits and other outputs",
+    "Native TF32 dispatch verified per length; no measurement compile/capture",
+    "Full source/allocation/work deadline/log closure bound to unique job/run",
+    "All five full-vocabulary score matrix SHA256 values equal across arms and warm/direct/replay/reverse/retention, not just selected transition scores",
+    "Model parameters/buffers, prepared inputs and constraint tensors byte-immutable before setup through after profiles"
+  ],
+  "gate": {
+    "minimum_median_reduction_percent": 5,
+    "p95_no_regression": true,
+    "all_length_half_cross_strata": true,
+    "all_execution_checks": true,
+    "promotion": false,
+    "quality_noninferiority_claim": false
+  },
+  "budget": {
+    "allocation_minutes": 30,
+    "global_deadline_s": 1620,
+    "generation_max_s": 1500,
+    "audit_max_s": 120,
+    "recovery_uses_remaining_global_time": true,
+    "setup_feasibility": "Four serial-only processes capture the same eight existing batch50 graphs each. Prior mixed wave generation1461.31s is context, not guarantee. New hashing is outside measurement and inside1500s generation cap; no retries on deadline failure. Global1620s cap leaves180s scheduler cleanup. Audit allowance min120s and remaining global time."
+  },
+  "remaining_implementation": [],
+  "experiment": "released_normalized_buffer_reuse_tf32_pilot",
+  "profile": "released-normalized-buffer-reuse-cuda-v1",
+  "baseline": {
+    "run_id": "precision-full500-quality-20261027T114104Z-82ab3f1230b7",
+    "job_id": "8007230",
+    "remote_dir": "/oscar/scratch/aagraw73/agent-runs/rapidtinyrec-precision-full500/precision-full500-quality-20261027T114104Z-82ab3f1230b7",
+    "raw_manifest_sha256": "f9056b9234ab75f3710771f6b4c009f482f13a88f32ab8706997eafd0cb50c44",
+    "recovered_audit_sha256": "f7142a8ad04ffbb587dbd531c86b605865bec5deb121cb5c5329b6f763665b95",
+    "recovered_audit_passed": true,
+    "recovered_audit_remote_path": "/oscar/scratch/aagraw73/agent-runs/rapidtinyrec-full500-audit-recovery/full500-audit-recovery-20261028T014425Z-0f34500ac483/outputs/recovery-audit.json"
+  },
+  "resources": {
+    "partition": "gpu",
+    "qos": "norm-gpu",
+    "constraint": "ampere",
+    "gpu_type": "nvidia_rtx_a6000",
+    "gpus": 1,
+    "cpus": 4,
+    "memory_gb": 32,
+    "time": "00:30:00"
+  },
+  "release_users_sha256": "f78097bfedff69f5928a8ccbe39d5a96e07f7e9dd4616209953cf4f51408f487",
+  "pairs": [
+    {
+      "pair_index": 0,
+      "cohort_indices": [
+        1,
+        2
+      ],
+      "prompt_tokens": 76
+    },
+    {
+      "pair_index": 1,
+      "cohort_indices": [
+        6,
+        10
+      ],
+      "prompt_tokens": 121
+    }
+  ],
+  "promotion": false,
+  "noninferiority_established": false
+}

@@ -1,0 +1,57 @@
+{
+  "schema": "buffer-reuse-adapter-preparation-v2",
+  "created_at_utc": "2026-10-30T06:41:53.401945+00:00",
+  "status": "PORTABLE_SERIAL_ADAPTER_PASS_PILOT_NOT_SUBMISSION_READY",
+  "new_tests": {
+    "unique_tests": 5,
+    "passed_initially": 4,
+    "initial_error": "Test byte comparator rejected scalar int64 tensors; implementation comparison and ownership assertions had passed before test errored.",
+    "repair": "Flatten tensors before byte view; reran only failed integration test, passed.",
+    "passed_after_repair": 1,
+    "skipped": 0,
+    "logs": [
+      "buffer-reuse-adapter-tests-attempt1.txt",
+      "buffer-reuse-adapter-tests-repair.txt"
+    ]
+  },
+  "evidence": [
+    "Packaged relative constraint import verifies unchanged SHA0a5e903b; no workspace-only source dependency.",
+    "AST shows timed generate identical to pinned parent except processor factory; candidate processor differs only final add_ expression.",
+    "Parent/control/candidate direct and simulated arena generation equal all5scorebits/sequences/sequence_scores/ancestry on two tiny CPU requests.",
+    "60 independent retained score storage blocks survive subsequent calls, with model/input/table immutability.",
+    "Both arms create fresh processor; RuntimeError/KeyboardInterrupt after2steps restore owner/forward/reorder and next generation is exact.",
+    "Wave variant/unknown precision/cache arms rejected.",
+    "72 copied parent package files verified unchanged."
+  ],
+  "source_files": {
+    "work/rapidtinyrec_prep/autoresearch_v2/buffer_reuse_pilot/rapidtinyrec/buffer_reuse_generation.py": {
+      "sha256": "41919712efe93f24f2222f2b0df5f17c1744114666885a9baf3c80e171799fb1",
+      "bytes": 5585
+    },
+    "work/rapidtinyrec_prep/autoresearch_v2/buffer_reuse_pilot/rapidtinyrec/buffer_reuse_processor.py": {
+      "sha256": "398f0726f58ef0225bef6cba65e558b8e8d561257e2dbb9279bff69d88a09083",
+      "bytes": 815
+    },
+    "work/rapidtinyrec_prep/autoresearch_v2/buffer_reuse_pilot/protocol.json": {
+      "sha256": "323cad3c1d4f92504c93c931b8c171de534591facbe78548c8b1a4b064c891c0",
+      "bytes": 3699
+    },
+    "work/rapidtinyrec_prep/autoresearch_v2/buffer_reuse_pilot/parent-source-lock.json": {
+      "sha256": "f8e0292d87155bd2439af2f3c3e5fe0eec73c6c998013d50710d5bee871353b8",
+      "bytes": 8035
+    },
+    "work/rapidtinyrec_prep/autoresearch_v2/test_buffer_reuse_adapter.py": {
+      "sha256": "28f93562dbb8644e73f2d9afa3605768488598b85e8e6ee84d23f75d053e15e8",
+      "bytes": 7637
+    }
+  },
+  "scope": "New packaged serial PrefixArena adapter tests only; not a repeat of closed primitive/MPS screens, not CUDA graph/stream validation, no speed or quality claim.",
+  "submission_ready": false,
+  "remaining": [
+    "Distinct phase benchmark and new allocation identity, no old entrypoint reuse by relabeling",
+    "Allocated saved-output auditor covering both new arms and original5scores",
+    "Runner/deadline/log staging closure and package manifests",
+    "Exclusive submission guard and focused new tests/source review",
+    "Paired source/budget review before ready flag"
+  ]
+}

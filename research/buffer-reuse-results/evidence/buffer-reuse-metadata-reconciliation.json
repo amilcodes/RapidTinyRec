@@ -1,0 +1,63 @@
+{
+  "schema": "buffer-reuse-terminal-metadata-review-v1",
+  "records": [
+    {
+      "stage": "work",
+      "schema": "buffer-reuse-allocation-reconciliation-v1",
+      "matched": true,
+      "run_id": "released-normalized-buffer-reuse-cuda-v1-20261030T070129Z-28b02b6759d6",
+      "job_id": "8120807",
+      "files": 99,
+      "bootstrap_executed": false
+    },
+    {
+      "stage": "audit",
+      "schema": "buffer-reuse-allocation-reconciliation-v1",
+      "matched": true,
+      "run_id": "released-normalized-buffer-reuse-cuda-v1-20261030T070129Z-28b02b6759d6",
+      "job_id": "8120807",
+      "files": 99,
+      "bootstrap_executed": false
+    },
+    {
+      "stage": "phase_0",
+      "schema": "buffer-reuse-allocation-reconciliation-v1",
+      "matched": true,
+      "run_id": "released-normalized-buffer-reuse-cuda-v1-20261030T070129Z-28b02b6759d6",
+      "job_id": "8120807",
+      "files": 99,
+      "bootstrap_executed": false
+    },
+    {
+      "stage": "phase_1",
+      "schema": "buffer-reuse-allocation-reconciliation-v1",
+      "matched": true,
+      "run_id": "released-normalized-buffer-reuse-cuda-v1-20261030T070129Z-28b02b6759d6",
+      "job_id": "8120807",
+      "files": 99,
+      "bootstrap_executed": false
+    },
+    {
+      "stage": "phase_2",
+      "schema": "buffer-reuse-allocation-reconciliation-v1",
+      "matched": true,
+      "run_id": "released-normalized-buffer-reuse-cuda-v1-20261030T070129Z-28b02b6759d6",
+      "job_id": "8120807",
+      "files": 99,
+      "bootstrap_executed": false
+    },
+    {
+      "stage": "phase_3",
+      "schema": "buffer-reuse-allocation-reconciliation-v1",
+      "matched": true,
+      "run_id": "released-normalized-buffer-reuse-cuda-v1-20261030T070129Z-28b02b6759d6",
+      "job_id": "8120807",
+      "files": 99,
+      "bootstrap_executed": false
+    }
+  ],
+  "source_files": 99,
+  "source_bytes": 1204761,
+  "source_raw_verified_before_after": true,
+  "local_numerical_audit": false
+}
