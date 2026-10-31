@@ -72,12 +72,15 @@ def signature(kwargs):
 
 class ReplayBuffers:
     """Stable tensors are independent of any cache containers a forward mutates."""
-    def __init__(self,kwargs):
+    def __init__(self,kwargs,arena=None):
         self.signature=signature(kwargs)
         self.tensors={k:kwargs[k].detach().clone() for k in TENSOR_KEYS}
-        self.pairs=tuple(tuple(x.detach().clone() for x in pair)
-                         for pair in cache_pairs(kwargs['past_key_values']))
+        incoming=cache_pairs(kwargs['past_key_values'])
+        self.pairs=(arena.views(incoming) if arena is not None else
+                    tuple(tuple(x.detach().clone() for x in pair) for pair in incoming))
         self.fixed={k:kwargs[k] for k in FIXED_KEYS if k in kwargs}
+        if arena is not None:
+            self.load(kwargs)
 
     def kwargs(self):
         return {**self.tensors,**self.fixed,'attention_mask':{'full_attention':None},
@@ -113,8 +116,9 @@ class ReplayOutput:
 
 
 class DecodeReplayPool:
-    def __init__(self,forward,max_graphs=40):
+    def __init__(self,forward,max_graphs=40,arena=None):
         self.forward=forward
+        self.arena=arena
         self.max_graphs=max_graphs
         self.entries={}
         self.events=[]
@@ -136,7 +140,7 @@ class DecodeReplayPool:
         torch.cuda.synchronize(device)
         started=time.perf_counter()
         before=torch.cuda.memory_allocated(device)
-        buffers=ReplayBuffers(kwargs)
+        buffers=ReplayBuffers(kwargs,self.arena)
         stream=torch.cuda.Stream(device=device)
         stream.wait_stream(torch.cuda.current_stream(device))
         with torch.cuda.stream(stream):
@@ -150,6 +154,8 @@ class DecodeReplayPool:
             output=self.forward(**buffers.kwargs())
         torch.cuda.synchronize(device)
         captured=ReplayOutput(output)
+        if self.arena is not None:
+            self.arena.check_output(captured)
         if captured.pairs[0][0].shape[-2]!=kwargs['past_key_values'].get_seq_length()+1:
             raise AssertionError('Capture did not advance the cache by exactly one token')
         self.entries[key]=(buffers,graph,captured)
@@ -177,8 +183,13 @@ class DecodeReplayPool:
         return output.fresh()
 
     def report(self):
+        tensors=[x for buffers,_,_ in self.entries.values()
+                 for x in list(buffers.tensors.values())+[v for pair in buffers.pairs for v in pair]]
+        storage={(x.device,x.untyped_storage().data_ptr()):x.untyped_storage().nbytes() for x in tensors}
         return {'graphs':len(self.entries),'frozen':self.frozen,'replays':self.replays,
             'capture_and_warmup_s':sum(e['capture_and_warmup_s'] for e in self.events),
-            'input_buffer_bytes':sum(e['input_buffer_bytes'] for e in self.events),
+            'input_buffer_bytes':sum(x.numel()*x.element_size() for x in tensors),
+            'unique_input_storage_bytes':sum(storage.values()),
+            'shared_input_arena':self.arena is not None,
             'events':self.events,
-            'scope':'Experimental model-forward replay only. Input staging, cache containers, beam search and constraints remain in timed requests. Independent graph pools; no inter-graph memory sharing.'}
+            'scope':'Experimental model-forward replay only. Input staging, cache containers, beam search and constraints remain timed. Independent graph output pools; optional shared KV input storage. Sequential use only.'}

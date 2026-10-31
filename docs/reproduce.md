@@ -82,3 +82,6 @@ Profiling covers representatives of the ten history lengths. Uninstrumented
 latency runs precede scope timing and CUDA tracing. Stream-event spans include
 idle time; use trace kernel activities to distinguish GPU work from launch gaps.
 Profiler timings are not the 500-user benchmark numbers.
+
+The [input-arena protocol](input-arena.md) compares direct reorder against shared
+input storage in isolated processes, with separate memory and setup measurements.
