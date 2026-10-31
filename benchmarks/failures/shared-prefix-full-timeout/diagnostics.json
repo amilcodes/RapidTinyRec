@@ -1,0 +1,555 @@
+{
+  "run_id": "prefix-full-20261023T190124Z-1ae3764cde99",
+  "job_id": "7861959",
+  "status": "TIMEOUT at 15m04",
+  "full_audit_passed": false,
+  "full_audit_failure": "Missing phase_3/summary.json; phase 3 saved only 107 of 250 requested users. No complete four-phase audit or 500-user paired performance result.",
+  "source_commit": "735a73b838b5032adb0b05e13db168d2acacb9fc",
+  "snapshot_files_verified": 41,
+  "scope": "Incomplete diagnostics only. 357 paired users, including the complete first 250-user half and 107 second-half users. Candidate covers all 500 against historical GQA; 143 paired controls are missing. Do not substitute historical latency or call this completed ABBA.",
+  "paired_users": 357,
+  "missing_control_users": [
+    215,
+    217,
+    219,
+    221,
+    223,
+    225,
+    227,
+    229,
+    231,
+    233,
+    235,
+    237,
+    239,
+    241,
+    243,
+    245,
+    247,
+    249,
+    251,
+    253,
+    255,
+    257,
+    259,
+    261,
+    263,
+    265,
+    267,
+    269,
+    271,
+    273,
+    275,
+    277,
+    279,
+    281,
+    283,
+    285,
+    287,
+    289,
+    291,
+    293,
+    295,
+    297,
+    299,
+    301,
+    303,
+    305,
+    307,
+    309,
+    311,
+    313,
+    315,
+    317,
+    319,
+    321,
+    323,
+    325,
+    327,
+    329,
+    331,
+    333,
+    335,
+    337,
+    339,
+    341,
+    343,
+    345,
+    347,
+    349,
+    351,
+    353,
+    355,
+    357,
+    359,
+    361,
+    363,
+    365,
+    367,
+    369,
+    371,
+    373,
+    375,
+    377,
+    379,
+    381,
+    383,
+    385,
+    387,
+    389,
+    391,
+    393,
+    395,
+    397,
+    399,
+    401,
+    403,
+    405,
+    407,
+    409,
+    411,
+    413,
+    415,
+    417,
+    419,
+    421,
+    423,
+    425,
+    427,
+    429,
+    431,
+    433,
+    435,
+    437,
+    439,
+    441,
+    443,
+    445,
+    447,
+    449,
+    451,
+    453,
+    455,
+    457,
+    459,
+    461,
+    463,
+    465,
+    467,
+    469,
+    471,
+    473,
+    475,
+    477,
+    479,
+    481,
+    483,
+    485,
+    487,
+    489,
+    491,
+    493,
+    495,
+    497,
+    499
+  ],
+  "paired_comparison": {
+    "requests": 357,
+    "rank_positions": 17850,
+    "sequence_values": 17850,
+    "transition_values": 89250,
+    "matching_rank_lists": 357,
+    "matching_rank_positions": 17850,
+    "matching_sequence_vectors": 357,
+    "matching_transition_arrays": 357,
+    "matching_sequence_values": 17850,
+    "matching_transition_values": 89250,
+    "max_sequence_difference_common": 0.0,
+    "max_transition_difference_common": 0.0
+  },
+  "historical_comparisons": {
+    "arena_replay": {
+      "requests": 357,
+      "rank_positions": 17850,
+      "sequence_values": 17850,
+      "transition_values": 89250,
+      "matching_rank_lists": 357,
+      "matching_rank_positions": 17850,
+      "matching_sequence_vectors": 357,
+      "matching_transition_arrays": 357,
+      "matching_sequence_values": 17850,
+      "matching_transition_values": 89250,
+      "max_sequence_difference_common": 0.0,
+      "max_transition_difference_common": 0.0
+    },
+    "prefix_replay": {
+      "requests": 500,
+      "rank_positions": 25000,
+      "sequence_values": 25000,
+      "transition_values": 125000,
+      "matching_rank_lists": 500,
+      "matching_rank_positions": 25000,
+      "matching_sequence_vectors": 500,
+      "matching_transition_arrays": 500,
+      "matching_sequence_values": 25000,
+      "matching_transition_values": 125000,
+      "max_sequence_difference_common": 0.0,
+      "max_transition_difference_common": 0.0
+    }
+  },
+  "partial_paired_latency_ms": {
+    "arena_replay": {
+      "n": 357,
+      "median_ms": 129.55538928508759,
+      "p95_ms": 137.31831088662148
+    },
+    "prefix_replay": {
+      "n": 357,
+      "median_ms": 126.95115432143211,
+      "p95_ms": 133.26058387756348
+    }
+  },
+  "complete_first_half_latency_ms": {
+    "arena_replay": {
+      "n": 250,
+      "median_ms": 129.59996238350868,
+      "p95_ms": 137.36104872077703
+    },
+    "prefix_replay": {
+      "n": 250,
+      "median_ms": 126.83754600584507,
+      "p95_ms": 133.36289580911398
+    }
+  },
+  "partial_second_half_latency_ms": {
+    "arena_replay": {
+      "n": 107,
+      "median_ms": 129.36560064554214,
+      "p95_ms": 136.67126968502998
+    },
+    "prefix_replay": {
+      "n": 107,
+      "median_ms": 127.18741595745087,
+      "p95_ms": 133.14484246075153
+    }
+  },
+  "complete_first_half_by_length_ms": {
+    "76": {
+      "arena_replay": {
+        "n": 57,
+        "median_ms": 126.65656954050064,
+        "p95_ms": 127.9839888215065
+      },
+      "prefix_replay": {
+        "n": 57,
+        "median_ms": 124.99986961483955,
+        "p95_ms": 126.66019722819328
+      }
+    },
+    "81": {
+      "arena_replay": {
+        "n": 22,
+        "median_ms": 127.38027609884739,
+        "p95_ms": 129.48808576911688
+      },
+      "prefix_replay": {
+        "n": 22,
+        "median_ms": 125.31737051904202,
+        "p95_ms": 126.75342485308647
+      }
+    },
+    "86": {
+      "arena_replay": {
+        "n": 31,
+        "median_ms": 128.87701019644737,
+        "p95_ms": 130.1006991416216
+      },
+      "prefix_replay": {
+        "n": 31,
+        "median_ms": 126.02413445711136,
+        "p95_ms": 127.83257849514484
+      }
+    },
+    "91": {
+      "arena_replay": {
+        "n": 42,
+        "median_ms": 129.23465482890606,
+        "p95_ms": 130.90355060994625
+      },
+      "prefix_replay": {
+        "n": 42,
+        "median_ms": 126.43609195947647,
+        "p95_ms": 127.41721905767918
+      }
+    },
+    "96": {
+      "arena_replay": {
+        "n": 28,
+        "median_ms": 132.68358446657658,
+        "p95_ms": 133.9867416769266
+      },
+      "prefix_replay": {
+        "n": 28,
+        "median_ms": 129.59489412605762,
+        "p95_ms": 130.45933432877064
+      }
+    },
+    "101": {
+      "arena_replay": {
+        "n": 15,
+        "median_ms": 135.31046360731125,
+        "p95_ms": 136.8449978530407
+      },
+      "prefix_replay": {
+        "n": 15,
+        "median_ms": 132.05521553754807,
+        "p95_ms": 133.4548119455576
+      }
+    },
+    "106": {
+      "arena_replay": {
+        "n": 13,
+        "median_ms": 135.71161404252052,
+        "p95_ms": 137.32010051608086
+      },
+      "prefix_replay": {
+        "n": 13,
+        "median_ms": 131.71343877911568,
+        "p95_ms": 132.80633613467216
+      }
+    },
+    "111": {
+      "arena_replay": {
+        "n": 8,
+        "median_ms": 136.23948954045773,
+        "p95_ms": 136.99190523475409
+      },
+      "prefix_replay": {
+        "n": 8,
+        "median_ms": 132.20739550888538,
+        "p95_ms": 133.2023784518242
+      }
+    },
+    "116": {
+      "arena_replay": {
+        "n": 7,
+        "median_ms": 136.952456086874,
+        "p95_ms": 137.66056783497334
+      },
+      "prefix_replay": {
+        "n": 7,
+        "median_ms": 132.2052702307701,
+        "p95_ms": 133.46419408917427
+      }
+    },
+    "121": {
+      "arena_replay": {
+        "n": 27,
+        "median_ms": 137.19024136662483,
+        "p95_ms": 138.81105110049248
+      },
+      "prefix_replay": {
+        "n": 27,
+        "median_ms": 132.94637203216553,
+        "p95_ms": 133.91113840043545
+      }
+    }
+  },
+  "phases": [
+    {
+      "phase": 0,
+      "variant": "arena_replay",
+      "complete": true,
+      "measured_users": 250,
+      "expected_users": 250,
+      "compiler_state": "complete",
+      "compiler_artifacts_reused": false,
+      "setup_s": 137.17342867702246,
+      "backend_compile_s": 101.3440678305924,
+      "graph_preparation_nested_s": 3.7869557291269302,
+      "setup_memory": {
+        "allocated_bytes": 20168194560,
+        "reserved_bytes": 24339546112,
+        "peak_allocated_bytes": 21443384320,
+        "peak_reserved_bytes": 24339546112
+      },
+      "measured_memory": {
+        "allocated_bytes": 20168194560,
+        "reserved_bytes": 24339546112,
+        "peak_allocated_bytes": 21087174656,
+        "peak_reserved_bytes": 24339546112
+      },
+      "graphs_frozen_at_measurement_start": 40,
+      "measurement_compilations_recorded": 0,
+      "end_capture_counters_available": true,
+      "logical_input_bytes": 11468832320,
+      "unique_input_storage_bytes": 355565120,
+      "physical_prefix": null,
+      "warmup_comparison": {
+        "requests": 10,
+        "rank_positions": 500,
+        "sequence_values": 500,
+        "transition_values": 2500,
+        "matching_rank_lists": 10,
+        "matching_rank_positions": 500,
+        "matching_sequence_vectors": 10,
+        "matching_transition_arrays": 10,
+        "matching_sequence_values": 500,
+        "matching_transition_values": 2500,
+        "max_sequence_difference_common": 0.0,
+        "max_transition_difference_common": 0.0
+      }
+    },
+    {
+      "phase": 1,
+      "variant": "prefix_replay",
+      "complete": true,
+      "measured_users": 250,
+      "expected_users": 250,
+      "compiler_state": "complete",
+      "compiler_artifacts_reused": false,
+      "setup_s": 346.2368078120053,
+      "backend_compile_s": 266.41494342312217,
+      "graph_preparation_nested_s": 210.99958259239793,
+      "setup_memory": {
+        "allocated_bytes": 8036586496,
+        "reserved_bytes": 10500440064,
+        "peak_allocated_bytes": 8810904064,
+        "peak_reserved_bytes": 10500440064
+      },
+      "measured_memory": {
+        "allocated_bytes": 8036586496,
+        "reserved_bytes": 10500440064,
+        "peak_allocated_bytes": 8352647680,
+        "peak_reserved_bytes": 10500440064
+      },
+      "graphs_frozen_at_measurement_start": 40,
+      "measurement_compilations_recorded": 0,
+      "end_capture_counters_available": true,
+      "logical_input_bytes": 397999680,
+      "unique_input_storage_bytes": 15572544,
+      "physical_prefix": {
+        "requests_loaded": 20,
+        "prefix_bytes_copied": 112967680,
+        "prefix_capacity_bytes": 6938624,
+        "suffix_capacity_bytes": 8601600,
+        "max_prefix_tokens": 121,
+        "max_suffix_tokens": 3,
+        "physical_prefix_batch": 1,
+        "suffix_batch": 50,
+        "attention_materialization": "Temporary dense exact-length K/V per layer; unchanged SDPA"
+      },
+      "warmup_comparison": {
+        "requests": 10,
+        "rank_positions": 500,
+        "sequence_values": 500,
+        "transition_values": 2500,
+        "matching_rank_lists": 10,
+        "matching_rank_positions": 500,
+        "matching_sequence_vectors": 10,
+        "matching_transition_arrays": 10,
+        "matching_sequence_values": 500,
+        "matching_transition_values": 2500,
+        "max_sequence_difference_common": 0.0,
+        "max_transition_difference_common": 0.0
+      }
+    },
+    {
+      "phase": 2,
+      "variant": "prefix_replay",
+      "complete": true,
+      "measured_users": 250,
+      "expected_users": 250,
+      "compiler_state": "complete",
+      "compiler_artifacts_reused": true,
+      "setup_s": 147.29633965343237,
+      "backend_compile_s": 67.04769586026669,
+      "graph_preparation_nested_s": 82.27853740379214,
+      "setup_memory": {
+        "allocated_bytes": 8036586496,
+        "reserved_bytes": 9999220736,
+        "peak_allocated_bytes": 8816888832,
+        "peak_reserved_bytes": 10563354624
+      },
+      "measured_memory": {
+        "allocated_bytes": 8036586496,
+        "reserved_bytes": 9999220736,
+        "peak_allocated_bytes": 8358494720,
+        "peak_reserved_bytes": 9999220736
+      },
+      "graphs_frozen_at_measurement_start": 40,
+      "measurement_compilations_recorded": 0,
+      "end_capture_counters_available": true,
+      "logical_input_bytes": 397999680,
+      "unique_input_storage_bytes": 15572544,
+      "physical_prefix": {
+        "requests_loaded": 20,
+        "prefix_bytes_copied": 112967680,
+        "prefix_capacity_bytes": 6938624,
+        "suffix_capacity_bytes": 8601600,
+        "max_prefix_tokens": 121,
+        "max_suffix_tokens": 3,
+        "physical_prefix_batch": 1,
+        "suffix_batch": 50,
+        "attention_materialization": "Temporary dense exact-length K/V per layer; unchanged SDPA"
+      },
+      "warmup_comparison": {
+        "requests": 10,
+        "rank_positions": 500,
+        "sequence_values": 500,
+        "transition_values": 2500,
+        "matching_rank_lists": 10,
+        "matching_rank_positions": 500,
+        "matching_sequence_vectors": 10,
+        "matching_transition_arrays": 10,
+        "matching_sequence_values": 500,
+        "matching_transition_values": 2500,
+        "max_sequence_difference_common": 0.0,
+        "max_transition_difference_common": 0.0
+      }
+    },
+    {
+      "phase": 3,
+      "variant": "arena_replay",
+      "complete": false,
+      "measured_users": 107,
+      "expected_users": 250,
+      "compiler_state": "measurement",
+      "compiler_artifacts_reused": true,
+      "setup_s": 67.91490800306201,
+      "backend_compile_s": 31.535214688628912,
+      "graph_preparation_nested_s": 3.9357881881296635,
+      "setup_memory": {
+        "allocated_bytes": 20171389952,
+        "reserved_bytes": 24637341696,
+        "peak_allocated_bytes": 21451927040,
+        "peak_reserved_bytes": 24637341696
+      },
+      "measured_memory": null,
+      "graphs_frozen_at_measurement_start": 40,
+      "measurement_compilations_recorded": 0,
+      "end_capture_counters_available": false,
+      "logical_input_bytes": 11468832320,
+      "unique_input_storage_bytes": 355565120,
+      "physical_prefix": null,
+      "warmup_comparison": {
+        "requests": 10,
+        "rank_positions": 500,
+        "sequence_values": 500,
+        "transition_values": 2500,
+        "matching_rank_lists": 10,
+        "matching_rank_positions": 500,
+        "matching_sequence_vectors": 10,
+        "matching_transition_arrays": 10,
+        "matching_sequence_values": 500,
+        "matching_transition_values": 2500,
+        "max_sequence_difference_common": 0.0,
+        "max_transition_difference_common": 0.0
+      }
+    }
+  ],
+  "setup_total_s": 698.6214841455221,
+  "inference_saved_total_s": 111.02075711637735,
+  "cause": "The allocation expired during phase-3 measurement after all four setup phases. Setup/warmup alone consumed about 699 s; model loading, output extraction/serialization and inference also count toward the 900-s allocation. No Python exception was found before the scheduler timeout.",
+  "next_requirement": "A longer bounded single-A6000 allocation is needed for a fresh complete four-phase comparison. No replacement job submitted: current instructions prohibit another pilot or full submission."
+}

@@ -20,6 +20,7 @@ paired run on the same 500 users; improvements should not be multiplied together
 | Restore native GQA in compiled forward | 174.4 → 159.7 | 188.2 → 169.8 | Bitwise exact |
 | Replay + direct KV reorder (experimental) | 136.5 → 131.1 | 144.6 → 138.8 | Bitwise exact |
 | Reuse graph input storage (experimental) | 130.1 → 130.2 | 138.0 → 138.3 | Bitwise exact |
+| Share physical history KV (experimental) | 129.3 → 126.7 | 137.2 → 133.3 | Bitwise exact |
 
 Every row preserves all 50 ranks for every user against its paired control.
 Compilation, capture and warmup are excluded. Full-vocabulary normalization, newline/EOS
@@ -29,6 +30,10 @@ probabilities, beam width and model weights are preserved.
 Sharing input storage across 40 graphs reduces allocated GPU memory
 **29.16 → 18.78 GiB (35.6%)**, with the small latency regression shown above.
 [Memory results and setup costs](docs/input-arena.md).
+
+Keeping one physical history copy further reduces allocated memory
+**18.37–18.78 → 7.48 GiB (59–60%)** in its paired comparison. Cold setup
+increases **140 → 350 s**. [Shared-prefix results](docs/shared-prefix.md).
 
 ## Run
 
