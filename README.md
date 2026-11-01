@@ -13,7 +13,8 @@ The earlier shared-prefill change reduced median latency **869 ms → 188 ms
 (4.63×)** with all 25,000 ranked positions unchanged.
 
 Reduced-precision research reached **82.3 ms with TF32** and **56.5 ms with
-BF16**. These change rankings and are not enabled on main; see the
+BF16**. BF16 is available as an **experimental opt-in**; FP32 remains the default.
+These modes change rankings; see the
 [precision and quality comparison](#reduced-precision-results) below.
 
 ## Performance
@@ -51,6 +52,8 @@ Packing decode query heads into attention rows reduces median/p95 latency
 
 ### Reduced-precision results
 
+![Measured precision and quantization frontier; INT8 and INT4 are unmeasured](docs/assets/precision-frontier.svg)
+
 Same Office checkpoint, RTX A6000, 500 users, batch 1 and beam 50. Each row is
 a separate paired experiment; its control timings must not be substituted
 with those from another row. Setup, compilation and capture are excluded.
@@ -69,7 +72,10 @@ These results support a speed/quality tradeoff, not a claim of equivalent
 quality or exact rankings. The comparison is BF16 versus TF32, not a direct
 paired BF16-versus-FP32 experiment.
 
-These are completed research measurements, not selectable modes on main.
+These are the completed full500 research measurements; the smaller release
+acceptance check does not replace them. BF16 is selectable with
+`--precision bf16-experimental`; TF32 remains research-only. INT8/INT4
+quantization is neither implemented nor benchmarked.
 [Precision recipe, quality limits and source evidence](docs/precision-results.md).
 
 ## Run
@@ -85,6 +91,24 @@ python -m rapidtinyrec.run prefill \
 Linux, Python 3.11+, CUDA. [Run every ablation and profiler](docs/reproduce.md).
 Release files and the user cohort are pinned and hash-checked; generated outputs
 include all rankings, scores and per-request timings.
+
+Run the folded stack with FP32 (default), or explicitly opt into BF16:
+
+```bash
+python -m rapidtinyrec.run folded \
+  --release-root releases/office --reference-results GQA_RESULTS \
+  --output-root results/folded-fp32
+python -m rapidtinyrec.run folded --precision bf16-experimental \
+  --release-root releases/office --reference-results GQA_RESULTS \
+  --output-root results/folded-bf16
+```
+
+`GQA_RESULTS` is the pinned historical GQA benchmark directory described in
+[reproduction instructions](docs/reproduce.md). These commands run the four-user
+acceptance cohort; add `--full-cohort` for all 500 users. Each launch creates a
+fresh process and compiler caches. Use a new output directory for every run.
+BF16 retains FP32 normalization/beam scores and the same beam width, vocabulary
+and EOS policy; it does not promise identical rankings or equivalent quality.
 
 [How decoding works](docs/decoding.md) · [Benchmark evidence](benchmarks/results)
 · [Changes](https://github.com/amilcodes/RapidTinyRec/pulls?q=is%3Apr)
