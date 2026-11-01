@@ -70,6 +70,19 @@ repeats, immutable parameter/input/table digests, and compiler/capture freeze
 checks. Its small cohort is an integration check, not a new quality study or
 replacement for the full500 chart.
 
+This acceptance passed on an RTX A6000 on November 1, 2026: eight requests
+per mode, 40 full-score comparisons per mode, and exact saved same-policy
+outputs. The small sample measured FP32 at 115.08 ms median / 120.05 ms p95
+and BF16 at 57.56 ms / 58.87 ms. Cold setup and warmup took about 376 seconds
+per mode, excluded from those request timings. Parameter/input/table integrity,
+retained scores, compiler/capture freeze and policy restoration passed the
+allocated independent audit. [Acceptance summary](../benchmarks/results/bf16-opt-in/summary.json),
+[protocol](../benchmarks/results/bf16-opt-in/protocol.json),
+[auditor](../benchmarks/results/bf16-opt-in/audit_acceptance.py) and
+[source provenance](../benchmarks/results/bf16-opt-in/source.json) are retained.
+The initial upload omitted a nested Python package and failed before model
+loading; that attempt remains recorded separately from the corrected run.
+
 An experimental opt-in can expose the measured tradeoff with these limits.
 Changing the default or promising a quality-loss budget would need an explicit
 acceptance threshold and representative held-out evaluation. The existing
