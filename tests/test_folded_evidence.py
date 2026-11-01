@@ -78,7 +78,12 @@ class FoldedEvidenceTests(unittest.TestCase):
             self.assertEqual(hashlib.sha256((root / name).read_bytes()).hexdigest(), expected, name)
         for name, expected in source['published_source_sha256'].items():
             self.assertEqual(source['submitted_source_sha256'][name], expected, name)
-            self.assertEqual(hashlib.sha256((ROOT / name).read_bytes()).hexdigest(), expected, name)
+            # The launcher now includes an opt-in command. Its measured version
+            # remains archived verbatim; all measured inference modules still
+            # match the current implementation. Never rewrite historical hashes.
+            path = (ROOT / 'benchmarks/reference_sources/folded-query-heads/run.py'
+                    if name == 'rapidtinyrec/run.py' else ROOT / name)
+            self.assertEqual(hashlib.sha256(path.read_bytes()).hexdigest(), expected, name)
 
 
 if __name__ == '__main__':

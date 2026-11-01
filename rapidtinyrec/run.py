@@ -7,6 +7,7 @@ import sys
 import tempfile
 
 MODES = {
+    'folded': ('benchmark_inference', []),
     'prefill': ('benchmark', ['--experiment', 'shared_prefill']),
     'batched': ('benchmark', ['--experiment', 'bulk_constraints']),
     'gpu': ('benchmark', ['--experiment', 'gpu_constraints']),
@@ -26,7 +27,7 @@ def main():
     module, flags=MODES[args.mode]
     env=dict(os.environ)
     env['TOKENIZERS_PARALLELISM']='false'
-    if args.mode in ('compiled','gqa','decode-pilot','profile-compiled'):
+    if args.mode in ('folded','compiled','gqa','decode-pilot','profile-compiled'):
         args.cache_root.mkdir(parents=True,exist_ok=True)
         root=Path(tempfile.mkdtemp(prefix=args.mode+'-',dir=args.cache_root)).resolve()
         env['TORCHINDUCTOR_CACHE_DIR']=str(root/'inductor')

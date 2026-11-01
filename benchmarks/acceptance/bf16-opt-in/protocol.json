@@ -1,0 +1,23 @@
+{
+  "schema": "bf16-opt-in-acceptance-v2",
+  "modes": [
+    "fp32",
+    "bf16-experimental"
+  ],
+  "cohort_indices": [
+    1,
+    2,
+    6,
+    10
+  ],
+  "repeats": 2,
+  "gate": "Exact same-policy saved token/sequence/transition outputs; BF16 saved ancestry; all five full scores repeat/reverse/warm exact; FP32 score dtypes; immutable tensors; no measured compile/capture; restored policy. No cross-precision exactness or population quality claim.",
+  "member_seconds": 600,
+  "whole_seconds": 1440,
+  "guardian_seconds": 1500,
+  "allocated_minutes": 30,
+  "experimental": true,
+  "auto_retry": false,
+  "research_loop": "PAUSED",
+  "change": "Complete recursive Python package; v1 failed before model loading due to omitted nested source directory. Numerical protocol unchanged."
+}

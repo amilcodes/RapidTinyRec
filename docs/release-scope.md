@@ -69,9 +69,15 @@ remain available for reproduction.
 
 ## Excluded from this promotion
 
-TF32 and BF16 precision branches, combined suffix scoring, packed MLP/QKV,
+TF32 research runners, combined suffix scoring, packed MLP/QKV,
 constraint/beam-helper replay, concurrent serving, prompt caching, beam waves,
 and later buffer-reuse or score-capture experiments are not merged here.
 The approximately 82 ms TF32 and 57 ms BF16 medians reported in later research
 use different numerical policies; they are not results for this FP32/TF32-off
-release. Precision/quality tradeoffs require a separate decision.
+release. They have a separate precision/quality contract.
+
+BF16 has since been added as an explicit experimental option in
+`python -m rapidtinyrec.run folded --precision bf16-experimental`; FP32 remains
+the default. [Precision results and usage](precision-results.md) describe the
+separate quality contract. The original FP32 ablation entry points and their
+measurement evidence are unchanged.

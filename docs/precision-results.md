@@ -1,8 +1,9 @@
 # Reduced-precision measurements
 
-The default validated stack on main uses FP32 with TF32 disabled. The TF32 and
-BF16 experiments below are completed research results; documenting them does
-not enable either mode or merge the experimental runners.
+The default stack uses FP32 with TF32 disabled. The new folded entry point
+accepts `--precision bf16-experimental` as an explicit quality tradeoff. TF32
+remains research-only. The historical research runners and failed experiments
+are not merged into the runtime path.
 
 ## Measured quality and latency
 
@@ -37,7 +38,7 @@ The aggregate hides descriptive subgroup regressions. At prompt length 91
 not establish population equivalence or a zero quality cost; these intervals
 describe uncertainty on this cohort, not a guaranteed loss bound for deployment.
 
-## What an opt-in BF16 mode needs
+## Experimental BF16 opt-in
 
 The measured recipe loads model parameters in BF16 and retains BF16 model
 logits and KV tensors. Hugging Face normalization, processor scores and beam
@@ -46,14 +47,41 @@ matmuls, disables cuDNN TF32 and BF16 reduced-precision reductions, preserves
 the reviewed split-K setting, and disables reduced-precision math-SDPA
 reductions. It is not simply an autocast switch, and uses no INT8/INT4 weights.
 
-A supported opt-in should extract this recipe into the main folded path,
-keep FP32 as the default, and select precision before loading, compilation
-and capture. Each mode needs separate model/compiled/graph state, explicit
-dtype and policy checks, restored global settings, and result metadata naming
-the mode. New integration checks should cover default FP32 behavior, BF16
-logits/KV with FP32 scores, output lifetime and exception cleanup. A targeted
-A6000 acceptance run of that new entry point would validate the integration;
-the completed research run itself remains closed.
+Use `python -m rapidtinyrec.run folded --precision bf16-experimental` with
+`--release-root`, `--reference-results` and a new `--output-root`. Omit the
+precision flag for FP32. Selection happens before loading, compilation and
+capture; every launcher call creates a fresh process and compiler caches.
+Runtime checks enforce model/logit/KV dtypes and FP32 owned scores. The process
+restores its numerical policy on normal exit and exceptions, and records the
+selected precision and restoration in output metadata. Global attention and
+model hooks retain their context-managed restoration.
+
+The default cohort is four users at the shortest/longest validated lengths,
+with two passes in forward/reverse order. `--full-cohort` runs all 500 users
+once; `--repeats` controls pilot repetitions only. `--save-full-scores` writes
+lossless dense FP32 scores for acceptance auditing outside the latency timer,
+and retains score tensors to verify their lifetime. It increases memory/I/O
+cost and is not required for ordinary benchmark use.
+
+The release acceptance uses the new default FP32 command and BF16 opt-in in
+separate processes, with same-policy historical token/sequence/transition
+references, BF16 ancestry references, all five full scores, reverse-order
+repeats, immutable parameter/input/table digests, and compiler/capture freeze
+checks. Its small cohort is an integration check, not a new quality study or
+replacement for the full500 chart.
+
+This acceptance passed on an RTX A6000 on November 1, 2026: eight requests
+per mode, 40 full-score comparisons per mode, and exact saved same-policy
+outputs. The small sample measured FP32 at 115.08 ms median / 120.05 ms p95
+and BF16 at 57.56 ms / 58.87 ms. Cold setup and warmup took about 376 seconds
+per mode, excluded from those request timings. Parameter/input/table integrity,
+retained scores, compiler/capture freeze and policy restoration passed the
+allocated independent audit. [Acceptance summary](../benchmarks/acceptance/bf16-opt-in/summary.json),
+[protocol](../benchmarks/acceptance/bf16-opt-in/protocol.json),
+[auditor](../benchmarks/acceptance/bf16-opt-in/audit_acceptance.py) and
+[source provenance](../benchmarks/acceptance/bf16-opt-in/source.json) are retained.
+The initial upload omitted a nested Python package and failed before model
+loading; that attempt remains recorded separately from the corrected run.
 
 An experimental opt-in can expose the measured tradeoff with these limits.
 Changing the default or promising a quality-loss budget would need an explicit
@@ -67,5 +95,5 @@ apply; this does not create a concurrent serving API.
 - [BF16 corrected full500 independent review](https://github.com/amilcodes/RapidTinyRec/blob/7de96b5caa7741a99d13bc9cb0ef859bdd992936/research/bf16-full500-results/evidence/bf16-full500-corrected-independent-review.json): execution, source/protocol, dispatch, stability and allocated numerical audits passed; no automatic promotion or quality-equivalence claim.
 - [BF16 policy](https://github.com/amilcodes/RapidTinyRec/blob/7de96b5caa7741a99d13bc9cb0ef859bdd992936/rapidtinyrec/bf16_policy.py) and [full500 benchmark](https://github.com/amilcodes/RapidTinyRec/blob/7de96b5caa7741a99d13bc9cb0ef859bdd992936/rapidtinyrec/benchmark_bf16_full500.py) define the measured precision and output contract.
 
-The README numbers are rounded from these saved reports. No new benchmark,
-bootstrap or numerical re-audit was performed for this documentation update.
+The README chart numbers are rounded from these saved full500 reports. The
+opt-in acceptance is separate; no historical job is reopened or re-audited.
