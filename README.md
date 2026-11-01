@@ -77,7 +77,7 @@ acceptance check does not replace them. BF16 is selectable with
 `--precision bf16-experimental`; TF32 remains research-only. INT8/INT4
 quantization is neither implemented nor benchmarked.
 [Precision recipe, quality limits and source evidence](docs/precision-results.md).
-The new opt-in also passed a separate [targeted A6000 acceptance check](benchmarks/results/bf16-opt-in/summary.json)
+The new opt-in also passed a separate [targeted A6000 acceptance check](benchmarks/acceptance/bf16-opt-in/summary.json)
 with eight requests per mode and all five full scores checked per request.
 
 ## Run

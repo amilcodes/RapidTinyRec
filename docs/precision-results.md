@@ -76,10 +76,10 @@ outputs. The small sample measured FP32 at 115.08 ms median / 120.05 ms p95
 and BF16 at 57.56 ms / 58.87 ms. Cold setup and warmup took about 376 seconds
 per mode, excluded from those request timings. Parameter/input/table integrity,
 retained scores, compiler/capture freeze and policy restoration passed the
-allocated independent audit. [Acceptance summary](../benchmarks/results/bf16-opt-in/summary.json),
-[protocol](../benchmarks/results/bf16-opt-in/protocol.json),
-[auditor](../benchmarks/results/bf16-opt-in/audit_acceptance.py) and
-[source provenance](../benchmarks/results/bf16-opt-in/source.json) are retained.
+allocated independent audit. [Acceptance summary](../benchmarks/acceptance/bf16-opt-in/summary.json),
+[protocol](../benchmarks/acceptance/bf16-opt-in/protocol.json),
+[auditor](../benchmarks/acceptance/bf16-opt-in/audit_acceptance.py) and
+[source provenance](../benchmarks/acceptance/bf16-opt-in/source.json) are retained.
 The initial upload omitted a nested Python package and failed before model
 loading; that attempt remains recorded separately from the corrected run.
 
