@@ -129,9 +129,26 @@ U3(a,b,c) = U2 + s(c|ab). For any item, score ≤ U3 ≤ U2.
 4. **Certificate**: top-K is globally optimal iff the K-th exact score ≥ max(U3 of the best
    un-suffixed item, U2 of the best unexpanded prefix).
 
-Validated against brute-force scoring of all 3,444 SIDs in FP32: 0 violations; top-1 always
-optimal. Certification rates: full scoring with suffix, N=64: top-10 26–29%; no suffix:
-top-10 94%; trie: top-50 99.9%.
+Validated against brute-force scoring of all 3,444 SIDs in FP32: 0 violations among certified
+users; top-1 always optimal.
+
+Certification rate (share of the 4,866 Office test users whose top-K is proven globally optimal):
+
+| decoder | scoring | forwards | top-1 | top-5 | top-10 | top-20 | median ms |
+|---|---|---:|---:|---:|---:|---:|---:|
+| single bound, N=16 items | full (with suffix) | 3 | 0.88 | 0.11 | 0.00 | — | 31.1* |
+| single bound, N=32 | full | 3 | 0.96 | 0.32 | 0.05 | 0.00 | 32.4* |
+| single bound, N=64 | full | 3 | 0.98 | 0.58 | 0.27 | 0.03 | 36.6* |
+| single bound, N=128 | full | 3 | 0.99 | 0.75 | 0.54 | — | 45.5* |
+| single bound, N=64 | no suffix | 3 | 1.00 | 0.94 | 0.83 | 0.26 | 31.5* |
+| three-stage, M=64, fused first level | no suffix | 2 | 1.00 | 0.97 | 0.94 | 0.86 | 19.8 |
+| three-stage, M=64, fused first level | trie | 2 | 1.00 | 1.00 | 1.00 | 1.00 | 16.1 |
+
+\*uncompiled, unfused first level, PyTorch attention (earlier engine stage).
+
+Skipping the second forward when the certificate already closes after the first (possible under
+trie scoring, where single-child prefixes — 1,907 of 2,488 — have exact scores after F1)
+happens for 42% of users at K=1 but only 0.4% at K=10, so the second forward stays.
 
 ## 6. What exact decoding reveals
 
@@ -161,11 +178,37 @@ compute-bound beyond B≈8. [Exact decoders: TBD.]
 
 ## 9. Related work
 
-See `lit_ledger.md`. Systems lineage: FlashRec, NVIDIA SID-GR, xGR, GRACE, GR4AD, STATIC,
-FlashTrie, STARK (tree attention for beams), Hydragen/FlashInfer cascade. Prefill-only heads
-(NEZHA, SID-MLP, Deco) are complementary. Search: DiGR's brute-force exhaustive scoring
-(5 s/user) and 2611.01072's first-step coverage study for TIGER; Stahlberg & Byrne (2019) on
-exact search in NMT. Constrained-decoding theory: Wu et al. (SIGIR'25), grammar-aligned decoding.
+**GR serving engines.** FlashRec (Sohu, 2026; open source) combines wide-beam CUDA graphs, a
+fused trie kernel, a per-codebook restricted LM head with restricted log-softmax, radix
+prefix caching, cross-request beam batching and FP8, and reports throughput against
+SGLang/vLLM/TRT-LLM with 86–92% beam-set overlap to HF. NVIDIA's SID-GR inference example
+separates shared context KV from per-beam KV with a custom decode-attention kernel (17.6 ms at
+batch 1 for Qwen3-1.7B, beam 256, on an H100) and fixes output length with `ignore_eos`.
+xGR (2512.11529) separates shared/unshared KV, terminates sorting early and filters items with
+masks; GRACE (2608.00938) captures the whole SID loop in one CUDA graph and treats beams as the
+query dimension of cross-attention; GR4AD (2602.22732) reports per-mechanism QPS for
+beam-shared KV, top-K pre-cut, FP8 and a lazy decoder; UniSGR/STARK (2607.04068) uses tree
+attention over beam candidates; STATIC (2602.22647) and FlashTrie (2607.10044) make trie
+constraints cheap on accelerators. Our engine re-implements this lineage for one model and
+does not claim those mechanisms; our contributions are the decoding algorithm, the
+first-level prefill fusion, and the measurements.
+
+**Faster generation by changing the model.** NEZHA (2511.18793), SID-MLP (2605.12617) and Deco
+(2610.32980) run the LLM once and decode SIDs with a light head; RPG, VaLiDRec and masked
+diffusion generate SID tokens in parallel; OneRec-V2's lazy decoder and GR4AD's LazyAR cut
+decoder compute; AtSpeed, SpecGR and PAD-Rec apply speculative decoding. All are
+complementary to exact decoding of an unmodified model.
+
+**Search and scoring.** DiGR (2602.07847) scores every legal SID of an LLM recommender by brute
+force (5 s/user) and finds it beats beam-50; 2611.01072 studies beam's first-step losses for
+TIGER with an offline exhaustive reference; Item-Supported Decoding (2607.24995) protects
+prefixes with an external ranker. Wu et al. (SIGIR'25) bound the error of constrained
+decoding; grammar-aligned decoding (2405.21047) shows mask-then-renormalize distorts LLM
+distributions. In machine translation, exact search exposed that the model's MAP output is
+often worse than beam's (Stahlberg & Byrne, 2019; Meister et al., 2020). To our knowledge no
+prior work makes exact search over the SID trie fast enough to serve, gives a per-request
+optimality certificate, or measures how forced suffix tokens and normalization choices change
+recommendation quality.
 
 ## 10. Limitations
 
