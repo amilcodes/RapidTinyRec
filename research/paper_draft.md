@@ -180,11 +180,12 @@ relative. [TBD: weights tuned on MiniOneRec's validation split, evaluated once o
 datasets — `scripts/tune_weights.py`.] Why the deep terms mislead (exhaustive FP32 scores, 1,217 Office users × 3,444 SIDs):
 - **Sibling penalty.** lp(c|ab) falls with the number of catalog items sharing the prefix
   (a,b): median −0.87, −2.46, −3.05, −3.38, −4.12 for 1, 2, 3, 4, 6 siblings (Pearson r = −0.36
-  between lp(c|ab) and sibling count over each user's top-50). Splitting mass among siblings
-  imposes roughly a −log k structural penalty unrelated to the user.
+  between lp(c|ab) and sibling count over each user's top-50) — steeper than the −log k of an
+  even split (−1.6 nats from one to two siblings vs log 2 = 0.69). This is a structural penalty
+  on items that share a prefix, unrelated to the user (Fig. `sibling_penalty_office`).
 - **Codebook leakage.** Even after a valid (a,b), a median 47% of next-token mass falls outside
-  the c-codebook (median log-mass −0.63); full-vocabulary scoring charges every item for it,
-  unevenly across prefixes. Codebook/trie renormalization removes it.
+  the c-codebook (median log-mass −0.63, flat across sibling counts); full-vocabulary scoring
+  charges every item for it, unevenly across users and prefixes. Codebook/trie renormalization removes it.
 - **The forced suffix is mixed evidence.** On average the target's lp(\n)+lp(EOS) is higher than
   its competitors' (−1.69 vs −6.31; competitor mean dominated by a few very unlikely completions),
   but adding the suffix moves the target up for 28% of users and down for 25%; it correlates
