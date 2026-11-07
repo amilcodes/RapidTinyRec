@@ -224,3 +224,8 @@ See `lit_ledger.md`, `architecture_directions.md`, `kernel_techniques.md`.
   55% at 22, 71% at 25. Industrial: 21% at 16, 65% at 22, 77% at 25. Target's first code is in
   the lens top-10 for 44%/61% at layer 22 vs 51%/63% at the output (Office/Industrial).
   Implication: no early exit for the first two codes; depth reduction would need training.
+- **Early exit for the c-level forward** (certified trie + template, Office): layers 28/22/18/14/10/6
+  → 14.4/13.2/12.2/11.3/10.4/9.4 ms; HR@10 0.165/0.164/0.164/0.164/0.164/0.165 (flat) but HR@1
+  0.098/0.091/0.083/0.073/0.066/0.062 and NDCG@10 0.129/0.124/0.121/0.116/0.113/0.111. The third
+  code decides the order among siblings, not set membership; early exit is a latency/precision
+  trade (−34% latency at −3.6 pt HR@1), not a free win. Certification is w.r.t. the truncated score.
