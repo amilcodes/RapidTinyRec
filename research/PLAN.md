@@ -191,3 +191,6 @@ See `lit_ledger.md`, `architecture_directions.md`, `kernel_techniques.md`.
   [+0.21, +1.81] / +0.46 [+0.06, +0.85]; no-suffix full w_c=0.75 → +0.66 [+0.00, +1.27]; trie
   w_c=0.75 → +0.49 (n.s.). w_b=1 chosen everywhere: only the third code (and suffix) is discounted.
   Beam-50 and exact give the same numbers under tuned weights.
+- FP16 + template cache: full-semantics beam **26.1 ms with top-1 = FP32 for 500/500** and HR@10
+  0.1587 (FP32 0.1589) — the faithful fast path; certified exact trie 14.3 ms (= BF16 14.4);
+  beam-50 trie 14.3 ms; exact no-suffix 18.2 ms.
