@@ -103,21 +103,30 @@ def main():
         mine = mine[:a.limit]
     acc = {k: [] for k in ('la', 'cba', 'lb', 'cbb', 'lc', 'cbc', 'lnl', 'leos')}
     t0 = time.time()
+    Path(a.out).mkdir(parents=True, exist_ok=True)
+    done_rows = []
     for n, i in enumerate(mine):
         r = one_user(e, ids[i], dev, a.chunk)
         for k, v in r.items():
             acc[k].append(v.float().cpu())
+        done_rows.append(i)
         if n % 100 == 0:
             print(json.dumps({'done': n, 'of': len(mine), 'elapsed_s': time.time() - t0}), flush=True)
+        if (n + 1) % 400 == 0 or n + 1 == len(mine):
+            save(a, e, cat, tok, rows, acc, done_rows)
+    print(json.dumps({'stage': 'done', 'users': len(mine), 'elapsed_s': time.time() - t0}), flush=True)
+
+
+def save(a, e, cat, tok, rows, acc, mine):
     out = {k: torch.stack(v) for k, v in acc.items()}
     out['rows'] = torch.tensor(mine)
     out['meta'] = {'sid_tok': e.sid_tok.cpu(), 'first': cat.first.cpu(), 't1': cat.t1.cpu(), 'v1': cat.v1.cpu(),
                    'sid_a': e.sid_a.cpu(), 'sid_flat': e.sid_flat.cpu(), 'sid_pair': e.sid_pair.cpu(),
-                   'W1': cat.W1, 'dtype': a.dtype, 'gpu': torch.cuda.get_device_name(0) if dev.type == 'cuda' else str(dev),
+                   'W1': cat.W1, 'dtype': a.dtype, 'gpu': torch.cuda.get_device_name(0) if torch.cuda.is_available() else 'cpu',
                    'targets': [data.sid_tokens(tok, rows[i]['item_sid']) for i in mine]}
-    Path(a.out).mkdir(parents=True, exist_ok=True)
-    torch.save(out, Path(a.out) / f'scores_{a.shard}_of_{a.nshards}.pt')
-    print(json.dumps({'stage': 'done', 'users': len(mine), 'elapsed_s': time.time() - t0}), flush=True)
+    tmp = Path(a.out) / f'scores_{a.shard}_of_{a.nshards}.pt.tmp'
+    torch.save(out, tmp)
+    tmp.replace(Path(a.out) / f'scores_{a.shard}_of_{a.nshards}.pt')
 
 
 if __name__ == '__main__':

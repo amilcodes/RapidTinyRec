@@ -93,7 +93,54 @@ def _torchao(W, scheme):
     torch.cuda.empty_cache()
 
 
+class FP8Linear(torch.nn.Module):
+    """W8A8 FP8 (e4m3) with per-output-channel weight scales and per-token dynamic activation
+    scales via torch._scaled_mm (Ada/Hopper). Rows are padded to a multiple of 16."""
+
+    def __init__(self, w, b=None, rowwise=True):
+        super().__init__()
+        ws = w.float().abs().amax(1, keepdim=True).clamp(min=1e-12) / 448.0
+        self.w8 = (w.float() / ws).to(torch.float8_e4m3fn).contiguous()   # [N,K]
+        self.ws = ws.t().contiguous()                                      # [1,N]
+        self.b = b
+        self.rowwise = rowwise
+        self.shape = w.shape
+
+    def forward(self, x):
+        shp = x.shape
+        x2 = x.reshape(-1, shp[-1])
+        M = x2.shape[0]
+        pad = (-M) % 16
+        if pad:
+            x2 = F.pad(x2, (0, 0, 0, pad))
+        xf = x2.float()
+        if self.rowwise:
+            xs = xf.abs().amax(1, keepdim=True).clamp(min=1e-12) / 448.0
+            y = torch._scaled_mm((xf / xs).to(torch.float8_e4m3fn), self.w8.t(), scale_a=xs,
+                                 scale_b=self.ws, out_dtype=x.dtype)
+        else:
+            xs = xf.abs().amax().clamp(min=1e-12) / 448.0
+            y = torch._scaled_mm((xf / xs).to(torch.float8_e4m3fn), self.w8.t(), scale_a=xs,
+                                 scale_b=self.ws.amax(), out_dtype=x.dtype)
+        y = y[:M]
+        if self.b is not None:
+            y = y + self.b
+        return y.reshape(*shp[:-1], -1)
+
+
+def _fp8(W, scheme):
+    rowwise = scheme != 'fp8_tensor'
+    for layer in W.layers:
+        layer['wqkv'] = FP8Linear(layer['wqkv'], layer['bqkv'], rowwise); layer['bqkv'] = None
+        for k in ('wo', 'wgu', 'wd'):
+            layer[k] = FP8Linear(layer[k], None, rowwise)
+    W.linear = _dispatch
+    torch.cuda.empty_cache()
+
+
 def get(scheme):
+    if scheme.startswith('fp8'):
+        return lambda W: _fp8(W, scheme)
     if scheme.startswith('gl_'):
         return lambda W: _gemlite(W, scheme)
     if scheme.startswith('ao_'):

@@ -110,9 +110,37 @@ def reference(q, kc, vc, kp, vp, lengths, s0, scale):
     return o.reshape(B, R, NQ, H * D)
 
 
+def torch_path(q, kc, vc, kp, vp, lengths, s0, scale):
+    """The engine's PyTorch attention, in the model dtype (same math as Forward.step)."""
+    B, R, NQ, H, D = q.shape
+    KV, P = kc.shape[1], kc.shape[2]
+    rep = H // KV
+    S = s0 + NQ
+    neg = torch.finfo(torch.float32).min
+    pmask = torch.where(torch.arange(P, device=q.device)[None] < lengths[:, None], 0.0, neg)
+    qi = torch.arange(NQ, device=q.device)[:, None]
+    si = torch.arange(S, device=q.device)[None, :]
+    cmask = torch.where(si <= s0 + qi, 0.0, neg)
+    q = q * scale
+    qg = q.view(B, R, NQ, KV, rep, D).permute(0, 3, 1, 2, 4, 5).reshape(B, KV, R * NQ * rep, D)
+    sp = torch.matmul(qg, kc.transpose(-1, -2)).float() + pmask[:, None, None, :]
+    sp = sp.view(B, KV, R, NQ * rep, P)
+    qr = q.view(B, R, NQ, KV, rep, D).permute(0, 1, 3, 2, 4, 5).reshape(B, R, KV, NQ * rep, D)
+    ss = torch.matmul(qr, kp[:, :, :S].permute(0, 1, 3, 4, 2)).float()
+    ss = (ss.view(B, R, KV, NQ, rep, S) + cmask[None, None, None, :, None, :]).view(B, R, KV, NQ * rep, S).permute(0, 2, 1, 3, 4)
+    probs = torch.softmax(torch.cat([sp, ss], -1), -1).to(q.dtype)
+    pp, ps = probs.split([P, S], -1)
+    op = torch.matmul(pp.reshape(B, KV, R * NQ * rep, P), vc).view(B, KV, R, NQ * rep, D)
+    os_ = torch.matmul(ps, vp[:, :, :S].permute(0, 3, 1, 2, 4))
+    return (op + os_).view(B, KV, R, NQ, rep, D).permute(0, 2, 3, 1, 4, 5).reshape(B, R, NQ, H * D)
+
+
 def selfcheck(dtype, device='cuda'):
+    """Max |error| vs an FP32 reference for the Triton kernel and for the PyTorch path in the
+    same dtype; the kernel passes if it is no worse than the PyTorch path (+ small slack)."""
     torch.manual_seed(0)
     out = {}
+    ok = True
     for (B, R, NQ, s0, P) in [(1, 50, 1, 0, 96), (1, 50, 2, 2, 128), (2, 88, 3, 1, 80), (3, 50, 1, 1, 112)]:
         q = torch.randn(B, R, NQ, 12, 128, device=device, dtype=dtype) * 3
         kc = torch.randn(B, 2, P, 128, device=device, dtype=dtype) * 3
@@ -120,7 +148,10 @@ def selfcheck(dtype, device='cuda'):
         kp = torch.randn(B, R, 4, 2, 128, device=device, dtype=dtype) * 3
         vp = torch.randn_like(kp)
         lengths = torch.randint(P - 15, P + 1, (B,), device=device)
-        a = beam_attention(q, kc, vc, kp, vp, lengths, s0, 128 ** -0.5).float()
         r = reference(q, kc, vc, kp, vp, lengths, s0, 128 ** -0.5)
-        out[f'{B},{R},{NQ},{s0},{P}'] = (a - r).abs().max().item()
+        a = (beam_attention(q, kc, vc, kp, vp, lengths, s0, 128 ** -0.5).float() - r).abs().max().item()
+        t = (torch_path(q, kc, vc, kp, vp, lengths, s0, 128 ** -0.5).float() - r).abs().max().item()
+        out[f'{B},{R},{NQ},{s0},{P}'] = {'triton': a, 'torch': t}
+        ok &= a <= 1.5 * t + 1e-3
+    out['pass'] = bool(ok)
     return out
