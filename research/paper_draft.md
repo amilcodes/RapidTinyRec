@@ -6,55 +6,57 @@ Sections marked [TBD] wait on runs that are queued.*
 ## Abstract
 
 LLM-based generative recommenders emit an item as a short semantic-ID (SID) token sequence
-under a catalog trie, and serve it with constrained beam search. We study the inference of
-an open, widely reproduced instance — MiniOneRec (Qwen2-1.5B, three-level RQ semantic IDs,
-beam 50) — and show that beam search is neither necessary nor the best choice. (1) At batch 1
-latency is set by the number of *sequential* forwards times weight bytes, almost independent
-of how many tokens each forward processes up to ~200; beam search spends most of its time
-re-reading weights to walk a tree whose shape is known in advance. (2) Because the trie is
-tiny (88 first codes and 2,488 two-code prefixes for 3,459 Office items) and every scored term
-is a log-probability ≤ 0, two forwards suffice to score *every* first code and *every* prefix,
-which yields admissible upper bounds on every item; a third, small set of teacher-forced paths
-gives exact scores for the best-bounded items, and a simple test certifies when the returned
-top-K is the global optimum of the model's own objective. Fusing the first trie level into the
-prompt forward removes another sequential step. (3) Exact decoding exposes the objective:
-MiniOneRec's full-vocabulary score, including the forced newline/EOS tokens that production
-engines silently drop or renormalize away, is mis-calibrated — admitting more candidates
-toward its true argmax lowers HR@10, while trie-renormalized scoring is both better and
-almost always certifiable. (4) With a hand-written engine (one CUDA graph per request, fused
-first level, Triton shared-prefix attention), exact trie-scored decoding runs in **16.1 ms**
-per request on one RTX A6000, versus 869 ms for Hugging Face `generate` (54×) and 56.5 ms for
-the best prior BF16 implementation, while certifying the top-50 for 99.9% of users and
-improving HR@10 from 0.1589 to 0.1646 and NDCG@10 from 0.1247 to 0.1289 over the FP32 reference.
+under a catalog trie and serve it with constrained beam search. We study inference for an
+open, widely reproduced instance — MiniOneRec (Qwen2-1.5B, three-level RQ semantic IDs, beam
+50) on its two released datasets — and show that beam search is unnecessary. At batch 1, cost is
+set by the number of sequential forwards times weight bytes: on an RTX A6000 one forward costs
+8.1 ms for 1 token and 9.8 ms for 50, so beam width is nearly free and depth of the decode loop is
+everything. Because every scored term is a log-probability ≤ 0, scoring the prompt together with
+*all* first-level trie nodes in one forward (trie-level prefill fusion) bounds every catalog item;
+one more forward over the best-bounded prefixes yields exact scores and a per-request
+certificate that the returned top-K is the global optimum of the model's own objective. With a
+hand-written engine (one CUDA graph per request, Triton shared-prefix attention, a cached
+prompt template), certified decoding takes **14.4 ms** per request on Office and **11.5 ms** on
+Industrial, versus 869 ms for Hugging Face `generate` (60×) and 56.5 ms for the best prior
+implementation, and serves 172 users/s on one GPU — 1.9× a fully fused beam-50 engine.
+Certification holds for ≥99.7% of users at top-10 under codebook or trie normalization, and was
+checked against brute-force scoring of every item (0 violations). Exact search also works as an
+instrument: with exhaustive FP32 scores for every (user, item) pair we find that beam-50's
+search error under the training objective (it recovers 86% of the exact top-10) does not hurt
+quality, that the deep SID terms carry a structural penalty (−1.6 nats for sharing a prefix with
+one sibling; ~47% of mass leaked off the codebook), and that the decode-time scoring rule should
+be chosen on validation data: on Office a codebook softmax with the third code down-weighted
+improves HR@10 by +1.11 points [+0.53, +1.69] (+7%) and NDCG@10 by +0.62 [+0.32, +0.93] over the
+FP32 reference decode, while on Industrial no rule beats the original and certified decoding
+matches its quality at 2.3× the speed. FP16 matches BF16's speed with ~10× better fidelity;
+weight-only INT8/INT4 do not help at 50–200 rows per forward.
 
 ## 1. Introduction
 
-Generative retrieval with semantic IDs is now deployed at scale (OneRec, GR4AD, GRACE,
-PinRec, Spotify, NVIDIA SID-GR) and serving cost is the gating factor. Public engines report
-throughput against SGLang/vLLM/TensorRT-LLM with *approximate* parity (FlashRec: 86–92%
-beam-set overlap; NVIDIA: top-K overlap 0.96) and make silent, different scoring choices
-(full-vocabulary log-softmax then mask; per-codebook restricted softmax; mask-before-softmax;
-`ignore_eos` fixed-length output). We ask three questions on one fully reproducible
-model/dataset pair:
+Generative retrieval with semantic IDs is deployed at scale (OneRec, GR4AD, GRACE, PinRec,
+Spotify, NVIDIA SID-GR) and serving cost gates its use. Public engines report throughput against
+SGLang/vLLM/TensorRT-LLM with *approximate* parity (FlashRec: 86–92% beam-set overlap; NVIDIA:
+top-K overlap 0.96) and make silent, different scoring choices (full-vocabulary log-softmax then
+mask; per-codebook softmax; mask-before-softmax; `ignore_eos`). We ask, on one fully reproducible
+model family with two datasets:
 
 1. Where does the time go at batch 1, and what is the floor?
 2. Is beam search necessary when the catalog trie is small?
 3. Which score is being maximized, and does maximizing it exactly help?
 
 Contributions:
-- **A cost model and a measured ladder** from HF `generate` (869 ms) to 16.1 ms, with a
-  fidelity gate at every rung (FP32 rank-exactness for the exact track; paired-bootstrap
-  HR/NDCG for precision and semantics changes).
-- **Trie-level prefill fusion**: the prompt and all first-level trie nodes in one forward
-  (tree attention mask), exact, removing one sequential step from beam *and* exact decoding.
-- **Certified exact top-K decoding** for LLM-based SID recommenders in 2 forwards (no forced
-  suffix) or 2–3 forwards (with it), with a per-request optimality certificate.
-- **A scoring-semantics study**: full-vocab vs codebook vs trie normalization, with and without
-  forced suffix tokens, under beam and exact search; the forced suffix costs a forward and
-  hurts ranking; trie scoring + exact search is best.
-- Replication on a second MiniOneRec dataset (Industrial & Scientific) [TBD], an exhaustive
-  FP32 per-token score dump for every test user × catalog item (both datasets) [TBD], and a
-  weight-only/FP8 quantization frontier [TBD].
+- **Cost model and measured ladder** from HF `generate` (869 ms) to 14.4 ms on one A6000, with a
+  fidelity gate at every rung (FP32 rank agreement; paired-bootstrap HR/NDCG on all test users).
+- **Trie-level prefill fusion**: prompt + all first-level trie nodes in one forward; exact;
+  removes a sequential step from beam and exact decoding alike.
+- **Certified exact top-K decoding** in two forwards (three with a forced suffix), with a
+  per-request optimality certificate computed on device; validated against brute force.
+- **Exhaustive score dumps** (FP32, every test user × every SID, both datasets) and an offline
+  simulator for any search × scoring rule; a scoring-semantics study showing the rule is a
+  first-order, dataset-dependent choice; a mechanism for why deep SID terms mislead.
+- Negative results: weight-only INT8/INT4 and whole-layer compilation do not help at these
+  shapes; one-forward certification is rare (0.4% at top-10); SID codes are decided in the last
+  ~6–9 of 28 layers (logit lens), so early exit is not free.
 
 ## 2. Setting
 
