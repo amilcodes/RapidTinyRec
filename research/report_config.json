@@ -1,5 +1,5 @@
 {
- "updated": "Nov 7, 2:00 AM ET (in progress)",
+ "updated": "Nov 7, 1:50 AM ET (in progress)",
  "ladder": [
   {
    "label": "HF generate, FP32 (prior)",
@@ -11,7 +11,7 @@
   },
   {
    "label": "Speedrun engine, FP32",
-   "run": "sweepA/fp32",
+   "run": "ladderZ/L0_fp32_graph",
    "ours": true
   },
   {
@@ -19,28 +19,38 @@
    "ms": 56.5
   },
   {
-   "label": "Speedrun, BF16, one graph/request",
-   "ms": 41.3,
+   "label": "BF16, newline/EOS as separate forwards",
+   "run": "ladderZ/L2_bf16_sep",
    "ours": true
   },
   {
-   "label": "+ torch.compile fusion",
-   "run": "sweepA/bf16_compile",
+   "label": "BF16, one CUDA graph, fused suffix",
+   "run": "ladderZ/L1_bf16_graph",
+   "ours": true
+  },
+  {
+   "label": "+ torch.compile",
+   "run": "ladderZ/L3_bf16_compile",
    "ours": true
   },
   {
    "label": "+ fused first level + Triton attention",
-   "run": "sweepF2/beam_ff_tc",
+   "run": "ladderZ/L4_bf16_ff_tc",
    "ours": true
   },
   {
-   "label": "Certified exact, no forced suffix",
-   "run": "sweepF2/ex3_nosuf_ff_tc",
+   "label": "certified exact, no forced suffix",
+   "run": "ladderZ/L5_ex3_nosuf",
    "ours": true
   },
   {
-   "label": "Certified exact, trie scoring",
-   "run": "sweepF2/ex3_trie_ff_tc",
+   "label": "beam-50, trie scoring",
+   "run": "ladderZ/L9_beam_trie_ff_tc",
+   "ours": true
+  },
+  {
+   "label": "certified exact, trie scoring",
+   "run": "ladderZ/L6_ex3_trie",
    "ours": true
   }
  ],
@@ -48,10 +58,6 @@
   {
    "label": "FP32 beam-50, MiniOneRec scoring (reference)",
    "run": "sweepA/fp32"
-  },
-  {
-   "label": "BF16 beam-50, compiled",
-   "run": "sweepA/bf16_compile"
   },
   {
    "label": "BF16 beam-50, fused first level + Triton",
@@ -66,12 +72,16 @@
    "run": "sweepA/bf16_nosuffix"
   },
   {
-   "label": "BF16 prefix-filtered exact, N=16",
-   "run": "sweepB/ex_bf16_n16"
+   "label": "BF16 beam-50, codebook scoring",
+   "run": "sweepC/norm_codebook"
   },
   {
-   "label": "BF16 prefix-filtered exact, N=32",
-   "run": "sweepB/ex_bf16_n32"
+   "label": "BF16 beam-50, trie scoring",
+   "run": "ladderZ/L9_beam_trie_ff_tc"
+  },
+  {
+   "label": "BF16 prefix-filtered exact, N=16",
+   "run": "sweepB/ex_bf16_n16"
   },
   {
    "label": "BF16 certified exact, no suffix",
@@ -80,6 +90,10 @@
   {
    "label": "BF16 certified exact, trie scoring",
    "run": "sweepF2/ex3_trie_ff_tc"
+  },
+  {
+   "label": "BF16 certified exact, no suffix, INT8 weights",
+   "run": "sweepF2/ex3_nosuf_ff_tc_w8"
   }
  ],
  "sim_tables": [],

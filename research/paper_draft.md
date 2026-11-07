@@ -177,11 +177,21 @@ score = lp(a) + w_b lp(b|a) + w_c lp(c|ab) + w_s(lp(\n)+lp(EOS)), is a two/three
 decode-time calibration that keeps every term ≤ 0, so certified exact decoding applies unchanged.
 In-sample on a quarter of the Office test users, w = (0.75, 0.3, 0.3) raises HR@10 by ~10%
 relative. [TBD: weights tuned on MiniOneRec's validation split, evaluated once on test, both
-datasets — `scripts/tune_weights.py`.] Interpretation: the user signal lives in the first codes
-(cf. SID-MLP's observation that SID difficulty concentrates in the first digit); conditional
-log-probabilities of deep codes and of the forced suffix are dominated by catalog structure
-(sibling counts, how much mass the model leaks off the valid codebook after an unusual prefix)
-rather than by preference.
+datasets — `scripts/tune_weights.py`.] Why the deep terms mislead (exhaustive FP32 scores, 1,217 Office users × 3,444 SIDs):
+- **Sibling penalty.** lp(c|ab) falls with the number of catalog items sharing the prefix
+  (a,b): median −0.87, −2.46, −3.05, −3.38, −4.12 for 1, 2, 3, 4, 6 siblings (Pearson r = −0.36
+  between lp(c|ab) and sibling count over each user's top-50). Splitting mass among siblings
+  imposes roughly a −log k structural penalty unrelated to the user.
+- **Codebook leakage.** Even after a valid (a,b), a median 47% of next-token mass falls outside
+  the c-codebook (median log-mass −0.63); full-vocabulary scoring charges every item for it,
+  unevenly across prefixes. Codebook/trie renormalization removes it.
+- **The forced suffix is mixed evidence.** On average the target's lp(\n)+lp(EOS) is higher than
+  its competitors' (−1.69 vs −6.31; competitor mean dominated by a few very unlikely completions),
+  but adding the suffix moves the target up for 28% of users and down for 25%; it correlates
+  with log item popularity (r = 0.15) — a weak popularity prior that costs a forward.
+These are consistent with SID-MLP's observation that SID difficulty concentrates in the first
+code: preference information lives in lp(a) and lp(b|a), while deeper terms are dominated by
+catalog structure.
 
 ## 7. Precision and quantization
 
