@@ -241,3 +241,10 @@ See `lit_ledger.md`, `architecture_directions.md`, `kernel_techniques.md`.
   (w_c from the grid) +0.29 [−0.24, +0.84] HR@10, +0.02 NDCG@10 (n.s.); dropping the suffix
   −0.42 [−0.82, −0.02] / −0.46 [−0.65, −0.27]. Confirms: scoring gains are dataset-specific;
   certified decoding is quality-neutral on Industrial and quality-positive on Office.
+- **L40S (Ada) results:** full-semantics fused beam BF16 20.1 ms (A6000 27.9); certified exact
+  no-suffix 14.0 ms (A6000 19.8). **FP8 W8A8 (dynamic per-token, torch._scaled_mm rowwise) is
+  slower**: beam 23.5 ms, exact 15.9 ms; quality ≈ BF16 (HR@10 0.1582 vs 0.1589; top-1 = FP32
+  450/500). L40S roofline per forward at M = 1/50/128/256/512/1024: BF16 6.4/8.0/9.0/11.4/16.2/29.4 ms;
+  FP8 6.7/8.3/11.6/17.6/28.9/51.9 (activation quantization + kernel overhead dominate); GemLite
+  INT8 weight-only 4.3/6.3/7.3/10.5/17.0/30.9 (1.2–1.5× at M ≤ 128 — better than on the A6000).
+  Negative result for naive FP8; a fused quant-in-RMSNorm FP8 path is future work.
