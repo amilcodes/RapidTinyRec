@@ -62,6 +62,7 @@ def main():
     ap.add_argument('--template-cache', action='store_true', help='cache K/V of the prompt prefix shared by all users')
     ap.add_argument('--exit-c', type=int, default=None, help='layers used by the c-level forward (exact3, no suffix)')
     ap.add_argument('--compile-layer', action='store_true', help='compile whole decode layers incl. Triton attention')
+    ap.add_argument('--weights', default=None, help='depth-discounted scoring weights wb,wc,ws')
     ap.add_argument('--n-expand', type=int, default=64)
     ap.add_argument('--profile', action='store_true', help='eager kernel-time breakdown for a few users')
     ap.add_argument('--check-exhaustive', type=int, default=0, help='compare first K cohort users against exhaustive exact scoring')
@@ -94,6 +95,10 @@ def main():
         eng = ExactEngine(W, cat, n_expand=a.n_expand, suffix_mode=a.suffix, norm=a.norm, fuse_first=a.fuse_first)
     else:
         eng = ExactEngine3(W, cat, n_prefix=a.n_prefix, n_expand=a.n_expand, suffix_mode=a.suffix, norm=a.norm, fuse_first=a.fuse_first, exit_c=a.exit_c)
+    if a.weights:
+        wb, wc, ws = (float(x) for x in a.weights.split(','))
+        eng.set_weights(wb, wc, ws)
+        meta['weights'] = [wb, wc, ws]
     if a.template_cache:
         assert a.fuse_first, '--template-cache needs --fuse-first'
         lcp = list(all_ids[0])
