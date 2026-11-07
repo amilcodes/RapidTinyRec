@@ -1,25 +1,82 @@
 {
  "updated": "2026-11-07 02:10 ET",
  "ladder": [
-  {"label": "HF generate, FP32 (prior)", "ms": 868.8},
-  {"label": "RapidTinyRec FP32 bit-exact (prior)", "ms": 114.8},
-  {"label": "Speedrun engine, FP32", "run": "sweepA/fp32", "ours": true},
-  {"label": "RapidTinyRec BF16 (prior)", "ms": 56.5},
-  {"label": "Speedrun, BF16, one graph/request", "ms": 41.3, "ours": true},
-  {"label": "+ torch.compile fusion", "run": "sweepA/bf16_compile", "ours": true},
-  {"label": "+ fused first level + Triton attention", "run": "sweepF2/beam_ff_tc", "ours": true},
-  {"label": "Certified exact, no forced suffix", "run": "sweepF2/ex3_nosuf_ff_tc", "ours": true},
-  {"label": "Certified exact, trie scoring", "run": "sweepF2/ex3_trie_ff_tc", "ours": true}
+  {
+   "label": "HF generate, FP32 (prior)",
+   "ms": 868.8
+  },
+  {
+   "label": "RapidTinyRec FP32 bit-exact (prior)",
+   "ms": 114.8
+  },
+  {
+   "label": "Speedrun engine, FP32",
+   "run": "sweepA/fp32",
+   "ours": true
+  },
+  {
+   "label": "RapidTinyRec BF16 (prior)",
+   "ms": 56.5
+  },
+  {
+   "label": "Speedrun, BF16, one graph/request",
+   "ms": 41.3,
+   "ours": true
+  },
+  {
+   "label": "+ torch.compile fusion",
+   "run": "sweepA/bf16_compile",
+   "ours": true
+  },
+  {
+   "label": "+ fused first level + Triton attention",
+   "run": "sweepF2/beam_ff_tc",
+   "ours": true
+  },
+  {
+   "label": "Certified exact, no forced suffix",
+   "run": "sweepF2/ex3_nosuf_ff_tc",
+   "ours": true
+  },
+  {
+   "label": "Certified exact, trie scoring",
+   "run": "sweepF2/ex3_trie_ff_tc",
+   "ours": true
+  }
  ],
  "compare": [
-  {"label": "FP32 beam-50, MiniOneRec scoring (reference)", "run": "sweepA/fp32"},
-  {"label": "BF16 beam-50, compiled", "run": "sweepA/bf16_compile"},
-  {"label": "BF16 beam-50, fused first level + Triton", "run": "sweepF2/beam_ff_tc"},
-  {"label": "BF16 beam-50, forced suffix dropped", "run": "sweepA/bf16_nosuffix"},
-  {"label": "BF16 prefix-filtered exact, N=16", "run": "sweepB/ex_bf16_n16"},
-  {"label": "BF16 prefix-filtered exact, N=32", "run": "sweepB/ex_bf16_n32"},
-  {"label": "BF16 certified exact, no suffix", "run": "sweepF2/ex3_nosuf_ff_tc"},
-  {"label": "BF16 certified exact, trie scoring", "run": "sweepF2/ex3_trie_ff_tc"}
+  {
+   "label": "FP32 beam-50, MiniOneRec scoring (reference)",
+   "run": "sweepA/fp32"
+  },
+  {
+   "label": "BF16 beam-50, compiled",
+   "run": "sweepA/bf16_compile"
+  },
+  {
+   "label": "BF16 beam-50, fused first level + Triton",
+   "run": "sweepF2/beam_ff_tc"
+  },
+  {
+   "label": "BF16 beam-50, forced suffix dropped",
+   "run": "sweepA/bf16_nosuffix"
+  },
+  {
+   "label": "BF16 prefix-filtered exact, N=16",
+   "run": "sweepB/ex_bf16_n16"
+  },
+  {
+   "label": "BF16 prefix-filtered exact, N=32",
+   "run": "sweepB/ex_bf16_n32"
+  },
+  {
+   "label": "BF16 certified exact, no suffix",
+   "run": "sweepF2/ex3_nosuf_ff_tc"
+  },
+  {
+   "label": "BF16 certified exact, trie scoring",
+   "run": "sweepF2/ex3_trie_ff_tc"
+  }
  ],
  "sim_tables": [],
  "findings": [
@@ -28,5 +85,11 @@
   "With trie-renormalized scoring the exact decoder runs in 16.1 ms and certifies its top-50 for 99.9% of users, while beating the FP32 reference on HR@1, HR@10, NDCG@10 and HR@50.",
   "MiniOneRec's forced newline/EOS terms cost a forward and slightly hurt ranking; dropping them improves NDCG@10 by +0.36 pt (95% CI +0.13 to +0.61)."
  ],
- "next": ["INT8/INT4 weights with compiled kernels", "Exhaustive FP32 dumps for both datasets (search × scoring study)", "Industrial & Scientific replication", "Batched throughput for the exact decoders"]
+ "next": [
+  "INT8/INT4 weights with compiled kernels",
+  "Exhaustive FP32 dumps for both datasets (search \u00d7 scoring study)",
+  "Industrial & Scientific replication",
+  "Batched throughput for the exact decoders"
+ ],
+ "notes": "<section class=\"panel\"><h2>How MiniOneRec decodes, and why it was slow</h2>\n<p>MiniOneRec turns a user's history into a prompt of about 100 tokens and asks a 1.5B-parameter Qwen2 model to write the next item's semantic ID: three code tokens <code>&lt;a&gt;&lt;b&gt;&lt;c&gt;</code>, then a forced newline and end-of-sequence. A catalog trie allows only codes that exist (88 first codes, 2,488 two-code prefixes, 3,444 items). Beam search keeps the 50 best partial IDs at each step. An item's score is the sum of five log-probabilities, each normalized over the whole 152k-token vocabulary.</p>\n<p>At batch size 1 every forward pass has to stream all ~3 GB of BF16 weights from GPU memory. On an RTX A6000 that alone takes about 4 ms, and a forward with 50 beam rows costs about the same as one with 1 row. Beam search makes five sequential forwards, so it is bound by how many times it re-reads the weights, not by the beam width. Hugging Face <code>generate</code> adds Python overhead on top and lands at 869 ms.</p></section>\n<section class=\"panel\"><h2>What changed</h2>\n<ul>\n<li><b>One CUDA graph per request.</b> A hand-written Qwen2 forward and a GPU-resident constrained beam search run the whole request \u2014 prompt, three code steps, the forced suffix and the final sort \u2014 as one replay.</li>\n<li><b>Fused forced suffix.</b> The newline and EOS are forced, so both are scored in one two-token forward instead of two (\u221210 ms).</li>\n<li><b>Trie-level prefill fusion.</b> All 88 first codes are appended to the prompt as tree nodes (each sees the prompt and itself). One forward gives the probability of every first code and of every second code under it. This removes another sequential step and is exact.</li>\n<li><b>Triton shared-prefix attention.</b> One kernel per layer attends the 50 beam rows to a single copy of the prompt's keys and values plus each row's few private tokens.</li>\n<li><b>Certified exact decoding.</b> Every term is a log-probability, so it is \u2264 0. The score of a first-two-code prefix therefore upper-bounds the score of every item under it. After the fused forward, every item has a bound. One more forward scores the best-bounded prefixes exactly. If the K-th exact score beats every remaining bound, the returned top-K is provably the best possible under the model's own scoring rule; no beam search is needed.</li>\n</ul></section>\n<section class=\"panel\"><h2>What exact decoding revealed</h2>\n<p>Exact search is a microscope on the objective. Under MiniOneRec's own full-vocabulary score, beam-50 misses items that the exact search finds, yet getting closer to the true optimum does not help. Admitting fewer candidates by prefix score raises HR@10 (N=16: +0.70 points over the FP32 reference). The forced newline/EOS terms cost a forward and slightly hurt ranking. Renormalizing each step over the valid trie children (trie scoring) makes the scores a proper distribution over the catalog. It also makes certification succeed for 99.9% of users, and it is the most accurate rule we measured.</p></section>\n<section class=\"panel\"><h2>Caveats</h2>\n<ul>\n<li>One model family (MiniOneRec, Qwen2-1.5B) and small catalogs; exact decoding cost grows with the number of first-level codes and with how loose the prefix bound is. The certificate tells you per request when it did not close.</li>\n<li>Trie and no-suffix scoring change the decoding objective (a decode-time choice, like FlashRec's per-codebook softmax); full-semantics numbers are reported separately (27.9 ms, HR@10 equal to FP32).</li>\n<li>Quality is SID-level HR/NDCG; 15 catalog SIDs are shared by two items. Latency is batch 1 on one RTX A6000 with setup, compilation and graph capture excluded.</li>\n</ul></section>\n"
 }

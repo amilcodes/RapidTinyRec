@@ -117,6 +117,25 @@ code { font: 13px var(--mono); background: var(--accent-soft); padding: 1px 4px;
 <tr><td>BF16 certified exact, trie scoring</td><td class=num>16.1</td><td class=num>16.2</td><td class=num>0.0984</td><td class=num>0.1408</td><td class=num>0.1646</td><td class=num>0.1289</td><td class=num>1.00</td></tr></tbody></table></div>
 <p class="note">Quality is SID-level HR/NDCG on the full Office test set (4,866 users). "Top-10 certified" is the share of users for whom the exact decoder proves its top-10 is the global optimum of the scoring rule.</p></section>
 <section class="panel"><h2>Search × scoring rule (offline, exhaustive FP32)</h2></section>
+<section class="panel"><h2>How MiniOneRec decodes, and why it was slow</h2>
+<p>MiniOneRec turns a user's history into a prompt of about 100 tokens and asks a 1.5B-parameter Qwen2 model to write the next item's semantic ID: three code tokens <code>&lt;a&gt;&lt;b&gt;&lt;c&gt;</code>, then a forced newline and end-of-sequence. A catalog trie allows only codes that exist (88 first codes, 2,488 two-code prefixes, 3,444 items). Beam search keeps the 50 best partial IDs at each step. An item's score is the sum of five log-probabilities, each normalized over the whole 152k-token vocabulary.</p>
+<p>At batch size 1 every forward pass has to stream all ~3 GB of BF16 weights from GPU memory. On an RTX A6000 that alone takes about 4 ms, and a forward with 50 beam rows costs about the same as one with 1 row. Beam search makes five sequential forwards, so it is bound by how many times it re-reads the weights, not by the beam width. Hugging Face <code>generate</code> adds Python overhead on top and lands at 869 ms.</p></section>
+<section class="panel"><h2>What changed</h2>
+<ul>
+<li><b>One CUDA graph per request.</b> A hand-written Qwen2 forward and a GPU-resident constrained beam search run the whole request — prompt, three code steps, the forced suffix and the final sort — as one replay.</li>
+<li><b>Fused forced suffix.</b> The newline and EOS are forced, so both are scored in one two-token forward instead of two (−10 ms).</li>
+<li><b>Trie-level prefill fusion.</b> All 88 first codes are appended to the prompt as tree nodes (each sees the prompt and itself). One forward gives the probability of every first code and of every second code under it. This removes another sequential step and is exact.</li>
+<li><b>Triton shared-prefix attention.</b> One kernel per layer attends the 50 beam rows to a single copy of the prompt's keys and values plus each row's few private tokens.</li>
+<li><b>Certified exact decoding.</b> Every term is a log-probability, so it is ≤ 0. The score of a first-two-code prefix therefore upper-bounds the score of every item under it. After the fused forward, every item has a bound. One more forward scores the best-bounded prefixes exactly. If the K-th exact score beats every remaining bound, the returned top-K is provably the best possible under the model's own scoring rule; no beam search is needed.</li>
+</ul></section>
+<section class="panel"><h2>What exact decoding revealed</h2>
+<p>Exact search is a microscope on the objective. Under MiniOneRec's own full-vocabulary score, beam-50 misses items that the exact search finds, yet getting closer to the true optimum does not help. Admitting fewer candidates by prefix score raises HR@10 (N=16: +0.70 points over the FP32 reference). The forced newline/EOS terms cost a forward and slightly hurt ranking. Renormalizing each step over the valid trie children (trie scoring) makes the scores a proper distribution over the catalog. It also makes certification succeed for 99.9% of users, and it is the most accurate rule we measured.</p></section>
+<section class="panel"><h2>Caveats</h2>
+<ul>
+<li>One model family (MiniOneRec, Qwen2-1.5B) and small catalogs; exact decoding cost grows with the number of first-level codes and with how loose the prefix bound is. The certificate tells you per request when it did not close.</li>
+<li>Trie and no-suffix scoring change the decoding objective (a decode-time choice, like FlashRec's per-codebook softmax); full-semantics numbers are reported separately (27.9 ms, HR@10 equal to FP32).</li>
+<li>Quality is SID-level HR/NDCG; 15 catalog SIDs are shared by two items. Latency is batch 1 on one RTX A6000 with setup, compilation and graph capture excluded.</li>
+</ul></section>
 
 <section><h2>Next</h2><ul><li>INT8/INT4 weights with compiled kernels</li>
 <li>Exhaustive FP32 dumps for both datasets (search × scoring study)</li>

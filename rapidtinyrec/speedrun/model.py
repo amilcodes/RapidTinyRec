@@ -107,6 +107,20 @@ class Forward:
         self.W = W
         self.scale = 1.0 / math.sqrt(W.hd)
         self.attn = attn
+        self.layer_fn = None   # optional compiled whole decode layer (see compile_layer)
+
+    def decode_layer(self, x, pos, kc, vc, kp, vp, lengths, s0: int, layer):
+        """One decode layer with Triton beam attention; a single torch.compile region."""
+        from .kernels import beam_attention
+        q, k, v = Forward.qkv(self, x, layer, pos)
+        Q = x.shape[2]
+        kp[:, :, s0:s0 + Q] = k
+        vp[:, :, s0:s0 + Q] = v
+        o = beam_attention(q, kc, vc, kp, vp, lengths, s0, self.scale)
+        return Forward.post(self, x, o, layer)
+
+    def compile_layer(self, mode='default'):
+        self.layer_fn = torch.compile(self.decode_layer, mode=mode, dynamic=False)
 
     def qkv(self, x, layer, pos):
         W = self.W
@@ -218,6 +232,10 @@ class Forward:
         qi = torch.arange(Q, device=x.device)[:, None]
         si = torch.arange(S, device=x.device)[None, :]
         cmask = torch.where(si <= s0 + qi, 0.0, neg)  # [Q, S]
+        if self.attn == 'triton' and self.layer_fn is not None:
+            for i, layer in enumerate(W.layers[:n_layers]):
+                x = self.layer_fn(x, pos, kcache[i], vcache[i], kpriv[i], vpriv[i], lengths, s0, layer)
+            return self.final(x)
         for i, layer in enumerate(W.layers[:n_layers]):
             q, k, v = self.qkv(x, layer, pos)  # q [B,R,Q,H,hd], k/v [B,R,Q,KV,hd]
             kpriv[i][:, :, s0:S] = k

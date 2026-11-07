@@ -61,6 +61,7 @@ def main():
     ap.add_argument('--fuse-first', action='store_true', help='trie-level prefill fusion')
     ap.add_argument('--template-cache', action='store_true', help='cache K/V of the prompt prefix shared by all users')
     ap.add_argument('--exit-c', type=int, default=None, help='layers used by the c-level forward (exact3, no suffix)')
+    ap.add_argument('--compile-layer', action='store_true', help='compile whole decode layers incl. Triton attention')
     ap.add_argument('--n-expand', type=int, default=64)
     ap.add_argument('--profile', action='store_true', help='eager kernel-time breakdown for a few users')
     ap.add_argument('--check-exhaustive', type=int, default=0, help='compare first K cohort users against exhaustive exact scoring')
@@ -119,6 +120,10 @@ def main():
         if hasattr(dc, 'recompile_limit'):
             dc.recompile_limit = 1024
         dc.automatic_dynamic_shapes = False
+        if a.compile_layer:
+            assert a.attn == 'triton'
+            eng.fwd.compile_layer(a.compile)   # decode steps: whole layer compiled
+            # prefill paths still use the separately compiled pieces
         eng.fwd.qkv = torch.compile(eng.fwd.qkv, mode=a.compile, dynamic=False, fullgraph=True)
         eng.fwd.post = torch.compile(eng.fwd.post, mode=a.compile, dynamic=False, fullgraph=True)
     torch.cuda.synchronize()
