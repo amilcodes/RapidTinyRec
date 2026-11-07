@@ -213,3 +213,14 @@ See `lit_ledger.md`, `architecture_directions.md`, `kernel_techniques.md`.
   filter helps" effect does not transfer (N=16 HR@10 0.1458, −1.1 pt). Robust claims: speed with
   equal-or-better quality via certified trie decoding on both datasets; scoring-rule gains beyond
   that are dataset-specific and must be tuned on validation.
+- **Industrial, validation-tuned scoring (1,134 valid users → 3,400 test users):** no rule beats
+  the original objective significantly (tuned codebook HR@10 +0.35 [−0.26, +0.97], NDCG@10 −0.03);
+  untuned codebook/trie ≈ 0; dropping the suffix hurts (−0.56 [−1.03, −0.06] / −0.48 [−0.70, −0.27]).
+  ⇒ The Office scoring gains (+1.1 pt HR@10) are dataset-specific. What generalizes: certified
+  trie decoding at ~2× fewer forwards with equal quality on both datasets; and the recipe "choose
+  the scoring rule on validation" (it picks codebook + w_c=0.5 on Office, ≈ original on Industrial).
+- **Logit lens (1,000 users each):** SID codes are decided late. Office: top-1 first code agrees
+  with layer 28 for ≤7% of users through layer 19, 45% at 22, 69% at 25; second code (given a)
+  55% at 22, 71% at 25. Industrial: 21% at 16, 65% at 22, 77% at 25. Target's first code is in
+  the lens top-10 for 44%/61% at layer 22 vs 51%/63% at the output (Office/Industrial).
+  Implication: no early exit for the first two codes; depth reduction would need training.
