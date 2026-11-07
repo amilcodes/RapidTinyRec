@@ -195,3 +195,15 @@ See `lit_ledger.md`, `architecture_directions.md`, `kernel_techniques.md`.
   0.1587 (FP32 0.1589) — the faithful fast path; certified exact trie 14.3 ms (= BF16 14.4);
   beam-50 trie 14.3 ms; exact no-suffix 18.2 ms.
 - Whole-layer torch.compile incl. Triton attention: 14.29 vs 14.31 ms — no gain (GEMM-bound).
+- **Office, full test (4,866), exhaustive FP32 simulation** (`research/sim_office_full.md`,
+  `research/tune_office.md`): under the full objective exact search is slightly *worse* than
+  beam-50 (NDCG@10 −0.08 [−0.14, −0.02]); beam-50 recovers 86.4% of the exact top-10. Codebook
+  scoring untuned +0.90 [+0.35, +1.48] HR@10; validation-tuned codebook (w_c=0.5) **+1.15 [+0.55,
+  +1.73] HR@10, +0.64 [+0.34, +0.96] NDCG@10**, matching the engine (0.1700 / 0.1309).
+- **Engine, Office full test: certified exact, codebook, w_c=0.5, template, BF16 = 14.4 ms**; vs
+  FP32 reference decode HR@1 +0.35 [+0.04, +0.68], HR@10 +1.11 [+0.53, +1.69], NDCG@10 +0.62
+  [+0.32, +0.93], HR@50 +1.50 [+0.86, +2.16]; top-10 certified 99.7%, top-50 92.4%. FP16 same.
+- **Industrial (4,533 users):** speed replicates (certified exact no-suffix 13.9 ms vs compiled
+  beam 26.5 ms, fused beam 20.0 ms) but the scoring story does not transfer as-is: dropping the
+  forced suffix *hurts* (NDCG@10 −0.42 [−0.59, −0.25]); trie ≈ full (+0.13 HR@10, n.s.). The
+  scoring rule is dataset-dependent → must be chosen on validation (Industrial tuning pending).
