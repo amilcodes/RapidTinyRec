@@ -55,29 +55,31 @@ code { font: 13px var(--mono); background: var(--accent-soft); padding: 1px 4px;
 </style>
 <div class="wrap">
 <header>
-  <div class="eyebrow">MiniOneRec · Qwen2-1.5B · beam 50 · RTX A6000 · updated Nov 7, 1:50 AM ET (in progress)</div>
+  <div class="eyebrow">MiniOneRec · Qwen2-1.5B · beam 50 · RTX A6000 · updated Nov 7, 3:40 AM ET (final)</div>
   <h1>RapidTinyRec Speedrun</h1>
   <p class="lede">How fast can an LLM generative recommender decode, and is beam search even the right algorithm? Batch-1 latency on the frozen 500-user Office cohort; quality on all 4,866 Office test users.</p>
 </header>
-<section><h2>Findings so far</h2><ul><li>A whole MiniOneRec request (prefill, constrained beam, forced-suffix scoring, sort) runs as one CUDA graph in a hand-written engine: 27.9 ms in BF16 with HR@10 identical to the FP32 reference.</li>
-<li>Certified exact decoding replaces beam search: two forwards score every first code and every two-code prefix, then expand the best-bounded candidates, with a proof that the returned top-K is the global optimum.</li>
-<li>With trie-renormalized scoring the exact decoder runs in 16.1 ms and certifies its top-50 for 99.9% of users, while beating the FP32 reference on HR@1, HR@10, NDCG@10 and HR@50.</li>
-<li>MiniOneRec's forced newline/EOS terms cost a forward and slightly hurt ranking; dropping them improves NDCG@10 by +0.36 pt (95% CI +0.13 to +0.61).</li>
-<li>FP16 serves at the same speed as BF16 but reproduces the FP32 reference far better (top-10 set identical for 484 vs 374 of 500 users), once queries are pre-scaled so Qwen2's attention logits fit in FP16.</li>
-<li>Weight-only INT8/INT4 (GemLite) gives at most 3–8% at these shapes; GEMMs are already ~80% of GPU time at ~75% of peak bandwidth, so the A6000 BF16 path sits within ~2× of its weight-streaming floor.</li></ul></section>
-<section class="panel"><h2>Latency ladder</h2><div class="scroll"><svg viewBox="0 0 760 420" role="img" aria-label="latency ladder" class="chart">
-<line x1="250.0" y1="18" x2="250.0" y2="382" class="grid"/>
-<text x="250.0" y="396" class="tick" text-anchor="middle">10</text>
-<line x1="316.2" y1="18" x2="316.2" y2="382" class="grid"/>
-<text x="316.2" y="396" class="tick" text-anchor="middle">20</text>
-<line x1="403.8" y1="18" x2="403.8" y2="382" class="grid"/>
-<text x="403.8" y="396" class="tick" text-anchor="middle">50</text>
-<line x1="470.0" y1="18" x2="470.0" y2="382" class="grid"/>
-<text x="470.0" y="396" class="tick" text-anchor="middle">100</text>
-<line x1="536.3" y1="18" x2="536.3" y2="382" class="grid"/>
-<text x="536.3" y="396" class="tick" text-anchor="middle">200</text>
-<line x1="623.8" y1="18" x2="623.8" y2="382" class="grid"/>
-<text x="623.8" y="396" class="tick" text-anchor="middle">500</text>
+<section><h2>Findings so far</h2><ul><li>Batch-1 cost is set by how many sequential forwards a request needs, not by beam width: one full forward on the A6000 costs 8.1 ms for 1 token and 9.8 ms for 50.</li>
+<li>Certified exact decoding replaces beam search. One forward scores the prompt together with every first code; a second scores the best-bounded prefixes; an on-device test proves when the top-K is the global optimum. Checked against brute-force scoring of every item: 0 violations.</li>
+<li>Office: 14.4 ms per request in one paired allocation (60× faster than HF generate, 3.9× faster than the prior BF16 stack) with top-10 proven optimal for 99.7% of users. With codebook scoring and the third code weighted 0.5 (chosen on the validation split), HR@10 rises from 0.1589 to 0.1700 (+1.11 pt, 95% CI +0.53 to +1.69) over the FP32 reference decode.</li>
+<li>Industrial & Scientific: 14.0 ms vs 25.6 ms for the fully optimized full-semantics beam on the same A6000, at equal quality. No scoring rule beats MiniOneRec's own there, so the Office quality gain is dataset-specific and the rule has to be chosen on validation data.</li>
+<li>Throughput: certified exact decoding serves 176 users/s on one A6000 at batch 32, vs 91 for the fully fused beam engine.</li>
+<li>Why deep terms mislead: an item loses ~1.6 nats of third-code log-probability just for sharing its prefix with one sibling, and about 47% of the next-token mass leaks off the valid codebook. Beam-50 misses 14% of the exact top-10 under the training objective, yet exact search does not improve quality.</li>
+<li>FP16 matches BF16's speed with about 10× better fidelity to FP32 (top-10 identical for 484 vs 374 of 500 users). Weight-only INT8/INT4 barely help at 50–200 rows per forward, and the logit lens shows SID codes are decided only in the last 6–9 of 28 layers.</li>
+<li>FP8 on an L40S is slower than BF16 as implemented (15.9 vs 14.0 ms): quantizing activations at every matrix multiply costs more than the narrower weights save at 50–200 rows.</li></ul></section>
+<section class="panel"><h2>Latency ladder</h2><div class="scroll"><svg viewBox="0 0 760 388" role="img" aria-label="latency ladder" class="chart">
+<line x1="250.0" y1="18" x2="250.0" y2="350" class="grid"/>
+<text x="250.0" y="364" class="tick" text-anchor="middle">10</text>
+<line x1="316.2" y1="18" x2="316.2" y2="350" class="grid"/>
+<text x="316.2" y="364" class="tick" text-anchor="middle">20</text>
+<line x1="403.8" y1="18" x2="403.8" y2="350" class="grid"/>
+<text x="403.8" y="364" class="tick" text-anchor="middle">50</text>
+<line x1="470.0" y1="18" x2="470.0" y2="350" class="grid"/>
+<text x="470.0" y="364" class="tick" text-anchor="middle">100</text>
+<line x1="536.3" y1="18" x2="536.3" y2="350" class="grid"/>
+<text x="536.3" y="364" class="tick" text-anchor="middle">200</text>
+<line x1="623.8" y1="18" x2="623.8" y2="350" class="grid"/>
+<text x="623.8" y="364" class="tick" text-anchor="middle">500</text>
 <text x="240" y="39.4" class="lab" text-anchor="end">HF generate, FP32 (prior)</text>
 <rect x="250" y="24" width="426.6" height="22" class="bar"/>
 <text x="682.6" y="39.4" class="val">868.8 ms</text>
@@ -85,99 +87,95 @@ code { font: 13px var(--mono); background: var(--accent-soft); padding: 1px 4px;
 <rect x="250" y="56" width="233.2" height="22" class="bar"/>
 <text x="489.2" y="71.4" class="val">114.8 ms</text>
 <text x="240" y="103.4" class="lab" text-anchor="end">Speedrun engine, FP32</text>
-<rect x="250" y="88" width="224.7" height="22" class="bar hl"/>
-<text x="480.7" y="103.4" class="val">105.0 ms</text>
+<rect x="250" y="88" width="220.8" height="22" class="bar hl"/>
+<text x="476.8" y="103.4" class="val">100.8 ms</text>
 <text x="240" y="135.4" class="lab" text-anchor="end">RapidTinyRec BF16 (prior)</text>
 <rect x="250" y="120" width="165.5" height="22" class="bar"/>
 <text x="421.5" y="135.4" class="val">56.5 ms</text>
-<text x="240" y="167.4" class="lab" text-anchor="end">BF16, newline/EOS as separate forwards</text>
-<rect x="250" y="152" width="164.4" height="22" class="bar hl"/>
-<text x="420.4" y="167.4" class="val">55.9 ms</text>
-<text x="240" y="199.4" class="lab" text-anchor="end">BF16, one CUDA graph, fused suffix</text>
-<rect x="250" y="184" width="146.5" height="22" class="bar hl"/>
-<text x="402.5" y="199.4" class="val">46.3 ms</text>
-<text x="240" y="231.4" class="lab" text-anchor="end">+ torch.compile</text>
-<rect x="250" y="216" width="126.4" height="22" class="bar hl"/>
-<text x="382.4" y="231.4" class="val">37.5 ms</text>
-<text x="240" y="263.4" class="lab" text-anchor="end">+ fused first level + Triton attention</text>
-<rect x="250" y="248" width="105.5" height="22" class="bar hl"/>
-<text x="361.5" y="263.4" class="val">30.2 ms</text>
-<text x="240" y="295.4" class="lab" text-anchor="end">certified exact, no forced suffix</text>
-<rect x="250" y="280" width="73.6" height="22" class="bar hl"/>
-<text x="329.6" y="295.4" class="val">21.6 ms</text>
-<text x="240" y="327.4" class="lab" text-anchor="end">beam-50, trie scoring</text>
-<rect x="250" y="312" width="54.5" height="22" class="bar hl"/>
-<text x="310.5" y="327.4" class="val">17.7 ms</text>
-<text x="240" y="359.4" class="lab" text-anchor="end">certified exact, trie scoring</text>
-<rect x="250" y="344" width="55.0" height="22" class="bar hl"/>
-<text x="311.0" y="359.4" class="val">17.8 ms</text>
-<text x="470" y="416" class="tick" text-anchor="middle">median latency per request, ms (log scale)</text>
+<text x="240" y="167.4" class="lab" text-anchor="end">BF16, one CUDA graph per request</text>
+<rect x="250" y="152" width="137.4" height="22" class="bar hl"/>
+<text x="393.4" y="167.4" class="val">42.1 ms</text>
+<text x="240" y="199.4" class="lab" text-anchor="end">+ torch.compile</text>
+<rect x="250" y="184" width="119.8" height="22" class="bar hl"/>
+<text x="375.8" y="199.4" class="val">35.0 ms</text>
+<text x="240" y="231.4" class="lab" text-anchor="end">+ fused first level + Triton attention</text>
+<rect x="250" y="216" width="98.9" height="22" class="bar hl"/>
+<text x="354.9" y="231.4" class="val">28.1 ms</text>
+<text x="240" y="263.4" class="lab" text-anchor="end">+ FP16 + cached prompt template</text>
+<rect x="250" y="248" width="92.2" height="22" class="bar hl"/>
+<text x="348.2" y="263.4" class="val">26.2 ms</text>
+<text x="240" y="295.4" class="lab" text-anchor="end">certified exact, trie scoring</text>
+<rect x="250" y="280" width="34.7" height="22" class="bar hl"/>
+<text x="290.7" y="295.4" class="val">14.4 ms</text>
+<text x="240" y="327.4" class="lab" text-anchor="end">certified exact, tuned codebook scoring</text>
+<rect x="250" y="312" width="34.7" height="22" class="bar hl"/>
+<text x="290.7" y="327.4" class="val">14.4 ms</text>
+<text x="470" y="384" class="tick" text-anchor="middle">median latency per request, ms (log scale)</text>
 </svg></div>
 <p class="note">Orange rows are this overnight run's engine; grey rows are earlier RapidTinyRec results on the same GPU and cohort. Setup, compilation and graph capture are excluded.</p></section>
 <section class="panel"><h2>Speed and quality by configuration</h2><div class="scroll"><table>
 <thead><tr><th>configuration</th><th class=num>median ms</th><th class=num>p95 ms</th><th class=num>HR@1</th><th class=num>HR@5</th><th class=num>HR@10</th><th class=num>NDCG@10</th><th class=num>top-10 certified</th></tr></thead>
 <tbody><tr><td>FP32 beam-50, MiniOneRec scoring (reference)</td><td class=num>98.8</td><td class=num>103.1</td><td class=num>0.0941</td><td class=num>0.1404</td><td class=num>0.1589</td><td class=num>0.1247</td><td class=num>—</td></tr>
-<tr><td>BF16 beam-50, fused first level + Triton</td><td class=num>27.9</td><td class=num>28.0</td><td class=num>0.0947</td><td class=num>0.1397</td><td class=num>0.1589</td><td class=num>0.1249</td><td class=num>—</td></tr>
-<tr><td>FP16 beam-50, fused first level + Triton</td><td class=num>27.5</td><td class=num>27.9</td><td class=num>0.0947</td><td class=num>0.1404</td><td class=num>0.1587</td><td class=num>0.1249</td><td class=num>—</td></tr>
+<tr><td>FP16 beam-50, fused first level + template</td><td class=num>26.1</td><td class=num>27.5</td><td class=num>0.0943</td><td class=num>0.1400</td><td class=num>0.1587</td><td class=num>0.1248</td><td class=num>—</td></tr>
 <tr><td>BF16 beam-50, forced suffix dropped</td><td class=num>30.3</td><td class=num>30.8</td><td class=num>0.0986</td><td class=num>0.1436</td><td class=num>0.1624</td><td class=num>0.1284</td><td class=num>—</td></tr>
 <tr><td>BF16 beam-50, codebook scoring</td><td class=num>26.1</td><td class=num>26.6</td><td class=num>0.0986</td><td class=num>0.1424</td><td class=num>0.1667</td><td class=num>0.1299</td><td class=num>—</td></tr>
-<tr><td>BF16 beam-50, trie scoring</td><td class=num>17.7</td><td class=num>18.2</td><td class=num>0.0982</td><td class=num>0.1410</td><td class=num>0.1650</td><td class=num>0.1288</td><td class=num>—</td></tr>
-<tr><td>BF16 prefix-filtered exact, N=16</td><td class=num>31.1</td><td class=num>31.6</td><td class=num>0.0945</td><td class=num>0.1469</td><td class=num>0.1658</td><td class=num>0.1284</td><td class=num>0.00</td></tr>
-<tr><td>BF16 certified exact, no suffix</td><td class=num>19.8</td><td class=num>19.9</td><td class=num>0.0984</td><td class=num>0.1430</td><td class=num>0.1624</td><td class=num>0.1283</td><td class=num>0.94</td></tr>
-<tr><td>BF16 certified exact, trie scoring</td><td class=num>16.1</td><td class=num>16.2</td><td class=num>0.0984</td><td class=num>0.1408</td><td class=num>0.1646</td><td class=num>0.1289</td><td class=num>1.00</td></tr>
-<tr><td>BF16 certified exact, no suffix, INT8 weights</td><td class=num>18.2</td><td class=num>21.1</td><td class=num>0.0984</td><td class=num>0.1445</td><td class=num>0.1626</td><td class=num>0.1284</td><td class=num>0.94</td></tr></tbody></table></div>
+<tr><td>FP16 certified exact, trie scoring</td><td class=num>14.3</td><td class=num>15.6</td><td class=num>0.0984</td><td class=num>0.1404</td><td class=num>0.1648</td><td class=num>0.1288</td><td class=num>1.00</td></tr>
+<tr><td>FP16 certified exact, tuned codebook (w_c = 0.5)</td><td class=num>14.4</td><td class=num>15.6</td><td class=num>0.0980</td><td class=num>0.1441</td><td class=num>0.1702</td><td class=num>0.1311</td><td class=num>1.00</td></tr>
+<tr><td>BF16 certified exact, trie, third code on 6 layers</td><td class=num>9.4</td><td class=num>10.4</td><td class=num>0.0617</td><td class=num>0.1350</td><td class=num>0.1646</td><td class=num>0.1113</td><td class=num>1.00</td></tr>
+<tr><td>Industrial: FP16 beam-50, MiniOneRec scoring</td><td class=num>25.6</td><td class=num>25.8</td><td class=num>0.0863</td><td class=num>0.1328</td><td class=num>0.1584</td><td class=num>0.1179</td><td class=num>—</td></tr>
+<tr><td>Industrial: BF16 certified exact, codebook</td><td class=num>14.1</td><td class=num>14.5</td><td class=num>0.0841</td><td class=num>0.1297</td><td class=num>0.1593</td><td class=num>0.1168</td><td class=num>0.95</td></tr></tbody></table></div>
 <p class="note">Quality is SID-level HR/NDCG on the full Office test set (4,866 users). "Top-10 certified" is the share of users for whom the exact decoder proves its top-10 is the global optimum of the scoring rule.</p></section>
-<section class="panel"><h2>Search × scoring rule (offline, exhaustive FP32)</h2><p class=note>1,217 Office test users, exhaustive FP32 scores of all 3,444 SIDs per user.</p><div class=scroll><svg viewBox="0 0 760 300" role="img" aria-label="NDCG@10 versus beam width" class="chart">
+<section class="panel"><h2>Search × scoring rule (offline, exhaustive FP32)</h2><p class=note>4,866 Office test users, exhaustive FP32 scores of all 3,444 SIDs per user.</p><div class=scroll><svg viewBox="0 0 760 300" role="img" aria-label="NDCG@10 versus beam width" class="chart">
 <line x1="62" y1="260.0" x2="570" y2="260.0" class="grid"/>
-<text x="54" y="264.0" class="tick" text-anchor="end">0.109</text>
+<text x="54" y="264.0" class="tick" text-anchor="end">0.120</text>
 <line x1="62" y1="199.0" x2="570" y2="199.0" class="grid"/>
-<text x="54" y="203.0" class="tick" text-anchor="end">0.112</text>
+<text x="54" y="203.0" class="tick" text-anchor="end">0.123</text>
 <line x1="62" y1="138.0" x2="570" y2="138.0" class="grid"/>
-<text x="54" y="142.0" class="tick" text-anchor="end">0.115</text>
+<text x="54" y="142.0" class="tick" text-anchor="end">0.126</text>
 <line x1="62" y1="77.0" x2="570" y2="77.0" class="grid"/>
-<text x="54" y="81.0" class="tick" text-anchor="end">0.118</text>
+<text x="54" y="81.0" class="tick" text-anchor="end">0.129</text>
 <line x1="62" y1="16.0" x2="570" y2="16.0" class="grid"/>
-<text x="54" y="20.0" class="tick" text-anchor="end">0.121</text>
+<text x="54" y="20.0" class="tick" text-anchor="end">0.132</text>
 <text x="62.0" y="276" class="tick" text-anchor="middle">5</text>
 <text x="179.5" y="276" class="tick" text-anchor="middle">10</text>
 <text x="297.1" y="276" class="tick" text-anchor="middle">20</text>
 <text x="452.5" y="276" class="tick" text-anchor="middle">50</text>
 <text x="570.0" y="276" class="tick" text-anchor="middle">100</text>
 <text x="316" y="296" class="tick" text-anchor="middle">beam width (dotted line: certified exact search)</text>
-<polyline points="62.0,187.4 179.5,64.3 297.1,87.6 452.5,119.9 570.0,125.9" class="ln c1" fill="none"/>
-<circle cx="62.0" cy="187.4" r="2.6" class="pt c1"/>
-<circle cx="179.5" cy="64.3" r="2.6" class="pt c1"/>
-<circle cx="297.1" cy="87.6" r="2.6" class="pt c1"/>
-<circle cx="452.5" cy="119.9" r="2.6" class="pt c1"/>
-<circle cx="570.0" cy="125.9" r="2.6" class="pt c1"/>
-<line x1="62" y1="122.7" x2="570" y2="122.7" class="ex c1"/>
+<polyline points="62.0,197.5 179.5,88.4 297.1,132.1 452.5,159.0 570.0,168.3" class="ln c1" fill="none"/>
+<circle cx="62.0" cy="197.5" r="2.6" class="pt c1"/>
+<circle cx="179.5" cy="88.4" r="2.6" class="pt c1"/>
+<circle cx="297.1" cy="132.1" r="2.6" class="pt c1"/>
+<circle cx="452.5" cy="159.0" r="2.6" class="pt c1"/>
+<circle cx="570.0" cy="168.3" r="2.6" class="pt c1"/>
+<line x1="62" y1="176.4" x2="570" y2="176.4" class="ex c1"/>
 <line x1="584" y1="24" x2="604" y2="24" class="ln c1"/>
 <text x="610" y="28" class="lab">MiniOneRec scoring</text>
-<polyline points="62.0,189.6 179.5,65.0 297.1,85.4 452.5,89.1 570.0,99.4" class="ln c2" fill="none"/>
-<circle cx="62.0" cy="189.6" r="2.6" class="pt c2"/>
-<circle cx="179.5" cy="65.0" r="2.6" class="pt c2"/>
-<circle cx="297.1" cy="85.4" r="2.6" class="pt c2"/>
-<circle cx="452.5" cy="89.1" r="2.6" class="pt c2"/>
-<circle cx="570.0" cy="99.4" r="2.6" class="pt c2"/>
-<line x1="62" y1="99.4" x2="570" y2="99.4" class="ex c2"/>
+<polyline points="62.0,181.6 179.5,59.5 297.1,82.0 452.5,82.6 570.0,86.6" class="ln c2" fill="none"/>
+<circle cx="62.0" cy="181.6" r="2.6" class="pt c2"/>
+<circle cx="179.5" cy="59.5" r="2.6" class="pt c2"/>
+<circle cx="297.1" cy="82.0" r="2.6" class="pt c2"/>
+<circle cx="452.5" cy="82.6" r="2.6" class="pt c2"/>
+<circle cx="570.0" cy="86.6" r="2.6" class="pt c2"/>
+<line x1="62" y1="86.6" x2="570" y2="86.6" class="ex c2"/>
 <line x1="584" y1="44" x2="604" y2="44" class="ln c2"/>
 <text x="610" y="48" class="lab">no forced suffix</text>
-<polyline points="62.0,231.5 179.5,39.6 297.1,76.3 452.5,75.2 570.0,75.2" class="ln c3" fill="none"/>
-<circle cx="62.0" cy="231.5" r="2.6" class="pt c3"/>
+<polyline points="62.0,206.1 179.5,39.6 297.1,54.2 452.5,45.1 570.0,45.1" class="ln c3" fill="none"/>
+<circle cx="62.0" cy="206.1" r="2.6" class="pt c3"/>
 <circle cx="179.5" cy="39.6" r="2.6" class="pt c3"/>
-<circle cx="297.1" cy="76.3" r="2.6" class="pt c3"/>
-<circle cx="452.5" cy="75.2" r="2.6" class="pt c3"/>
-<circle cx="570.0" cy="75.2" r="2.6" class="pt c3"/>
-<line x1="62" y1="75.2" x2="570" y2="75.2" class="ex c3"/>
+<circle cx="297.1" cy="54.2" r="2.6" class="pt c3"/>
+<circle cx="452.5" cy="45.1" r="2.6" class="pt c3"/>
+<circle cx="570.0" cy="45.1" r="2.6" class="pt c3"/>
+<line x1="62" y1="45.1" x2="570" y2="45.1" class="ex c3"/>
 <line x1="584" y1="64" x2="604" y2="64" class="ln c3"/>
 <text x="610" y="68" class="lab">codebook softmax</text>
-<polyline points="62.0,236.4 179.5,51.3 297.1,69.1 452.5,75.1 570.0,75.1" class="ln c4" fill="none"/>
+<polyline points="62.0,236.4 179.5,58.1 297.1,72.2 452.5,69.1 570.0,70.4" class="ln c4" fill="none"/>
 <circle cx="62.0" cy="236.4" r="2.6" class="pt c4"/>
-<circle cx="179.5" cy="51.3" r="2.6" class="pt c4"/>
-<circle cx="297.1" cy="69.1" r="2.6" class="pt c4"/>
-<circle cx="452.5" cy="75.1" r="2.6" class="pt c4"/>
-<circle cx="570.0" cy="75.1" r="2.6" class="pt c4"/>
-<line x1="62" y1="75.1" x2="570" y2="75.1" class="ex c4"/>
+<circle cx="179.5" cy="58.1" r="2.6" class="pt c4"/>
+<circle cx="297.1" cy="72.2" r="2.6" class="pt c4"/>
+<circle cx="452.5" cy="69.1" r="2.6" class="pt c4"/>
+<circle cx="570.0" cy="70.4" r="2.6" class="pt c4"/>
+<line x1="62" y1="70.4" x2="570" y2="70.4" class="ex c4"/>
 <line x1="584" y1="84" x2="604" y2="84" class="ln c4"/>
 <text x="610" y="88" class="lab">trie softmax</text>
 </svg></div></section>
@@ -193,16 +191,18 @@ code { font: 13px var(--mono); background: var(--accent-soft); padding: 1px 4px;
 <li><b>Certified exact decoding.</b> Every term is a log-probability, so it is ≤ 0. The score of a first-two-code prefix therefore upper-bounds the score of every item under it. After the fused forward, every item has a bound. One more forward scores the best-bounded prefixes exactly. If the K-th exact score beats every remaining bound, the returned top-K is provably the best possible under the model's own scoring rule; no beam search is needed.</li>
 </ul></section>
 <section class="panel"><h2>What exact decoding revealed</h2>
-<p>Exact search is a microscope on the objective. Under MiniOneRec's own full-vocabulary score, beam-50 misses items that the exact search finds, yet getting closer to the true optimum does not help. Admitting fewer candidates by prefix score raises HR@10 (N=16: +0.70 points over the FP32 reference). The forced newline/EOS terms cost a forward and slightly hurt ranking. Renormalizing each step over the valid trie children (trie scoring) makes the scores a proper distribution over the catalog. It also makes certification succeed for 99.9% of users, and it is the most accurate rule we measured.</p></section>
+<p>To test what exact search changes, we computed the FP32 log-probability of every catalog item for every test user on both datasets (about 16 million items per dataset) and replayed every search and scoring choice offline. Under MiniOneRec's own score, beam-50 misses 14% of the true top-10 on Office (6% on Industrial), yet finding the true optimum does not raise HR@10. Search error is not what limits quality.</p>
+<p>The scoring rule is what limits quality. The third code's log-probability falls by about 1.6 nats when an item shares its two-code prefix with even one sibling, and roughly half of the next-token mass leaks onto tokens that cannot be valid codes. On Office, a per-codebook softmax with the third code weighted 0.5 — chosen on the separate validation split — improves HR@10 by 1.1 points and NDCG@10 by 0.6 points. On Industrial the same tuning finds nothing better than the original rule, and dropping the forced newline/EOS terms there hurts. The rule is a real, dataset-dependent choice that should be made on validation data, and certified decoding makes any such rule exact.</p></section>
 <section class="panel"><h2>Caveats</h2>
 <ul>
 <li>One model family (MiniOneRec, Qwen2-1.5B) and small catalogs; exact decoding cost grows with the number of first-level codes and with how loose the prefix bound is. The certificate tells you per request when it did not close.</li>
-<li>Trie and no-suffix scoring change the decoding objective (a decode-time choice, like FlashRec's per-codebook softmax); full-semantics numbers are reported separately (27.9 ms, HR@10 equal to FP32).</li>
+<li>Trie, codebook and weighted scoring change the decoding objective (a decode-time choice, like FlashRec's per-codebook softmax); full-semantics numbers are reported separately (26.1 ms in FP16, top-1 identical to FP32 for 500/500 users).</li>
+<li>Industrial latencies on this page are from the A6000; an earlier Industrial run on an L40S measured 11.5 ms for certified decoding.</li>
 <li>Quality is SID-level HR/NDCG; 15 catalog SIDs are shared by two items. Latency is batch 1 on one RTX A6000 with setup, compilation and graph capture excluded.</li>
 </ul></section>
 
-<section><h2>Next</h2><ul><li>INT8/INT4 weights with compiled kernels</li>
-<li>Exhaustive FP32 dumps for both datasets (search × scoring study)</li>
-<li>Industrial & Scientific replication</li>
-<li>Batched throughput for the exact decoders</li></ul></section>
+<section><h2>Next</h2><ul><li>Push the branch and open a PR on amilcodes/RapidTinyRec (not done; waiting for your go-ahead).</li>
+<li>Matched-hardware comparison against FlashRec and NVIDIA's SID-GR engine, now that the scoring rule is known to matter.</li>
+<li>A larger catalog (e.g. OneRec/RecIF or a 100k-item Amazon category) to test how certification rates and exact-decoding cost scale.</li>
+<li>Training-time ideas the analysis points to: SID schemes without sibling penalties, or a depth-aware loss.</li></ul></section>
 </div>

@@ -106,19 +106,29 @@ Profile of the first engine version (BF16, eager): ≈24 ms GEMM at ≈65% of pe
 - **One CUDA graph per (batch, padded length)** with a shared memory pool; torch.compile fuses
   the per-layer elementwise work.
 
-Ladder (A6000, batch 1, median ms; full MiniOneRec semantics unless noted):
+- **Cached prompt template**: all MiniOneRec prompts share a 69-token instruction prefix; its K/V
+  are computed once, so the fused first forward carries only the user-specific tail plus the
+  first-level trie nodes (bit-identical outputs in FP32).
 
-| rung | ms | fidelity |
-|---|---:|---|
-| HF generate, FP32 | 868.8 | reference |
-| RapidTinyRec FP32 bit-exact stack (prior) | 114.8 | bit-exact |
-| speedrun engine, FP32 | 98.8 | HR@10 = reference |
-| RapidTinyRec BF16 (prior) | 56.5 | HR@10 = |
-| speedrun, BF16, one graph | 41.3 | |
-| + compile | 35.2 | ΔHR@10 −0.10 [−0.27,+0.06] |
-| + fused first level + Triton attention | 27.9 | HR@10 0.1589 (= FP32) |
-| certified exact, no forced suffix | 19.8 | top-10 certified 94% |
-| certified exact, trie scoring | **16.1** | top-50 certified 99.9% |
+Ladder (`runs/ladder2`: one allocation, one RTX A6000, 2 × 500 requests per rung; batch 1; median /
+p95 ms; HF and prior rows from earlier RapidTinyRec measurements on the same GPU type and cohort):
+
+| rung | median | p95 | fidelity / quality |
+|---|---:|---:|---|
+| HF `generate`, FP32 | 868.8 | — | reference |
+| RapidTinyRec FP32 bit-exact stack (prior) | 114.8 | 119.9 | bit-exact |
+| RapidTinyRec BF16 (prior) | 56.5 | 57.6 | HR@10 = reference |
+| speedrun engine, FP32 | 100.8 | 105.5 | top-10 set = reference for 500/500 |
+| BF16, one CUDA graph per request (fused suffix) | 42.1 | 42.9 | top-1 = FP32 471/500 |
+| + torch.compile | 35.0 | 35.4 | |
+| + trie-level prefill fusion + Triton beam attention | 28.1 | 28.4 | HR@10 = FP32 (0.1589) |
+| + FP16 + cached template | 26.2 | 27.7 | top-1 = FP32 500/500 |
+| certified exact, trie scoring | **14.4** | 15.7 | top-50 certified 99.9%; HR@10 0.1648 |
+| certified exact, codebook, w_c = 0.5 (tuned on validation) | **14.4** | 15.6 | top-10 certified 99.7%; HR@10 0.1700 |
+
+The separate-suffix variant (two one-token forwards for `\n` and EOS) costs 55.9 vs 46.3 ms in the
+earlier paired ladder (`runs/ladderZ`), i.e. forced-suffix fusion saves ≈10 ms. Allocations of the
+same GPU type differ by up to ≈10% in absolute latency; ratios are taken within one allocation.
 
 ## 5. Certified exact decoding
 
@@ -224,14 +234,25 @@ FP16 is as fast as BF16 and ~10× more faithful; HR/NDCG are statistically indis
 from FP32 for both. Weight-only INT8 (GemLite) is quality-neutral but only 3–8% faster;
 INT4 (RTN, group 128) is no faster and less faithful. The kernel profile explains why: after
 fusion, GEMMs are ≈80% of GPU time at ≈75% of peak bandwidth, with M = 50–216 rows per forward
-— outside the M ≤ 16 regime where weight-only kernels shine. [TBD: FP8 W8A8 on L40S.]
+— outside the M ≤ 16 regime where weight-only kernels shine. The roofline makes this explicit: one
+A6000 forward costs 8.1 / 9.8 / 12.2 / 16.1 ms at 1 / 50 / 128 / 256 tokens in BF16, versus 5.2 / 8.3 /
+11.8 / 18.1 ms with INT8 weights. On an L40S, dynamic per-token FP8 W8A8 (`torch._scaled_mm`,
+rowwise scales) is *slower* than BF16 end to end (certified exact 15.9 vs 14.0 ms; beam 23.5 vs
+20.1 ms) at near-equal quality, because quantizing activations at every GEMM outweighs the
+narrower weights at 50–216 rows; a quantize-in-RMSNorm FP8 path is future work.
 
 ## 8. Throughput
 
-Compiled BF16 beam: 23.9 users/s (B=1) → 71.5 (B=16) → 77.9 (B=64) on one A6000; compute-bound
-beyond B≈8. Certified exact decoding processes fewer tokens per user (prompt tail + 88 trie
-nodes + 64 prefix rows ≈ 190 with the template cache, vs ≈340 for fused beam). [TBD: measured
-throughput curves, `sweepI`, `tmplJ`.]
+Users per second on one A6000 (BF16/FP16, cached template), batch B users per graph replay:
+
+| decoder | B=1 | B=4 | B=8 | B=16 | B=32 |
+|---|---:|---:|---:|---:|---:|
+| beam-50, full MiniOneRec scoring | 37.5 | 69.2 | 77.0 | 86.0 | 91.3 |
+| certified exact, trie scoring | 67.8 | 135.6 | 145.9 | 165.2 | 172.2 |
+| certified exact, tuned codebook | 67.8 | — | 160.5 | — | 176.2 |
+
+Exact decoding processes fewer tokens per user (prompt tail + 88 trie nodes + 64 prefix rows vs
+prompt + 88 + 50 + 100 beam rows) and stays ≈1.9× ahead once both are compute-bound.
 
 ## 9. Related work
 

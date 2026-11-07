@@ -1,5 +1,5 @@
 {
- "updated": "Nov 7, 1:50 AM ET (in progress)",
+ "updated": "Nov 7, 3:40 AM ET (final)",
  "ladder": [
   {
    "label": "HF generate, FP32 (prior)",
@@ -91,11 +91,12 @@
  "findings": [
   "Batch-1 cost is set by how many sequential forwards a request needs, not by beam width: one full forward on the A6000 costs 8.1 ms for 1 token and 9.8 ms for 50.",
   "Certified exact decoding replaces beam search. One forward scores the prompt together with every first code; a second scores the best-bounded prefixes; an on-device test proves when the top-K is the global optimum. Checked against brute-force scoring of every item: 0 violations.",
-  "Office: 14.4 ms per request (60\u00d7 faster than HF generate, 3.9\u00d7 faster than the prior BF16 stack) with top-10 proven optimal for 99.7% of users. With codebook scoring and the third code weighted 0.5 (chosen on the validation split), HR@10 rises from 0.1589 to 0.1700 (+1.11 pt, 95% CI +0.53 to +1.69) over the FP32 reference decode.",
+  "Office: 14.4 ms per request in one paired allocation (60\u00d7 faster than HF generate, 3.9\u00d7 faster than the prior BF16 stack) with top-10 proven optimal for 99.7% of users. With codebook scoring and the third code weighted 0.5 (chosen on the validation split), HR@10 rises from 0.1589 to 0.1700 (+1.11 pt, 95% CI +0.53 to +1.69) over the FP32 reference decode.",
   "Industrial & Scientific: 14.0 ms vs 25.6 ms for the fully optimized full-semantics beam on the same A6000, at equal quality. No scoring rule beats MiniOneRec's own there, so the Office quality gain is dataset-specific and the rule has to be chosen on validation data.",
-  "Throughput: certified exact decoding serves 172 users/s on one A6000 at batch 32, vs 91 for the fused beam engine.",
+  "Throughput: certified exact decoding serves 176 users/s on one A6000 at batch 32, vs 91 for the fully fused beam engine.",
   "Why deep terms mislead: an item loses ~1.6 nats of third-code log-probability just for sharing its prefix with one sibling, and about 47% of the next-token mass leaks off the valid codebook. Beam-50 misses 14% of the exact top-10 under the training objective, yet exact search does not improve quality.",
-  "FP16 matches BF16's speed with about 10\u00d7 better fidelity to FP32 (top-10 identical for 484 vs 374 of 500 users). Weight-only INT8/INT4 barely help at 50\u2013200 rows per forward, and the logit lens shows SID codes are decided only in the last 6\u20139 of 28 layers."
+  "FP16 matches BF16's speed with about 10\u00d7 better fidelity to FP32 (top-10 identical for 484 vs 374 of 500 users). Weight-only INT8/INT4 barely help at 50\u2013200 rows per forward, and the logit lens shows SID codes are decided only in the last 6\u20139 of 28 layers.",
+  "FP8 on an L40S is slower than BF16 as implemented (15.9 vs 14.0 ms): quantizing activations at every matrix multiply costs more than the narrower weights save at 50\u2013200 rows."
  ],
  "next": [
   "Push the branch and open a PR on amilcodes/RapidTinyRec (not done; waiting for your go-ahead).",
