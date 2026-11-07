@@ -24,18 +24,21 @@ CUDA graph and adds a decoder that replaces beam search: every term of an item's
 log-probability ≤ 0, so scoring all first codes and all two-code prefixes bounds every item,
 and a second small forward proves when the returned top-K is the global optimum.
 
-| A6000, batch 1, 500 Office users (same allocation) | median ms |
+| A6000, batch 1, 500 Office users (one allocation) | median ms |
 | :--- | ---: |
 | HF `generate`, FP32 (above) | 868.8 |
-| speedrun engine, FP32 | 105.0 |
-| BF16, one CUDA graph per request | 46.3 |
-| + torch.compile | 37.5 |
-| + first trie level fused into the prompt forward + Triton beam attention | 30.2 |
-| certified exact decoding, trie-renormalized scoring | **17.8** |
+| speedrun engine, FP32 | 100.8 |
+| BF16, one CUDA graph per request | 42.1 |
+| + torch.compile | 35.0 |
+| + first trie level fused into the prompt forward + Triton beam attention | 28.1 |
+| + FP16 + cached prompt template (top-1 identical to FP32 for 500/500 users) | 26.2 |
+| certified exact decoding, trie or tuned codebook scoring | **14.4** |
 
-Certified trie decoding proves its top-50 globally optimal for 99.9% of users and beats the
-FP32 reference decode on HR@1 / HR@10 / NDCG@10 (0.0984 / 0.1646 / 0.1289 vs 0.0941 / 0.1589 /
-0.1247 on all 4,866 test users). FP16 matches BF16's speed with ~10× better fidelity to FP32.
+Certified decoding proves its top-10 globally optimal for ≥99.7% of users. With codebook scoring
+and the third code weighted 0.5 (chosen on MiniOneRec's validation split) it improves HR@10 from
+0.1589 to 0.1700 and NDCG@10 from 0.1247 to 0.1309 over the FP32 reference decode on all 4,866
+Office test users; on Industrial & Scientific it matches the reference quality at 14.0 vs 25.6 ms.
+It serves 176 users/s on one A6000. FP16 matches BF16's speed with ~10× better fidelity to FP32.
 Method, measurements and negative results: [`research/`](research/PLAN.md).
 
 ## Performance

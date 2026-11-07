@@ -31,13 +31,14 @@ def first(*keys):
 
 # 1. ladder
 ladder = [('HF generate, FP32', 868.8, False), ('RapidTinyRec FP32 (prior)', 114.8, False),
-          ('Speedrun FP32', lat(first('ladderZ/L0_fp32_graph', 'sweepA/fp32')), True),
+          ('Speedrun FP32', lat('ladder2/M0_fp32_graph'), True),
           ('RapidTinyRec BF16 (prior)', 56.5, False),
-          ('Speedrun BF16, 1 graph', lat(first('ladderZ/L1_bf16_graph')) or 41.3, True),
-          ('+ compile', lat(first('ladderZ/L3_bf16_compile', 'sweepA/bf16_compile')), True),
-          ('+ fused first level + Triton attn', lat(first('ladderZ/L4_bf16_ff_tc', 'sweepF2/beam_ff_tc')), True),
-          ('certified exact, no suffix', lat(first('ladderZ/L5_ex3_nosuf', 'sweepF2/ex3_nosuf_ff_tc')), True),
-          ('certified exact, trie scoring', lat(first('ladderZ/L6_ex3_trie', 'sweepF2/ex3_trie_ff_tc')), True)]
+          ('Speedrun BF16, 1 graph', lat('ladder2/M1_bf16_graph'), True),
+          ('+ compile', lat('ladder2/M2_bf16_compile'), True),
+          ('+ fused first level + Triton attn', lat('ladder2/M3_bf16_ff_tc'), True),
+          ('+ FP16 + cached template', lat('ladder2/M4_fp16_ff_tc_tmpl'), True),
+          ('certified exact, trie scoring', lat('ladder2/M5_ex3_trie_tmpl'), True),
+          ('certified exact, tuned codebook', lat('ladder2/M6_ex3_cb_w05_tmpl'), True)]
 ladder = [l for l in ladder if l[1]]
 fig, ax = plt.subplots(figsize=(6.2, 3.2))
 ys = range(len(ladder))[::-1]
@@ -88,13 +89,13 @@ if any_r:
 # 4. throughput
 fig, ax = plt.subplots(figsize=(4.8, 3.0))
 any_t = False
-for k, lab in (('tmplJ/tp_ex3_trie_tmpl', 'certified exact, trie scoring'), ('tmplJ/tp_beam_ff_tc_tmpl', 'beam-50, full MiniOneRec scoring'),
+for k, lab in (('ladder2/M7_tp_ex3_cb_w05', 'certified exact, tuned codebook'), ('tmplJ/tp_ex3_trie_tmpl', 'certified exact, trie scoring'), ('tmplJ/tp_beam_ff_tc_tmpl', 'beam-50, full MiniOneRec scoring'),
                ('sweepI/tp_ex3_nosuf_ff_tc', 'certified exact, no suffix (no template)'), ('sweepA/bf16_compile', 'beam-50, compile only (no fusion)')):
     r = res(k)
     if r and r.get('throughput'):
         tp = r['throughput']
         bs = sorted(int(b) for b in tp)
-        ax.plot(bs, [tp[str(b)]['users_per_s'] if str(b) in tp else tp[b]['users_per_s'] for b in bs], marker='o', ms=3, label=lab)
+        ax.plot(bs, [tp[str(b)]['users_per_s'] for b in bs], marker='o', ms=3, label=lab)
         any_t = True
 if any_t:
     ax.set_xscale('log', base=2); ax.set_xlabel('users per batch'); ax.set_ylabel('users / s (one A6000)'); ax.legend(fontsize=7)

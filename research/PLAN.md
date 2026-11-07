@@ -248,3 +248,10 @@ See `lit_ledger.md`, `architecture_directions.md`, `kernel_techniques.md`.
   FP8 6.7/8.3/11.6/17.6/28.9/51.9 (activation quantization + kernel overhead dominate); GemLite
   INT8 weight-only 4.3/6.3/7.3/10.5/17.0/30.9 (1.2–1.5× at M ≤ 128 — better than on the A6000).
   Negative result for naive FP8; a fused quant-in-RMSNorm FP8 path is future work.
+- **Final paired ladder (ladder2: one allocation, same A6000, 2×500 requests per rung):** FP32
+  100.8 → BF16 one graph 42.1 → +compile 35.0 → +fused first level + Triton 28.1 → +FP16 + template
+  26.2 (top-1 = FP32 500/500) → **certified exact, trie 14.38 / 15.68 p95** → **certified exact,
+  validation-tuned codebook (w_c=0.5) 14.37 / 15.64** (top-10 certified 99.7%; HR@10 0.1700 vs
+  0.1589 FP32 reference). Throughput of the tuned decoder: 67.8 (B=1), 160.5 (B=8), 176.2 (B=32)
+  users/s. **869 → 14.4 ms = 60.4× (HF FP32 → certified FP16); 56.5 → 14.4 = 3.9× over the prior
+  BF16 stack; 114.8 → 14.4 = 8.0× over the prior FP32 exact stack.**
