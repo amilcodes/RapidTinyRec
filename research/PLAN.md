@@ -203,12 +203,12 @@ See `lit_ledger.md`, `architecture_directions.md`, `kernel_techniques.md`.
 - **Engine, Office full test: certified exact, codebook, w_c=0.5, template, BF16 = 14.4 ms**; vs
   FP32 reference decode HR@1 +0.35 [+0.04, +0.68], HR@10 +1.11 [+0.53, +1.69], NDCG@10 +0.62
   [+0.32, +0.93], HR@50 +1.50 [+0.86, +2.16]; top-10 certified 99.7%, top-50 92.4%. FP16 same.
-- **Industrial (4,533 users):** speed replicates (certified exact no-suffix 13.9 ms vs compiled
-  beam 26.5 ms, fused beam 20.0 ms) but the scoring story does not transfer as-is: dropping the
+- **Industrial (4,533 users):** speed replicates (*measured on an L40S — this job ran on any GPU*:
+  certified exact no-suffix 13.9 ms vs compiled beam 26.5 ms, fused beam 20.0 ms) but the scoring story does not transfer as-is: dropping the
   forced suffix *hurts* (NDCG@10 −0.42 [−0.59, −0.25]); trie ≈ full (+0.13 HR@10, n.s.). The
   scoring rule is dataset-dependent → must be chosen on validation (Industrial tuning pending).
-- **Industrial certified exact trie: 11.5 ms** (48 first codes; no template cache) vs compiled beam
-  26.5 ms / fused beam 20.0 ms; top-20 certified 100%, top-50 97.9%; HR@10 0.1582 vs 0.1571 and
+- **Industrial certified exact trie: 11.5 ms on L40S** (48 first codes; no template cache) vs compiled
+  beam 26.5 ms / fused beam 20.0 ms on the same L40S; top-20 certified 100%, top-50 97.9%; HR@10 0.1582 vs 0.1571 and
   NDCG@10 0.1167 vs 0.1172 for full-semantics beam (equal quality). The Office "narrow prefix
   filter helps" effect does not transfer (N=16 HR@10 0.1458, −1.1 pt). Robust claims: speed with
   equal-or-better quality via certified trie decoding on both datasets; scoring-rule gains beyond
@@ -229,3 +229,9 @@ See `lit_ledger.md`, `architecture_directions.md`, `kernel_techniques.md`.
   0.098/0.091/0.083/0.073/0.066/0.062 and NDCG@10 0.129/0.124/0.121/0.116/0.113/0.111. The third
   code decides the order among siblings, not set membership; early exit is a latency/precision
   trade (−34% latency at −3.6 pt HR@1), not a free win. Certification is w.r.t. the truncated score.
+- **Correction / A6000 Industrial numbers (indT):** the indH latencies above were on an L40S
+  (job relaxed to any GPU). On the A6000: certified exact trie + template **14.0 ms / 14.4 p95**;
+  certified exact codebook + template 14.1 ms (HR@10 0.1593, NDCG@10 0.1168, top-10 cert 94.7%);
+  full-semantics beam FP16 + template 25.6 ms (HR@10 0.1584, NDCG@10 0.1179); FP32 graph 96.5 ms.
+  ⇒ Industrial A6000: certified decoding 1.8× faster than the fully optimized full-semantics beam
+  at equal quality; 11.5 ms vs 14.0 ms is the L40S vs A6000 difference.

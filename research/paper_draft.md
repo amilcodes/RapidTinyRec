@@ -16,8 +16,8 @@ everything. Because every scored term is a log-probability ≤ 0, scoring the pr
 one more forward over the best-bounded prefixes yields exact scores and a per-request
 certificate that the returned top-K is the global optimum of the model's own objective. With a
 hand-written engine (one CUDA graph per request, Triton shared-prefix attention, a cached
-prompt template), certified decoding takes **14.4 ms** per request on Office and **11.5 ms** on
-Industrial, versus 869 ms for Hugging Face `generate` (60×) and 56.5 ms for the best prior
+prompt template), certified decoding takes **14.4 ms** per request on Office and **14.0 ms** on
+Industrial (11.5 ms on an L40S), versus 869 ms for Hugging Face `generate` (60×) and 56.5 ms for the best prior
 implementation, and serves 172 users/s on one GPU — 1.9× a fully fused beam-50 engine.
 Certification holds for ≥99.7% of users at top-10 under codebook or trie normalization, and was
 checked against brute-force scoring of every item (0 violations). Exact search also works as an
@@ -28,7 +28,7 @@ one sibling; ~47% of mass leaked off the codebook), and that the decode-time sco
 be chosen on validation data: on Office a codebook softmax with the third code down-weighted
 improves HR@10 by +1.11 points [+0.53, +1.69] (+7%) and NDCG@10 by +0.62 [+0.32, +0.93] over the
 FP32 reference decode, while on Industrial no rule beats the original and certified decoding
-matches its quality at 2.3× the speed. FP16 matches BF16's speed with ~10× better fidelity;
+matches its quality at 1.8× the speed of a fully optimized full-semantics beam engine. FP16 matches BF16's speed with ~10× better fidelity;
 weight-only INT8/INT4 do not help at 50–200 rows per forward.
 
 ## 1. Introduction
