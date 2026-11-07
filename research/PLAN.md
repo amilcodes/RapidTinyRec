@@ -235,3 +235,9 @@ See `lit_ledger.md`, `architecture_directions.md`, `kernel_techniques.md`.
   full-semantics beam FP16 + template 25.6 ms (HR@10 0.1584, NDCG@10 0.1179); FP32 graph 96.5 ms.
   ⇒ Industrial A6000: certified decoding 1.8× faster than the fully optimized full-semantics beam
   at equal quality; 11.5 ms vs 14.0 ms is the L40S vs A6000 difference.
+- **Industrial, full test (4,533), exhaustive FP32** (`research/sim_industrial_full.md`,
+  `research/tune_industrial.md`): beam-50 recovers 93.9% of the exact top-10 under the full
+  objective (Office 86.4%); exact vs beam −0.02 pt HR@10 (n.s.). Validation-tuned codebook
+  (w_c from the grid) +0.29 [−0.24, +0.84] HR@10, +0.02 NDCG@10 (n.s.); dropping the suffix
+  −0.42 [−0.82, −0.02] / −0.46 [−0.65, −0.27]. Confirms: scoring gains are dataset-specific;
+  certified decoding is quality-neutral on Industrial and quality-positive on Office.
