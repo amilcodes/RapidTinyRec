@@ -4,7 +4,7 @@ import torch
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 from rapidtinyrec.speedrun.model import Qwen2Weights
 from rapidtinyrec.speedrun.beam import SidCatalog, BeamEngine
-from rapidtinyrec.speedrun.exact import ExactEngine3
+from rapidtinyrec.speedrun.exact import ExactEngine, ExactEngine3
 from rapidtinyrec.speedrun import data
 rel = sys.argv[1]; dev = torch.device('mps')
 tok = data.load_tokenizer(rel); rows = data.test_rows(rel)
@@ -16,7 +16,7 @@ with torch.inference_mode():
     t = torch.full((3, P), tok.eos_token_id, dtype=torch.long)
     for u in range(3): t[u, :len(ids[u])] = torch.tensor(ids[u])
     t = t.to(dev); ln = torch.tensor([len(x) for x in ids], device=dev)
-    for cls, kw in ((BeamEngine, {}), (ExactEngine3, dict(n_prefix=128, n_expand=32))):
+    for cls, kw in ((ExactEngine, dict(n_expand=16)), (ExactEngine3, dict(n_prefix=64, n_expand=50, suffix_mode="none"))):
         e0 = cls(W, cat, **kw); e1 = cls(W, cat, fuse_first=True, **kw)
         o0 = e0.run(t, ln, e0.alloc(3, P)); o1 = e1.run(t, ln, e1.alloc(3, P))
         for u in range(3):

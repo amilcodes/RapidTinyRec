@@ -86,3 +86,18 @@ See `lit_ledger.md`, `architecture_directions.md`, `kernel_techniques.md`.
   rank-identical, FP32 score diff ≤3e-5), FP8 W8A8 (L40S), roofline microbenchmark,
   Industrial & Scientific checkpoint (48 / 2,295 / 3,670 trie nodes; 4,533 test users),
   exhaustive FP32 dumps for both datasets (queued), λ-rescoring with cross-fitting.
+- 01:40 — sweepA: new engine FP32 (graph, uncompiled) **98.8 ms** vs prior FP32 stack 114.8;
+  forced-suffix fusion is worth **10 ms** (BF16: 51.3 separate → 41.3 fused); dropping the
+  suffix (3 forwards) 30.3 ms.
+- 01:40 — **Quality vs the FP32 MiniOneRec reference decode (paired bootstrap, 4,866 users):**
+  BF16 beam ΔHR@10 −0.10 pt [−0.27, +0.06] (free); no-suffix beam ΔNDCG@10 +0.36 [+0.13, +0.61];
+  prefix-filtered exact N=16 ΔHR@10 **+0.70 [+0.12, +1.29]**, ΔHR@5 +0.66 [+0.29, +1.05],
+  ΔNDCG@10 +0.36 [+0.13, +0.60]; N=32 ΔHR@10 +0.64 [+0.21, +1.09]. Under no-suffix scoring
+  beam-50 and certified exact search give identical HR@10 (0.16235) → there, the scoring rule,
+  not the search, is what matters. Table: `results_table.md`.
+- 01:45 — Bug caught locally before GPU time: Industrial has 48 first codes < beam 50
+  (HF semantics: extra beams dead). Fixed.
+- 01:50 — **Full MiniOneRec semantics, BF16: 27.9 ms median / 28.0 p95** (fused first level +
+  Triton shared-prefix attention + compile), vs 56.5 ms prior BF16 stack, 869 ms HF. Full-test
+  HR@10 0.15886 = FP32 reference exactly; NDCG@10 0.1249 vs 0.1247. Triton attention is ~2×
+  closer to FP32 than the PyTorch BF16 attention path (self-check max err 0.06 vs 0.16).

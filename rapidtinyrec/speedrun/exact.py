@@ -23,8 +23,10 @@ from .beam import ScoreMixin
 
 
 class ExactEngine(ScoreMixin):
-    def __init__(self, W, cat, n_expand=64, newline_id=198, eos_id=151645, suffix_mode='fused', ks=(1, 5, 10, 20, 50), norm='full'):
+    def __init__(self, W, cat, n_expand=64, newline_id=198, eos_id=151645, suffix_mode='fused', ks=(1, 5, 10, 20, 50), norm='full',
+                 fuse_first=False):
         self.W, self.cat, self.N = W, cat, n_expand
+        self.fuse_first = fuse_first
         self.fwd = Forward(W)
         self.newline, self.eos = newline_id, eos_id
         self._init_scoring(norm)
@@ -72,17 +74,24 @@ class ExactEngine(ScoreMixin):
         dev = tokens.device
         nA = len(cat.first)
         bidx = torch.arange(B, device=dev)[:, None]
-        # ---- forward 1: prefill -> lp(a) for every valid first code
-        pos = torch.arange(P, device=dev)[None, :].expand(B, P)
-        h = fwd.prefill(W.embed[tokens], pos, bufs['kc'], bufs['vc'])
-        la = self._lp(h[torch.arange(B, device=dev), lengths - 1], 0, cat.first[None].expand(B, -1), None)  # [B,nA]
         neg = torch.finfo(torch.float32).min
         pmask = torch.where(torch.arange(P, device=dev)[None, :] < lengths[:, None], 0.0, neg)
         L0 = lengths[:, None, None]
-        # ---- forward 2: every first code as a tree node -> lp(b|a)
-        x = W.embed[cat.first][None, :, None].expand(B, nA, 1, W.D)
-        h = fwd.step(x, L0.expand(B, nA, 1), bufs['kc'], bufs['vc'], pmask, bufs['kp2'], bufs['vp2'], 0, lengths=lengths)
-        lb = self._lp(h[:, :, 0], 1, cat.t1[None].expand(B, nA, cat.W1), cat.v1[None].expand(B, nA, cat.W1))
+        if self.fuse_first:
+            # ---- forward 1: prompt + every first code as tree nodes -> lp(a), lp(b|a)
+            hp, hn = fwd.prefill_tree(W.embed[tokens], W.embed[cat.first][None].expand(B, nA, W.D), lengths,
+                                      bufs['kc'], bufs['vc'], bufs['kp2'], bufs['vp2'])
+            la = self._lp(hp[torch.arange(B, device=dev), lengths - 1], 0, cat.first[None].expand(B, -1), None)
+        else:
+            # ---- forward 1: prefill -> lp(a) for every valid first code
+            pos = torch.arange(P, device=dev)[None, :].expand(B, P)
+            h = fwd.prefill(W.embed[tokens], pos, bufs['kc'], bufs['vc'])
+            la = self._lp(h[torch.arange(B, device=dev), lengths - 1], 0, cat.first[None].expand(B, -1), None)  # [B,nA]
+            # ---- forward 2: every first code as a tree node -> lp(b|a)
+            x = W.embed[cat.first][None, :, None].expand(B, nA, 1, W.D)
+            h = fwd.step(x, L0.expand(B, nA, 1), bufs['kc'], bufs['vc'], pmask, bufs['kp2'], bufs['vp2'], 0, lengths=lengths)
+            hn = h[:, :, 0]
+        lb = self._lp(hn, 1, cat.t1[None].expand(B, nA, cat.W1), cat.v1[None].expand(B, nA, cat.W1))
         lb = lb.masked_fill(~cat.v1[None], float('-inf')).view(B, nA * cat.W1)
         u2 = la.repeat_interleave(cat.W1, dim=1) + lb                          # [B,nA*W1]
         bound = u2[:, self.sid_flat]                                          # [B,S]

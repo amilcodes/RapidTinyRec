@@ -88,7 +88,7 @@ def main():
     if a.engine == 'beam':
         eng = BeamEngine(W, cat, suffix_mode=a.suffix, norm=a.norm, fuse_first=a.fuse_first)
     elif a.engine == 'exact':
-        eng = ExactEngine(W, cat, n_expand=a.n_expand, suffix_mode=a.suffix, norm=a.norm)
+        eng = ExactEngine(W, cat, n_expand=a.n_expand, suffix_mode=a.suffix, norm=a.norm, fuse_first=a.fuse_first)
     else:
         eng = ExactEngine3(W, cat, n_prefix=a.n_prefix, n_expand=a.n_expand, suffix_mode=a.suffix, norm=a.norm, fuse_first=a.fuse_first)
     if a.attn == 'triton':
