@@ -29,12 +29,26 @@ every SID and user), `scripts/simulate.py` (offline search × scoring study),
   the best-bounded candidates exactly and returns a per-K certificate that the returned top-K
   is the global optimum of the model's objective.
 
-## Example
+## Recommended configurations
+
+| goal | flags | Office, A6000 |
+|---|---|---|
+| MiniOneRec semantics, FP32-faithful | `--dtype float16 --fuse-first --template-cache --attn triton --compile default` | 26.1 ms, top-1 = FP32 for 500/500 |
+| fastest, equal-or-better quality, certified | `--engine exact3 --norm trie --n-prefix 64 --n-expand 50 --fuse-first --template-cache --dtype float16 --attn triton --compile default` | 14.3 ms, top-50 certified 99.9% |
+| best Office quality (weights tuned on validation) | same, with `--norm codebook --weights 1,0.5,0` | 14.4 ms, HR@10 0.1700 vs 0.1589 |
+
+Other flags: `--suffix none|fused|separate`, `--norm full|codebook|trie`, `--weights wb,wc,ws`
+(depth-discounted scoring), `--exit-c L` (layers for the third-code forward), `--quant gl_w8|gl_w4|fp8`,
+`--beam W`, `--profile`, `--check-exhaustive K` (brute-force check of K cohort users),
+`SPEEDRUN_DATASET=industrial` (MiniOneRec Industrial & Scientific).
 
 ```bash
-python scripts/bench.py --release RELEASE --out results/ex3 --engine exact3 --suffix none \
-  --n-prefix 64 --n-expand 50 --fuse-first --dtype bfloat16 --attn triton --compile default \
-  --modes latency,quality
+python scripts/bench.py --release RELEASE --out results/ex3 --engine exact3 --norm trie \
+  --n-prefix 64 --n-expand 50 --fuse-first --template-cache --dtype float16 --attn triton \
+  --compile default --modes latency,quality
+python scripts/dump_scores.py --release RELEASE --out dumps/office --shard 0 --nshards 4   # exhaustive FP32 scores
+python scripts/simulate.py dumps/office --out sim.json                                   # search x scoring study
+python scripts/tune_weights.py dumps/office_valid dumps/office --out tune.json           # tune on validation, test once
 ```
 
 Measurements, protocol and the research log live in `research/`.
