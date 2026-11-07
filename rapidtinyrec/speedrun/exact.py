@@ -79,9 +79,10 @@ class ExactEngine(ScoreMixin):
         L0 = lengths[:, None, None]
         if self.fuse_first:
             # ---- forward 1: prompt + every first code as tree nodes -> lp(a), lp(b|a)
-            hp, hn = fwd.prefill_tree(W.embed[tokens], W.embed[cat.first][None].expand(B, nA, W.D), lengths,
-                                      bufs['kc'], bufs['vc'], bufs['kp2'], bufs['vp2'])
-            la = self._lp(hp[torch.arange(B, device=dev), lengths - 1], 0, cat.first[None].expand(B, -1), None)
+            T0 = self._T0()
+            hp, hn = fwd.prefill_tree(W.embed[tokens[:, T0:]], W.embed[cat.first][None].expand(B, nA, W.D), lengths,
+                                      bufs['kc'], bufs['vc'], bufs['kp2'], bufs['vp2'], tmpl=self.tmpl)
+            la = self._lp(hp[torch.arange(B, device=dev), lengths - 1 - T0], 0, cat.first[None].expand(B, -1), None)
         else:
             # ---- forward 1: prefill -> lp(a) for every valid first code
             pos = torch.arange(P, device=dev)[None, :].expand(B, P)
@@ -224,9 +225,10 @@ class ExactEngine3(ExactEngine):
         pmask = torch.where(torch.arange(P, device=dev)[None, :] < lengths[:, None], 0.0, neg)
         L0 = lengths[:, None, None]
         if self.fuse_first:
-            hp, hn = fwd.prefill_tree(W.embed[tokens], W.embed[cat.first][None].expand(B, nA, W.D), lengths,
-                                      bufs['kc'], bufs['vc'], bufs['kp2'], bufs['vp2'])
-            la = self._lp(hp[torch.arange(B, device=dev), lengths - 1], 0, cat.first[None].expand(B, -1), None)
+            T0 = self._T0()
+            hp, hn = fwd.prefill_tree(W.embed[tokens[:, T0:]], W.embed[cat.first][None].expand(B, nA, W.D), lengths,
+                                      bufs['kc'], bufs['vc'], bufs['kp2'], bufs['vp2'], tmpl=self.tmpl)
+            la = self._lp(hp[torch.arange(B, device=dev), lengths - 1 - T0], 0, cat.first[None].expand(B, -1), None)
         else:
             pos = torch.arange(P, device=dev)[None, :].expand(B, P)
             h = fwd.prefill(W.embed[tokens], pos, bufs['kc'], bufs['vc'])
