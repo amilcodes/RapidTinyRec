@@ -95,6 +95,16 @@ class ScoreMixin:
     def _T0(self):
         return 0 if self.tmpl is None else self.tmpl[0].shape[2]
 
+    level_w = (1.0, 1.0, 1.0)   # weights on the a, b, c terms (depth-discounted scoring)
+    suffix_w = 1.0              # weight on lp(\n) + lp(EOS)
+
+    def set_weights(self, wb=1.0, wc=1.0, ws=1.0):
+        """Depth-discounted score: lp(a) + wb lp(b|a) + wc lp(c|ab) + ws (lp(\n)+lp(EOS)).
+        All weights > 0 keep every term <= 0, so exact-search bounds stay admissible."""
+        assert wb > 0 and wc > 0 and ws >= 0
+        self.level_w = (1.0, float(wb), float(wc))
+        self.suffix_w = float(ws)
+
     def _init_scoring(self, norm):
         assert norm in ('full', 'codebook', 'trie')
         self.norm = norm
@@ -103,6 +113,11 @@ class ScoreMixin:
             self.sid_head = head[self.cat.sid_ids].contiguous()
 
     def _lp(self, h, level, tok_idx, valid):
+        lp = self._lp_raw(h, level, tok_idx, valid)
+        w = self.level_w[level]
+        return lp if w == 1.0 else lp * w
+
+    def _lp_raw(self, h, level, tok_idx, valid):
         if self.norm == 'full':
             lg = self.W.linear(h, self.W.lm_head)[..., :self.W.V].float()
             return lg.gather(-1, tok_idx) - torch.logsumexp(lg, -1, keepdim=True)
@@ -232,6 +247,8 @@ class BeamEngine(ScoreMixin):
                 h = fwd.step(W.embed[nl][:, :, None], (L0 + 3).expand(B, R, 1), kc, vc, pmask, kp, vp, 3, lengths=lengths)
                 lg = self._logits(h[:, :, 0])
                 tr_e = lg[..., self.eos] - torch.logsumexp(lg, -1)
+            if self.suffix_w != 1.0:
+                tr_n, tr_e = tr_n * self.suffix_w, tr_e * self.suffix_w
             final = s3 + tr_n + tr_e
             tr = torch.stack([tr_a, tr_b, tr_c, tr_n, tr_e], -1)
         final, order = torch.sort(final, dim=-1, descending=True, stable=True)

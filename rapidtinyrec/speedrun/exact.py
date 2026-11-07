@@ -127,7 +127,7 @@ class ExactEngine(ScoreMixin):
             lc = lg[..., 0, :].gather(-1, sid[..., 2:3])[..., 0] - lse[..., 0]
             ln = lg[..., 1, self.newline] - lse[..., 1]
             le = lg[..., 2, self.eos] - lse[..., 2]
-            exact = base + lc + ln + le
+            exact = base + lc + self.suffix_w * (ln + le)
             tr = torch.stack([lc, ln, le], -1)
         final, order = torch.sort(exact, dim=-1, descending=True, stable=True)
         cert = torch.stack([final[:, k - 1] >= next_bound for k in self.ks if k <= N], -1)
@@ -172,8 +172,8 @@ class ExactEngine(ScoreMixin):
                 h = fwd.step(x, pos3, bufs['kc'], bufs['vc'], pmask, kp3, vp3, 1, lengths=lengths)
                 lg = self._logits(h)
                 lse = torch.logsumexp(lg, -1)
-                lc = lg[..., 0, :].gather(-1, sid[..., 2:3])[..., 0] - lse[..., 0]
-                ex = u2[idx] + lc[0] + lg[0, :, 1, self.newline] - lse[0, :, 1] + lg[0, :, 2, self.eos] - lse[0, :, 2]
+                lc = (lg[..., 0, :].gather(-1, sid[..., 2:3])[..., 0] - lse[..., 0]) * self.level_w[2]
+                ex = u2[idx] + lc[0] + self.suffix_w * (lg[0, :, 1, self.newline] - lse[0, :, 1] + lg[0, :, 2, self.eos] - lse[0, :, 2])
             else:
                 x = W.embed[sid[..., 1]][:, :, None]
                 h = fwd.step(x, (L0 + 1).expand(1, n, 1), bufs['kc'], bufs['vc'], pmask, kp3, vp3, 1, lengths=lengths)
@@ -278,7 +278,7 @@ class ExactEngine3(ExactEngine):
             lse = torch.logsumexp(lg, -1)
             ln = lg[..., 0, self.newline] - lse[..., 0]
             le = lg[..., 1, self.eos] - lse[..., 1]
-            exact = top3 + ln + le
+            exact = top3 + self.suffix_w * (ln + le)
         final, order = torch.sort(exact, dim=-1, descending=True, stable=True)
         cert = torch.stack([final[:, kk - 1] >= next_bound for kk in self.ks if kk <= N], -1)
         return {'sids': sid.gather(1, order[..., None].expand(B, N, 3)), 'scores': final,

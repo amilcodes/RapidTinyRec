@@ -48,14 +48,16 @@ code { font: 13px var(--mono); background: var(--accent-soft); padding: 1px 4px;
 </style>
 <div class="wrap">
 <header>
-  <div class="eyebrow">MiniOneRec · Qwen2-1.5B · beam 50 · RTX A6000 · updated 2026-11-07 02:10 ET</div>
+  <div class="eyebrow">MiniOneRec · Qwen2-1.5B · beam 50 · RTX A6000 · updated Nov 7, 2:00 AM ET (in progress)</div>
   <h1>RapidTinyRec Speedrun</h1>
   <p class="lede">How fast can an LLM generative recommender decode, and is beam search even the right algorithm? Batch-1 latency on the frozen 500-user Office cohort; quality on all 4,866 Office test users.</p>
 </header>
 <section><h2>Findings so far</h2><ul><li>A whole MiniOneRec request (prefill, constrained beam, forced-suffix scoring, sort) runs as one CUDA graph in a hand-written engine: 27.9 ms in BF16 with HR@10 identical to the FP32 reference.</li>
 <li>Certified exact decoding replaces beam search: two forwards score every first code and every two-code prefix, then expand the best-bounded candidates, with a proof that the returned top-K is the global optimum.</li>
 <li>With trie-renormalized scoring the exact decoder runs in 16.1 ms and certifies its top-50 for 99.9% of users, while beating the FP32 reference on HR@1, HR@10, NDCG@10 and HR@50.</li>
-<li>MiniOneRec's forced newline/EOS terms cost a forward and slightly hurt ranking; dropping them improves NDCG@10 by +0.36 pt (95% CI +0.13 to +0.61).</li></ul></section>
+<li>MiniOneRec's forced newline/EOS terms cost a forward and slightly hurt ranking; dropping them improves NDCG@10 by +0.36 pt (95% CI +0.13 to +0.61).</li>
+<li>FP16 serves at the same speed as BF16 but reproduces the FP32 reference far better (top-10 set identical for 484 vs 374 of 500 users), once queries are pre-scaled so Qwen2's attention logits fit in FP16.</li>
+<li>Weight-only INT8/INT4 (GemLite) gives at most 3–8% at these shapes; GEMMs are already ~80% of GPU time at ~75% of peak bandwidth, so the A6000 BF16 path sits within ~2× of its weight-streaming floor.</li></ul></section>
 <section class="panel"><h2>Latency ladder</h2><div class="scroll"><svg viewBox="0 0 760 342" role="img" aria-label="latency ladder" class="chart">
 <line x1="250.0" y1="18" x2="250.0" y2="316" class="grid"/>
 <text x="250.0" y="332" class="tick" text-anchor="middle">1</text>

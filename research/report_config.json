@@ -1,5 +1,5 @@
 {
- "updated": "2026-11-07 02:10 ET",
+ "updated": "Nov 7, 2:00 AM ET (in progress)",
  "ladder": [
   {
    "label": "HF generate, FP32 (prior)",
@@ -58,6 +58,10 @@
    "run": "sweepF2/beam_ff_tc"
   },
   {
+   "label": "FP16 beam-50, fused first level + Triton",
+   "run": "sweepH/fp16_beam_ff_tc"
+  },
+  {
    "label": "BF16 beam-50, forced suffix dropped",
    "run": "sweepA/bf16_nosuffix"
   },
@@ -83,7 +87,9 @@
   "A whole MiniOneRec request (prefill, constrained beam, forced-suffix scoring, sort) runs as one CUDA graph in a hand-written engine: 27.9 ms in BF16 with HR@10 identical to the FP32 reference.",
   "Certified exact decoding replaces beam search: two forwards score every first code and every two-code prefix, then expand the best-bounded candidates, with a proof that the returned top-K is the global optimum.",
   "With trie-renormalized scoring the exact decoder runs in 16.1 ms and certifies its top-50 for 99.9% of users, while beating the FP32 reference on HR@1, HR@10, NDCG@10 and HR@50.",
-  "MiniOneRec's forced newline/EOS terms cost a forward and slightly hurt ranking; dropping them improves NDCG@10 by +0.36 pt (95% CI +0.13 to +0.61)."
+  "MiniOneRec's forced newline/EOS terms cost a forward and slightly hurt ranking; dropping them improves NDCG@10 by +0.36 pt (95% CI +0.13 to +0.61).",
+  "FP16 serves at the same speed as BF16 but reproduces the FP32 reference far better (top-10 set identical for 484 vs 374 of 500 users), once queries are pre-scaled so Qwen2's attention logits fit in FP16.",
+  "Weight-only INT8/INT4 (GemLite) gives at most 3\u20138% at these shapes; GEMMs are already ~80% of GPU time at ~75% of peak bandwidth, so the A6000 BF16 path sits within ~2\u00d7 of its weight-streaming floor."
  ],
  "next": [
   "INT8/INT4 weights with compiled kernels",
