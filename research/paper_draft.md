@@ -150,31 +150,59 @@ Skipping the second forward when the certificate already closes after the first 
 trie scoring, where single-child prefixes — 1,907 of 2,488 — have exact scores after F1)
 happens for 42% of users at K=1 but only 0.4% at K=10, so the second forward stays.
 
-## 6. What exact decoding reveals
+## 6. What exact decoding reveals about the objective
 
-- Beam-50 is not exact under MiniOneRec's objective: for some users, half of the exact top-10
-  never enter the beam (their (a,b) prefix ranks 100+ by prefix score but their c/suffix terms
-  are small). The FP32 beam reference has a non-optimal top-1 for 3/500 cohort users.
-- **Search error helps under the full objective.** Admitting fewer candidates by prefix bound
-  improves HR@10 monotonically: N=16 +0.70 pt [+0.12,+1.29] vs the FP32 reference; N=32 +0.64;
-  N=64 +0.10; N=128 −0.02 (≈ beam).
-- **The forced suffix hurts.** Dropping lp(\n)+lp(EOS) improves NDCG@10 by +0.36 pt
-  [+0.13,+0.61] and removes a forward; under that objective beam-50 and certified exact search
-  give identical HR@10 (0.16235).
-- **Trie scoring is best** and is certifiable: HR@10 0.1646, NDCG@10 0.1289. [Paired CIs and the
-  full offline search × scoring matrix from the exhaustive dumps: TBD.]
+**Beam search error is real but is not what limits quality.** From exhaustive FP32 scores of every
+catalog SID for every test user (`scripts/dump_scores.py`), beam-50 under MiniOneRec's
+full-vocabulary objective recovers 86% of the exact top-10 (top-1 exact for 99.8% of users), yet
+exhaustive search gives the same HR@10. Under codebook or trie normalization beam-50 is
+essentially exact (99.6% / 99.9% of the exact top-10).
 
-## 7. Precision and quantization [TBD]
+**The objective is mis-calibrated in its deep terms.** Three independent signals:
+1. Admitting fewer candidates by prefix bound improves HR@10 (N=16: +0.70 pt [+0.12, +1.29] vs the
+   FP32 reference); admitting more converges back to beam.
+2. Dropping the forced newline/EOS terms improves NDCG@10 by +0.36 pt [+0.13, +0.61].
+3. Restricted normalizations — what production engines do for speed — score better than the
+   training objective (beam-50, full test set):
 
-BF16 is free on quality (ΔHR@10 −0.10 pt, CI includes 0) though it reorders lists (top-10 set
-identical to FP32 for 35% of users). FP16 needs Q pre-scaling and is ≈10× closer to FP32 than
-BF16. Weight-only INT8 via GemLite at M≈50 gains only ≈10% uncompiled. [Compiled INT8/INT4,
-FP8 on L40S: TBD.]
+| scoring rule | HR@1 | HR@10 | NDCG@10 | HR@50 |
+|---|---:|---:|---:|---:|
+| full vocabulary, with forced suffix (MiniOneRec) | 0.0947 | 0.1589 | 0.1249 | 0.2370 |
+| full vocabulary, no suffix | 0.0986 | 0.1624 | 0.1284 | 0.2363 |
+| trie-renormalized | 0.0982 | 0.1648 | 0.1287 | 0.2417 |
+| codebook-renormalized (FlashRec-style) | 0.0986 | 0.1667 | 0.1299 | 0.2470 |
+
+**Depth-discounted scoring.** Weighting later SID levels less,
+score = lp(a) + w_b lp(b|a) + w_c lp(c|ab) + w_s(lp(\n)+lp(EOS)), is a two/three-parameter
+decode-time calibration that keeps every term ≤ 0, so certified exact decoding applies unchanged.
+In-sample on a quarter of the Office test users, w = (0.75, 0.3, 0.3) raises HR@10 by ~10%
+relative. [TBD: weights tuned on MiniOneRec's validation split, evaluated once on test, both
+datasets — `scripts/tune_weights.py`.] Interpretation: the user signal lives in the first codes
+(cf. SID-MLP's observation that SID difficulty concentrates in the first digit); conditional
+log-probabilities of deep codes and of the forced suffix are dominated by catalog structure
+(sibling counts, how much mass the model leaks off the valid codebook after an unusual prefix)
+rather than by preference.
+
+## 7. Precision and quantization
+
+| precision (fused + Triton beam, full semantics) | ms | top-1 = FP32 | top-10 set = FP32 | identical 50-lists | max \|Δscore\| |
+|---|---:|---:|---:|---:|---:|
+| FP32 (TF32 off) | 98.8–105.0 | 500/500 | 500/500 | — | — |
+| FP16 (Q pre-scaled) | 27.5 | 500/500 | 484/500 | 151/500 | 0.15 |
+| BF16 | 27.9 | 488/500 | 374/500 | 0/500 | 1.48 |
+
+FP16 is as fast as BF16 and ~10× more faithful; HR/NDCG are statistically indistinguishable
+from FP32 for both. Weight-only INT8 (GemLite) is quality-neutral but only 3–8% faster;
+INT4 (RTN, group 128) is no faster and less faithful. The kernel profile explains why: after
+fusion, GEMMs are ≈80% of GPU time at ≈75% of peak bandwidth, with M = 50–216 rows per forward
+— outside the M ≤ 16 regime where weight-only kernels shine. [TBD: FP8 W8A8 on L40S.]
 
 ## 8. Throughput
 
-Compiled BF16 beam: 23.9 users/s (B=1) → 71.5 (B=16) → 77.9 (B=64) on one A6000;
-compute-bound beyond B≈8. [Exact decoders: TBD.]
+Compiled BF16 beam: 23.9 users/s (B=1) → 71.5 (B=16) → 77.9 (B=64) on one A6000; compute-bound
+beyond B≈8. Certified exact decoding processes fewer tokens per user (prompt tail + 88 trie
+nodes + 64 prefix rows ≈ 190 with the template cache, vs ≈340 for fused beam). [TBD: measured
+throughput curves, `sweepI`, `tmplJ`.]
 
 ## 9. Related work
 

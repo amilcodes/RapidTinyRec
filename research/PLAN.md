@@ -133,3 +133,25 @@ See `lit_ledger.md`, `architecture_directions.md`, `kernel_techniques.md`.
   equal 91.5% vs 57.7%; identical 50-lists 151 vs 0; max |Δscore| 0.15 vs 1.48. Requires Q
   pre-scaling (Qwen2's QKV biases overflow FP16 attention logits otherwise). Recommendation: serve
   LLM recommenders in FP16, not BF16, when list fidelity matters.
+- Scoring rules, beam-50, BF16, full Office test: full-vocab (MiniOneRec) HR@10 0.1589 / NDCG@10
+  0.1247; no-suffix 0.1624 / 0.1284; trie 0.1648 / 0.1287; **codebook (FlashRec-style per-level
+  softmax) 0.1667 / 0.1299, HR@50 0.2470** — the restricted normalizations production engines use
+  for speed are also *more accurate* than the objective the model was trained with.
+- Exhaustive FP32 dump, shard 1 of 4 (1,217 users): under full-vocab scoring beam-50 recovers 86%
+  of the exact top-10 (top-1 exact 99.8%) with identical HR@10; under codebook/trie scoring beam-50
+  is essentially exact (99.6% / 99.9%). So beam's search error is real but not what limits quality.
+- **Depth-discounted scoring** (in-sample on that shard, to be validated on MiniOneRec's validation
+  split): score = lp(a) + w_b lp(b|a) + w_c lp(c|ab) + w_s (lp(\n)+lp(EOS)); w=(0.75, 0.3, 0.3)
+  gives HR@10 0.1668 vs 0.1512 (+10% rel.), NDCG@10 0.1235 vs 0.1159; single λ on the tail
+  (w_c=w_s=0.3) cross-fits to +1.15 pt [+0.25, +2.14]. Later SID levels should count less.
+  Validation dumps (Office + Industrial, ~1.2k users each) queued for honest tuning.
+- torchao INT8 + compile OOMed; skipped.
+- **Paired ladder (ladderZ, one allocation, same A6000, 2×500 requests per rung):** FP32 105.0 →
+  BF16 one graph 46.3 (separate-suffix variant 55.9) → +compile 37.5 → +fused first level +
+  Triton 30.2 → certified exact no-suffix 21.6 → certified exact trie 17.8; beam-50 with trie
+  scoring 17.7 (same cost: the certificate is free); exact trie M=32 17.9; prefix-filtered exact
+  N=16 full semantics 21.2. This card is ~7–10% slower than earlier allocations of the same GPU
+  type (e.g. 30.2 vs 27.9 ms for the same config), so ratios come from the paired ladder and
+  absolute bests are reported with that spread.
+- Inductor max-autotune (no cudagraphs): 27.7 vs 27.9 ms default — no gain at these shapes.
+- FP16 certified exact no-suffix: 19.5 ms, HR@10 0.1619 (BF16 19.8, 0.1624).
