@@ -96,7 +96,7 @@ def main():
         chk = kernels.selfcheck(dt)
         meta['attn_selfcheck_maxabs'] = chk
         print(json.dumps({'stage': 'attn_selfcheck', **chk}), flush=True)
-        assert max(chk.values()) < (1e-3 if dt == torch.float32 else 5e-2), chk
+        assert chk['pass'], chk
         eng.fwd.attn = 'triton'
     if a.compile != 'none':
         import torch._inductor.config as ic
@@ -172,7 +172,7 @@ def main():
                 o = r(t, ln)
                 torch.cuda.synchronize()
                 e1 = time.perf_counter()
-                sids = o['sids'].cpu(); sc = o['scores'].cpu(); tr = o['trans'].cpu()
+                sids = o['sids'].cpu(); sc = o['scores'].cpu(); tr = o['trans'].cpu() if 'trans' in o else None
                 e2 = time.perf_counter()
                 times.append(e1 - st); times_d2h.append(e2 - st)
                 if rep == 0:
@@ -181,7 +181,7 @@ def main():
                     ranked = [tuple(x) for x in sids[0].tolist()]
                     per_user.append(data.rank_metrics(ranked, targets[i]))
                     recs.append({'row': i, 'L': len(all_ids[i]), 'ms': 1e3 * (e1 - st), 'sids': [list(x) for x in ranked],
-                                 'scores': sc[0].tolist(), 'trans': tr[0].tolist()})
+                                 'scores': sc[0].tolist(), 'trans': tr[0].tolist() if tr is not None else None})
         lat = {'device_only': dist(times), 'with_d2h': dist(times_d2h), 'metrics_500': agg_metrics(per_user),
                'by_length': {}}
         if recs_cert:

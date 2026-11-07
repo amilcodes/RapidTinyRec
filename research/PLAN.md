@@ -76,3 +76,13 @@ See `lit_ledger.md`, `architecture_directions.md`, `kernel_techniques.md`.
   to the true argmax) *hurts*. Hypothesis: the c-level and forced \n/EOS terms of the
   full-vocabulary objective are mis-calibrated for ranking (cf. Stahlberg & Byrne 2019 for NMT).
   Test: FP32 sweep over scoring rules (full / no-suffix / codebook / trie) × (beam / exact).
+- 01:25 — **Certificate validated in FP32** (exact N=64 vs brute-force scoring of all 3,444
+  SIDs, 100 users): 0 violations among 23 certified-top-10 users; top-1 = global optimum for
+  100%. The FP32 beam-50 reference returns a non-optimal top-1 for 3/500 cohort users.
+  FP32 full-test quality matches BF16 (HR@10 0.1595 vs 0.1599 at N=64).
+- 01:25 — Throughput (compiled BF16 beam): 23.9 users/s at B=1 → 71.5 (B=16) → 76.7 (B=32)
+  → 77.9 (B=64); compute-bound above B≈8 (≈63% of A6000 BF16 peak).
+- 01:30 — Added: trie-level prefill fusion (prompt + all first-level trie nodes in one forward;
+  rank-identical, FP32 score diff ≤3e-5), FP8 W8A8 (L40S), roofline microbenchmark,
+  Industrial & Scientific checkpoint (48 / 2,295 / 3,670 trie nodes; 4,533 test users),
+  exhaustive FP32 dumps for both datasets (queued), λ-rescoring with cross-fitting.

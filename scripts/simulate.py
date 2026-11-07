@@ -170,6 +170,30 @@ def main():
             per = metrics(pf[:, :20], tgt)
             per_store[(rule, f'filter{N}')] = per
             res[f'{rule}/filter{N}'] = summarize(per)
+    # lambda-weighted tail: lp(a)+lp(b|a) + lam*(lp(c|ab)+lp(\n)+lp(EOS)), exhaustive search,
+    # lambda chosen by 2-fold cross-fitting over users (fit on one half, report on the other)
+    fa, fb, fc, fs = terms(D, meta, 'full')
+    u2_full, _ = item_scores(meta, fa, fb, fc * 0, fs * 0)
+    lam_grid = (0.0, 0.1, 0.2, 0.3, 0.5, 0.7, 1.0)
+    lam_per = {}
+    for lam in lam_grid:
+        tot = u2_full + lam * (fc + fs)
+        per = metrics(exhaustive_rank(tot)[:, :20], tgt)
+        lam_per[lam] = per
+        res[f'lambda{lam}/exhaustive'] = summarize(per)
+        per_store[(f'lambda{lam}', 'exhaustive')] = per
+    folds = torch.arange(U) % 2
+    cf = {m: torch.zeros(U) for m in lam_per[1.0]}
+    chosen = []
+    for f in (0, 1):
+        fit = folds == f
+        best = max(lam_grid, key=lambda l: lam_per[l]['NDCG@10'][fit].mean().item())
+        chosen.append(best)
+        for m in cf:
+            cf[m][~fit] = lam_per[best][m][~fit]
+    per_store[('lambda-crossfit', 'exhaustive')] = cf
+    res['lambda-crossfit/exhaustive'] = summarize(cf)
+    res['lambda-crossfit/exhaustive']['chosen'] = chosen
     base = per_store[('full', 'beam50')]
     res['bootstrap_vs_full_beam50'] = {}
     for key, per in per_store.items():
