@@ -184,3 +184,10 @@ See `lit_ledger.md`, `architecture_directions.md`, `kernel_techniques.md`.
   trie 67.8 / 135.6 / 145.9 / 165.2 / **172.2**; beam-50 full semantics 37.5 / 69.2 / 77.0 / 86.0 /
   91.3. Exact decoding is ~1.9× ahead at every batch size (fewer tokens per user: prompt tail +
   88 trie nodes + 64 prefix rows vs prompt + 88 + 50 + 100 beam rows).
+- **Depth-discounted scoring, honest evaluation:** weights tuned on 1,217 MiniOneRec *validation*
+  users (grid, max NDCG@10, exhaustive search), evaluated once on 2,434 test users vs the FP32
+  reference decode (full, beam-50): full-vocab with w_c=0.5, w_s=0.1 → HR@10 0.1684 vs 0.1578,
+  **+1.07 pt [+0.41, +1.73]**, NDCG@10 +0.57 [+0.24, +0.91]; codebook with w_c=0.5 → +0.99
+  [+0.21, +1.81] / +0.46 [+0.06, +0.85]; no-suffix full w_c=0.75 → +0.66 [+0.00, +1.27]; trie
+  w_c=0.75 → +0.49 (n.s.). w_b=1 chosen everywhere: only the third code (and suffix) is discounted.
+  Beam-50 and exact give the same numbers under tuned weights.
