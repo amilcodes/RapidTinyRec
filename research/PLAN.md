@@ -180,3 +180,7 @@ See `lit_ledger.md`, `architecture_directions.md`, `kernel_techniques.md`.
   NDCG@10 0.1295 vs 0.1232; 2-fold cross-fit picks λ=0.3 in both folds. Beam-10 > beam-50 under the
   full objective (+0.82 [+0.08, +1.56]); exhaustive vs beam-50 under the full objective −0.12
   [−0.37, +0.12]. Search exactness is not the quality lever; the scoring rule is.
+- **Throughput with template cache (A6000, BF16, users/s at B = 1/4/8/16/32):** certified exact
+  trie 67.8 / 135.6 / 145.9 / 165.2 / **172.2**; beam-50 full semantics 37.5 / 69.2 / 77.0 / 86.0 /
+  91.3. Exact decoding is ~1.9× ahead at every batch size (fewer tokens per user: prompt tail +
+  88 trie nodes + 64 prefix rows vs prompt + 88 + 50 + 100 beam rows).

@@ -88,8 +88,8 @@ if any_r:
 # 4. throughput
 fig, ax = plt.subplots(figsize=(4.8, 3.0))
 any_t = False
-for k, lab in (('sweepI/tp_beam_ff_tc', 'beam-50 (full scoring)'), ('sweepI/tp_ex3_nosuf_ff_tc', 'certified exact, no suffix'),
-               ('sweepI/tp_exff_full_n16_tc', 'prefix-filtered exact N=16'), ('sweepA/bf16_compile', 'beam-50, compile only')):
+for k, lab in (('tmplJ/tp_ex3_trie_tmpl', 'certified exact, trie scoring'), ('tmplJ/tp_beam_ff_tc_tmpl', 'beam-50, full MiniOneRec scoring'),
+               ('sweepI/tp_ex3_nosuf_ff_tc', 'certified exact, no suffix (no template)'), ('sweepA/bf16_compile', 'beam-50, compile only (no fusion)')):
     r = res(k)
     if r and r.get('throughput'):
         tp = r['throughput']
