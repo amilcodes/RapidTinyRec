@@ -56,7 +56,8 @@ Contributions:
   first-order, dataset-dependent choice; a mechanism for why deep SID terms mislead.
 - Negative results: weight-only INT8/INT4 and whole-layer compilation do not help at these
   shapes; one-forward certification is rare (0.4% at top-10); SID codes are decided in the last
-  ~6–9 of 28 layers (logit lens), so early exit is not free.
+  ~6–9 of 28 layers (logit lens), and exiting the third-code forward early keeps HR@10 flat
+  but costs HR@1 (9.4 ms at −3.6 pt HR@1 with 6 layers): the third code orders siblings.
 
 ## 2. Setting
 
