@@ -42,6 +42,13 @@ td.num, th.num { font-family: var(--mono); font-variant-numeric: tabular-nums; t
 .chart .val { fill: var(--ink); font: 12px var(--mono); }
 .chart .bar { fill: var(--base); }
 .chart .bar.hl { fill: var(--accent); }
+.chart .ln { stroke-width: 2; fill: none; }
+.chart .ex { stroke-width: 1; stroke-dasharray: 3 3; }
+.chart .c1 { stroke: var(--base); fill: var(--base); }
+.chart .c2 { stroke: var(--ink); fill: var(--ink); }
+.chart .c3 { stroke: var(--accent); fill: var(--accent); }
+.chart .c4 { stroke: var(--good); fill: var(--good); }
+.chart polyline.c1, .chart polyline.c2, .chart polyline.c3, .chart polyline.c4 { fill: none; }
 ul { margin: 0; padding-left: 20px; display: grid; gap: 6px; }
 .note { font-size: 13px; color: var(--muted); }
 code { font: 13px var(--mono); background: var(--accent-soft); padding: 1px 4px; border-radius: 3px; }
@@ -58,59 +65,53 @@ code { font: 13px var(--mono); background: var(--accent-soft); padding: 1px 4px;
 <li>MiniOneRec's forced newline/EOS terms cost a forward and slightly hurt ranking; dropping them improves NDCG@10 by +0.36 pt (95% CI +0.13 to +0.61).</li>
 <li>FP16 serves at the same speed as BF16 but reproduces the FP32 reference far better (top-10 set identical for 484 vs 374 of 500 users), once queries are pre-scaled so Qwen2's attention logits fit in FP16.</li>
 <li>Weight-only INT8/INT4 (GemLite) gives at most 3–8% at these shapes; GEMMs are already ~80% of GPU time at ~75% of peak bandwidth, so the A6000 BF16 path sits within ~2× of its weight-streaming floor.</li></ul></section>
-<section class="panel"><h2>Latency ladder</h2><div class="scroll"><svg viewBox="0 0 760 406" role="img" aria-label="latency ladder" class="chart">
-<line x1="250.0" y1="18" x2="250.0" y2="380" class="grid"/>
-<text x="250.0" y="396" class="tick" text-anchor="middle">1</text>
-<line x1="294.2" y1="18" x2="294.2" y2="380" class="grid"/>
-<text x="294.2" y="396" class="tick" text-anchor="middle">2</text>
-<line x1="352.5" y1="18" x2="352.5" y2="380" class="grid"/>
-<text x="352.5" y="396" class="tick" text-anchor="middle">5</text>
-<line x1="396.7" y1="18" x2="396.7" y2="380" class="grid"/>
-<text x="396.7" y="396" class="tick" text-anchor="middle">10</text>
-<line x1="440.8" y1="18" x2="440.8" y2="380" class="grid"/>
-<text x="440.8" y="396" class="tick" text-anchor="middle">20</text>
-<line x1="499.2" y1="18" x2="499.2" y2="380" class="grid"/>
-<text x="499.2" y="396" class="tick" text-anchor="middle">50</text>
-<line x1="543.4" y1="18" x2="543.4" y2="380" class="grid"/>
-<text x="543.4" y="396" class="tick" text-anchor="middle">100</text>
-<line x1="587.5" y1="18" x2="587.5" y2="380" class="grid"/>
-<text x="587.5" y="396" class="tick" text-anchor="middle">200</text>
-<line x1="645.9" y1="18" x2="645.9" y2="380" class="grid"/>
-<text x="645.9" y="396" class="tick" text-anchor="middle">500</text>
+<section class="panel"><h2>Latency ladder</h2><div class="scroll"><svg viewBox="0 0 760 420" role="img" aria-label="latency ladder" class="chart">
+<line x1="250.0" y1="18" x2="250.0" y2="382" class="grid"/>
+<text x="250.0" y="396" class="tick" text-anchor="middle">10</text>
+<line x1="316.2" y1="18" x2="316.2" y2="382" class="grid"/>
+<text x="316.2" y="396" class="tick" text-anchor="middle">20</text>
+<line x1="403.8" y1="18" x2="403.8" y2="382" class="grid"/>
+<text x="403.8" y="396" class="tick" text-anchor="middle">50</text>
+<line x1="470.0" y1="18" x2="470.0" y2="382" class="grid"/>
+<text x="470.0" y="396" class="tick" text-anchor="middle">100</text>
+<line x1="536.3" y1="18" x2="536.3" y2="382" class="grid"/>
+<text x="536.3" y="396" class="tick" text-anchor="middle">200</text>
+<line x1="623.8" y1="18" x2="623.8" y2="382" class="grid"/>
+<text x="623.8" y="396" class="tick" text-anchor="middle">500</text>
 <text x="240" y="39.4" class="lab" text-anchor="end">HF generate, FP32 (prior)</text>
-<rect x="250" y="24" width="431.1" height="22" class="bar"/>
-<text x="687.1" y="39.4" class="val">868.8 ms</text>
+<rect x="250" y="24" width="426.6" height="22" class="bar"/>
+<text x="682.6" y="39.4" class="val">868.8 ms</text>
 <text x="240" y="71.4" class="lab" text-anchor="end">RapidTinyRec FP32 bit-exact (prior)</text>
-<rect x="250" y="56" width="302.2" height="22" class="bar"/>
-<text x="558.2" y="71.4" class="val">114.8 ms</text>
+<rect x="250" y="56" width="233.2" height="22" class="bar"/>
+<text x="489.2" y="71.4" class="val">114.8 ms</text>
 <text x="240" y="103.4" class="lab" text-anchor="end">Speedrun engine, FP32</text>
-<rect x="250" y="88" width="296.4" height="22" class="bar hl"/>
-<text x="552.4" y="103.4" class="val">105.0 ms</text>
+<rect x="250" y="88" width="224.7" height="22" class="bar hl"/>
+<text x="480.7" y="103.4" class="val">105.0 ms</text>
 <text x="240" y="135.4" class="lab" text-anchor="end">RapidTinyRec BF16 (prior)</text>
-<rect x="250" y="120" width="257.0" height="22" class="bar"/>
-<text x="513.0" y="135.4" class="val">56.5 ms</text>
+<rect x="250" y="120" width="165.5" height="22" class="bar"/>
+<text x="421.5" y="135.4" class="val">56.5 ms</text>
 <text x="240" y="167.4" class="lab" text-anchor="end">BF16, newline/EOS as separate forwards</text>
-<rect x="250" y="152" width="256.3" height="22" class="bar hl"/>
-<text x="512.3" y="167.4" class="val">55.9 ms</text>
+<rect x="250" y="152" width="164.4" height="22" class="bar hl"/>
+<text x="420.4" y="167.4" class="val">55.9 ms</text>
 <text x="240" y="199.4" class="lab" text-anchor="end">BF16, one CUDA graph, fused suffix</text>
-<rect x="250" y="184" width="244.4" height="22" class="bar hl"/>
-<text x="500.4" y="199.4" class="val">46.3 ms</text>
+<rect x="250" y="184" width="146.5" height="22" class="bar hl"/>
+<text x="402.5" y="199.4" class="val">46.3 ms</text>
 <text x="240" y="231.4" class="lab" text-anchor="end">+ torch.compile</text>
-<rect x="250" y="216" width="230.9" height="22" class="bar hl"/>
-<text x="486.9" y="231.4" class="val">37.5 ms</text>
+<rect x="250" y="216" width="126.4" height="22" class="bar hl"/>
+<text x="382.4" y="231.4" class="val">37.5 ms</text>
 <text x="240" y="263.4" class="lab" text-anchor="end">+ fused first level + Triton attention</text>
-<rect x="250" y="248" width="217.0" height="22" class="bar hl"/>
-<text x="473.0" y="263.4" class="val">30.2 ms</text>
+<rect x="250" y="248" width="105.5" height="22" class="bar hl"/>
+<text x="361.5" y="263.4" class="val">30.2 ms</text>
 <text x="240" y="295.4" class="lab" text-anchor="end">certified exact, no forced suffix</text>
-<rect x="250" y="280" width="195.7" height="22" class="bar hl"/>
-<text x="451.7" y="295.4" class="val">21.6 ms</text>
+<rect x="250" y="280" width="73.6" height="22" class="bar hl"/>
+<text x="329.6" y="295.4" class="val">21.6 ms</text>
 <text x="240" y="327.4" class="lab" text-anchor="end">beam-50, trie scoring</text>
-<rect x="250" y="312" width="183.0" height="22" class="bar hl"/>
-<text x="439.0" y="327.4" class="val">17.7 ms</text>
+<rect x="250" y="312" width="54.5" height="22" class="bar hl"/>
+<text x="310.5" y="327.4" class="val">17.7 ms</text>
 <text x="240" y="359.4" class="lab" text-anchor="end">certified exact, trie scoring</text>
-<rect x="250" y="344" width="183.3" height="22" class="bar hl"/>
-<text x="439.3" y="359.4" class="val">17.8 ms</text>
-<text x="470" y="406" class="tick" text-anchor="middle">median latency per request, ms (log scale)</text>
+<rect x="250" y="344" width="55.0" height="22" class="bar hl"/>
+<text x="311.0" y="359.4" class="val">17.8 ms</text>
+<text x="470" y="416" class="tick" text-anchor="middle">median latency per request, ms (log scale)</text>
 </svg></div>
 <p class="note">Orange rows are this overnight run's engine; grey rows are earlier RapidTinyRec results on the same GPU and cohort. Setup, compilation and graph capture are excluded.</p></section>
 <section class="panel"><h2>Speed and quality by configuration</h2><div class="scroll"><table>
@@ -126,7 +127,60 @@ code { font: 13px var(--mono); background: var(--accent-soft); padding: 1px 4px;
 <tr><td>BF16 certified exact, trie scoring</td><td class=num>16.1</td><td class=num>16.2</td><td class=num>0.0984</td><td class=num>0.1408</td><td class=num>0.1646</td><td class=num>0.1289</td><td class=num>1.00</td></tr>
 <tr><td>BF16 certified exact, no suffix, INT8 weights</td><td class=num>18.2</td><td class=num>21.1</td><td class=num>0.0984</td><td class=num>0.1445</td><td class=num>0.1626</td><td class=num>0.1284</td><td class=num>0.94</td></tr></tbody></table></div>
 <p class="note">Quality is SID-level HR/NDCG on the full Office test set (4,866 users). "Top-10 certified" is the share of users for whom the exact decoder proves its top-10 is the global optimum of the scoring rule.</p></section>
-<section class="panel"><h2>Search × scoring rule (offline, exhaustive FP32)</h2></section>
+<section class="panel"><h2>Search × scoring rule (offline, exhaustive FP32)</h2><p class=note>1,217 Office test users, exhaustive FP32 scores of all 3,444 SIDs per user.</p><div class=scroll><svg viewBox="0 0 760 300" role="img" aria-label="NDCG@10 versus beam width" class="chart">
+<line x1="62" y1="260.0" x2="570" y2="260.0" class="grid"/>
+<text x="54" y="264.0" class="tick" text-anchor="end">0.109</text>
+<line x1="62" y1="199.0" x2="570" y2="199.0" class="grid"/>
+<text x="54" y="203.0" class="tick" text-anchor="end">0.112</text>
+<line x1="62" y1="138.0" x2="570" y2="138.0" class="grid"/>
+<text x="54" y="142.0" class="tick" text-anchor="end">0.115</text>
+<line x1="62" y1="77.0" x2="570" y2="77.0" class="grid"/>
+<text x="54" y="81.0" class="tick" text-anchor="end">0.118</text>
+<line x1="62" y1="16.0" x2="570" y2="16.0" class="grid"/>
+<text x="54" y="20.0" class="tick" text-anchor="end">0.121</text>
+<text x="62.0" y="276" class="tick" text-anchor="middle">5</text>
+<text x="179.5" y="276" class="tick" text-anchor="middle">10</text>
+<text x="297.1" y="276" class="tick" text-anchor="middle">20</text>
+<text x="452.5" y="276" class="tick" text-anchor="middle">50</text>
+<text x="570.0" y="276" class="tick" text-anchor="middle">100</text>
+<text x="316" y="296" class="tick" text-anchor="middle">beam width (dotted line: certified exact search)</text>
+<polyline points="62.0,187.4 179.5,64.3 297.1,87.6 452.5,119.9 570.0,125.9" class="ln c1" fill="none"/>
+<circle cx="62.0" cy="187.4" r="2.6" class="pt c1"/>
+<circle cx="179.5" cy="64.3" r="2.6" class="pt c1"/>
+<circle cx="297.1" cy="87.6" r="2.6" class="pt c1"/>
+<circle cx="452.5" cy="119.9" r="2.6" class="pt c1"/>
+<circle cx="570.0" cy="125.9" r="2.6" class="pt c1"/>
+<line x1="62" y1="122.7" x2="570" y2="122.7" class="ex c1"/>
+<line x1="584" y1="24" x2="604" y2="24" class="ln c1"/>
+<text x="610" y="28" class="lab">MiniOneRec scoring</text>
+<polyline points="62.0,189.6 179.5,65.0 297.1,85.4 452.5,89.1 570.0,99.4" class="ln c2" fill="none"/>
+<circle cx="62.0" cy="189.6" r="2.6" class="pt c2"/>
+<circle cx="179.5" cy="65.0" r="2.6" class="pt c2"/>
+<circle cx="297.1" cy="85.4" r="2.6" class="pt c2"/>
+<circle cx="452.5" cy="89.1" r="2.6" class="pt c2"/>
+<circle cx="570.0" cy="99.4" r="2.6" class="pt c2"/>
+<line x1="62" y1="99.4" x2="570" y2="99.4" class="ex c2"/>
+<line x1="584" y1="44" x2="604" y2="44" class="ln c2"/>
+<text x="610" y="48" class="lab">no forced suffix</text>
+<polyline points="62.0,231.5 179.5,39.6 297.1,76.3 452.5,75.2 570.0,75.2" class="ln c3" fill="none"/>
+<circle cx="62.0" cy="231.5" r="2.6" class="pt c3"/>
+<circle cx="179.5" cy="39.6" r="2.6" class="pt c3"/>
+<circle cx="297.1" cy="76.3" r="2.6" class="pt c3"/>
+<circle cx="452.5" cy="75.2" r="2.6" class="pt c3"/>
+<circle cx="570.0" cy="75.2" r="2.6" class="pt c3"/>
+<line x1="62" y1="75.2" x2="570" y2="75.2" class="ex c3"/>
+<line x1="584" y1="64" x2="604" y2="64" class="ln c3"/>
+<text x="610" y="68" class="lab">codebook softmax</text>
+<polyline points="62.0,236.4 179.5,51.3 297.1,69.1 452.5,75.1 570.0,75.1" class="ln c4" fill="none"/>
+<circle cx="62.0" cy="236.4" r="2.6" class="pt c4"/>
+<circle cx="179.5" cy="51.3" r="2.6" class="pt c4"/>
+<circle cx="297.1" cy="69.1" r="2.6" class="pt c4"/>
+<circle cx="452.5" cy="75.1" r="2.6" class="pt c4"/>
+<circle cx="570.0" cy="75.1" r="2.6" class="pt c4"/>
+<line x1="62" y1="75.1" x2="570" y2="75.1" class="ex c4"/>
+<line x1="584" y1="84" x2="604" y2="84" class="ln c4"/>
+<text x="610" y="88" class="lab">trie softmax</text>
+</svg></div></section>
 <section class="panel"><h2>How MiniOneRec decodes, and why it was slow</h2>
 <p>MiniOneRec turns a user's history into a prompt of about 100 tokens and asks a 1.5B-parameter Qwen2 model to write the next item's semantic ID: three code tokens <code>&lt;a&gt;&lt;b&gt;&lt;c&gt;</code>, then a forced newline and end-of-sequence. A catalog trie allows only codes that exist (88 first codes, 2,488 two-code prefixes, 3,444 items). Beam search keeps the 50 best partial IDs at each step. An item's score is the sum of five log-probabilities, each normalized over the whole 152k-token vocabulary.</p>
 <p>At batch size 1 every forward pass has to stream all ~3 GB of BF16 weights from GPU memory. On an RTX A6000 that alone takes about 4 ms, and a forward with 50 beam rows costs about the same as one with 1 row. Beam search makes five sequential forwards, so it is bound by how many times it re-reads the weights, not by the beam width. Hugging Face <code>generate</code> adds Python overhead on top and lands at 869 ms.</p></section>
