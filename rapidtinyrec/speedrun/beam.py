@@ -132,6 +132,16 @@ class BeamEngine(ScoreMixin):
         return self.W.linear(h, self.W.lm_head)[..., :self.W.V].float()
 
     @staticmethod
+    def _first_topk(la, R):
+        # catalogs with fewer valid first codes than beams: extra beams are dead (-inf), as in HF
+        k = min(R, la.shape[-1])
+        s1, ai = la.topk(k, -1)
+        if k < R:
+            s1 = torch.cat([s1, s1.new_full((s1.shape[0], R - k), float('-inf'))], -1)
+            ai = torch.cat([ai, ai.new_zeros((ai.shape[0], R - k))], -1)
+        return s1, ai
+
+    @staticmethod
     def _reorder(buf, bidx, par):
         buf.copy_(buf[:, bidx, par])
 
@@ -150,7 +160,7 @@ class BeamEngine(ScoreMixin):
             hp, hn = fwd.prefill_tree(W.embed[tokens], W.embed[cat.first][None].expand(B, nA, W.D), lengths,
                                       kc, vc, bufs['kn'], bufs['vn'])
             la = self._lp(hp[torch.arange(B, device=dev), lengths - 1], 0, cat.first[None].expand(B, -1), None)
-            s1, ai = la.topk(R, -1)  # [B,R]
+            s1, ai = self._first_topk(la, R)  # [B,R]
             a_tok = cat.first[ai]
             t1 = cat.t1[ai]; v1 = cat.v1[ai]
             lb = self._lp(hn.gather(1, ai[..., None].expand(B, R, W.D)), 1, t1, v1)
@@ -162,7 +172,7 @@ class BeamEngine(ScoreMixin):
             h = fwd.prefill(W.embed[tokens], pos, kc, vc)
             hl = h[torch.arange(B, device=dev), lengths - 1]
             la = self._lp(hl, 0, cat.first[None].expand(B, -1), None)
-            s1, ai = la.topk(R, -1)  # [B,R]
+            s1, ai = self._first_topk(la, R)  # [B,R]
             a_tok = cat.first[ai]
             # ---- step b
             h = fwd.step(W.embed[a_tok][:, :, None], L0.expand(B, R, 1), kc, vc, pmask, kp, vp, 0, lengths=lengths)
