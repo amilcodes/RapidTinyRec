@@ -194,3 +194,4 @@ See `lit_ledger.md`, `architecture_directions.md`, `kernel_techniques.md`.
 - FP16 + template cache: full-semantics beam **26.1 ms with top-1 = FP32 for 500/500** and HR@10
   0.1587 (FP32 0.1589) — the faithful fast path; certified exact trie 14.3 ms (= BF16 14.4);
   beam-50 trie 14.3 ms; exact no-suffix 18.2 ms.
+- Whole-layer torch.compile incl. Triton attention: 14.29 vs 14.31 ms — no gain (GEMM-bound).
