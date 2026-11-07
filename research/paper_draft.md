@@ -119,6 +119,21 @@ Ladder (A6000, batch 1, median ms; full MiniOneRec semantics unless noted):
 
 ## 5. Certified exact decoding
 
+```
+input : prompt x, catalog trie (first codes A, prefixes (a,b), items (a,b,c)), budgets M, N, K
+F1    : one forward over [x ; every a ∈ A as a tree node]          # trie-level prefill fusion
+        s(a) for all a ;  s(b|a) for all valid (a,b)
+        U2(a,b) = s(a) + s(b|a)                                        # admissible: score ≤ U2
+F2    : one forward over the M prefixes with largest U2, token b each, reusing the a-node K/V
+        s(c|ab) for all children ;  U3(a,b,c) = U2 + s(c|ab)            # exact if no forced suffix
+F3    : (forced suffix only) one forward over the N items with largest U3, tokens [c, \n]
+        exact(a,b,c) = U3 + s(\n|abc) + s(EOS|abc\n)
+return: items sorted by exact score, and for each K:
+        certified_K = exact_(K) ≥ max( U3 of best un-suffixed item , U2 of best unexpanded prefix )
+```
+Every step has a fixed shape (|A|, M, N), so the whole request is one CUDA-graph replay; the
+certificate is computed on the device and returned with the list.
+
 All scored terms are log-probabilities ≤ 0. Define U2(a,b) = s(a)+s(b|a) and
 U3(a,b,c) = U2 + s(c|ab). For any item, score ≤ U3 ≤ U2.
 

@@ -18,12 +18,13 @@ submit)
   ssh $SSHO $HOST "test ! -e $run/out/slurm.log || { echo 'run exists: $name' >&2; exit 3; }; mkdir -p $run/code $run/out"
   rsync -az -e "ssh $SSHO" --exclude .git --exclude __pycache__ "$REPO/rapidtinyrec" "$REPO/scripts" "$HOST:$run/code/"
   qos=norm-gpu; [ "$part" = gpu-debug ] && qos=gpu-debug
+  GRES="gpu:$gpu:1"; [ "$gpu" = any ] && GRES="gpu:1"
   cat > "/tmp/sr-$name.sbatch" <<EOF
 #!/bin/bash
 #SBATCH -J sr-$name
 #SBATCH -p $part
 #SBATCH -q $qos
-#SBATCH --gres=gpu:$gpu:1
+#SBATCH --gres=$GRES
 #SBATCH -c 2
 #SBATCH --mem=24G
 #SBATCH -t $tlim
