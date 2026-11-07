@@ -207,3 +207,9 @@ See `lit_ledger.md`, `architecture_directions.md`, `kernel_techniques.md`.
   beam 26.5 ms, fused beam 20.0 ms) but the scoring story does not transfer as-is: dropping the
   forced suffix *hurts* (NDCG@10 −0.42 [−0.59, −0.25]); trie ≈ full (+0.13 HR@10, n.s.). The
   scoring rule is dataset-dependent → must be chosen on validation (Industrial tuning pending).
+- **Industrial certified exact trie: 11.5 ms** (48 first codes; no template cache) vs compiled beam
+  26.5 ms / fused beam 20.0 ms; top-20 certified 100%, top-50 97.9%; HR@10 0.1582 vs 0.1571 and
+  NDCG@10 0.1167 vs 0.1172 for full-semantics beam (equal quality). The Office "narrow prefix
+  filter helps" effect does not transfer (N=16 HR@10 0.1458, −1.1 pt). Robust claims: speed with
+  equal-or-better quality via certified trie decoding on both datasets; scoring-rule gains beyond
+  that are dataset-specific and must be tuned on validation.
