@@ -63,6 +63,7 @@ def main():
     ap.add_argument('--exit-c', type=int, default=None, help='layers used by the c-level forward (exact3, no suffix)')
     ap.add_argument('--compile-layer', action='store_true', help='compile whole decode layers incl. Triton attention')
     ap.add_argument('--weights', default=None, help='depth-discounted scoring weights wb,wc,ws')
+    ap.add_argument('--beam', type=int, default=50)
     ap.add_argument('--n-expand', type=int, default=64)
     ap.add_argument('--profile', action='store_true', help='eager kernel-time breakdown for a few users')
     ap.add_argument('--check-exhaustive', type=int, default=0, help='compare first K cohort users against exhaustive exact scoring')
@@ -90,7 +91,7 @@ def main():
         quant = Q.get(a.quant)
     W = Qwen2Weights(Path(a.release) / data.CKPT, dt, dev, quant=quant)
     if a.engine == 'beam':
-        eng = BeamEngine(W, cat, suffix_mode=a.suffix, norm=a.norm, fuse_first=a.fuse_first)
+        eng = BeamEngine(W, cat, beam=a.beam, suffix_mode=a.suffix, norm=a.norm, fuse_first=a.fuse_first)
     elif a.engine == 'exact':
         eng = ExactEngine(W, cat, n_expand=a.n_expand, suffix_mode=a.suffix, norm=a.norm, fuse_first=a.fuse_first)
     else:
