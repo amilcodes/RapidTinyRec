@@ -122,3 +122,14 @@ See `lit_ledger.md`, `architecture_directions.md`, `kernel_techniques.md`.
   373/500 vs 471 BF16; certified trie NDCG@10 0.1274 vs 0.1289).
   INT8 (GemLite A16W8): quality-neutral, only 3–8% faster compiled. Negative result: at 50–200
   rows per forward these weight-only kernels do not beat cuBLAS BF16 on the A6000.
+- Kernel profile of the compiled engines (eager replay of the same kernels): GEMMs ≈80% of GPU
+  time for both the 27.9 ms beam and the certified-exact paths (≈75% of peak HBM bandwidth at
+  M≈50–216); remaining glue ≈4 ms/request (from ≈14 ms before fusion); Triton beam attention
+  ≈0.25–0.33 ms/request; prefill attention (masked SDPA) ≈0.35–0.5 ms. ⇒ at batch 1 the A6000
+  BF16 path is within ~2× of the weight-streaming floor; further gains need better skinny-GEMM
+  kernels, fewer bytes (FP8 on Ada), or fewer tokens in the first forward (template cache).
+- **FP16 dominates BF16 at equal speed** (fused+Triton beam, full semantics): 27.5 vs 27.9 ms;
+  vs FP32 reference: top-1 equal 500/500 vs 488; top-10 set equal 484/500 vs 374; rank positions
+  equal 91.5% vs 57.7%; identical 50-lists 151 vs 0; max |Δscore| 0.15 vs 1.48. Requires Q
+  pre-scaling (Qwen2's QKV biases overflow FP16 attention logits otherwise). Recommendation: serve
+  LLM recommenders in FP16, not BF16, when list fidelity matters.
