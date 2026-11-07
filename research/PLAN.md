@@ -170,3 +170,13 @@ See `lit_ledger.md`, `architecture_directions.md`, `kernel_techniques.md`.
   53.8 at 1,024 → 50 beam rows cost 1.2× one row; linear beyond ~256. INT8 weight-only (GemLite):
   5.2 ms at 1 token (1.55×), 8.3 at 50 (1.19×), no gain ≥ 88; INT4: 4.4 ms at 1 (1.8×), 8.7 at 50,
   slower ≥ 88. Our forwards carry 50–216 rows, which is why weight-only quantization barely helps.
+- **Shared-template K/V cache (69 of 76–121 prompt tokens):** certified exact trie decoding
+  **14.36 ms / 15.41 p95** (same quality: HR@10 0.1650, NDCG@10 0.1288, top-50 certified 99.9%);
+  full-semantics beam 26.3 ms; exact no-suffix 18.2 ms. **869 → 14.4 ms = 60×.**
+  Throughput, certified exact trie + template: 67.8 users/s (B=1), 135.6 (B=4), 145.9 (B=8)
+  vs 77.9 users/s saturated for compiled beam-50.
+- Exhaustive dumps, half the Office test set (2,433 users), paired bootstrap vs full/beam-50:
+  tail weight λ=0.3 (lp(a)+lp(b|a)+0.3·rest) HR@10 0.1709 vs 0.1578 (**+1.31 pt [+0.66, +2.01]**),
+  NDCG@10 0.1295 vs 0.1232; 2-fold cross-fit picks λ=0.3 in both folds. Beam-10 > beam-50 under the
+  full objective (+0.82 [+0.08, +1.56]); exhaustive vs beam-50 under the full objective −0.12
+  [−0.37, +0.12]. Search exactness is not the quality lever; the scoring rule is.
