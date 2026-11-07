@@ -165,3 +165,8 @@ See `lit_ledger.md`, `architecture_directions.md`, `kernel_techniques.md`.
   top-10), top-1 always optimal. Beam-50 with trie scoring (17.7 ms) gives the same quality as
   certified exact trie (HR@10 0.1650 vs 0.1646): under trie scoring beam is near-exact, and the
   exact decoder adds the proof at no cost.
+- **Roofline (A6000, one full forward incl. full LM head + logsumexp, eager kernels in a CUDA
+  graph):** BF16 8.1 ms at 1 token, 9.8 at 50, 11.0 at 88, 12.2 at 128, 16.1 at 256, 28.7 at 512,
+  53.8 at 1,024 → 50 beam rows cost 1.2× one row; linear beyond ~256. INT8 weight-only (GemLite):
+  5.2 ms at 1 token (1.55×), 8.3 at 50 (1.19×), no gain ≥ 88; INT4: 4.4 ms at 1 (1.8×), 8.7 at 50,
+  slower ≥ 88. Our forwards carry 50–216 rows, which is why weight-only quantization barely helps.
