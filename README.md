@@ -17,6 +17,27 @@ BF16**. BF16 is available as an **experimental opt-in**; FP32 remains the defaul
 These modes change rankings; see the
 [precision and quality comparison](#reduced-precision-results) below.
 
+### Speedrun engine and certified exact decoding (research branch)
+
+A from-scratch engine ([`rapidtinyrec/speedrun`](SPEEDRUN.md)) runs a whole request as one
+CUDA graph and adds a decoder that replaces beam search: every term of an item's score is a
+log-probability ≤ 0, so scoring all first codes and all two-code prefixes bounds every item,
+and a second small forward proves when the returned top-K is the global optimum.
+
+| A6000, batch 1, 500 Office users (same allocation) | median ms |
+| :--- | ---: |
+| HF `generate`, FP32 (above) | 868.8 |
+| speedrun engine, FP32 | 105.0 |
+| BF16, one CUDA graph per request | 46.3 |
+| + torch.compile | 37.5 |
+| + first trie level fused into the prompt forward + Triton beam attention | 30.2 |
+| certified exact decoding, trie-renormalized scoring | **17.8** |
+
+Certified trie decoding proves its top-50 globally optimal for 99.9% of users and beats the
+FP32 reference decode on HR@1 / HR@10 / NDCG@10 (0.0984 / 0.1646 / 0.1289 vs 0.0941 / 0.1589 /
+0.1247 on all 4,866 test users). FP16 matches BF16's speed with ~10× better fidelity to FP32.
+Method, measurements and negative results: [`research/`](research/PLAN.md).
+
 ## Performance
 
 Office checkpoint · RTX A6000 · FP32 · batch 1 · beam 50. Each row is a separate

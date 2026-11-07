@@ -155,3 +155,13 @@ See `lit_ledger.md`, `architecture_directions.md`, `kernel_techniques.md`.
   absolute bests are reported with that spread.
 - Inductor max-autotune (no cudagraphs): 27.7 vs 27.9 ms default — no gain at these shapes.
 - FP16 certified exact no-suffix: 19.5 ms, HR@10 0.1619 (BF16 19.8, 0.1624).
+- Mechanism (exhaustive FP32, 1,217 users): lp(c|ab) median −0.87/−2.46/−3.05/−3.38/−4.12 for
+  1/2/3/4/6 siblings (≈ −log k structural penalty; r = −0.36); median 47% of mass leaks off the
+  c-codebook even after a valid prefix; suffix is mixed (target rank up 28% / down 25% of users,
+  r = 0.15 with log popularity).
+- **FP32 certificate validation (certV) vs brute-force scoring of all SIDs:** trie scoring, 300
+  users: 0 violations, top-10 certified 300/300, returned lists = exhaustive optimum at every
+  K ≤ 20 (search recall@50 0.99993). No-suffix scoring, 200 users: 0 violations (190 certified at
+  top-10), top-1 always optimal. Beam-50 with trie scoring (17.7 ms) gives the same quality as
+  certified exact trie (HR@10 0.1650 vs 0.1646): under trie scoring beam is near-exact, and the
+  exact decoder adds the proof at no cost.
