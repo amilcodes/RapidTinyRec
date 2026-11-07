@@ -135,35 +135,57 @@ class Forward:
     # -- trie-level prefill fusion: prompt [B,P,D] plus n first-level trie nodes [B,n,D] in ONE
     # forward. Prompt tokens are causal; node t attends to the user's real prompt (< L) and to
     # itself only, at position L. Prompt K/V -> kcache/vcache; node K/V -> private slot 0.
-    def prefill_tree(self, x, xn, lengths, kcache, vcache, kpriv, vpriv):
+    # Optional shared template: if `tmpl` = (kt [L,KV,T0,hd], vt) holds the K/V of a prefix
+    # shared by every prompt, `x` covers only prompt positions T0..P-1 and attends to the
+    # cached template as well (exact: causal attention never lets the template see later tokens).
+    def prefill_tree(self, x, xn, lengths, kcache, vcache, kpriv, vpriv, tmpl=None):
         W = self.W
-        B, P, _ = x.shape
+        B, Pn, _ = x.shape
+        T0 = 0 if tmpl is None else tmpl[0].shape[2]
+        P = T0 + Pn
         n = xn.shape[1]
-        T = P + n
+        T = Pn + n
         rep = W.H // W.KV
         dev = x.device
-        pos = torch.cat([torch.arange(P, device=dev)[None].expand(B, P), lengths[:, None].expand(B, n)], 1)
-        i = torch.arange(T, device=dev)
-        causal = i[None, :] <= i[:, None]                                  # [T,T]
-        node_q = i[:, None] >= P
-        to_prompt = (i[None, None, :] < lengths[:, None, None]) & (i[None, None, :] < P)
-        self_ok = i[None, :] == i[:, None]
-        mask = torch.where(node_q[None], to_prompt | self_ok[None], causal[None])  # [B,T,T]
+        pos = torch.cat([torch.arange(T0, P, device=dev)[None].expand(B, Pn), lengths[:, None].expand(B, n)], 1)
+        qi = torch.arange(T, device=dev)                 # query index within new tokens
+        kj = torch.arange(T0 + T, device=dev)            # key index: template, new prompt, nodes
+        causal = kj[None, :] <= (qi[:, None] + T0)                                    # [T,T0+T]
+        node_q = qi[:, None] >= Pn
+        to_prompt = (kj[None, None, :] < lengths[:, None, None]) & (kj[None, None, :] < P)
+        self_ok = kj[None, :] == (qi[:, None] + T0)
+        mask = torch.where(node_q[None], to_prompt | self_ok[None], causal[None])     # [B,T,T0+T]
         h = torch.cat([x, xn], 1)
         for li, layer in enumerate(W.layers):
             q, k, v = self.qkv(h, layer, pos)
             kt = k.transpose(1, 2)
             vt = v.transpose(1, 2)
-            kcache[li].copy_(kt[:, :, :P])
-            vcache[li].copy_(vt[:, :, :P])
-            kpriv[li][:, :, 0] = k[:, P:]
-            vpriv[li][:, :, 0] = v[:, P:]
+            if T0:
+                kfull = torch.cat([tmpl[0][li][None].expand(B, -1, -1, -1), kt], 2)
+                vfull = torch.cat([tmpl[1][li][None].expand(B, -1, -1, -1), vt], 2)
+            else:
+                kfull, vfull = kt, vt
+            kcache[li].copy_(kfull[:, :, :P])
+            vcache[li].copy_(vfull[:, :, :P])
+            kpriv[li][:, :, 0] = k[:, Pn:]
+            vpriv[li][:, :, 0] = v[:, Pn:]
             o = F.scaled_dot_product_attention(
-                q.transpose(1, 2), kt.repeat_interleave(rep, 1), vt.repeat_interleave(rep, 1),
+                q.transpose(1, 2), kfull.repeat_interleave(rep, 1), vfull.repeat_interleave(rep, 1),
                 attn_mask=mask[:, None], scale=self.scale)
             h = self.post(h, o.transpose(1, 2).reshape(B, T, W.H * W.hd), layer)
         h = self.final(h)
-        return h[:, :P], h[:, P:]
+        return h[:, :Pn], h[:, Pn:]
+
+    @torch.inference_mode()
+    def template_kv(self, ids, device):
+        """K/V of a prompt prefix shared by all requests, computed once at setup."""
+        W = self.W
+        t = torch.tensor([ids], device=device)
+        T0 = len(ids)
+        kc = torch.zeros(W.L, 1, W.KV, T0, W.hd, device=device, dtype=W.dtype)
+        vc = torch.zeros_like(kc)
+        self.prefill(W.embed[t], torch.arange(T0, device=device)[None], kc, vc)
+        return kc[:, 0].contiguous(), vc[:, 0].contiguous()
 
     # -- prefill: x [B, P, D], pos [B, P]; returns hidden and per-layer K/V [B, KV, P, hd]
     def prefill(self, x, pos, kcache, vcache):

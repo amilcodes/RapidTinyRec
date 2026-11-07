@@ -1,0 +1,125 @@
+<title>RapidTinyRec Speedrun</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Instrument+Sans:wght@500;600;700&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<style>
+/* Layout: one reading column; charts and wide tables scroll inside their own frames. */
+:root {
+  --bg: #f5f6f8; --surface: #ffffff; --ink: #161a21; --muted: #5a6371; --rule: #dfe3ea;
+  --accent: #c2410c; --accent-soft: #fbe3d6; --base: #8a95a6; --good: #1f7a4d;
+  --display: "Instrument Sans", "Helvetica Neue", Arial, sans-serif;
+  --body: "IBM Plex Sans", "Helvetica Neue", Arial, sans-serif;
+  --mono: "IBM Plex Mono", ui-monospace, Menlo, monospace;
+}
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) {
+  --bg: #0f1216; --surface: #171b21; --ink: #e7eaef; --muted: #9aa3b1; --rule: #2a3039;
+  --accent: #f08a54; --accent-soft: #3a2418; --base: #6c7686; --good: #5cc98d; color-scheme: dark } }
+:root[data-theme="dark"] {
+  --bg: #0f1216; --surface: #171b21; --ink: #e7eaef; --muted: #9aa3b1; --rule: #2a3039;
+  --accent: #f08a54; --accent-soft: #3a2418; --base: #6c7686; --good: #5cc98d; color-scheme: dark }
+body { background: var(--bg); color: var(--ink); font: 15px/1.6 var(--body); }
+.wrap { max-width: 960px; margin: 0 auto; padding-block: 40px 72px;
+  padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px));
+  display: grid; gap: 28px; }
+header { display: grid; gap: 10px; }
+.eyebrow { font: 500 12px/1 var(--mono); letter-spacing: .08em; text-transform: uppercase; color: var(--muted); }
+h1 { font: 700 clamp(28px, 5vw, 42px)/1.1 var(--display); margin: 0; text-wrap: balance; }
+h2 { font: 600 22px/1.25 var(--display); margin: 0 0 8px; text-wrap: balance; }
+h3 { font: 600 16px/1.3 var(--display); margin: 18px 0 6px; }
+p, li { max-width: 68ch; }
+.lede { font-size: 17px; color: var(--muted); margin: 0; }
+section { display: grid; gap: 10px; min-width: 0; }
+.panel { background: var(--surface); border: 1px solid var(--rule); border-radius: 6px; padding: 18px; min-width: 0; }
+.scroll { overflow-x: auto; }
+table { border-collapse: collapse; width: 100%; font-size: 13.5px; }
+th, td { padding: 7px 10px; border-bottom: 1px solid var(--rule); text-align: left; white-space: nowrap; }
+th { font: 500 11.5px/1.2 var(--mono); letter-spacing: .04em; text-transform: uppercase; color: var(--muted); }
+td.num, th.num { font-family: var(--mono); font-variant-numeric: tabular-nums; text-align: right; }
+.chart { width: 100%; min-width: 620px; height: auto; display: block; }
+.chart .grid { stroke: var(--rule); stroke-width: 1; }
+.chart .tick { fill: var(--muted); font: 11px var(--mono); }
+.chart .lab { fill: var(--ink); font: 12.5px var(--body); }
+.chart .val { fill: var(--ink); font: 12px var(--mono); }
+.chart .bar { fill: var(--base); }
+.chart .bar.hl { fill: var(--accent); }
+ul { margin: 0; padding-left: 20px; display: grid; gap: 6px; }
+.note { font-size: 13px; color: var(--muted); }
+code { font: 13px var(--mono); background: var(--accent-soft); padding: 1px 4px; border-radius: 3px; }
+</style>
+<div class="wrap">
+<header>
+  <div class="eyebrow">MiniOneRec · Qwen2-1.5B · beam 50 · RTX A6000 · updated 2026-11-07 02:10 ET</div>
+  <h1>RapidTinyRec Speedrun</h1>
+  <p class="lede">How fast can an LLM generative recommender decode, and is beam search even the right algorithm? Batch-1 latency on the frozen 500-user Office cohort; quality on all 4,866 Office test users.</p>
+</header>
+<section><h2>Findings so far</h2><ul><li>A whole MiniOneRec request (prefill, constrained beam, forced-suffix scoring, sort) runs as one CUDA graph in a hand-written engine: 27.9 ms in BF16 with HR@10 identical to the FP32 reference.</li>
+<li>Certified exact decoding replaces beam search: two forwards score every first code and every two-code prefix, then expand the best-bounded candidates, with a proof that the returned top-K is the global optimum.</li>
+<li>With trie-renormalized scoring the exact decoder runs in 16.1 ms and certifies its top-50 for 99.9% of users, while beating the FP32 reference on HR@1, HR@10, NDCG@10 and HR@50.</li>
+<li>MiniOneRec's forced newline/EOS terms cost a forward and slightly hurt ranking; dropping them improves NDCG@10 by +0.36 pt (95% CI +0.13 to +0.61).</li></ul></section>
+<section class="panel"><h2>Latency ladder</h2><div class="scroll"><svg viewBox="0 0 760 342" role="img" aria-label="latency ladder" class="chart">
+<line x1="250.0" y1="18" x2="250.0" y2="316" class="grid"/>
+<text x="250.0" y="332" class="tick" text-anchor="middle">1</text>
+<line x1="294.2" y1="18" x2="294.2" y2="316" class="grid"/>
+<text x="294.2" y="332" class="tick" text-anchor="middle">2</text>
+<line x1="352.5" y1="18" x2="352.5" y2="316" class="grid"/>
+<text x="352.5" y="332" class="tick" text-anchor="middle">5</text>
+<line x1="396.7" y1="18" x2="396.7" y2="316" class="grid"/>
+<text x="396.7" y="332" class="tick" text-anchor="middle">10</text>
+<line x1="440.8" y1="18" x2="440.8" y2="316" class="grid"/>
+<text x="440.8" y="332" class="tick" text-anchor="middle">20</text>
+<line x1="499.2" y1="18" x2="499.2" y2="316" class="grid"/>
+<text x="499.2" y="332" class="tick" text-anchor="middle">50</text>
+<line x1="543.4" y1="18" x2="543.4" y2="316" class="grid"/>
+<text x="543.4" y="332" class="tick" text-anchor="middle">100</text>
+<line x1="587.5" y1="18" x2="587.5" y2="316" class="grid"/>
+<text x="587.5" y="332" class="tick" text-anchor="middle">200</text>
+<line x1="645.9" y1="18" x2="645.9" y2="316" class="grid"/>
+<text x="645.9" y="332" class="tick" text-anchor="middle">500</text>
+<text x="240" y="39.4" class="lab" text-anchor="end">HF generate, FP32 (prior)</text>
+<rect x="250" y="24" width="431.1" height="22" class="bar"/>
+<text x="687.1" y="39.4" class="val">868.8 ms</text>
+<text x="240" y="71.4" class="lab" text-anchor="end">RapidTinyRec FP32 bit-exact (prior)</text>
+<rect x="250" y="56" width="302.2" height="22" class="bar"/>
+<text x="558.2" y="71.4" class="val">114.8 ms</text>
+<text x="240" y="103.4" class="lab" text-anchor="end">Speedrun engine, FP32</text>
+<rect x="250" y="88" width="292.6" height="22" class="bar hl"/>
+<text x="548.6" y="103.4" class="val">98.8 ms</text>
+<text x="240" y="135.4" class="lab" text-anchor="end">RapidTinyRec BF16 (prior)</text>
+<rect x="250" y="120" width="257.0" height="22" class="bar"/>
+<text x="513.0" y="135.4" class="val">56.5 ms</text>
+<text x="240" y="167.4" class="lab" text-anchor="end">Speedrun, BF16, one graph/request</text>
+<rect x="250" y="152" width="237.0" height="22" class="bar hl"/>
+<text x="493.0" y="167.4" class="val">41.3 ms</text>
+<text x="240" y="199.4" class="lab" text-anchor="end">+ torch.compile fusion</text>
+<rect x="250" y="184" width="226.9" height="22" class="bar hl"/>
+<text x="482.9" y="199.4" class="val">35.2 ms</text>
+<text x="240" y="231.4" class="lab" text-anchor="end">+ fused first level + Triton attention</text>
+<rect x="250" y="216" width="212.0" height="22" class="bar hl"/>
+<text x="468.0" y="231.4" class="val">27.9 ms</text>
+<text x="240" y="263.4" class="lab" text-anchor="end">Certified exact, no forced suffix</text>
+<rect x="250" y="248" width="190.2" height="22" class="bar hl"/>
+<text x="446.2" y="263.4" class="val">19.8 ms</text>
+<text x="240" y="295.4" class="lab" text-anchor="end">Certified exact, trie scoring</text>
+<rect x="250" y="280" width="177.0" height="22" class="bar hl"/>
+<text x="433.0" y="295.4" class="val">16.1 ms</text>
+<text x="470" y="342" class="tick" text-anchor="middle">median latency per request, ms (log scale)</text>
+</svg></div>
+<p class="note">Orange rows are this overnight run's engine; grey rows are earlier RapidTinyRec results on the same GPU and cohort. Setup, compilation and graph capture are excluded.</p></section>
+<section class="panel"><h2>Speed and quality by configuration</h2><div class="scroll"><table>
+<thead><tr><th>configuration</th><th class=num>median ms</th><th class=num>p95 ms</th><th class=num>HR@1</th><th class=num>HR@5</th><th class=num>HR@10</th><th class=num>NDCG@10</th><th class=num>top-10 certified</th></tr></thead>
+<tbody><tr><td>FP32 beam-50, MiniOneRec scoring (reference)</td><td class=num>98.8</td><td class=num>103.1</td><td class=num>0.0941</td><td class=num>0.1404</td><td class=num>0.1589</td><td class=num>0.1247</td><td class=num>—</td></tr>
+<tr><td>BF16 beam-50, compiled</td><td class=num>35.2</td><td class=num>35.6</td><td class=num>0.0945</td><td class=num>0.1414</td><td class=num>0.1578</td><td class=num>0.1245</td><td class=num>—</td></tr>
+<tr><td>BF16 beam-50, fused first level + Triton</td><td class=num>27.9</td><td class=num>28.0</td><td class=num>0.0947</td><td class=num>0.1397</td><td class=num>0.1589</td><td class=num>0.1249</td><td class=num>—</td></tr>
+<tr><td>BF16 beam-50, forced suffix dropped</td><td class=num>30.3</td><td class=num>30.8</td><td class=num>0.0986</td><td class=num>0.1436</td><td class=num>0.1624</td><td class=num>0.1284</td><td class=num>—</td></tr>
+<tr><td>BF16 prefix-filtered exact, N=16</td><td class=num>31.1</td><td class=num>31.6</td><td class=num>0.0945</td><td class=num>0.1469</td><td class=num>0.1658</td><td class=num>0.1284</td><td class=num>0.00</td></tr>
+<tr><td>BF16 prefix-filtered exact, N=32</td><td class=num>32.4</td><td class=num>32.9</td><td class=num>0.0939</td><td class=num>0.1432</td><td class=num>0.1652</td><td class=num>0.1270</td><td class=num>0.05</td></tr>
+<tr><td>BF16 certified exact, no suffix</td><td class=num>19.8</td><td class=num>19.9</td><td class=num>0.0984</td><td class=num>0.1430</td><td class=num>0.1624</td><td class=num>0.1283</td><td class=num>0.94</td></tr>
+<tr><td>BF16 certified exact, trie scoring</td><td class=num>16.1</td><td class=num>16.2</td><td class=num>0.0984</td><td class=num>0.1408</td><td class=num>0.1646</td><td class=num>0.1289</td><td class=num>1.00</td></tr></tbody></table></div>
+<p class="note">Quality is SID-level HR/NDCG on the full Office test set (4,866 users). "Top-10 certified" is the share of users for whom the exact decoder proves its top-10 is the global optimum of the scoring rule.</p></section>
+<section class="panel"><h2>Search × scoring rule (offline, exhaustive FP32)</h2></section>
+
+<section><h2>Next</h2><ul><li>INT8/INT4 weights with compiled kernels</li>
+<li>Exhaustive FP32 dumps for both datasets (search × scoring study)</li>
+<li>Industrial & Scientific replication</li>
+<li>Batched throughput for the exact decoders</li></ul></section>
+</div>

@@ -85,6 +85,16 @@ class ScoreMixin:
     Restricted modes only need the ~600 SID rows of the LM head.
     """
 
+    tmpl = None
+
+    def set_template(self, ids):
+        """Cache the K/V of a prompt prefix shared by all requests (fused-first path only)."""
+        self.tmpl = self.fwd.template_kv(ids, self.W.device)
+        self.template_ids = list(ids)
+
+    def _T0(self):
+        return 0 if self.tmpl is None else self.tmpl[0].shape[2]
+
     def _init_scoring(self, norm):
         assert norm in ('full', 'codebook', 'trie')
         self.norm = norm
@@ -157,9 +167,10 @@ class BeamEngine(ScoreMixin):
         nA = len(cat.first)
         if self.fuse_first:
             # ---- prompt + every first-level trie node in one forward
-            hp, hn = fwd.prefill_tree(W.embed[tokens], W.embed[cat.first][None].expand(B, nA, W.D), lengths,
-                                      kc, vc, bufs['kn'], bufs['vn'])
-            la = self._lp(hp[torch.arange(B, device=dev), lengths - 1], 0, cat.first[None].expand(B, -1), None)
+            T0 = self._T0()
+            hp, hn = fwd.prefill_tree(W.embed[tokens[:, T0:]], W.embed[cat.first][None].expand(B, nA, W.D), lengths,
+                                      kc, vc, bufs['kn'], bufs['vn'], tmpl=self.tmpl)
+            la = self._lp(hp[torch.arange(B, device=dev), lengths - 1 - T0], 0, cat.first[None].expand(B, -1), None)
             s1, ai = self._first_topk(la, R)  # [B,R]
             a_tok = cat.first[ai]
             t1 = cat.t1[ai]; v1 = cat.v1[ai]

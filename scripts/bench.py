@@ -59,6 +59,7 @@ def main():
     ap.add_argument('--norm', default='full', choices=['full', 'codebook', 'trie'])
     ap.add_argument('--attn', default='torch', choices=['torch', 'triton'])
     ap.add_argument('--fuse-first', action='store_true', help='trie-level prefill fusion')
+    ap.add_argument('--template-cache', action='store_true', help='cache K/V of the prompt prefix shared by all users')
     ap.add_argument('--n-expand', type=int, default=64)
     ap.add_argument('--profile', action='store_true', help='eager kernel-time breakdown for a few users')
     ap.add_argument('--check-exhaustive', type=int, default=0, help='compare first K cohort users against exhaustive exact scoring')
@@ -91,6 +92,17 @@ def main():
         eng = ExactEngine(W, cat, n_expand=a.n_expand, suffix_mode=a.suffix, norm=a.norm, fuse_first=a.fuse_first)
     else:
         eng = ExactEngine3(W, cat, n_prefix=a.n_prefix, n_expand=a.n_expand, suffix_mode=a.suffix, norm=a.norm, fuse_first=a.fuse_first)
+    if a.template_cache:
+        assert a.fuse_first, '--template-cache needs --fuse-first'
+        lcp = list(all_ids[0])
+        for ids_ in all_ids:
+            k = 0
+            while k < min(len(lcp), len(ids_)) and lcp[k] == ids_[k]:
+                k += 1
+            lcp = lcp[:k]
+        eng.set_template(lcp)
+        meta['template_tokens'] = len(lcp)
+        print(json.dumps({'stage': 'template', 'tokens': len(lcp), 'min_prompt': min(map(len, all_ids))}), flush=True)
     if a.attn == 'triton':
         from rapidtinyrec.speedrun import kernels
         chk = kernels.selfcheck(dt)

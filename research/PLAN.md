@@ -101,3 +101,19 @@ See `lit_ledger.md`, `architecture_directions.md`, `kernel_techniques.md`.
   Triton shared-prefix attention + compile), vs 56.5 ms prior BF16 stack, 869 ms HF. Full-test
   HR@10 0.15886 = FP32 reference exactly; NDCG@10 0.1249 vs 0.1247. Triton attention is ~2×
   closer to FP32 than the PyTorch BF16 attention path (self-check max err 0.06 vs 0.16).
+- 02:05 — **Certified exact decoding, no forced suffix, BF16: 19.8 ms / 19.9 p95** (2 forwards:
+  prompt+first-level tree, then 64 prefix rows). Top-10 certified globally optimal for 94%,
+  top-20 for 86%. HR@1 0.0984 / HR@10 0.1624 / NDCG@10 0.1283.
+- 02:05 — **HEADLINE: trie-renormalized scoring + certified exact decoding, BF16: 16.1 ms /
+  16.25 p95.** Top-50 certified globally optimal for 99.9% of users (top-1..20: 100%). Quality
+  above the FP32 MiniOneRec reference on every metric: HR@1 0.0984 (0.0941), HR@5 0.1408 (0.1404),
+  HR@10 0.1646 (0.1589), NDCG@10 0.1289 (0.1247), HR@50 0.2390 (0.2361). 54× faster than HF
+  generate (869 ms), 3.5× faster than the prior BF16 stack (56.5 ms), 7.1× faster than the
+  prior FP32 exact stack (114.8 ms). Restricted (600-row SID) LM head: no 152k-row head at all.
+- 02:05 — GemLite INT8 weight-only (uncompiled, torch attention): 37.1 ms vs BF16 41.3 — only
+  10%; INT8 kernels at M≈50 are not bandwidth-efficient. Compiled variants pending.
+- 02:20 — Paired bootstrap vs FP32 reference (4,866 users): fused+Triton beam (27.9 ms) ΔHR@10
+  +0.00 [−0.10,+0.10] (equivalent); certified exact no-suffix (19.8 ms) ΔHR@1 +0.43 [+0.14,+0.72],
+  ΔNDCG@10 +0.35 [+0.12,+0.59]; **certified exact trie (16.1 ms) ΔHR@1 +0.43 [+0.12,+0.76],
+  ΔNDCG@10 +0.42 [+0.10,+0.74], ΔHR@10 +0.58 [−0.02,+1.15]**; GemLite INT8 ΔHR@10 −0.10
+  [−0.29,+0.08] (equivalent).

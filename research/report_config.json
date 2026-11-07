@@ -1,0 +1,32 @@
+{
+ "updated": "2026-11-07 02:10 ET",
+ "ladder": [
+  {"label": "HF generate, FP32 (prior)", "ms": 868.8},
+  {"label": "RapidTinyRec FP32 bit-exact (prior)", "ms": 114.8},
+  {"label": "Speedrun engine, FP32", "run": "sweepA/fp32", "ours": true},
+  {"label": "RapidTinyRec BF16 (prior)", "ms": 56.5},
+  {"label": "Speedrun, BF16, one graph/request", "ms": 41.3, "ours": true},
+  {"label": "+ torch.compile fusion", "run": "sweepA/bf16_compile", "ours": true},
+  {"label": "+ fused first level + Triton attention", "run": "sweepF2/beam_ff_tc", "ours": true},
+  {"label": "Certified exact, no forced suffix", "run": "sweepF2/ex3_nosuf_ff_tc", "ours": true},
+  {"label": "Certified exact, trie scoring", "run": "sweepF2/ex3_trie_ff_tc", "ours": true}
+ ],
+ "compare": [
+  {"label": "FP32 beam-50, MiniOneRec scoring (reference)", "run": "sweepA/fp32"},
+  {"label": "BF16 beam-50, compiled", "run": "sweepA/bf16_compile"},
+  {"label": "BF16 beam-50, fused first level + Triton", "run": "sweepF2/beam_ff_tc"},
+  {"label": "BF16 beam-50, forced suffix dropped", "run": "sweepA/bf16_nosuffix"},
+  {"label": "BF16 prefix-filtered exact, N=16", "run": "sweepB/ex_bf16_n16"},
+  {"label": "BF16 prefix-filtered exact, N=32", "run": "sweepB/ex_bf16_n32"},
+  {"label": "BF16 certified exact, no suffix", "run": "sweepF2/ex3_nosuf_ff_tc"},
+  {"label": "BF16 certified exact, trie scoring", "run": "sweepF2/ex3_trie_ff_tc"}
+ ],
+ "sim_tables": [],
+ "findings": [
+  "A whole MiniOneRec request (prefill, constrained beam, forced-suffix scoring, sort) runs as one CUDA graph in a hand-written engine: 27.9 ms in BF16 with HR@10 identical to the FP32 reference.",
+  "Certified exact decoding replaces beam search: two forwards score every first code and every two-code prefix, then expand the best-bounded candidates, with a proof that the returned top-K is the global optimum.",
+  "With trie-renormalized scoring the exact decoder runs in 16.1 ms and certifies its top-50 for 99.9% of users, while beating the FP32 reference on HR@1, HR@10, NDCG@10 and HR@50.",
+  "MiniOneRec's forced newline/EOS terms cost a forward and slightly hurt ranking; dropping them improves NDCG@10 by +0.36 pt (95% CI +0.13 to +0.61)."
+ ],
+ "next": ["INT8/INT4 weights with compiled kernels", "Exhaustive FP32 dumps for both datasets (search × scoring study)", "Industrial & Scientific replication", "Batched throughput for the exact decoders"]
+}
