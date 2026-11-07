@@ -200,10 +200,12 @@ class ExactEngine3(ExactEngine):
     U2 of the best unexpanded prefix).
     """
 
-    def __init__(self, W, cat, n_prefix=128, n_expand=32, fuse_first=False, **kw):
+    def __init__(self, W, cat, n_prefix=128, n_expand=32, fuse_first=False, exit_c=None, **kw):
         super().__init__(W, cat, n_expand=n_expand, **kw)
         self.M = n_prefix
         self.fuse_first = fuse_first
+        self.exit_c = exit_c   # early exit (layer count) for the c-level forward; no-suffix scoring only
+        assert exit_c is None or self.suffix_mode == 'none'
         self.N = n_expand if self.suffix_mode != 'none' else min(n_expand, n_prefix * cat.W2)
 
     def alloc(self, B, P):
@@ -250,7 +252,7 @@ class ExactEngine3(ExactEngine):
         for kp, kp2 in ((bufs['kp3'], bufs['kp2']), (bufs['vp3'], bufs['vp2'])):
             kp[:, :, :, 0] = kp2[:, bidx, ai, 0]
         h = fwd.step(W.embed[b_tok][:, :, None], (L0 + 1).expand(B, M, 1), bufs['kc'], bufs['vc'], pmask,
-                     bufs['kp3'], bufs['vp3'], 1, lengths=lengths)
+                     bufs['kp3'], bufs['vp3'], 1, lengths=lengths, n_layers=self.exit_c)
         t2, v2 = cat.t2[pair], cat.v2[pair]                # [B,M,W2]
         lc = self._lp(h[:, :, 0], 2, t2, v2).masked_fill(~v2, float('-inf'))
         u3 = (u2m[..., None] + lc).view(B, M * cat.W2)

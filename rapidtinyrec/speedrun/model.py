@@ -207,7 +207,7 @@ class Forward:
     # -- beam step: x [B, R, Q, D] (R beams per user, Q new tokens per beam)
     # prefix K/V: [B, KV, P, hd] with additive prefix mask [B, P]
     # private K/V: [B, R, S, KV, hd]; the new tokens occupy slots [s0, s0+Q)
-    def step(self, x, pos, kcache, vcache, pmask, kpriv, vpriv, s0, lengths=None):
+    def step(self, x, pos, kcache, vcache, pmask, kpriv, vpriv, s0, lengths=None, n_layers=None):
         W = self.W
         B, R, Q, _ = x.shape
         rep = W.H // W.KV
@@ -218,7 +218,7 @@ class Forward:
         qi = torch.arange(Q, device=x.device)[:, None]
         si = torch.arange(S, device=x.device)[None, :]
         cmask = torch.where(si <= s0 + qi, 0.0, neg)  # [Q, S]
-        for i, layer in enumerate(W.layers):
+        for i, layer in enumerate(W.layers[:n_layers]):
             q, k, v = self.qkv(x, layer, pos)  # q [B,R,Q,H,hd], k/v [B,R,Q,KV,hd]
             kpriv[i][:, :, s0:S] = k
             vpriv[i][:, :, s0:S] = v

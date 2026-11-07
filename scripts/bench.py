@@ -60,6 +60,7 @@ def main():
     ap.add_argument('--attn', default='torch', choices=['torch', 'triton'])
     ap.add_argument('--fuse-first', action='store_true', help='trie-level prefill fusion')
     ap.add_argument('--template-cache', action='store_true', help='cache K/V of the prompt prefix shared by all users')
+    ap.add_argument('--exit-c', type=int, default=None, help='layers used by the c-level forward (exact3, no suffix)')
     ap.add_argument('--n-expand', type=int, default=64)
     ap.add_argument('--profile', action='store_true', help='eager kernel-time breakdown for a few users')
     ap.add_argument('--check-exhaustive', type=int, default=0, help='compare first K cohort users against exhaustive exact scoring')
@@ -91,7 +92,7 @@ def main():
     elif a.engine == 'exact':
         eng = ExactEngine(W, cat, n_expand=a.n_expand, suffix_mode=a.suffix, norm=a.norm, fuse_first=a.fuse_first)
     else:
-        eng = ExactEngine3(W, cat, n_prefix=a.n_prefix, n_expand=a.n_expand, suffix_mode=a.suffix, norm=a.norm, fuse_first=a.fuse_first)
+        eng = ExactEngine3(W, cat, n_prefix=a.n_prefix, n_expand=a.n_expand, suffix_mode=a.suffix, norm=a.norm, fuse_first=a.fuse_first, exit_c=a.exit_c)
     if a.template_cache:
         assert a.fuse_first, '--template-cache needs --fuse-first'
         lcp = list(all_ids[0])
