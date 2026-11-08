@@ -128,6 +128,14 @@
   {
    "label": "Industrial, H100: certified trie + late entry (10 layers)",
    "run": "finH/I_trie_L18w"
+  },
+  {
+   "label": "Industrial, A6000: beam-50, MiniOneRec scoring",
+   "run": "finA/I_beam_full"
+  },
+  {
+   "label": "Industrial, A6000: certified trie + late entry (10 layers)",
+   "run": "finA/I_trie_L18w"
   }
  ],
  "sim_tables": [],
@@ -136,6 +144,7 @@
   "The certificate's cost scales with K, not the catalog: under trie scoring certifying the top K expands about K prefixes at every K up to 1,000, and only multi-child prefixes need the second forward. Certified top-500: 3.8 ms on an H100 vs 18.1 ms for MiniOneRec's beam-500; 6.4\u00d7 its throughput.",
   "Late entry: the third SID code does not need the lower 22 layers. A bridge distilled from the parent node's layer-22 state (validation prompts, no labels, 1\u20132 minutes) matches the full-depth second forward on HR@10 and NDCG@10 on both datasets; early exit at the same cost loses 2.4\u20133.7 points of HR@1.",
   "Fastest and best: certified decoding with late entry and a validation-chosen scoring rule (codebook-normalized first two codes, trie-normalized third code weighted 0.75) takes 3.1 ms on an H100 and 9.0 ms on an RTX A6000, and raises Office HR@10 from 0.159 (MiniOneRec's own FP32 decode; 869 ms with Hugging Face generate) to 0.171, +1.23 points [+0.66, +1.81]. 1,447 users/s on one H100.",
+  "Industrial & Scientific: certified decoding with late entry matches MiniOneRec's own beam-50 (HR@10 0.1597 vs 0.1582, n.s.) at 9.4 vs 25.8 ms on the A6000 and 3.2 vs 8.4 ms on the H100.",
   "The scoring rule is a first-order choice: on Office a validation-chosen codebook objective lifts HR@10 from 0.159 to 0.170 and HR@500 by 2.4 points; on Industrial nothing beats the original objective, and certified decoding matches it.",
   "The beam-search curse grows with list length: under MiniOneRec's own objective exact search loses 1.8 / 2.5 / 3.5 / 4.3 points of HR@50 / 100 / 200 / 500 on Office. Beam search's prefix-first pruning acts as an implicit depth discount.",
   "Negative results: one forward is not enough (a user-independent third-code table loses 4.8 points of HR@1; speculating the expansion set covers at most 29% of requests); late entry of the second code is a trade-off; INT8/INT4 weight-only and FP8 do not help at these shapes."
