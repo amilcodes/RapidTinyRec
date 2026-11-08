@@ -60,6 +60,7 @@ code { font: 13px var(--mono); background: var(--accent-soft); padding: 1px 4px;
   <p class="lede">How fast can an LLM generative recommender decode, and is beam search even the right algorithm? Batch-1 latency on the frozen 500-user Office cohort; quality on all 4,866 Office and 4,533 Industrial test users.</p>
 </header>
 <section><h2>Findings so far</h2><ul><li>Exact search makes objective fusion exact: adding a per-user collaborative term (β·log q from a SASRec trained in one minute) inside certified search keeps two forwards and 100% certification and lifts Office HR@10 from 0.1714 to 0.1825 (+1.11 [+0.62, +1.60]; MiniOneRec's FP32 beam decode: 0.1589) and HR@500 by 4.0 points — beam-then-rerank cannot change the candidate set. Industrial: +0.51 [+0.07, +0.95]. With random item values, LLM-top-50-then-rerank recovers only 50% of the exact top-10.</li>
+<li>Same stack on Industrial (H100): MiniOneRec beam-50 semantics 8.37 ms (HR@10 0.1582) → certified with both bridges at layer 18 3.11 ms (0.1619) → + SASRec term 3.45 ms (0.1670); FP8 + fusion 3,738 users/s. On the A6000 (Office): 22.4 ms beam → 6.44 ms with fusion (HR@10 0.1825); HF generate: 869 ms.</li>
 <li>Two-sided bounds: under trie normalization the best child of an n-child prefix scores at least −log n, so the set of prefixes that guarantees the certificate is known right after the first forward. It averages ≤ 1.1·K prefixes at every K up to 500 and is within 1.2–2.1× of the provable minimum for any bound-based decoder.</li>
 <li>Late entry goes to the top 2 layers on Office: the third code enters at layer 26 of 28 (cascade bridge on the layer-18 first-level states), lossless against the full-depth model (ΔHR@10 +0.12 [−0.27, +0.51]); certified top-10 in 2.75 ms on an H100 (2.72 ms with the SASRec term; MiniOneRec beam-50 in the same engine and allocation: 8.43 ms; certified top-500 with fusion: 2.92 ms). Industrial loses 0.46 pt HR@1 at layer 26 and keeps layer 18.</li>
 <li>Filters are exact too: with 5% of items eligible, filtering the LLM's top 50 recovers only 30.5% of the exact filtered top-10 (HR@10 0.018 vs 0.029); certified search answers in the same two forwards, 100% certified under every filter tried.</li>
@@ -74,19 +75,19 @@ code { font: 13px var(--mono); background: var(--accent-soft); padding: 1px 4px;
 <li>The scoring rule is a first-order choice: on Office a validation-chosen codebook objective lifts HR@10 from 0.159 to 0.170 and HR@500 by 2.4 points; on Industrial nothing beats the original objective, and certified decoding matches it.</li>
 <li>The beam-search curse grows with list length: under MiniOneRec's own objective exact search loses 1.8 / 2.5 / 3.5 / 4.3 points of HR@50 / 100 / 200 / 500 on Office. Beam search's prefix-first pruning acts as an implicit depth discount.</li>
 <li>Negative results: one forward is not enough (a user-independent third-code table loses 4.8 points of HR@1; speculating the expansion set covers at most 29% of requests); late entry of the second code is a trade-off; INT8/INT4 weight-only and FP8 do not help at these shapes.</li></ul></section>
-<section class="panel"><h2>Latency ladder</h2><div class="scroll"><svg viewBox="0 0 760 484" role="img" aria-label="latency ladder" class="chart">
-<line x1="250.0" y1="18" x2="250.0" y2="446" class="grid"/>
-<text x="250.0" y="460" class="tick" text-anchor="middle">10</text>
-<line x1="316.2" y1="18" x2="316.2" y2="446" class="grid"/>
-<text x="316.2" y="460" class="tick" text-anchor="middle">20</text>
-<line x1="403.8" y1="18" x2="403.8" y2="446" class="grid"/>
-<text x="403.8" y="460" class="tick" text-anchor="middle">50</text>
-<line x1="470.0" y1="18" x2="470.0" y2="446" class="grid"/>
-<text x="470.0" y="460" class="tick" text-anchor="middle">100</text>
-<line x1="536.3" y1="18" x2="536.3" y2="446" class="grid"/>
-<text x="536.3" y="460" class="tick" text-anchor="middle">200</text>
-<line x1="623.8" y1="18" x2="623.8" y2="446" class="grid"/>
-<text x="623.8" y="460" class="tick" text-anchor="middle">500</text>
+<section class="panel"><h2>Latency ladder</h2><div class="scroll"><svg viewBox="0 0 760 612" role="img" aria-label="latency ladder" class="chart">
+<line x1="250.0" y1="18" x2="250.0" y2="574" class="grid"/>
+<text x="250.0" y="588" class="tick" text-anchor="middle">10</text>
+<line x1="316.2" y1="18" x2="316.2" y2="574" class="grid"/>
+<text x="316.2" y="588" class="tick" text-anchor="middle">20</text>
+<line x1="403.8" y1="18" x2="403.8" y2="574" class="grid"/>
+<text x="403.8" y="588" class="tick" text-anchor="middle">50</text>
+<line x1="470.0" y1="18" x2="470.0" y2="574" class="grid"/>
+<text x="470.0" y="588" class="tick" text-anchor="middle">100</text>
+<line x1="536.3" y1="18" x2="536.3" y2="574" class="grid"/>
+<text x="536.3" y="588" class="tick" text-anchor="middle">200</text>
+<line x1="623.8" y1="18" x2="623.8" y2="574" class="grid"/>
+<text x="623.8" y="588" class="tick" text-anchor="middle">500</text>
 <text x="240" y="39.4" class="lab" text-anchor="end">HF generate, FP32 (prior)</text>
 <rect x="250" y="24" width="426.6" height="22" class="bar"/>
 <text x="682.6" y="39.4" class="val">868.8 ms</text>
@@ -126,7 +127,19 @@ code { font: 13px var(--mono); background: var(--accent-soft); padding: 1px 4px;
 <text x="240" y="423.4" class="lab" text-anchor="end">same, codebook(a,b)+trie(c) scoring, w_c = 0.75</text>
 <rect x="250" y="408" width="1.0" height="22" class="bar hl"/>
 <text x="246.2" y="423.4" class="val">9.0 ms</text>
-<text x="470" y="480" class="tick" text-anchor="middle">median latency per request, ms (log scale)</text>
+<text x="240" y="455.4" class="lab" text-anchor="end">final paired run: MiniOneRec beam-50 semantics, FP16 engine</text>
+<rect x="250" y="440" width="77.3" height="22" class="bar"/>
+<text x="333.3" y="455.4" class="val">22.4 ms</text>
+<text x="240" y="487.4" class="lab" text-anchor="end">final: certified exact (trie M=16, cbtrie 0.75)</text>
+<rect x="250" y="472" width="12.8" height="22" class="bar hl"/>
+<text x="268.8" y="487.4" class="val">11.4 ms</text>
+<text x="240" y="519.4" class="lab" text-anchor="end">final: both bridges, third code at layer 26</text>
+<rect x="250" y="504" width="1.0" height="22" class="bar hl"/>
+<text x="213.1" y="519.4" class="val">6.4 ms</text>
+<text x="240" y="551.4" class="lab" text-anchor="end">final: + SASRec term in the graph (HR@10 0.1825)</text>
+<rect x="250" y="536" width="1.0" height="22" class="bar hl"/>
+<text x="213.9" y="551.4" class="val">6.4 ms</text>
+<text x="470" y="608" class="tick" text-anchor="middle">median latency per request, ms (log scale)</text>
 </svg></div>
 <p class="note">Orange rows are the speedrun engine; grey rows are earlier RapidTinyRec results on the same GPU and cohort. Setup, compilation and graph capture are excluded.</p></section>
 <section class="panel"><h2>Latency ladder, H100</h2><div class="scroll"><svg viewBox="0 0 760 548" role="img" aria-label="latency ladder" class="chart">

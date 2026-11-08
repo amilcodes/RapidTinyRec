@@ -37,7 +37,9 @@ a small bridge distilled from their parent node's state (no labels, frozen model
 | certified exact decoding (trie or tuned codebook scoring) | 14.4 | 5.6 |
 | + late entry for the third code | 9.5 | 4.2 |
 | + Triton prompt attention in the first forward (+ whole-layer compile, fused K/V stores on the H100) | 9.0 | 3.2 |
-| same, codebook(a,b)+trie(c) scoring with the third code weighted 0.75 (validation-tuned) | **9.0** | **3.1** |
+| same, codebook(a,b)+trie(c) scoring with the third code weighted 0.75 (validation-tuned) | 9.0 | 3.1 |
+| + first-level late entry (layer 18), third code at layer 26 — final paired runs | 6.4 | **2.75** |
+| + SASRec term inside the certified search (HR@10 0.1825) | **6.4** | **2.72** |
 
 - Certified decoding proves its top-10 globally optimal for ≥99.7% of users (0 violations
   against brute force). The fastest configuration also scores best: with codebook normalization
@@ -51,7 +53,14 @@ a small bridge distilled from their parent node's state (no labels, frozen model
 - Large candidate lists stay cheap: certifying the top K needs ≈K prefixes, and only multi-child
   prefixes need the second forward. Certified top-500 takes 6.1 ms on an H100 vs 18.1 ms for
   MiniOneRec's beam-500 (17.95 vs 83.2 ms on the A6000), and serves 450 vs 71 users/s.
-- Throughput, certified top-10 with late entry: 1,447 users/s on one H100.
+- Throughput, certified top-10 with late entry: 1,447 users/s on one H100; with both bridges, the third code at
+  layer 26 and dynamic FP8: 3,155 users/s (Office), 3,738 (Industrial).
+- **Exact objective fusion** (third session): any additive item term (prior, bid, filter, collaborative score)
+  keeps two forwards and the certificate. A SASRec term (1-minute training) lifts Office HR@10 from 0.1714 to
+  0.1825 (+1.11 [+0.62, +1.60]) and HR@500 by 4.0 points at 2.72 ms; Industrial +0.51 [+0.07, +0.95] at 3.45 ms.
+  Under a 5%-eligibility filter, filtering the LLM's top-50 recovers only 30% of the exact filtered top-10.
+- **Two-sided bounds**: under trie normalization the set of prefixes that guarantees the certificate is known
+  after the first forward (≤ 1.1·K on average).
 
 Method, measurements and negative results: [`research/`](research/PLAN.md),
 paper draft [`research/paper_draft.md`](research/paper_draft.md).
