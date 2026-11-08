@@ -483,7 +483,12 @@ vs the LLM alone: ΔHR@10 +1.11 [+0.62, +1.60], ΔNDCG@10 +0.72 [+0.45, +1.00], 
 vs rerank: ΔHR@10 +0.25 [+0.08, +0.43], ΔNDCG@10 +0.13 [+0.04, +0.23]. Against MiniOneRec's FP32 beam decode
 of the same checkpoint (0.1589) this is +2.36 points of HR@10 with no LLM training — on par with the best
 *trained* result we found on the same split (DASO, 0.1834) and above S-GRec, V-STAR and SA-OPSD
-(0.1689–0.1747). [Industrial: TBD `runs/fuseI`; H100 latency with the in-graph term: TBD `runs/fusH`.]
+(0.1689–0.1747). Industrial (`runs/fuseI`, β = 0.5): HR@10 0.1617 → 0.1668 (+0.51 [+0.07, +0.95]), NDCG@10
++0.42 [+0.19, +0.66], HR@50 +0.84 [+0.22, +1.48]. At large K the fused certified top-500 lifts HR@500 by 4.0
+points on Office (0.504 → 0.543) and 2.1 on Industrial (0.523 → 0.544), where reranking the LLM's own top 500
+cannot change the set; Industrial top-500 certifies for 85% of users at M = 256 under the fused objective
+(100% on Office). On the H100 the in-graph term costs ≈0 ms on Office (2.75 → 2.72 ms) and 0.34 ms on
+Industrial (3.11 → 3.45 ms).
 
 ### 6.y Training the model the decoder sees
 
@@ -506,7 +511,8 @@ Aligned vs released: ΔHR@10 +0.90 [+0.27, +1.54], ΔNDCG@10 +0.41 [+0.04, +0.78
 helps the released checkpoint; matching the training normalization to the decoder's does not measurably
 add to it — a negative result for the "align training with decoding" hypothesis. Bridges trained on the released model transfer imperfectly (entry 22: HR@10
 0.1743), so a fine-tuned backbone needs its own bridges (~25 min). [Industrial replication and a second
-seed: TBD.]
+seed: Industrial ΔHR@10 +0.49 [−0.15, +1.13] (n.s.), ΔHR@50 +1.81 [+0.95, +2.65]; a second Office seed
+reproduces ΔHR@10 +0.86 [+0.21, +1.54].]
 
 ## 7. Precision and quantization
 
