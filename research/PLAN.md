@@ -466,3 +466,8 @@ See `lit_ledger.md`, `architecture_directions.md`, `kernel_techniques.md`.
 - **Throughput with both bridges (H100, `runs/casH` C4tp, fixed code):** 325 / 1,677 / 2,436 / **2,575**
   users/s at B = 1/8/32/64 (peak 7.2 GB at B=64), vs 1,484 users/s at B=64 with the third-code bridge only
   (`runs/nodeH`) → **1.73×**. A6000 without the first-level bridge (`runs/nodeA`): 120 / 253 / 274 / 276.
+- **Industrial with both bridges in the engine (H100, `runs/casIH`, paired):** certified trie 4.24 ms → both
+  bridges at layer 18: **3.07 ms**; HR@1 0.0841, HR@10 0.1602, NDCG@10 0.1171; top-10 certified 100%. vs
+  MiniOneRec beam (8.37 ms, `runs/finH`): ΔHR@10 +0.22 [−0.38, +0.79], ΔNDCG@10 −0.06 [−0.35, +0.23], ΔHR@1 −0.22
+  [−0.55, +0.11]; vs full-depth certified: ΔHR@10 +0.13 [−0.15, +0.42]. A6000 baseline (third-code bridge only,
+  `runs/casA` C0): 8.96 ms.
