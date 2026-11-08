@@ -1,35 +1,33 @@
-# Beam Search Is Optional: Certified Exact Decoding for LLM Generative Recommenders
+# Beam Search Is Optional: Certified, Late-Entry Decoding for LLM Generative Recommenders
 
-*Working draft, 2026-11-07. Every number cites a run under `runs/` (A6000 unless noted).
+*Working draft, 2026-11-08. Every number cites a run under `runs/` (GPU named in each table).
 Sections marked [TBD] wait on runs that are queued.*
 
 ## Abstract
 
-LLM-based generative recommenders emit an item as a short semantic-ID (SID) token sequence
-under a catalog trie and serve it with constrained beam search. We study inference for an
-open, widely reproduced instance — MiniOneRec (Qwen2-1.5B, three-level RQ semantic IDs, beam
-50) on its two released datasets — and show that beam search is unnecessary. At batch 1, cost is
-set by the number of sequential forwards times weight bytes: on an RTX A6000 one forward costs
-8.1 ms for 1 token and 9.8 ms for 50, so beam width is nearly free and depth of the decode loop is
-everything. Because every scored term is a log-probability ≤ 0, scoring the prompt together with
-*all* first-level trie nodes in one forward (trie-level prefill fusion) bounds every catalog item;
-one more forward over the best-bounded prefixes yields exact scores and a per-request
-certificate that the returned top-K is the global optimum of the model's own objective. With a
-hand-written engine (one CUDA graph per request, Triton shared-prefix attention, a cached
-prompt template), certified decoding takes **14.4 ms** per request on Office and **14.0 ms** on
-Industrial (11.5 ms on an L40S), versus 869 ms for Hugging Face `generate` (60×) and 56.5 ms for the best prior
-implementation, and serves 172 users/s on one GPU — 1.9× a fully fused beam-50 engine.
-Certification holds for ≥99.7% of users at top-10 under codebook or trie normalization, and was
-checked against brute-force scoring of every item (0 violations). Exact search also works as an
-instrument: with exhaustive FP32 scores for every (user, item) pair we find that beam-50's
-search error under the training objective (it recovers 86% of the exact top-10) does not hurt
-quality, that the deep SID terms carry a structural penalty (−1.6 nats for sharing a prefix with
-one sibling; ~47% of mass leaked off the codebook), and that the decode-time scoring rule should
-be chosen on validation data: on Office a codebook softmax with the third code down-weighted
-improves HR@10 by +1.11 points [+0.53, +1.69] (+7%) and NDCG@10 by +0.62 [+0.32, +0.93] over the
-FP32 reference decode, while on Industrial no rule beats the original and certified decoding
-matches its quality at 1.8× the speed of a fully optimized full-semantics beam engine. FP16 matches BF16's speed with ~10× better fidelity;
-weight-only INT8/INT4 do not help at 50–200 rows per forward.
+LLM-based generative recommenders emit an item as a short semantic-ID (SID) token sequence under
+a catalog trie and serve it with constrained beam search. On an open, widely reproduced instance —
+MiniOneRec (Qwen2-1.5B, three-level SIDs, beam 50) on its two released datasets — we show that
+beam search can be replaced by **certified exact decoding**. Every scored term is a
+log-probability ≤ 0, so one forward over the prompt plus every first-level trie node bounds every
+catalog item; one more forward over the best-bounded prefixes yields exact scores and a
+per-request certificate that the returned top-K is the global optimum of the model's objective
+(0 violations against brute force). Under trie normalization the bound is nearly tight —
+certifying the top K costs about K prefix expansions at every K up to 1,000 — and single-child
+prefixes need no second forward at all, so a certified **top-500 still costs two forwards: 6.1 ms
+on an H100 vs 18.1 ms for MiniOneRec's beam-500 (3.0×; 6.4× in throughput)**. We further find that
+**the third SID code does not need the lower layers**: prefix rows can *enter* the second forward
+at layer 14–22 of 28 from a small bridge distilled from their parent node's state (validation
+prompts only, ≈30 s, no labels, frozen model). This is statistically lossless on Office from 6
+remaining layers and costs ≤0.35 points of HR@1 on Industrial, whereas early exit at the same cost
+loses 2.4–3.7 points. With a hand-written engine (one CUDA graph per request, Triton attention for
+the fused first forward), certified late-entry decoding serves a request in **3.3 ms on an H100
+and 9.7 ms on an RTX A6000** (Hugging Face `generate`: 869 ms on the A6000), and **1,369 users/s**
+on one H100. Exact search is also an instrument: the beam-search curse grows with list length —
+exact search under the training objective loses 4.3 points of HR@500 on Office — while a
+validation-chosen normalized, depth-discounted objective reverses it (+2.4 points HR@500, +1.1
+HR@10). FP16 matches BF16's speed with ~10× better fidelity; weight-only INT8/INT4 and FP8 do not
+help at these shapes.
 
 ## 1. Introduction
 
@@ -45,19 +43,24 @@ model family with two datasets:
 3. Which score is being maximized, and does maximizing it exactly help?
 
 Contributions:
-- **Cost model and measured ladder** from HF `generate` (869 ms) to 14.4 ms on one A6000, with a
-  fidelity gate at every rung (FP32 rank agreement; paired-bootstrap HR/NDCG on all test users).
-- **Trie-level prefill fusion**: prompt + all first-level trie nodes in one forward; exact;
-  removes a sequential step from beam and exact decoding alike.
 - **Certified exact top-K decoding** in two forwards (three with a forced suffix), with a
   per-request optimality certificate computed on device; validated against brute force.
-- **Exhaustive score dumps** (FP32, every test user × every SID, both datasets) and an offline
-  simulator for any search × scoring rule; a scoring-semantics study showing the rule is a
-  first-order, dataset-dependent choice; a mechanism for why deep SID terms mislead.
-- Negative results: weight-only INT8/INT4 and whole-layer compilation do not help at these
-  shapes; one-forward certification is rare (0.4% at top-10); SID codes are decided in the last
-  ~6–9 of 28 layers (logit lens), and exiting the third-code forward early keeps HR@10 flat
-  but costs HR@1 (9.4 ms at −3.6 pt HR@1 with 6 layers): the third code orders siblings.
+- **The certificate's cost scales with K, not with the catalog**: under trie normalization
+  certifying the top K expands ≈K prefixes, and only multi-child prefixes need the second forward
+  (≈0.4 K rows). Certified top-500 is two forwards; MiniOneRec's beam-500 is three wide ones.
+- **Late entry**: deeper SID codes skip the lower layers via a bridge distilled from the parent
+  node's state at the entry layer (frozen model, no labels); lossless on Office at 6–14 of 28
+  layers, ≤0.35 pt HR@1 on Industrial; composes with the certificate.
+- **Engine and ladders** on an A6000 and an H100 with a fidelity gate at every rung: trie-level
+  prefill fusion (exact), Triton shared-prefix and prompt attention, cached prompt template,
+  one CUDA graph per request. HF 869 ms → 9.7 ms (A6000); FP32 48 ms → 3.3 ms (H100).
+- **Exact search as an instrument** (exhaustive FP32 scores for every user × item, both
+  datasets): the beam-search curse grows with list length; the decode-time scoring rule is a
+  first-order, dataset-dependent choice; the deep SID terms carry a structural sibling penalty.
+- Negative results: one forward is not enough (a user-independent third-code table loses 4.8 pt
+  HR@1; speculating the expansion set covers ≤29% of requests; scoring all multi-child prefixes in
+  one late-entry forward is exact but slower than two forwards); late entry of the *second* code is
+  a trade-off; weight-only INT8/INT4 and FP8 W8A8 do not help at 50–700 rows per forward.
 
 ## 2. Setting
 
@@ -366,6 +369,19 @@ Users per second on one A6000 (BF16/FP16, cached template), batch B users per gr
 
 Exact decoding processes fewer tokens per user (prompt tail + 88 trie nodes + 64 prefix rows vs
 prompt + 88 + 50 + 100 beam rows) and stays ≈1.9× ahead once both are compute-bound.
+
+H100 (`runs/h100M`, `runs/largeKH`, `runs/tpK`, `runs/lateLH`), users/s:
+
+| decoder | B=1 | B=8 | B=32 | B=64 |
+|---|---:|---:|---:|---:|
+| certified exact, tuned codebook (M=64) | 178 | 726 | 904 | 920 |
+| certified exact, trie, multi-child prefixes only (M=16) | 182 | 837 | 1,223 | — |
+| + late entry at layer 22 | 261 | 983 | 1,355 | 1,369 |
+
+Large candidate lists (H100, users/s): certified top-500 173 / 374 / 414 / 450 at B = 1/4/8/16;
+beam-500 with trie scoring 132 / 229 / 253 (B = 1/4/8); MiniOneRec's beam-500 (full vocabulary,
+forced suffix) 54 / 68 / 71 — **6.4×** at the largest batch each fits. Certified top-100: 185 / 689 /
+858 (B = 1/8/32) vs trie beam-100 169 / 628 / 740.
 
 ## 9. Related work
 

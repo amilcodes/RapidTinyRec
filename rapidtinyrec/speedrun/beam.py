@@ -106,7 +106,7 @@ class ScoreMixin:
         self.suffix_w = float(ws)
 
     def _init_scoring(self, norm):
-        assert norm in ('full', 'codebook', 'trie')
+        assert norm in ('full', 'codebook', 'trie', 'cbtrie')   # cbtrie: codebook for a, b; trie for c
         self.norm = norm
         if norm != 'full':
             head = self.W.embed if isinstance(self.W.lm_head, torch.nn.Module) else self.W.lm_head
@@ -123,7 +123,7 @@ class ScoreMixin:
             return lg.gather(-1, tok_idx) - torch.logsumexp(lg, -1, keepdim=True)
         lg = torch.nn.functional.linear(h, self.sid_head).float()
         g = lg.gather(-1, self.cat.tok2loc[tok_idx])
-        if self.norm == 'codebook':
+        if self.norm == 'codebook' or (self.norm == 'cbtrie' and level < 2):
             lse = torch.logsumexp(lg.masked_fill(~self.cat.level_mask[level], float('-inf')), -1, keepdim=True)
         else:
             lse = torch.logsumexp(g if valid is None else g.masked_fill(~valid, float('-inf')), -1, keepdim=True)

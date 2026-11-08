@@ -317,9 +317,10 @@ class ExactTrieEngine(ExactEngine3):
     Cost: two forwards for any K; forward 2 carries M rows (about 0.4 K for top-K).
     """
 
-    def __init__(self, W, cat, n_prefix=16, n_out=50, fuse_first=True, ks=(1, 5, 10, 20, 50), **kw):
-        kw.pop('norm', None); kw.pop('suffix_mode', None)
-        super().__init__(W, cat, n_prefix=n_prefix, n_expand=n_out, fuse_first=fuse_first, norm='trie',
+    def __init__(self, W, cat, n_prefix=16, n_out=50, fuse_first=True, ks=(1, 5, 10, 20, 50), norm='trie', **kw):
+        kw.pop('suffix_mode', None)
+        assert norm in ('trie', 'cbtrie'), 'single-child skipping needs a trie-normalized third code'
+        super().__init__(W, cat, n_prefix=n_prefix, n_expand=n_out, fuse_first=fuse_first, norm=norm,
                          suffix_mode='none', ks=ks, **kw)
         self.N = n_out
         nA = len(cat.first)

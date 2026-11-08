@@ -17,29 +17,40 @@ BF16**. BF16 is available as an **experimental opt-in**; FP32 remains the defaul
 These modes change rankings; see the
 [precision and quality comparison](#reduced-precision-results) below.
 
-### Speedrun engine and certified exact decoding (research branch)
+### Speedrun engine, certified exact decoding and late entry (research branch)
 
 A from-scratch engine ([`rapidtinyrec/speedrun`](SPEEDRUN.md)) runs a whole request as one
-CUDA graph and adds a decoder that replaces beam search: every term of an item's score is a
-log-probability ≤ 0, so scoring all first codes and all two-code prefixes bounds every item,
-and a second small forward proves when the returned top-K is the global optimum.
+CUDA graph and replaces beam search with **certified exact decoding**: every term of an item's
+score is a log-probability ≤ 0, so one forward over the prompt and every first-level trie node
+bounds every item, and a second small forward proves when the returned top-K is the global
+optimum. **Late entry** makes that second forward cheap: prefix rows start at layer 22 of 28 from
+a small bridge distilled from their parent node's state (no labels, frozen model).
 
-| A6000, batch 1, 500 Office users (one allocation) | median ms |
-| :--- | ---: |
-| HF `generate`, FP32 (above) | 868.8 |
-| speedrun engine, FP32 | 100.8 |
-| BF16, one CUDA graph per request | 42.1 |
-| + torch.compile | 35.0 |
-| + first trie level fused into the prompt forward + Triton beam attention | 28.1 |
-| + FP16 + cached prompt template (top-1 identical to FP32 for 500/500 users) | 26.2 |
-| certified exact decoding, trie or tuned codebook scoring | **14.4** |
+| batch 1, 500 Office users, median ms | RTX A6000 | H100 |
+| :--- | ---: | ---: |
+| HF `generate`, FP32 | 868.8 | — |
+| speedrun engine, FP32 | 100.8 | 48.3 |
+| BF16, one CUDA graph per request | 42.1 | 20.1 |
+| + torch.compile | 35.0 | 12.9 |
+| + first trie level fused into the prompt forward + Triton beam attention | 28.1 | 8.50 |
+| + FP16 + cached prompt template (top-1 identical to FP32 for 500/500 users) | 26.2 | 8.48 |
+| certified exact decoding (trie or tuned codebook scoring) | 14.4 | 5.6 |
+| + late entry for the third code | 9.7 | 4.2 |
+| + Triton prompt attention in the first forward + whole-layer compile | [TBD] | **3.3** |
 
-Certified decoding proves its top-10 globally optimal for ≥99.7% of users. With codebook scoring
-and the third code weighted 0.5 (chosen on MiniOneRec's validation split) it improves HR@10 from
-0.1589 to 0.1700 and NDCG@10 from 0.1247 to 0.1309 over the FP32 reference decode on all 4,866
-Office test users; on Industrial & Scientific it matches the reference quality at 14.0 vs 25.6 ms.
-It serves 176 users/s on one A6000. FP16 matches BF16's speed with ~10× better fidelity to FP32.
-Method, measurements and negative results: [`research/`](research/PLAN.md).
+- Certified decoding proves its top-10 globally optimal for ≥99.7% of users (0 violations
+  against brute force). With codebook scoring and the third code weighted 0.5 (chosen on
+  MiniOneRec's validation split) it improves HR@10 from 0.1589 to 0.1700 on all 4,866 Office test
+  users; on Industrial & Scientific it matches the reference quality.
+- Late entry at layer 22 is statistically indistinguishable from the full-depth second forward on
+  Office (ΔHR@1 −0.12 [−0.37, +0.12]) and costs ≤0.35 pt HR@1 on Industrial.
+- Large candidate lists stay cheap: certifying the top K needs ≈K prefixes, and only multi-child
+  prefixes need the second forward. Certified top-500 takes 6.1 ms on an H100 vs 18.1 ms for
+  MiniOneRec's beam-500 (17.95 vs 83.2 ms on the A6000), and serves 450 vs 71 users/s.
+- Throughput, certified top-10 with late entry: 1,369 users/s on one H100.
+
+Method, measurements and negative results: [`research/`](research/PLAN.md),
+paper draft [`research/paper_draft.md`](research/paper_draft.md).
 
 ## Performance
 

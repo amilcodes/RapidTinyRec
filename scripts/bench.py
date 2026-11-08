@@ -56,7 +56,7 @@ def main():
     ap.add_argument('--no-graph', action='store_true')
     ap.add_argument('--engine', default='beam', choices=['beam', 'exact', 'exact3', 'exacttrie', 'onepass'])
     ap.add_argument('--n-prefix', type=int, default=128)
-    ap.add_argument('--norm', default='full', choices=['full', 'codebook', 'trie'])
+    ap.add_argument('--norm', default='full', choices=['full', 'codebook', 'trie', 'cbtrie'])
     ap.add_argument('--attn', default='torch', choices=['torch', 'triton'])
     ap.add_argument('--fuse-first', action='store_true', help='trie-level prefill fusion')
     ap.add_argument('--template-cache', action='store_true', help='cache K/V of the prompt prefix shared by all users')
@@ -101,7 +101,8 @@ def main():
     elif a.engine == 'onepass':
         eng = OnePassTrieEngine(W, cat, n_out=a.n_expand, fuse_first=True, ks=tuple(int(k) for k in a.ks.split(',')))
     elif a.engine == 'exacttrie':
-        eng = ExactTrieEngine(W, cat, n_prefix=a.n_prefix, n_out=a.n_expand, fuse_first=True, ks=tuple(int(k) for k in a.ks.split(',')))
+        eng = ExactTrieEngine(W, cat, n_prefix=a.n_prefix, n_out=a.n_expand, fuse_first=True, ks=tuple(int(k) for k in a.ks.split(',')),
+                              norm=a.norm if a.norm in ('trie', 'cbtrie') else 'trie')
     else:
         eng = ExactEngine3(W, cat, n_prefix=a.n_prefix, n_expand=a.n_expand, suffix_mode=a.suffix, norm=a.norm, fuse_first=a.fuse_first, exit_c=a.exit_c)
     if a.late_entry:
