@@ -43,7 +43,8 @@ a small bridge distilled from their parent node's state (no labels, frozen model
   against brute force). The fastest configuration also scores best: with codebook normalization
   for the first two codes, trie normalization for the third and the third code weighted 0.75
   (chosen on MiniOneRec's validation split), HR@10 rises from 0.1589 to 0.1712 on all 4,866 Office
-  test users (+1.23 pt [+0.66, +1.81]); on Industrial & Scientific it matches the reference quality.
+  test users (+1.23 pt [+0.66, +1.81]). On Industrial & Scientific it matches MiniOneRec's own
+  beam-50 (HR@10 0.1597 vs 0.1582, n.s.) at 9.4 ms vs 25.8 ms on the A6000 and 3.2 ms vs 8.4 ms on the H100.
 - Late entry is statistically indistinguishable from the full-depth second forward on HR@10 and
   NDCG@10 on both datasets (6 of 28 layers on Office, 10 on Industrial; bridges trained on the
   validation split only).

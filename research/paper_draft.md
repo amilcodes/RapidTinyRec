@@ -311,7 +311,13 @@ Engine latency (CUDA graph, FP16, paired within one allocation; certified top-10
 | + late entry at layer 22 | **9.06** | 3.56 |
 | + whole-layer compile, FP16 bridge | 9.07 | **3.24** |
 | certified exact, tuned codebook, M=64 → + late entry 22 | 14.33 → 9.68 | 5.57 → 4.17 |
-| certified top-500 → + late entry (and fast forward 1 on the H100) | 17.95 → [TBD] | 6.06 → 3.81 |
+| certified top-500 → + late entry + fast forward 1 | 17.95 → 10.09 | 6.06 → 3.36 |
+
+Industrial & Scientific (all 4,533 test users; paired against our fastest FP16 engine running MiniOneRec's
+own beam-50 on the same GPU): MiniOneRec beam 25.75 ms (A6000) / 8.37 ms (H100), HR@10 0.1582; certified
+trie 12.89 / 4.23 ms, HR@10 0.1588; **+ late entry at layer 18: 9.40 / 3.22 ms, HR@10 0.1597** (ΔHR@10
++0.18 [−0.38, +0.71], ΔNDCG@10 −0.08 [−0.36, +0.20], ΔHR@1 −0.29 [−0.64, +0.07]) — quality-neutral at
+2.7× / 2.6× the speed.
 
 ## 6. What exact decoding reveals about the objective
 
