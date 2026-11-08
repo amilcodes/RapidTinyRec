@@ -384,3 +384,6 @@ See `lit_ledger.md`, `architecture_directions.md`, `kernel_techniques.md`.
 - Graph-capture failures seen twice on the H100 with the FP32 bridge at batch > 1 (one-pass throughput at B=8;
   entry-18 quality pass) while other jobs shared the node and the inductor cache reported stale NFS handles;
   not reproduced with the FP16 bridge so far.
+- **A6000 certified top-500 + fast first forward + late entry: 10.58 ms** (vs 17.95 ms without late entry; vs
+  83.2 ms for MiniOneRec's beam-500 → 7.9×). A6000 throughput (trie M=16 + fast + late 22): 105 / 239 / 258
+  users/s at B = 1/8/32.

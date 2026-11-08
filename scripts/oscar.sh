@@ -35,7 +35,7 @@ export REL=/oscar/scratch/aagraw73/minionerec-shared-prefill/release
 export REF=/oscar/scratch/aagraw73/agent-runs/minionerec-shared-prefill/benchmark-gqa-fp32-20261023T054059Z-7b4f0ee334cb/outputs/gqa_500_users
 export OUT=$run/out
 export HF_HUB_OFFLINE=1 TOKENIZERS_PARALLELISM=false PYTHONPATH=/oscar/scratch/aagraw73/speedrun/pylib
-export TORCHINDUCTOR_CACHE_DIR=$ROOT/cache/inductor TRITON_CACHE_DIR=$ROOT/cache/triton
+export TORCHINDUCTOR_CACHE_DIR=/tmp/sr-\$SLURM_JOB_ID/inductor TRITON_CACHE_DIR=/tmp/sr-\$SLURM_JOB_ID/triton CUDA_MODULE_LOADING=EAGER
 cd $run/code
 nvidia-smi --query-gpu=name,driver_version,memory.total --format=csv
 echo "START \$(date -u +%FT%TZ)"

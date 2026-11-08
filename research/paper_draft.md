@@ -19,10 +19,10 @@ on an H100 vs 18.1 ms for MiniOneRec's beam-500 (3.0×; 6.4× in throughput)**. 
 **the third SID code does not need the lower layers**: prefix rows can *enter* the second forward
 at layer 14–22 of 28 from a small bridge distilled from their parent node's state (validation
 prompts only, ≈30 s, no labels, frozen model). This is statistically lossless on Office from 6
-remaining layers and costs ≤0.35 points of HR@1 on Industrial, whereas early exit at the same cost
-loses 2.4–3.7 points. With a hand-written engine (one CUDA graph per request, Triton attention for
-the fused first forward), certified late-entry decoding serves a request in **3.3 ms on an H100
-and 9.7 ms on an RTX A6000** (Hugging Face `generate`: 869 ms on the A6000), and **1,369 users/s**
+remaining layers on Office and 10 on Industrial once the distillation weights prefix rows by
+their bound, whereas early exit at the same cost loses 2.4–3.7 points of HR@1. With a hand-written engine (one CUDA graph per request, Triton attention for
+the fused first forward), certified late-entry decoding serves a request in **3.2 ms on an H100
+and 9.1 ms on an RTX A6000** (Hugging Face `generate`: 869 ms on the A6000), and **1,447 users/s**
 on one H100. Exact search is also an instrument: the beam-search curse grows with list length —
 exact search under the training objective loses 4.3 points of HR@500 on Office — while a
 validation-chosen normalized, depth-discounted objective reverses it (+2.4 points HR@500, +1.1
@@ -49,11 +49,11 @@ Contributions:
   certifying the top K expands ≈K prefixes, and only multi-child prefixes need the second forward
   (≈0.4 K rows). Certified top-500 is two forwards; MiniOneRec's beam-500 is three wide ones.
 - **Late entry**: deeper SID codes skip the lower layers via a bridge distilled from the parent
-  node's state at the entry layer (frozen model, no labels); lossless on Office at 6–14 of 28
-  layers, ≤0.35 pt HR@1 on Industrial; composes with the certificate.
+  node's state at the entry layer (frozen model, no labels); lossless on HR@10/NDCG@10 at 6 of 28
+  layers on Office and 10 on Industrial; composes with the certificate.
 - **Engine and ladders** on an A6000 and an H100 with a fidelity gate at every rung: trie-level
   prefill fusion (exact), Triton shared-prefix and prompt attention, cached prompt template,
-  one CUDA graph per request. HF 869 ms → 9.7 ms (A6000); FP32 48 ms → 3.3 ms (H100).
+  one CUDA graph per request. HF 869 ms → 9.1 ms (A6000); FP32 48 ms → 3.2 ms (H100).
 - **Exact search as an instrument** (exhaustive FP32 scores for every user × item, both
   datasets): the beam-search curse grows with list length; the decode-time scoring rule is a
   first-order, dataset-dependent choice; the deep SID terms carry a structural sibling penalty.
