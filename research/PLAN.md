@@ -307,3 +307,31 @@ See `lit_ledger.md`, `architecture_directions.md`, `kernel_techniques.md`.
   early exit (first 6 layers) 0.086 / 0.145; parent state only 0.113 / 0.152 (adding E[b]−E[a] changes
   nothing). The bridge recovers most of what early exit loses but leaves −0.8 pt HR@1; its relative residual is
   ≈0.62 at every depth. A trade-off (F2 at 6/28 layers), not a free win.
+- **Distilled late-entry bridge (`scripts/train_bridge.py`, `rapidtinyrec/speedrun/bridge.py`).** Bridge =
+  ridge(h_a, E[b], E[a]) + MLP([rms(h_a), E[b], E[a]]) (2,048 hidden, output layer zero-initialized), trained
+  for 3 epochs (≈30 s on an H100) on 3,000 Office *validation* prompts by KL between the full-depth and the
+  late-entry third-code distributions (no item labels). Held-out KL 2.33 (ridge) → 0.088. Entry layer 22 (the
+  second forward runs 6 of 28 layers), all 4,866 Office test users, codebook w_c=0.5, FP16, vs full depth:
+  HR@1 0.0968 vs 0.0980 (−0.12 pt [−0.37, +0.12]), HR@10 0.1693 vs 0.1706 (−0.12 [−0.35, +0.08]), NDCG@10
+  0.1304 vs 0.1312 (−0.08 [−0.22, +0.04]); top-1 identical for 91.7% of users, top-10 overlap 92.2%. Ridge only:
+  −0.51 / −0.58 / −0.54 pt. Early exit at the same cost: −3.68 / −0.84 / −2.11 pt. Still above the MiniOneRec
+  reference decode (HR@1 0.0941, HR@10 0.1589, NDCG@10 0.1247). **The third code does not need the lower 22
+  layers.**
+- **Large K, latency (batch 1, FP16, template, Triton, compiled; cohort of 500).** `ExactTrieEngine`
+  (multi-child prefixes only): A6000 top-10 (M=16) 13.57 ms, top-50 (M=48) 14.08, top-100 (M=80) 14.70,
+  top-200 (M=128) 15.06, top-500 (M=256) 17.95; certification 100% at every K on the cohort. H100: 5.46 /
+  5.30 / 5.66 / 5.75 / 6.06 ms. Beam with trie scoring and the fused first level is the same two-forward
+  structure without a proof (select W prefixes by U2, one c-forward): H100 beam-50/100/200/500 5.55 / 5.75 /
+  6.26 / 7.25 ms.
+- **Large K vs MiniOneRec semantics (full-vocabulary scoring, forced suffix, beam-W).** H100 batch 1:
+  beam-100 9.90 ms, beam-500 18.12 ms vs certified top-100 5.66 / top-500 6.06 ms (3.0× at K=500, with a
+  proof and +2.4 pt HR@500 for the tuned codebook rule on Office). A6000: beam-trie W=50/100/200 14.24 /
+  15.10 / 17.00 ms vs certified top-50/100/200 14.08 / 14.70 / 15.06 ms.
+  **Throughput at K=500 (H100, users/s):** certified top-500 173 / 374 / 414 / 450 (B = 1/4/8/16);
+  beam-500 trie 132 / 229 / 253 (B = 1/4/8); MiniOneRec beam-500 54 / 68 / 71 → **6.4×**. K=100: certified
+  185 / 689 / 858 (B = 1/8/32). Top-10 trie engine (M=16): 182 / 837 / 1,223 users/s (B = 1/8/32), vs 904 for
+  the codebook three-stage engine at B=32.
+- **Bridge depth frontier (Office, all test users, vs full-depth third code):** entry 22 (6 layers) ΔHR@1
+  −0.12 [−0.37, +0.12], ΔNDCG@10 −0.08 (n.s.); entry 24 (4 layers) −0.27 [−0.58, +0.02] / −0.09 (n.s.);
+  entry 26 (2 layers) −0.45 [−0.78, −0.10] / −0.24 [−0.43, −0.06]. Ridge-only and early exit are worse at
+  every depth (early exit −3.3 to −3.7 pt HR@1).

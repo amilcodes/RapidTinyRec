@@ -207,6 +207,23 @@ class ExactEngine3(ExactEngine):
         self.exit_c = exit_c   # early exit (layer count) for the c-level forward; no-suffix scoring only
         assert exit_c is None or self.suffix_mode == 'none'
         self.N = n_expand if self.suffix_mode != 'none' else min(n_expand, n_prefix * cat.W2)
+        self.late, self.bridge = None, None
+
+    def set_late_entry(self, entry, bridge):
+        """Third-code forward runs only layers entry..L-1; its input is bridge(parent residual at
+        `entry`, E[b], E[a]) (rapidtinyrec/speedrun/bridge.py). Needs fuse_first and no forced suffix."""
+        assert self.fuse_first and self.suffix_mode == 'none' and self.exit_c is None
+        self.late, self.bridge = int(entry), bridge.to(self.W.device).eval()
+
+    def _f2_input(self, cap, ai, b_tok):
+        """Input rows for forward 2: token embeddings, or bridged parent states (late entry)."""
+        W = self.W
+        if self.late is None:
+            return W.embed[b_tok][:, :, None], 0
+        B = ai.shape[0]
+        ha = cap[self.late][torch.arange(B, device=ai.device)[:, None], ai][:, :, None]
+        x0 = self.bridge(ha, W.embed[b_tok][:, :, None], W.embed[self.cat.first[ai]][:, :, None])
+        return x0.to(W.dtype), self.late
 
     def alloc(self, B, P):
         W, dev, dt = self.W, self.W.device, self.W.dtype
@@ -226,10 +243,11 @@ class ExactEngine3(ExactEngine):
         neg = torch.finfo(torch.float32).min
         pmask = torch.where(torch.arange(P, device=dev)[None, :] < lengths[:, None], 0.0, neg)
         L0 = lengths[:, None, None]
+        cap = None if self.late is None else {self.late: None}
         if self.fuse_first:
             T0 = self._T0()
             hp, hn = fwd.prefill_tree(W.embed[tokens[:, T0:]], W.embed[cat.first][None].expand(B, nA, W.D), lengths,
-                                      bufs['kc'], bufs['vc'], bufs['kp2'], bufs['vp2'], tmpl=self.tmpl)
+                                      bufs['kc'], bufs['vc'], bufs['kp2'], bufs['vp2'], tmpl=self.tmpl, capture=cap)
             la = self._lp(hp[torch.arange(B, device=dev), lengths - 1 - T0], 0, cat.first[None].expand(B, -1), None)
         else:
             pos = torch.arange(P, device=dev)[None, :].expand(B, P)
@@ -251,8 +269,9 @@ class ExactEngine3(ExactEngine):
         # F3: one token (b) per prefix; private slot 0 = a's K/V from F2
         for kp, kp2 in ((bufs['kp3'], bufs['kp2']), (bufs['vp3'], bufs['vp2'])):
             kp[:, :, :, 0] = kp2[:, bidx, ai, 0]
-        h = fwd.step(W.embed[b_tok][:, :, None], (L0 + 1).expand(B, M, 1), bufs['kc'], bufs['vc'], pmask,
-                     bufs['kp3'], bufs['vp3'], 1, lengths=lengths, n_layers=self.exit_c)
+        x2, start = self._f2_input(cap, ai, b_tok)
+        h = fwd.step(x2, (L0 + 1).expand(B, M, 1), bufs['kc'], bufs['vc'], pmask,
+                     bufs['kp3'], bufs['vp3'], 1, lengths=lengths, n_layers=self.exit_c, start=start)
         t2, v2 = cat.t2[pair], cat.v2[pair]                # [B,M,W2]
         lc = self._lp(h[:, :, 0], 2, t2, v2).masked_fill(~v2, float('-inf'))
         u3 = (u2m[..., None] + lc).view(B, M * cat.W2)
@@ -330,8 +349,9 @@ class ExactTrieEngine(ExactEngine3):
         pmask = torch.where(torch.arange(P, device=dev)[None, :] < lengths[:, None], 0.0, torch.finfo(torch.float32).min)
         L0 = lengths[:, None, None]
         T0 = self._T0()
+        cap = None if self.late is None else {self.late: None}
         hp, hn = fwd.prefill_tree(W.embed[tokens[:, T0:]], W.embed[cat.first][None].expand(B, nA, W.D), lengths,
-                                  bufs['kc'], bufs['vc'], bufs['kp2'], bufs['vp2'], tmpl=self.tmpl)
+                                  bufs['kc'], bufs['vc'], bufs['kp2'], bufs['vp2'], tmpl=self.tmpl, capture=cap)
         la = self._lp(hp[torch.arange(B, device=dev), lengths - 1 - T0], 0, cat.first[None].expand(B, -1), None)
         lb = self._lp(hn, 1, cat.t1[None].expand(B, nA, cat.W1), cat.v1[None].expand(B, nA, cat.W1))
         lb = lb.masked_fill(~cat.v1[None], neg_inf).view(B, nA * cat.W1)
@@ -344,8 +364,9 @@ class ExactTrieEngine(ExactEngine3):
         pair = cat.pair_table[ai, col]
         for kp, kp2 in ((bufs['kp3'], bufs['kp2']), (bufs['vp3'], bufs['vp2'])):
             kp[:, :, :, 0] = kp2[:, bidx, ai, 0]
-        h = fwd.step(W.embed[b_tok][:, :, None], (L0 + 1).expand(B, M, 1), bufs['kc'], bufs['vc'], pmask,
-                     bufs['kp3'], bufs['vp3'], 1, lengths=lengths, n_layers=self.exit_c)
+        x2, start = self._f2_input(cap, ai, b_tok)
+        h = fwd.step(x2, (L0 + 1).expand(B, M, 1), bufs['kc'], bufs['vc'], pmask,
+                     bufs['kp3'], bufs['vp3'], 1, lengths=lengths, n_layers=self.exit_c, start=start)
         t2, v2 = cat.t2[pair], cat.v2[pair]
         lc = self._lp(h[:, :, 0], 2, t2, v2).masked_fill(~v2, neg_inf)
         u3 = (u2m[..., None] + lc).view(B, M * cat.W2)
