@@ -109,6 +109,7 @@ class Forward:
         self.attn = attn
         self.layer_fn = None   # optional compiled whole decode layer (see compile_layer)
         self.tree_fast = False  # fused first forward with Triton prompt/node attention (needs attn='triton')
+        self.store_fn = None    # optional compiled qkv_store (K/V cache writes fused into the RoPE kernel)
 
     def decode_layer(self, x, pos, kc, vc, kp, vp, lengths, s0: int, layer):
         """One decode layer with Triton beam attention; a single torch.compile region."""
@@ -146,6 +147,16 @@ class Forward:
 
     def final(self, x):
         return rmsnorm(x, self.W.norm, self.W.eps)
+
+    def qkv_store(self, x, layer, pos, kc, vc, kn, vn, Pn: int):
+        """qkv() that also writes K/V: prompt rows [:Pn] into kc/vc ([B,KV,Pn,hd] cache views),
+        the remaining rows into kn/vn ([B,n,KV,hd]). Compiled, the stores fuse into the RoPE kernel."""
+        q, k, v = self.qkv(x, layer, pos)
+        kc.copy_(k[:, :Pn].transpose(1, 2))
+        vc.copy_(v[:, :Pn].transpose(1, 2))
+        kn.copy_(k[:, Pn:])
+        vn.copy_(v[:, Pn:])
+        return q
 
     # -- trie-level prefill fusion: prompt [B,P,D] plus n first-level trie nodes [B,n,D] in ONE
     # forward. Prompt tokens are causal; node t attends to the user's real prompt (< L) and to
@@ -232,11 +243,15 @@ class Forward:
                 h = torch.cat([h, x0[:, :, 0].to(h.dtype)], 1)
                 pos = torch.cat([pos, (lengths[:, None] + 1).expand(B, R)], 1)
                 kp2, vp2 = late['kp'], late['vp']                               # [L,B,R,2,KV,hd]
-            q, k, v = self.qkv(h, layer, pos)
-            kcache[li][:, :, T0:P] = k[:, :Pn].transpose(1, 2)
-            vcache[li][:, :, T0:P] = v[:, :Pn].transpose(1, 2)
-            kpriv[li][:, :, 0] = k[:, Pn:Pn + n]
-            vpriv[li][:, :, 0] = v[:, Pn:Pn + n]
+            if R == 0 and self.store_fn is not None:
+                q = self.store_fn(h, layer, pos, kcache[li][:, :, T0:P], vcache[li][:, :, T0:P],
+                                  kpriv[li][:, :, 0], vpriv[li][:, :, 0], Pn)
+            else:
+                q, k, v = self.qkv(h, layer, pos)
+                kcache[li][:, :, T0:P] = k[:, :Pn].transpose(1, 2)
+                vcache[li][:, :, T0:P] = v[:, :Pn].transpose(1, 2)
+                kpriv[li][:, :, 0] = k[:, Pn:Pn + n]
+                vpriv[li][:, :, 0] = v[:, Pn:Pn + n]
             o = torch.empty(B, T + R, W.H * W.hd, device=dev, dtype=h.dtype)
             prompt_attention(q[:, :Pn], kcache[li], vcache[li], T0, self.scale, out=o[:, :Pn])
             beam_attention(q[:, Pn:Pn + n, None], kcache[li], vcache[li], kpriv[li], vpriv[li], lengths, 0, self.scale,

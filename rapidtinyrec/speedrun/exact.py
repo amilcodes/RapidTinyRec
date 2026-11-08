@@ -214,6 +214,8 @@ class ExactEngine3(ExactEngine):
         `entry`, E[b], E[a]) (rapidtinyrec/speedrun/bridge.py). Needs fuse_first and no forced suffix."""
         assert self.fuse_first and self.suffix_mode == 'none' and self.exit_c is None
         self.late, self.bridge = int(entry), bridge.to(self.W.device).eval()
+        if self.W.dtype in (torch.float16, torch.bfloat16):
+            self.bridge.half_(self.W.dtype)
 
     def _f2_input(self, cap, ai, b_tok):
         """Input rows for forward 2: token embeddings, or bridged parent states (late entry)."""

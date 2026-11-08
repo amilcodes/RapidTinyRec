@@ -106,6 +106,11 @@ Profile of the first engine version (BF16, eager): ≈24 ms GEMM at ≈65% of pe
 - **One CUDA graph per (batch, padded length)** with a shared memory pool; torch.compile fuses
   the per-layer elementwise work.
 
+- **Triton prompt attention for the fused first forward** (`--tree-fast`): the template K/V is
+  copied into the cache once per request, prompt rows attend causally over the cache with a
+  Triton kernel, trie-node rows reuse the shared-prefix beam kernel; no per-layer concat, K/V-head
+  repetition or mask tensors. H100: 5.47 → 4.56 ms for the certified top-10 decoder, identical
+  quality.
 - **Cached prompt template**: all MiniOneRec prompts share a 69-token instruction prefix; its K/V
   are computed once, so the fused first forward carries only the user-specific tail plus the
   first-level trie nodes (bit-identical outputs in FP32).
@@ -384,6 +389,18 @@ first-level prefill fusion, and the measurements.
 diffusion generate SID tokens in parallel; OneRec-V2's lazy decoder and GR4AD's LazyAR cut
 decoder compute; AtSpeed, SpecGR and PAD-Rec apply speculative decoding. All are
 complementary to exact decoding of an unmodified model.
+
+**Skipping layers.** Early exit (CALM, Schuster et al., 2022; LayerSkip, Elhoushi et al., 2024)
+truncates the *top* of the network; Mixture-of-Depths (Raposo et al., 2024) routes tokens around
+blocks with trained routers. SkipDecode (Del Corro et al., 2023) is closest in shape: later tokens
+skip *lower* layers, with the skipped layers' K/V copied from the last computed layer, after
+fine-tuning the model for that schedule. EAGLE (Li et al., 2024) drafts next-token *features* from
+the target model's top-layer feature and the next token's embedding. Late entry differs from all
+of these: the base model is frozen, the entry state of a child row is predicted from its *parent's*
+state at the same depth (which the trie-level prefill already computes), and the third-code
+forward that it shortens sits inside a certified search, so the speed-up composes with exactness
+guarantees for the (bridged) objective. We find the third SID code needs only its last 6–14 of 28
+layers when entered this way, whereas the second code is more sensitive.
 
 **Search and scoring.** DiGR (2602.07847) scores every legal SID of an LLM recommender by brute
 force (5 s/user) and finds it beats beam-50; 2611.01072 studies beam's first-step losses for

@@ -21,9 +21,16 @@ class Bridge(nn.Module):
         self.register_buffer('scale', torch.ones(1))
 
     def forward(self, ha, eb, ea):
-        """ha, eb, ea: [..., D] (any float dtype) -> x_e [..., D] float32."""
-        ha, eb, ea = ha.float(), eb.float(), ea.float()
-        lin = torch.cat([ha, eb, ea, torch.ones_like(ha[..., :1])], -1) @ self.R
-        hn = ha * torch.rsqrt(ha.pow(2).mean(-1, keepdim=True) + 1e-6)
+        """ha, eb, ea: [..., D] -> x_e [..., D]. Computes in the parameters' dtype (fp32 for training;
+        `half_()` casts a trained bridge to the serving dtype so its GEMMs use tensor cores)."""
+        dt = self.R.dtype
+        ha32 = ha.float()
+        ha_, eb, ea = ha.to(dt), eb.to(dt), ea.to(dt)
+        lin = torch.cat([ha_, eb, ea, torch.ones_like(ha_[..., :1])], -1) @ self.R
+        hn = (ha32 * torch.rsqrt(ha32.pow(2).mean(-1, keepdim=True) + 1e-6)).to(dt)
         z = torch.cat([hn, eb * self.scale, ea * self.scale], -1)
-        return ha + lin + self.out(torch.nn.functional.silu(self.inp(z)))
+        return ha32 + lin.float() + self.out(torch.nn.functional.silu(self.inp(z))).float()
+
+    def half_(self, dtype):
+        """Serving copy in `dtype` (parameters and buffers)."""
+        return self.to(dtype)
