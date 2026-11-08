@@ -541,3 +541,52 @@ Experiments:
 - **Dynamic per-token FP8 (W8A8, `--quant fp8`) is quality-neutral** (H100, `runs/tpfH` T1fp8): HR@10 0.1712,
   NDCG@10 0.1315 vs FP16 0.1712 / 0.1319 — unlike static tensor-wise FP8 (−2.4 pt).
 - **Inductor PDL + combo kernels (H100, `runs/latH`):** 2.96 → 2.89 ms (−2.4%; same allocation).
+- **Fused objective at large K (`runs/fuseK`, certified top-500, M=256, β=0.5; Office test):** HR@K for
+  LLM / LLM-top-500-then-rerank / certified exact fused: K=50 0.2509 / 0.2723 / 0.2727; K=100 0.3005 / 0.3282 /
+  0.3288; K=200 0.3697 / 0.4001 / **0.4071**; K=500 0.5037 / 0.5037 / **0.5434 (+4.0 pt)**; certified 100% at
+  every K. A retrieval stage that returns hundreds of candidates gains most: rerank cannot change the set.
+- **Joint (w_c, β) sweep (`runs/fuseJ`):** validation picks w_c=1.0, β=0.5 → test HR@10 0.1819 (+1.19 [+0.68,
+  +1.69] vs LLM at its own best w_c), NDCG@10 0.1386; the first sweep's w_c=0.75 gives 0.1825. Robust to w_c.
+- **Deeper cascade late entry (prefix-weighted, cascade on the layer-18 first-level states; `runs/bridgeC24`,
+  `runs/bridgeC26`):** entry 24 (4 of 28 layers): ΔHR@1 −0.02 [−0.25, +0.21], ΔHR@10 0.00 [−0.37, +0.37],
+  ΔNDCG@10 −0.04 [−0.21, +0.14]; **entry 26 (2 of 28 layers): ΔHR@1 0.00 [−0.25, +0.29], ΔHR@10 −0.04 [−0.41,
+  +0.33], ΔNDCG@10 −0.04 [−0.22, +0.15] — lossless** (the old uniform-KL e26 bridge lost 0.45 pt HR@1).
+  Forward 2 shrinks from 6 to 2 layer-passes.
+- **Throughput with dynamic FP8 (H100, `runs/tpfH`):** FP16 2,515 / 2,528 users/s at B = 64 / 128 → FP8
+  **2,920 / 3,065 (+16% / +21%)**, quality-neutral (above).
+- **Latency levers (H100, `runs/latH`, same allocation, median of 2×500):** baseline 2.96 / 3.13 ms (start / end
+  of job — ±5% drift); PDL + combo kernels 2.89; max-autotune 2.97; GemLite INT8 weight-only 3.43 (slower;
+  HR@10 0.1710, neutral). Only PDL is (marginally) positive.
+- **Model branch — trie-aligned SFT (`scripts/train_sft.py`, `runs/sftV1`):** 1 epoch on the train split
+  (38.9k rows, lr 1e-5, AdamW, bf16 autocast, A40, 17.5 min), loss = per-level CE over the decoder's own
+  restricted sets (codebook for a, b; valid children for c). Certified decoder (cbtrie 0.75, full depth):
+  valid HR@10 0.2429 / NDCG@10 0.2003; **test HR@10 0.1767, NDCG@10 0.1345, HR@50 0.2643**. Paired vs the
+  released checkpoint under the identical decoder (`runs/baseEV`, test 0.1677 / 0.1304 / 0.2446): **ΔHR@10
+  +0.90 [+0.27, +1.54], ΔNDCG@10 +0.41 [+0.04, +0.78], ΔHR@50 +1.97 [+1.15, +2.77]**, ΔHR@1 +0.02 (n.s.);
+  validation ΔHR@10 +1.27 [+0.68, +1.85]. Full-vocabulary CE control (same data/steps, `runs/sftV2`) pending —
+  needed before attributing the gain to the aligned loss.
+- **Industrial fusion (`runs/fuseI`, SASRec valid-tuned β=0.5, both cascade bridges at 18):** HR@10 0.1617 →
+  0.1668 (+0.51 [+0.07, +0.95]), NDCG@10 0.1177 → 0.1220 (+0.42 [+0.19, +0.66]), HR@50 +0.84 [+0.22, +1.48];
+  vs rerank50 HR@10 +0.18 [+0.02, +0.33]. Smaller than Office (SASRec weaker relative to the LLM there).
+- **Fusion in the CUDA graph (H100, `runs/fusH` B16, M=16):** 3.03 ms / 3.30 p95 (≈+0.1 ms for the per-request
+  bonus tables), HR@10 0.1827, NDCG@10 0.1391, top-10 certified 100% at M=16.
+- **Entry 24 on the H100 (`runs/e24H`, PDL+combo, same allocation):** third code at 22: 2.90 ms → at 24:
+  **2.77 ms**; HR@10 0.1695 / NDCG@10 0.1304 (vs 0.1712 / 0.1319 at 22 in `runs/casH`; bridge eval: lossless).
+- **Entry 26 on the H100 (`runs/e26H`, PDL+combo, gpu2802 — same node as `runs/e24H` E22 2.90 ms): 2.64 ms /
+  2.74 p95** (forward 2 = top 2 layers). Paired, all 4,866 users, vs the *full-depth* model under the same
+  decoder (`runs/baseEV`): ΔHR@10 +0.12 [−0.27, +0.51], ΔNDCG@10 0.00 [−0.20, +0.20], ΔHR@1 −0.12 [−0.39,
+  +0.14] — lossless. vs the entry-22 cascade (which sits +0.35 [−0.02, +0.74] above full depth): ΔHR@10 −0.23
+  [−0.41, −0.04], ΔNDCG@10 −0.15 [−0.27, −0.05]. Entry 24: 2.77 ms; vs entry 22 ΔHR@10 −0.16 [−0.35, 0.00].
+- **Industrial entry 26 is NOT lossless (`runs/bridgeI26`, cascade on layer-18 first-level states):** ΔHR@1
+  −0.46 [−0.79, −0.15], ΔHR@10 −0.18 [−0.51, +0.13], ΔNDCG@10 −0.32 [−0.51, −0.14] vs full depth. Industrial
+  keeps entry 18 (lossless). Two-layer entry is dataset-dependent.
+- **Throughput, entry 26 (H100, `runs/e26H`):** FP16 2,617 / 2,632 users/s (B = 64 / 128) vs 2,515 / 2,528 at
+  entry 22; **FP8 dynamic + entry 26: 3,040 / 3,171 users/s** (best). Fusion in the graph costs little in
+  throughput (`runs/fusH`, entry 22, FP16): 307 / 1,550 / 2,443 users/s at B = 1 / 8 / 64 (vs 2,515 at B=64).
+  E26 + fusion latency rerun showed a p95 outlier tail (12 ms; median 2.98) — recheck.
+- **Fine-tuned model + fusion (`runs/fuseS1`, full depth, valid-tuned β=0.3, w_c=0.75):** test **HR@10 0.1852**,
+  NDCG@10 0.1388, HR@50 0.2797; vs the fine-tuned model alone +0.84 [+0.41, +1.29] HR@10, +0.42 [+0.19, +0.66]
+  NDCG@10. Best Office number of the project (DASO 0.1834). vs the released checkpoint under the same decoder
+  (0.1677): +1.75.
+- **Original bridges on the fine-tuned model (`runs/sftBr`):** entry 22 HR@10 0.1743 / NDCG@10 0.1315, entry 26
+  0.1714 / 0.1294 (vs 0.1767 / 0.1345 full depth) → bridges should be retrained for a fine-tuned backbone.
