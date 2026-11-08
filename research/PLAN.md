@@ -373,3 +373,14 @@ See `lit_ledger.md`, `architecture_directions.md`, `kernel_techniques.md`.
   softmax of their U2 bounds), 4,300 validation prompts, 6 epochs. Industrial entry 18: ΔHR@1 −0.07 [−0.22,
   +0.09], ΔHR@10 −0.04 [−0.24, +0.18], ΔNDCG@10 −0.04 [−0.13, +0.05] (was −0.35 / −0.04 / −0.18); top-1 = full
   for 91.6%. Late entry is lossless on both datasets with 10 layers.
+- **Office bridge with prefix-weighted KL (4,600 validation prompts, 6 epochs), entry 22:** ΔHR@1 +0.27
+  [+0.12, +0.45], ΔHR@10 −0.04 [−0.25, +0.16], ΔNDCG@10 +0.10 [−0.01, +0.20]; top-1 = full 94.4%; HR@10 0.1702.
+- **H100 final kernel work (`runs/storeH`, paired):** FP16 bridge 3.24 ms (from 3.31 with the FP32 bridge);
+  compiled K/V stores (`--fuse-store`) **3.16 ms / 3.23 p95**, identical quality (HR@10 0.16790); profile 1,475
+  kernels, 3.47 ms GPU time per request.
+- **A6000 (`runs/fastA`):** trie M=16 13.65 → Triton prompt attention 13.26 → + late entry 22 **9.06 ms**
+  (HR@10 0.1677) → + compile-layer 9.07; late entry 18: 9.87 ms (HR@10 0.1685); codebook three-stage + fast +
+  late 22: 9.31 ms (HR@10 0.1691).
+- Graph-capture failures seen twice on the H100 with the FP32 bridge at batch > 1 (one-pass throughput at B=8;
+  entry-18 quality pass) while other jobs shared the node and the inductor cache reported stale NFS handles;
+  not reproduced with the FP16 bridge so far.
