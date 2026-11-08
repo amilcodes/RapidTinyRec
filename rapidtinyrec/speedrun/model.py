@@ -108,6 +108,7 @@ class Forward:
         self.scale = 1.0 / math.sqrt(W.hd)
         self.attn = attn
         self.layer_fn = None   # optional compiled whole decode layer (see compile_layer)
+        self.tree_fast = False  # fused first forward with Triton prompt/node attention (needs attn='triton')
 
     def decode_layer(self, x, pos, kc, vc, kp, vp, lengths, s0: int, layer):
         """One decode layer with Triton beam attention; a single torch.compile region."""
@@ -152,7 +153,9 @@ class Forward:
     # Optional shared template: if `tmpl` = (kt [L,KV,T0,hd], vt) holds the K/V of a prefix
     # shared by every prompt, `x` covers only prompt positions T0..P-1 and attends to the
     # cached template as well (exact: causal attention never lets the template see later tokens).
-    def prefill_tree(self, x, xn, lengths, kcache, vcache, kpriv, vpriv, tmpl=None, capture=None):
+    def prefill_tree(self, x, xn, lengths, kcache, vcache, kpriv, vpriv, tmpl=None, capture=None, capture_prompt=None):
+        if self.tree_fast and self.attn == 'triton':
+            return self._prefill_tree_fast(x, xn, lengths, kcache, vcache, kpriv, vpriv, tmpl, capture, capture_prompt)
         W = self.W
         B, Pn, _ = x.shape
         T0 = 0 if tmpl is None else tmpl[0].shape[2]
@@ -173,6 +176,8 @@ class Forward:
         for li, layer in enumerate(W.layers):
             if capture is not None and li in capture:
                 capture[li] = h[:, Pn:].clone()      # node residual stream entering layer li
+            if capture_prompt is not None and li in capture_prompt:
+                capture_prompt[li] = h[:, :Pn].clone()
             q, k, v = self.qkv(h, layer, pos)
             kt = k.transpose(1, 2)
             vt = v.transpose(1, 2)
@@ -189,6 +194,42 @@ class Forward:
                 q.transpose(1, 2), kfull.repeat_interleave(rep, 1), vfull.repeat_interleave(rep, 1),
                 attn_mask=mask[:, None], scale=self.scale)
             h = self.post(h, o.transpose(1, 2).reshape(B, T, W.H * W.hd), layer)
+        h = self.final(h)
+        return h[:, :Pn], h[:, Pn:]
+
+    def _prefill_tree_fast(self, x, xn, lengths, kcache, vcache, kpriv, vpriv, tmpl, capture, capture_prompt):
+        """Same math as prefill_tree with fewer kernels: the template K/V is copied into the cache once
+        per request (all layers in one copy), each layer writes only its new K/V, prompt rows use a
+        causal Triton kernel over the cache and trie-node rows use the shared-prefix beam kernel
+        (prompt prefix < L, private slot 0 = the node itself). No concat, repeat or mask tensors."""
+        from .kernels import beam_attention, prompt_attention
+        W = self.W
+        B, Pn, _ = x.shape
+        T0 = 0 if tmpl is None else tmpl[0].shape[2]
+        P = T0 + Pn
+        n = xn.shape[1]
+        T = Pn + n
+        dev = x.device
+        if T0:
+            kcache[:, :, :, :T0].copy_(tmpl[0][:, None].expand(-1, B, -1, -1, -1))
+            vcache[:, :, :, :T0].copy_(tmpl[1][:, None].expand(-1, B, -1, -1, -1))
+        pos = torch.cat([torch.arange(T0, P, device=dev)[None].expand(B, Pn), lengths[:, None].expand(B, n)], 1)
+        h = torch.cat([x, xn], 1)
+        for li, layer in enumerate(W.layers):
+            if capture is not None and li in capture:
+                capture[li] = h[:, Pn:].clone()
+            if capture_prompt is not None and li in capture_prompt:
+                capture_prompt[li] = h[:, :Pn].clone()
+            q, k, v = self.qkv(h, layer, pos)
+            kcache[li][:, :, T0:P] = k[:, :Pn].transpose(1, 2)
+            vcache[li][:, :, T0:P] = v[:, :Pn].transpose(1, 2)
+            kpriv[li][:, :, 0] = k[:, Pn:]
+            vpriv[li][:, :, 0] = v[:, Pn:]
+            o = torch.empty(B, T, W.H * W.hd, device=dev, dtype=h.dtype)
+            prompt_attention(q[:, :Pn], kcache[li], vcache[li], T0, self.scale, out=o[:, :Pn])
+            beam_attention(q[:, Pn:, None], kcache[li], vcache[li], kpriv[li], vpriv[li], lengths, 0, self.scale,
+                           out=o[:, Pn:].view(B, n, 1, W.H, W.hd))
+            h = self.post(h, o, layer)
         h = self.final(h)
         return h[:, :Pn], h[:, Pn:]
 
@@ -224,9 +265,10 @@ class Forward:
     # prefix K/V: [B, KV, P, hd] with additive prefix mask [B, P]
     # private K/V: [B, R, S, KV, hd]; the new tokens occupy slots [s0, s0+Q)
     def step(self, x, pos, kcache, vcache, pmask, kpriv, vpriv, s0, lengths=None, n_layers=None, start=0,
-             capture=None):
+             capture=None, functional=False):
         """start > 0: x is the residual stream entering layer `start` (late entry); layers below are
-        skipped for these rows. capture: dict {layer: None} filled with the input of those layers."""
+        skipped for these rows. capture: dict {layer: None} filled with the input of those layers.
+        functional: do not write the new K/V into kpriv (autograd-safe; torch attention path only)."""
         W = self.W
         B, R, Q, _ = x.shape
         rep = W.H // W.KV
@@ -249,9 +291,14 @@ class Forward:
             if capture is not None and i in capture:
                 capture[i] = x.clone()
             q, k, v = self.qkv(x, layer, pos)  # q [B,R,Q,H,hd], k/v [B,R,Q,KV,hd]
-            kpriv[i][:, :, s0:S] = k
-            vpriv[i][:, :, s0:S] = v
-            if self.attn == 'triton':
+            if functional:
+                kpi = torch.cat([kpriv[i][:, :, :s0], k], 2)
+                vpi = torch.cat([vpriv[i][:, :, :s0], v], 2)
+            else:
+                kpriv[i][:, :, s0:S] = k
+                vpriv[i][:, :, s0:S] = v
+                kpi, vpi = kpriv[i][:, :, :S], vpriv[i][:, :, :S]
+            if self.attn == 'triton' and not functional:
                 from .kernels import beam_attention
                 o = beam_attention(q, kcache[i], vcache[i], kpriv[i], vpriv[i], lengths, s0, self.scale)
                 x = self.post(x, o, layer)
@@ -264,7 +311,7 @@ class Forward:
             sp = sp.view(B, W.KV, R, Q * rep, P)
             # private scores: [B, R, KV, Q*rep, S]
             qr = q.view(B, R, Q, W.KV, rep, W.hd).permute(0, 1, 3, 2, 4, 5).reshape(B, R, W.KV, Q * rep, W.hd)
-            kp = kpriv[i][:, :, :S].permute(0, 1, 3, 4, 2)  # [B,R,KV,hd,S]
+            kp = kpi.permute(0, 1, 3, 4, 2)  # [B,R,KV,hd,S]
             ss = torch.matmul(qr, kp).float()  # [B,R,KV,Q*rep,S]
             ss = ss.view(B, R, W.KV, Q, rep, S) + cmask[None, None, None, :, None, :]
             ss = ss.view(B, R, W.KV, Q * rep, S).permute(0, 2, 1, 3, 4)  # [B,KV,R,Qr,S]
@@ -272,7 +319,7 @@ class Forward:
             probs = torch.softmax(scores, -1).to(x.dtype)
             pp, ps = probs.split([P, S], -1)
             op = torch.matmul(pp.reshape(B, W.KV, R * Q * rep, P), vcache[i]).view(B, W.KV, R, Q * rep, W.hd)
-            vp = vpriv[i][:, :, :S].permute(0, 3, 1, 2, 4)  # [B,KV,R,S,hd]
+            vp = vpi.permute(0, 3, 1, 2, 4)  # [B,KV,R,S,hd]
             os_ = torch.matmul(ps, vp)  # [B,KV,R,Qr,hd]
             o = (op + os_).view(B, W.KV, R, Q, rep, W.hd).permute(0, 2, 3, 1, 4, 5).reshape(B, R, Q, W.H * W.hd)
             x = self.post(x, o, layer)

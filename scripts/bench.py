@@ -65,6 +65,8 @@ def main():
     ap.add_argument('--weights', default=None, help='depth-discounted scoring weights wb,wc,ws')
     ap.add_argument('--beam', type=int, default=50)
     ap.add_argument('--ks', default='1,5,10,20,50', help='K values for certificates (exacttrie)')
+    ap.add_argument('--tree-fast', action='store_true', help='Triton prompt/node attention in the fused first forward')
+    ap.add_argument('--late-entry', default=None, help='ENTRY:BRIDGE.pt - third-code forward runs layers ENTRY.. from a bridge')
     ap.add_argument('--n-expand', type=int, default=64)
     ap.add_argument('--profile', action='store_true', help='eager kernel-time breakdown for a few users')
     ap.add_argument('--check-exhaustive', type=int, default=0, help='compare first K cohort users against exhaustive exact scoring')
@@ -99,6 +101,14 @@ def main():
         eng = ExactTrieEngine(W, cat, n_prefix=a.n_prefix, n_out=a.n_expand, fuse_first=True, ks=tuple(int(k) for k in a.ks.split(',')))
     else:
         eng = ExactEngine3(W, cat, n_prefix=a.n_prefix, n_expand=a.n_expand, suffix_mode=a.suffix, norm=a.norm, fuse_first=a.fuse_first, exit_c=a.exit_c)
+    if a.late_entry:
+        from rapidtinyrec.speedrun.bridge import Bridge
+        e_, path_ = a.late_entry.split(':', 1)
+        sd_ = torch.load(path_, map_location='cpu')
+        br_ = Bridge(W.D, sd_['inp.weight'].shape[0])
+        br_.load_state_dict(sd_)
+        eng.set_late_entry(int(e_), br_)
+        meta['late_entry'] = {'entry': int(e_), 'bridge': path_}
     if a.weights:
         wb, wc, ws = (float(x) for x in a.weights.split(','))
         eng.set_weights(wb, wc, ws)
@@ -121,6 +131,12 @@ def main():
         print(json.dumps({'stage': 'attn_selfcheck', **chk}), flush=True)
         assert chk['pass'], chk
         eng.fwd.attn = 'triton'
+        if a.tree_fast:
+            chk2 = kernels.selfcheck_prompt(dt)
+            meta['prompt_attn_selfcheck'] = chk2
+            print(json.dumps({'stage': 'prompt_attn_selfcheck', **chk2}), flush=True)
+            assert chk2['pass'], chk2
+            eng.fwd.tree_fast = True
     if a.compile != 'none':
         import torch._inductor.config as ic
         import torch._dynamo.config as dc

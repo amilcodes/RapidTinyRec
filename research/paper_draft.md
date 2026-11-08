@@ -126,6 +126,24 @@ p95 ms; HF and prior rows from earlier RapidTinyRec measurements on the same GPU
 | certified exact, trie scoring | **14.4** | 15.7 | top-50 certified 99.9%; HR@10 0.1648 |
 | certified exact, codebook, w_c = 0.5 (tuned on validation) | **14.4** | 15.6 | top-10 certified 99.7%; HR@10 0.1700 |
 
+Same ladder on an H100 (`runs/h100M`, one allocation, 2 × 500 requests per rung):
+
+| rung (H100) | median | p95 | fidelity / quality |
+|---|---:|---:|---|
+| speedrun engine, FP32 | 48.3 | 50.2 | top-10 set = reference 500/500 |
+| BF16, one CUDA graph | 20.1 | 22.4 | top-1 = FP32 465/500 |
+| + torch.compile | 12.9 | 13.0 | |
+| + trie-level prefill fusion + Triton beam attention | 8.50 | 8.66 | top-1 = FP32 491/500 |
+| + FP16 + cached template | 8.48 | 8.59 | top-1 = FP32 500/500 |
+| certified exact, trie | **5.57** | 5.74 | top-50 certified 100% (cohort) |
+| certified exact, codebook w_c = 0.5 | **5.66** | 5.76 | HR@10 0.1697 (full test) |
+
+On the H100 the engine is kernel-bound rather than bandwidth-bound: 2,555 kernels and 5.9 ms
+of GPU time per request, of which GEMMs are ≈3.1 ms (≈50% of HBM bandwidth) and small
+copy/concat/attention-prep kernels ≈2.8 ms; streaming the weights twice would take ≈1.6 ms.
+Compiling whole decode layers (incl. the Triton attention) saves 3.5% here (5.15 vs 5.33 ms in a
+paired run) but nothing on the A6000. FP8 W8A8 is slower on the H100 too (6.0 ms).
+
 The separate-suffix variant (two one-token forwards for `\n` and EOS) costs 55.9 vs 46.3 ms in the
 earlier paired ladder (`runs/ladderZ`), i.e. forced-suffix fusion saves ≈10 ms. Allocations of the
 same GPU type differ by up to ≈10% in absolute latency; ratios are taken within one allocation.
@@ -178,6 +196,48 @@ Skipping the second forward when the certificate already closes after the first 
 trie scoring, where single-child prefixes — 1,907 of 2,488 — have exact scores after F1)
 happens for 42% of users at K=1 but only 0.4% at K=10, so the second forward stays.
 
+### 5.1 What the certificate costs, as a function of K
+
+The second forward must expand every prefix whose bound exceeds the K-th exact score,
+{(a,b) : U2(a,b) > s_K}. From the exhaustive FP32 scores (all test users, both datasets):
+
+| prefixes to expand (median / p90 / p99) | K=10 | K=50 | K=100 | K=500 | K=1000 |
+|---|---|---|---|---|---|
+| Office, trie | 10 / 12 / 14 | 52 / 57 / 61 | 104 / 111 / 117 | 489 / 510 / 524 | 932 / 960 / 979 |
+| Office, codebook w_c=0.5 | 10 / 13 / 35 | 51 / 61 / 180 | 100 / 117 / 325 | 459 / 517 / 1,058 | 871 / 962 / 1,600 |
+| Office, full vocabulary (MiniOneRec) | 52 / 1,715 / 2,488 | 268 / 2,462 / 2,488 | 506 / 2,486 / 2,488 | — | — |
+| Industrial, trie | 10 / 13 / 16 | 52 / 60 / 65 | 103 / 115 / 123 | 470 / 501 / 522 | 881 / 922 / 948 |
+
+Under trie normalization the bound is almost tight: certifying the top K costs about K prefix
+expansions at every K, with a thin tail. Under the full-vocabulary objective the off-codebook
+leak and the suffix make U2 loose and certification needs nearly the whole trie. The
+normalization choice therefore decides whether exact search is affordable at all.
+
+Trie normalization gives a second saving. The third-code term is a log-softmax over the valid
+children of (a,b), so it is exactly 0 when (a,b) has one child: every item under a single-child
+prefix is exactly scored by the first forward. Only multi-child prefixes need the second
+forward (Office: 581 of 2,488 prefixes, holding 1,537 of 3,444 items):
+
+| multi-child prefixes to expand (median / p90 / p99) | K=10 | K=50 | K=100 | K=500 |
+|---|---|---|---|---|
+| Office, trie | 5 / 8 / 10 | 22 / 31 / 38 | 43 / 55 / 64 | 175 / 198 / 213 |
+| Industrial, trie | 6 / 9 / 12 | 29 / 37 / 43 | 53 / 65 / 75 | 205 / 238 / 259 |
+
+`ExactTrieEngine` expands only multi-child prefixes; its candidate pool is the expanded children
+plus every single-child item, both exact. It reproduces the three-stage engine rank-for-rank and
+score-for-score (FP32). A certified top-500 is still two forwards, the second carrying ≈210
+rows; beam-500 needs four forwards of 500 rows each (three with trie scoring).
+
+**One forward is not enough.** Two ways to drop the second forward fail:
+- *A user-independent third-code table* (per-item mean of s(c|ab) over validation users) keeps
+  HR@10 within 0.9 pt but drops HR@1 from 0.098 to 0.050 (−4.8 pt [−5.5, −4.1]). Item identity
+  explains 77% of the variance of s(c|ab) overall but only 42% within a user's top-50; the third
+  code orders siblings per user.
+- *Speculating the expansion set before the first forward* (from the user's previous request,
+  history prefixes or popularity) covers the full certificate set for top-10 in at most 29% of
+  requests with 128 guessed prefixes; certification needs the near-boundary prefixes too.
+Certification after the first forward alone happens for 44% of users at K=1 and 0.5% at K=10.
+
 ## 6. What exact decoding reveals about the objective
 
 **Beam search error is real but is not what limits quality.** From exhaustive FP32 scores of every
@@ -185,6 +245,17 @@ catalog SID for every test user (`scripts/dump_scores.py`), beam-50 under MiniOn
 full-vocabulary objective recovers 86% of the exact top-10 (top-1 exact for 99.8% of users), yet
 exhaustive search gives the same HR@10. Under codebook or trie normalization beam-50 is
 essentially exact (99.6% / 99.9% of the exact top-10).
+
+**The beam-search curse grows with list length.** Generative retrieval feeds hundreds of
+candidates to a ranker, so lists longer than 10 matter. Beam-W recovers only part of the exact
+top-W under the full objective (Office 49% at W=50, 53% at 100, 64% at 500; Industrial 67 / 69 /
+79%); under trie scoring 95 / 96 / 99.6%. Under the full objective, exact search *loses* recall
+and the loss grows with K (Office, paired bootstrap vs MiniOneRec's beam-W decode): HR@50 −1.8 pt
+[−2.5, −1.1], HR@100 −2.5 [−3.3, −1.7], HR@200 −3.5 [−4.4, −2.5], HR@500 −4.3 [−5.3, −3.2];
+Industrial −0.1 to −0.7 (n.s.). With the validation-tuned codebook objective exact search
+*gains* recall on both datasets: Office HR@100 +2.3 [+1.5, +3.0], HR@500 +2.4 [+1.4, +3.3];
+Industrial HR@200 +0.9 [+0.1, +1.6], HR@500 +0.9 [+0.0, +1.8]. Beam search's prefix-first pruning
+acts as an implicit depth discount; once the discount is explicit, exactness stops hurting.
 
 **The objective is mis-calibrated in its deep terms.** Three independent signals:
 1. Admitting fewer candidates by prefix bound improves HR@10 (N=16: +0.70 pt [+0.12, +1.29] vs the
