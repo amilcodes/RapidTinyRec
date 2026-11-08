@@ -357,3 +357,19 @@ See `lit_ledger.md`, `architecture_directions.md`, `kernel_techniques.md`.
   [−0.44, −0.13]; entry 18: −0.35 [−0.62, −0.11] / −0.04 / −0.18 [−0.33, −0.04]; ridge −0.8 to −1.0; early
   exit −2.4. Office entry 14: −0.02 / +0.14 / +0.05 (lossless). Late entry is lossless on Office from 10
   layers and costs ≈0.2–0.35 pt on Industrial; retraining with prefix-weighted KL queued (`runs/bridgeW`).
+- **FP32 brute-force validation of `ExactTrieEngine` (M=16, 300 cohort users, `runs/certT`):** 0 certificate
+  violations; top-10 certified 300/300; top-1/5/10 equal to exhaustive scoring of all 3,444 SIDs for every
+  user (search recall@20 0.9985, @50 0.919 — M=16 is sized for top-10/20).
+- **One-pass trie engine (`OnePassTrieEngine`, every item scored in one forward, H100):** top-50 4.11 ms,
+  top-500 4.37 ms; full-test quality identical to the two-pass certified decoder (HR@10 0.16790 both — the
+  certified two-pass top-50 equals the exhaustive optimum). Two-pass with late entry is faster: top-10 3.37 ms,
+  top-500 **3.81 ms** (H100, fast first forward + compile-layer, late entry 22).
+- **A6000 late entry (`runs/lateLA`, paired):** codebook three-stage 14.33 → **9.68 ms** (HR@1 0.0968, HR@10
+  0.1695); trie M=16 13.70 → **9.46 ms** (HR@10 0.1681). Triton prompt attention on the A6000: 13.65 → 13.26 ms
+  (GEMM-bound GPU; small gain). Throughput with late entry: 101 / 235 / 256 users/s (B = 1/8/32).
+- **H100 throughput, fast first forward + late entry + compile-layer:** 301 / 1,120 / 1,412 / **1,447** users/s
+  (B = 1/8/32/64).
+- **Better bridge training fixes Industrial:** prefix-weighted KL (half uniform over the 64 rows, half the
+  softmax of their U2 bounds), 4,300 validation prompts, 6 epochs. Industrial entry 18: ΔHR@1 −0.07 [−0.22,
+  +0.09], ΔHR@10 −0.04 [−0.24, +0.18], ΔNDCG@10 −0.04 [−0.13, +0.05] (was −0.35 / −0.04 / −0.18); top-1 = full
+  for 91.6%. Late entry is lossless on both datasets with 10 layers.
