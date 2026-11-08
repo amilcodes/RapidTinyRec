@@ -142,8 +142,9 @@
  "findings": [
   "Exact search makes objective fusion exact: adding a per-user collaborative term (\u03b2\u00b7log q from a SASRec trained in one minute) inside certified search keeps two forwards and 100% certification and lifts Office HR@10 from 0.1714 to 0.1825 (+1.11 [+0.62, +1.60]; MiniOneRec's FP32 beam decode: 0.1589) and HR@500 by 4.0 points \u2014 beam-then-rerank cannot change the candidate set. Industrial: +0.51 [+0.07, +0.95]. With random item values, LLM-top-50-then-rerank recovers only 50% of the exact top-10.",
   "Two-sided bounds: under trie normalization the best child of an n-child prefix scores at least \u2212log n, so the set of prefixes that guarantees the certificate is known right after the first forward. It averages \u2264 1.1\u00b7K prefixes at every K up to 500 and is within 1.2\u20132.1\u00d7 of the provable minimum for any bound-based decoder.",
-  "Late entry goes to the top 2 layers on Office: the third code enters at layer 26 of 28 (cascade bridge on the layer-18 first-level states), lossless against the full-depth model (\u0394HR@10 +0.12 [\u22120.27, +0.51]); certified top-10 in 2.64 ms on an H100. Industrial loses 0.46 pt HR@1 at layer 26 and keeps layer 18.",
-  "Model branch: one epoch of fine-tuning with the decoder's own restricted per-level softmax adds +0.90 [+0.27, +1.54] HR@10 on Office; with the SASRec term the fine-tuned model reaches HR@10 0.1852 (full depth) \u2014 above the best trained result we found on this split (DASO, 0.1834).",
+  "Late entry goes to the top 2 layers on Office: the third code enters at layer 26 of 28 (cascade bridge on the layer-18 first-level states), lossless against the full-depth model (\u0394HR@10 +0.12 [\u22120.27, +0.51]); certified top-10 in 2.75 ms on an H100 (2.72 ms with the SASRec term; MiniOneRec beam-50 in the same engine and allocation: 8.43 ms; certified top-500 with fusion: 2.92 ms). Industrial loses 0.46 pt HR@1 at layer 26 and keeps layer 18.",
+  "Filters are exact too: with 5% of items eligible, filtering the LLM's top 50 recovers only 30.5% of the exact filtered top-10 (HR@10 0.018 vs 0.029); certified search answers in the same two forwards, 100% certified under every filter tried.",
+  "Model branch (mostly negative): one more epoch of supervised fine-tuning on the train split adds +0.8 HR@10 and +2.0 HR@50 to the released checkpoint (with the SASRec term: HR@10 0.1852, full depth), but a loss aligned with the decoder's restricted normalization is no better than a full-vocabulary control (\u0394HR@10 +0.14 [\u22120.16, +0.47]).",
   "Throughput: dynamic per-token FP8 is quality-neutral (static FP8 lost 2.4 points) and with layer-26 entry reaches 3,171 users/s on one H100 (FP16 at layer 22: 2,528).",
   "Novelty check (five literature sweeps, ~400 papers, research/lit2/): the certificate is classical and was stated for GR as post-hoc beam completion (Beyond the Beam, Sep 2026); trie renormalization appears in ZeroGR; late injection of the previous SID exists in trained architectures (GR4AD LazyAR). Ours: certificate as the decoder, two-sided bounds, frozen-model late entry, exact fused objectives.",
   "New negatives: choosing the prefix rows inside forward 1 from a tuned-lens estimate (one-forward decoding) covers the certificate set for only 33\u201378% of users; custom Triton weight-streaming GEMMs lose to cuBLAS at \u2265 64 rows; GemLite INT8 is slower; max-autotune and PDL change latency by \u2264 2.4%.",
@@ -210,23 +211,32 @@
    "ours": true
   },
   {
-   "label": "+ first-level late entry (cascade), PDL",
-   "run": "e24H/E22",
+   "label": "final paired run: MiniOneRec beam-50 semantics, our FP16 engine",
+   "run": "finalH/P0beam"
+  },
+  {
+   "label": "final: certified exact (trie M=16, cbtrie 0.75)",
+   "run": "finalH/P1trie",
    "ours": true
   },
   {
-   "label": "third code enters at layer 24",
-   "run": "e24H/E24",
+   "label": "final: + both bridges (third code at layer 22)",
+   "run": "finalH/P2br22",
    "ours": true
   },
   {
-   "label": "third code enters at layer 26 (top 2 layers)",
-   "run": "e26H/E26",
+   "label": "final: third code at layer 26 (top 2 layers)",
+   "run": "finalH/P3br26",
    "ours": true
   },
   {
-   "label": "+ SASRec term inside certified search (HR@10 0.1827)",
-   "run": "fusH/B16",
+   "label": "final: + SASRec term in the graph (HR@10 0.1829)",
+   "run": "finalH/P4fus",
+   "ours": true
+  },
+  {
+   "label": "final: certified top-500 with fusion",
+   "run": "finalH/P6k500",
    "ours": true
   }
  ],

@@ -22,14 +22,16 @@ up to 500 and is within 1.2–2.1× of the provable minimum for any bound-based 
 28 (first-level rows at layer 18) from small bridges distilled from the parent node's state on the
 frozen model (validation prompts only, no labels), losslessly against the full-depth model
 (ΔHR@10 +0.12 [−0.27, +0.51], ΔNDCG@10 0.00 [−0.20, +0.20]). With a hand-written engine (one CUDA graph
-per request), a certified top-10 takes **2.64 ms on an H100** (MiniOneRec's beam-50 in the same engine:
-8.37 ms; Hugging Face `generate`: 869 ms on an A6000). Exact search also makes **objective fusion exact**:
+per request), a certified top-10 takes **2.75 ms on an H100** (MiniOneRec's beam-50 in the same engine and
+allocation: 8.43 ms; Hugging Face `generate`: 869 ms on an A6000), and a certified top-500 2.92 ms (beam-500:
+18.1 ms). Exact search also makes **objective fusion exact**:
 adding a per-user collaborative term (β·log q from a 1-minute SASRec) inside the certified search keeps
 two forwards and 100% certification and raises Office HR@10 from 0.1714 to **0.1825** (+1.11 [+0.62, +1.60];
 +2.36 points over MiniOneRec's FP32 beam decode of the same checkpoint, with no LLM training) and HR@500 by
 **4.0 points**, where beam-then-rerank cannot change the candidate set; Industrial gains +0.51 [+0.07,
-+0.95]. With random item values, beam-then-rerank recovers only 50% of the exact top-10. A short
-fine-tune whose loss matches the decoder's normalization adds +0.90 [+0.27, +1.54] HR@10 [control TBD].
++0.95]. With random item values, beam-then-rerank recovers only 50% of the exact top-10. One more
+epoch of supervised fine-tuning adds +0.8 HR@10 (+2.0 HR@50) to the released checkpoint — but matching the
+training loss to the decoder's normalization adds nothing beyond a full-vocabulary control.
 Dynamic per-token FP8 is quality-neutral and adds 16–21% throughput; custom weight-streaming GEMMs, a
 one-forward variant with in-flight prefix selection, and weight-only INT8 do not help at these shapes.
 
@@ -60,15 +62,32 @@ Contributions:
   Office and +0.51 HR@10 on Industrial at ~3 ms, beating beam-then-rerank wherever the term moves items
   outside the LLM's own top list.
 - **Engine and ladders** (A6000, H100) with a fidelity gate at every rung; batch-1 certified top-10 in
-  2.64 ms on an H100.
-- **Model branch**: a one-epoch fine-tune with the decoder's own restricted per-level softmax
-  (+0.90 HR@10 [control TBD]).
+  2.75 ms on an H100 (2.72 ms with the fused SASRec term), certified top-500 in 2.92 ms.
+- **Model branch (mostly negative)**: one more SFT epoch helps the released checkpoint (+0.8 HR@10,
+  +2.0 HR@50; with the SASRec term HR@10 0.1852), but a loss aligned with the decoder's restricted
+  normalization is no better than full-vocabulary CE (ΔHR@10 +0.14 [−0.16, +0.47]).
 - **Exact search as an instrument** (exhaustive FP32 scores, both datasets): the beam-search curse grows
   with list length; the decode-time scoring rule is a first-order, dataset-dependent choice.
 - Negative results: one forward is not enough (user-independent third-code tables, speculation, and
   in-flight prefix selection with a tuned lens all fail to cover the certificate set); late entry of
   the *second* code below layer 18 is a trade-off; custom weight-streaming GEMMs lose to cuBLAS at ≥ 64
   rows; weight-only INT8/INT4 and static FP8 do not help (dynamic FP8 is neutral, +16–21% throughput).
+
+**Headline (Office, H100, batch 1, one allocation, median of 2×500 requests; quality on all 4,866 test
+users; `runs/finalH`).**
+
+| decoder | ms | p95 | HR@10 | NDCG@10 | certified top-10 |
+|---|---:|---:|---:|---:|---:|
+| MiniOneRec beam-50 semantics, our FP16 engine | 8.43 | 8.57 | 0.1587* | — | — |
+| certified exact, trie M=16, cbtrie 0.75 (full depth) | 4.35 | 4.53 | 0.1677 | 0.1304 | 100% |
+| + both bridges (first level at 18, third code at 22) | 2.93 | 3.05 | 0.1712 | 0.1319 | 100% |
+| third code at 26 (top 2 of 28 layers) | 2.75 | 3.00 | 0.1689 | 0.1304 | 100% |
+| + SASRec term inside the certified search (β = 0.5) | **2.72** | 2.97 | **0.1829** | **0.1390** | 100% |
+| certified top-500 with fusion | 2.92 | 3.03 | — | — | top-500: 100% |
+| throughput, FP8 dynamic + fusion, B = 128 | 3,155 users/s | | 0.1819 | 0.1382 | 100% |
+
+\*MiniOneRec FP32 reference decode: 0.1589. Quality rows for the bridge configurations come from the
+matching quality runs (`runs/casH`, `runs/e26H`, `runs/baseEV`).
 
 ## 2. Setting
 
@@ -435,6 +454,15 @@ then rerank" (an upper bound on any beam-50 + rerank pipeline) recovers 99.99 / 
 the exact top-10 at λ = 0.25 / 0.5 / 1 / 2 (Office, 2,000 users); certified search stays 100% certified
 at M = 32.
 
+*Filters.* A filter (inventory, region, policy) is an item term of 0 or −∞; a prefix whose items are all
+excluded gets bound −∞ and is never expanded. Certified search returns the exact top-K *eligible* items in
+the same two forwards and certified 100% of users under every filter we tried. Filtering the LLM's own
+top-50 afterwards recovers 99.6 / 92.8 / **30.5%** of the exact filtered top-10 at 50 / 20 / 5% random
+eligibility (3 items survive at 5%), and 88.3 / 68.0% when only 25 / 10% of first codes are allowed; HR@10 at
+5% eligibility drops from 0.029 to 0.018. Filtering a top-500 list recovers ≈99.7% (residual: FP16 near-ties
+across batch shapes) — i.e. filter-after-retrieval needs a ~10× longer candidate list to match two
+certified forwards (Office, 2,000 users, `runs/filtS`).
+
 *Collaborative fusion.* A SASRec (2 layers, d = 64, train split, 58 s on one GPU; alone: test HR@10 0.1500, NDCG@10 0.1156) supplies
 v_u(i) = β log q(i | history). β is chosen on validation (0.5). Office test, all 4,866 users:
 
@@ -449,6 +477,29 @@ vs rerank: ΔHR@10 +0.25 [+0.08, +0.43], ΔNDCG@10 +0.13 [+0.04, +0.23]. Against
 of the same checkpoint (0.1589) this is +2.36 points of HR@10 with no LLM training — on par with the best
 *trained* result we found on the same split (DASO, 0.1834) and above S-GRec, V-STAR and SA-OPSD
 (0.1689–0.1747). [Industrial: TBD `runs/fuseI`; H100 latency with the in-graph term: TBD `runs/fusH`.]
+
+### 6.y Training the model the decoder sees
+
+MiniOneRec is trained with full-vocabulary next-token cross-entropy, but our decoder ranks with
+per-level log-softmax over restricted sets (codebook for the first two codes, valid trie children for
+the third). We fine-tune the released checkpoint for one epoch on its own train split (38.9k rows,
+lr 1e-5, AdamW, bf16 autocast, one A40, 17.5 min) with exactly that restricted per-level cross-entropy on
+the three SID positions (`scripts/train_sft.py`). Same certified decoder, full depth, all test users:
+
+| Office test (certified, cbtrie 0.75, full depth) | HR@1 | HR@10 | NDCG@10 | HR@50 |
+|---|---:|---:|---:|---:|
+| released checkpoint | 0.0988 | 0.1677 | 0.1304 | 0.2446 |
+| + 1 epoch, decoder-aligned restricted CE | 0.0991 | 0.1767 | 0.1345 | 0.2643 |
+| + 1 epoch, full-vocabulary CE (control) | 0.0978 | 0.1753 | 0.1337 | 0.2643 |
+| aligned fine-tune + SASRec term (β = 0.3) | 0.1011 | **0.1852** | 0.1388 | 0.2797 |
+
+Aligned vs released: ΔHR@10 +0.90 [+0.27, +1.54], ΔNDCG@10 +0.41 [+0.04, +0.78], ΔHR@50 +1.97 [+1.15, +2.77]
+(validation ΔHR@10 +1.27). **But the control gets almost all of it:** aligned vs full-vocabulary CE ΔHR@10
++0.14 [−0.16, +0.47], ΔNDCG@10 +0.08 [−0.07, +0.24], ΔHR@50 0.00 (validation ΔHR@10 −0.14). One more SFT epoch
+helps the released checkpoint; matching the training normalization to the decoder's does not measurably
+add to it — a negative result for the "align training with decoding" hypothesis. Bridges trained on the released model transfer imperfectly (entry 22: HR@10
+0.1743), so a fine-tuned backbone needs its own bridges (~25 min). [Industrial replication and a second
+seed: TBD.]
 
 ## 7. Precision and quantization
 
