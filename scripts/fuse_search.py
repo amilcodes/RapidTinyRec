@@ -60,6 +60,7 @@ def main():
     ap.add_argument('--tag', default='office')
     ap.add_argument('--large-k', action='store_true', help='also: certified top-500 with the fused objective')
     ap.add_argument('--beta', type=float, default=None, help='skip validation; use this beta')
+    ap.add_argument('--wc-grid', default=None, help='joint grid: third-code weights w_c (b weight 1), e.g. 0.5,0.75,1')
     a = ap.parse_args()
     out = Path(a.out); out.mkdir(parents=True, exist_ok=True)
     dev = torch.device('cuda')
@@ -109,30 +110,43 @@ def main():
         print(json.dumps({'stage': 'eval', 'part': 'largeK', 'beta': a.beta, 'HR': res, 'cert_fused': cert}), flush=True)
         (out / f'fuse_largek_{a.tag}.json').write_text(json.dumps({'beta': a.beta, 'HR': res, 'cert_fused': cert}, indent=1))
         return
-    base_v = run(eng, vids, vidx, eos, dev)
-    val = {}
-    for beta in [float(x) for x in a.betas.split(',')]:
-        rv = base_v if beta == 0 else run(eng, vids, vidx, eos, dev, lq_v, beta)
-        rr = {i: sorted(base_v[i][0], key=lambda s, i=i: -(base_v[i][1][base_v[i][0].index(s)] + beta * float(lq_v[i, sid_index[s]])))
-              for i in base_v}
-        val[beta] = {'exact': agg(per_user({i: rv[i][0] for i in rv}, vtg)), 'rerank50': agg(per_user(rr, vtg)),
-                     'cert10': sum(rv[i][2][2] for i in rv) / len(rv)}
-        print(json.dumps({'stage': 'eval', 'part': 'valid', 'beta': beta, **val[beta]}), flush=True)
-    b_ex = max(val, key=lambda b: val[b]['exact']['NDCG@10'])
-    b_rr = max(val, key=lambda b: val[b]['rerank50']['NDCG@10'])
-    base_t = run(eng, ids, tidx, eos, dev)
+    wcs = [float(x) for x in a.wc_grid.split(',')] if a.wc_grid else [eng.level_w[2]]
+    wb = eng.level_w[1]
+    val, joint = {}, {}
+    for wc in wcs:
+        eng.set_weights(wb, wc, 0.0)
+        base_v = run(eng, vids, vidx, eos, dev)
+        for beta in [float(x) for x in a.betas.split(',')]:
+            rv = base_v if beta == 0 else run(eng, vids, vidx, eos, dev, lq_v, beta)
+            rr = {i: sorted(base_v[i][0], key=lambda s, i=i: -(base_v[i][1][base_v[i][0].index(s)] + beta * float(lq_v[i, sid_index[s]])))
+                  for i in base_v}
+            rec = {'exact': agg(per_user({i: rv[i][0] for i in rv}, vtg)), 'rerank50': agg(per_user(rr, vtg)),
+                   'cert10': sum(rv[i][2][2] for i in rv) / len(rv)}
+            joint[(wc, beta)] = rec
+            if wc == wcs[0] or len(wcs) == 1:
+                val[beta] = rec
+            print(json.dumps({'stage': 'eval', 'part': 'valid', 'wc': wc, 'beta': beta, **rec}), flush=True)
+    wc_ex, b_ex = max(joint, key=lambda k: joint[k]['exact']['NDCG@10'])
+    wc_rr, b_rr = max(joint, key=lambda k: joint[k]['rerank50']['NDCG@10'])
+    wc0 = max(wcs, key=lambda w: joint[(w, 0.0)]['exact']['NDCG@10']) if (wcs[0], 0.0) in joint else wcs[0]
+    eng.set_weights(wb, wc0, 0.0)
+    base_t = run(eng, ids, tidx, eos, dev)                        # LLM alone at its own best w_c
+    eng.set_weights(wb, wc_rr, 0.0)
+    base_rr = base_t if wc_rr == wc0 else run(eng, ids, tidx, eos, dev)
+    eng.set_weights(wb, wc_ex, 0.0)
     rt = run(eng, ids, tidx, eos, dev, lq_t, b_ex)
-    rr = {i: sorted(base_t[i][0], key=lambda s, i=i: -(base_t[i][1][base_t[i][0].index(s)] + b_rr * float(lq_t[i, sid_index[s]])))
-          for i in base_t}
+    rr = {i: sorted(base_rr[i][0], key=lambda s, i=i: -(base_rr[i][1][base_rr[i][0].index(s)] + b_rr * float(lq_t[i, sid_index[s]])))
+          for i in base_rr}
     pu_llm = per_user({i: base_t[i][0] for i in base_t}, tg)
     pu_ex = per_user({i: rt[i][0] for i in rt}, tg)
     pu_rr = per_user(rr, tg)
-    test = {'beta_exact': b_ex, 'beta_rerank': b_rr, 'llm': agg(pu_llm), 'exact_fused': agg(pu_ex), 'rerank50_fused': agg(pu_rr),
+    test = {'beta_exact': b_ex, 'beta_rerank': b_rr, 'wc_exact': wc_ex, 'wc_rerank': wc_rr, 'wc_llm': wc0, 'llm': agg(pu_llm), 'exact_fused': agg(pu_ex), 'rerank50_fused': agg(pu_rr),
             'cert10_fused': sum(rt[i][2][2] for i in rt) / len(rt),
             'd_exact_vs_llm': {k: boot(pu_ex, pu_llm, k) for k in ('HR@1', 'HR@10', 'NDCG@10', 'HR@50')},
             'd_exact_vs_rerank': {k: boot(pu_ex, pu_rr, k) for k in ('HR@1', 'HR@10', 'NDCG@10', 'HR@50')}}
     print(json.dumps({'stage': 'eval', 'part': 'test', **test}), flush=True)
-    (out / f'fuse_{a.tag}.json').write_text(json.dumps({'valid': val, 'test': test}, indent=1))
+    (out / f'fuse_{a.tag}.json').write_text(json.dumps({'valid': val, 'joint': {f'{k[0]},{k[1]}': v for k, v in joint.items()},
+                                                        'test': test}, indent=1))
     print(json.dumps({'stage': 'done'}), flush=True)
 
 
