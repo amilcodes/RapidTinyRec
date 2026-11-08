@@ -434,3 +434,8 @@ See `lit_ledger.md`, `architecture_directions.md`, `kernel_techniques.md`.
 - First-level late entry at layer 22 (weighted): ΔHR@1 −0.12, ΔHR@10 −0.12, ΔNDCG@10 −0.12 (all n.s.), 71% top-10
   prefix agreement — layer 18 is better (81%). With the old third-code bridge stacked on late first-level
   states: ΔHR@1 −1.05 [−1.46, −0.68] → cascade-trained third-code bridge queued (`runs/bridgeCas`).
+- **FP8 ceiling on the H100 (`runs/fp8H`, GEMM-only, 28 layers per forward):** FP16 1.18 / 1.24 / 1.58 / 1.58
+  / 3.33 ms at M = 16 / 64 / 144 / 224 / 704; FP8 e4m3 with tensor-wise scales 0.65 / 0.71 / 0.90 / 0.97 /
+  2.21 (1.5–1.8×); FP8 row-wise with BF16 output 1.64 / 1.56 / 1.72 / 1.62 / 2.85 (slower than FP16 at ≤224 rows —
+  why the earlier per-token FP8 path lost). Static tensor-wise FP8 with SmoothQuant folding (smoothing factors
+  folded into ln1, ln2, the v rows of wqkv and the up rows of wgu; `--fp8-smooth`) queued (`runs/fp8sH`).
