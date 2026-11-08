@@ -11,6 +11,26 @@ Survey date: 2026-11-07. Scope: inference and serving optimizations for semantic
 
 ---
 
+## Update, 2026-11-08 (third session): five deeper sweeps in `research/lit2/`
+
+`1_gr_inference.md` (~75 GR inference papers), `2_exact_search.md` (~55, exact/certified search),
+`3_layer_skip_kv.md` (~100, layer skipping / KV reuse), `4_model_quality.md` (~70, leaderboards and
+training), `5_kernels.md` (small-batch kernels). Changes to the claims below:
+- **Certificate:** *Beyond the Beam* (2609.33745) already states the top-K certificate for GR, as post-hoc
+  completion after beam-40 (full-vocabulary scores; certifies top-20 for 4.5–77.6% of queries). Lineage:
+  Stahlberg & Byrne 2019, Stahlberg et al. 2022 (exact n-best), PLT best-first search, Fagin's TA. Our claim is
+  the certificate *as the decoder* (100% certified, two forwards) plus two-sided trie bounds.
+- **Normalization:** ZeroGR (2611.04715) renormalizes over valid children for compute (finds the ranking
+  effect negligible on a small model).
+- **Late entry:** GR4AD LazyAR (2602.22732, trained late injection of the previous SID), FIRP/Hidden Transfer
+  (2404.12022, mid-layer states of unknown future tokens), BRIDGE (2611.07425, per-level loop budgets),
+  DMTD (2510.11958). Ours: frozen backbone, same-depth parent-state bridge, composes with the certificate.
+- **Quality leaderboard (same split):** Office HR@10 DASO 0.1834, SA-OPSD 0.1747, V-STAR 0.1746, S-GRec 0.1689;
+  Industrial SA-OPSD 0.1690. Ours: 0.1825 (no training, fusion) / 0.1854 (one extra SFT epoch + fusion).
+- **Fusion prior art:** CAPE / TCBSA / D3 add collaborative signals at decode time heuristically or with beam;
+  value-aware decoders (V-STAR, UAGR, GR4AD-X) patch pruning heuristically. Exact fused top-K with a
+  certificate: not found.
+
 ## 0. Summary
 
 - **The systems layer is crowded.** Every core mechanism in RapidTinyRec already has published or open-source precedent from 2025–2026:
