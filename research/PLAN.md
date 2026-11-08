@@ -477,3 +477,7 @@ See `lit_ledger.md`, `architecture_directions.md`, `kernel_techniques.md`.
 - **A6000 with both bridges (`runs/casA`, fixed code, paired):** third-code bridge only 8.96 ms → both bridges
   **8.20 ms / 8.79 p95**; full-test HR@1 0.0993, HR@10 0.1712, NDCG@10 0.1318 (= H100). Industrial A6000 baseline
   (certified trie, no bridges, `runs/casIA`): 11.18 ms.
+- **Throughput with both bridges, fixed code (users/s at B = 1/8/32/64; length-sorted batches, i.e. a best case):**
+  Office A6000 (`runs/casA`) 119 / 398 / 465 / **483**; Industrial A6000 (`runs/casIA`) 129 / 461 / 563 / 596;
+  Industrial H100 (`runs/casIH`) 309 / 1,783 / 2,858 / **3,068**; Office H100 (`runs/casH`) 325 / 1,677 / 2,436 /
+  2,575. Industrial A6000 latency: 11.18 ms (no bridges) → 7.67 ms (both bridges), paired.
