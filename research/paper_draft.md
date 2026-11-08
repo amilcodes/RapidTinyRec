@@ -238,6 +238,43 @@ rows; beam-500 needs four forwards of 500 rows each (three with trie scoring).
   requests with 128 guessed prefixes; certification needs the near-boundary prefixes too.
 Certification after the first forward alone happens for 44% of users at K=1 and 0.5% at K=10.
 
+### 5.2 Late entry: the third code does not need the lower layers
+
+The logit lens shows SID codes are decided in the last 6–9 of 28 layers, and early exit (running
+only the *first* k layers for the third code) keeps HR@10 but loses 3.3–3.7 points of HR@1. We
+instead let the prefix rows of the second forward *enter late*: a row (a,b) starts at layer e with
+an input built from its parent node's residual stream at layer e — already computed for every
+first code in forward 1 — and runs layers e..27 with exact attention to the prompt and parent
+K/V. The input is produced by a small bridge,
+
+    x_e(a,b) = h_e(a) + R_e [h_e(a); E[b]; E[a]; 1] + MLP_e([rms(h_e(a)); E[b]; E[a]]),
+
+where R_e is a ridge fit (label-free) and the MLP (2,048 hidden units, output zero-initialized)
+is distilled from the model itself: KL between the full-depth and the late-entry third-code
+distributions on 3,000 MiniOneRec *validation* prompts, three epochs, ≈30 s on one H100. No
+item labels are used and the base model is frozen; the certificate stays valid for the
+late-entry objective.
+
+Office, all 4,866 test users, validation-tuned codebook objective, FP16, paired against the
+full-depth third code (HR@1 0.0980, HR@10 0.1706, NDCG@10 0.1312):
+
+| second forward | layers | ΔHR@1 | ΔHR@10 | ΔNDCG@10 | top-1 = full |
+|---|---:|---|---|---|---:|
+| early exit (first k layers) | 6 | −3.68 [−4.34, −3.08] | −0.84 [−1.29, −0.39] | −2.11 [−2.44, −1.77] | 53% |
+| late entry, parent state only | 6 | −2.7 (2,000 users) | — | −2.2 | 54% |
+| late entry, ridge bridge | 6 | −0.51 [−0.86, −0.14] | −0.58 [−1.05, −0.14] | −0.54 [−0.80, −0.29] | 66% |
+| **late entry, distilled bridge** | **6** | **−0.12 [−0.37, +0.12]** | **−0.12 [−0.35, +0.08]** | **−0.08 [−0.22, +0.04]** | **92%** |
+| late entry, distilled bridge | 4 | −0.27 [−0.58, +0.02] | +0.04 | −0.09 [−0.26, +0.07] | 90% |
+| late entry, distilled bridge | 2 | −0.45 [−0.78, −0.10] | −0.09 | −0.24 [−0.43, −0.06] | 86% |
+
+With six layers the distilled bridge is statistically indistinguishable from the full-depth
+second forward on every metric and still well above the MiniOneRec reference decode (HR@1
+0.0968 vs 0.0941, HR@10 0.1693 vs 0.1589). The second forward then reads 6/28 of the weights.
+In the engine (CUDA graph, FP16, H100, paired run): certified decoding **4.17 ms vs 5.57 ms**
+(−25%); quality on the full test set reproduces the offline evaluation exactly (HR@10 0.1693).
+[A6000: pending `runs/lateLA`.]
+
+
 ## 6. What exact decoding reveals about the objective
 
 **Beam search error is real but is not what limits quality.** From exhaustive FP32 scores of every

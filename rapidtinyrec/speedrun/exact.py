@@ -383,3 +383,67 @@ class ExactTrieEngine(ExactEngine3):
         sid = torch.stack([a_tok, b_out, c_out], -1)
         cert = torch.stack([final[:, kk - 1] >= bound_pref for kk in self.ks if kk <= N], -1)
         return {'sids': sid, 'scores': final, 'certified': cert, 'next_bound': bound_pref}
+
+
+class OnePassTrieEngine(ExactTrieEngine):
+    """Every catalog item scored in ONE forward (trie scoring, late entry).
+
+    Forward 1 carries the prompt and every first code a (as before); at layer `entry` every
+    multi-child prefix (a,b) of the catalog joins as an extra row whose input is the bridge applied
+    to its parent's residual at that layer; it attends to the prompt, its parent and itself.
+    Single-child items need no third-code term (trie scoring), so after this one forward every
+    item has its exact (late-entry) score: the top-N is the exhaustive optimum, no certificate needed.
+    Rows in the last L-entry layers: prompt tail + |A| + #multi-child prefixes (Office 88 + 581).
+    """
+
+    def __init__(self, W, cat, n_out=50, **kw):
+        kw.pop('n_prefix', None)
+        super().__init__(W, cat, n_prefix=1, n_out=n_out, **kw)
+        flat = torch.nonzero(self.multi_flat).flatten()           # flat (a*W1 + j) of multi-child prefixes
+        self.mp_flat = flat
+        self.mp_a = flat // cat.W1
+        self.mp_b = cat.t1.view(-1)[flat]
+        self.mp_pair = cat.pair_table.view(-1)[flat]
+        self.R = flat.numel()
+
+    def alloc(self, B, P):
+        bufs = super().alloc(B, P)
+        W, dev, dt = self.W, self.W.device, self.W.dtype
+        z = lambda *s: torch.zeros(*s, device=dev, dtype=dt)
+        bufs['kpr'] = z(W.L, B, self.R, 2, W.KV, W.hd)
+        bufs['vpr'] = z(W.L, B, self.R, 2, W.KV, W.hd)
+        return bufs
+
+    def run(self, tokens, lengths, bufs):
+        W, cat, fwd, N = self.W, self.cat, self.fwd, self.N
+        assert self.late is not None and fwd.tree_fast and fwd.attn == 'triton'
+        B, P = tokens.shape
+        dev = tokens.device
+        nA = len(cat.first)
+        neg_inf = float('-inf')
+        T0 = self._T0()
+        late = dict(entry=self.late, bridge=self.bridge, parent=self.mp_a, b_tok=self.mp_b,
+                    a_tok=cat.first[self.mp_a], kp=bufs['kpr'], vp=bufs['vpr'])
+        hp, hn, hr = fwd._prefill_tree_fast(W.embed[tokens[:, T0:]], W.embed[cat.first][None].expand(B, nA, W.D), lengths,
+                                            bufs['kc'], bufs['vc'], bufs['kp2'], bufs['vp2'], self.tmpl, None, None, late=late)
+        la = self._lp(hp[torch.arange(B, device=dev), lengths - 1 - T0], 0, cat.first[None].expand(B, -1), None)
+        lb = self._lp(hn, 1, cat.t1[None].expand(B, nA, cat.W1), cat.v1[None].expand(B, nA, cat.W1))
+        lb = lb.masked_fill(~cat.v1[None], neg_inf).view(B, nA * cat.W1)
+        u2 = la.repeat_interleave(cat.W1, dim=1) + lb             # [B, nA*W1]
+        t2, v2 = cat.t2[self.mp_pair][None].expand(B, -1, -1), cat.v2[self.mp_pair][None].expand(B, -1, -1)
+        lc = self._lp(hr, 2, t2, v2).masked_fill(~v2, neg_inf)    # [B, R, W2]
+        u3 = (u2[:, self.mp_flat][..., None] + lc).reshape(B, -1)
+        single = u2.masked_fill(~self.single_flat[None], neg_inf)
+        pool = torch.cat([u3, single], 1)
+        final, idx = pool.topk(N, -1)
+        RW = self.R * cat.W2
+        is_r = idx < RW
+        r_idx = idx.clamp(max=RW - 1)
+        row = r_idx // cat.W2
+        s_idx = (idx - RW).clamp(min=0)
+        a_tok = torch.where(is_r, cat.first[self.mp_a[row]], self.flat_a[s_idx])
+        b_out = torch.where(is_r, self.mp_b[row], self.flat_b[s_idx])
+        c_out = torch.where(is_r, t2.reshape(B, -1).gather(1, r_idx), self.single_c[s_idx])
+        sid = torch.stack([a_tok, b_out, c_out], -1)
+        cert = torch.ones(B, len([k for k in self.ks if k <= N]), dtype=torch.bool, device=dev)
+        return {'sids': sid, 'scores': final, 'certified': cert}

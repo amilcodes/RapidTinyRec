@@ -335,3 +335,14 @@ See `lit_ledger.md`, `architecture_directions.md`, `kernel_techniques.md`.
   −0.12 [−0.37, +0.12], ΔNDCG@10 −0.08 (n.s.); entry 24 (4 layers) −0.27 [−0.58, +0.02] / −0.09 (n.s.);
   entry 26 (2 layers) −0.45 [−0.78, −0.10] / −0.24 [−0.43, −0.06]. Ridge-only and early exit are worse at
   every depth (early exit −3.3 to −3.7 pt HR@1).
+- **Late entry in the engine (H100, one allocation, `runs/lateLH`):** certified exact, codebook w_c=0.5, M=64:
+  5.57 ms → late entry at 22: **4.17 ms** (full-test HR@1 0.0968 / HR@10 0.1693 — identical to the offline
+  bridge evaluation) → + whole-layer compile **3.84 ms**. Trie engine M=16: 5.03 ms without late entry.
+- **Entry 18 (10 layers for the third code) is lossless:** ΔHR@1 +0.06 [−0.12, +0.27], ΔNDCG@10 −0.00
+  [−0.12, +0.12].
+- **Late entry for the first-level nodes is a trade-off** (`scripts/train_bridge_b.py`): the 88 a-node rows
+  join forward 1 at layer 22 from bridge_b(h_22(last prompt token), E[a], E[last token]); s(a) stays exact.
+  Held-out KL 2.16 → 0.139. Alone (exact third code): ΔHR@1 −0.21 [−0.55, +0.12], ΔHR@10 −0.27 [−0.74, +0.18],
+  ΔNDCG@10 −0.25 [−0.51, −0.01]; only 61% of top-10 prefixes agree with full depth. Stacked with the c-bridge
+  (trained on full-depth parent states): ΔHR@1 −1.79. The second code decides set membership and needs its
+  lower layers more than the third code does.

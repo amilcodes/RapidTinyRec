@@ -14,7 +14,7 @@ import torch
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 from rapidtinyrec.speedrun.model import Qwen2Weights
 from rapidtinyrec.speedrun.beam import SidCatalog, BeamEngine, GraphRunner
-from rapidtinyrec.speedrun.exact import ExactEngine, ExactEngine3, ExactTrieEngine
+from rapidtinyrec.speedrun.exact import ExactEngine, ExactEngine3, ExactTrieEngine, OnePassTrieEngine
 from rapidtinyrec.speedrun import data
 
 
@@ -54,7 +54,7 @@ def main():
     ap.add_argument('--throughput-users', type=int, default=1024)
     ap.add_argument('--repeats', type=int, default=1, help='timed passes over the cohort')
     ap.add_argument('--no-graph', action='store_true')
-    ap.add_argument('--engine', default='beam', choices=['beam', 'exact', 'exact3', 'exacttrie'])
+    ap.add_argument('--engine', default='beam', choices=['beam', 'exact', 'exact3', 'exacttrie', 'onepass'])
     ap.add_argument('--n-prefix', type=int, default=128)
     ap.add_argument('--norm', default='full', choices=['full', 'codebook', 'trie'])
     ap.add_argument('--attn', default='torch', choices=['torch', 'triton'])
@@ -97,6 +97,8 @@ def main():
         eng = BeamEngine(W, cat, beam=a.beam, suffix_mode=a.suffix, norm=a.norm, fuse_first=a.fuse_first)
     elif a.engine == 'exact':
         eng = ExactEngine(W, cat, n_expand=a.n_expand, suffix_mode=a.suffix, norm=a.norm, fuse_first=a.fuse_first)
+    elif a.engine == 'onepass':
+        eng = OnePassTrieEngine(W, cat, n_out=a.n_expand, fuse_first=True, ks=tuple(int(k) for k in a.ks.split(',')))
     elif a.engine == 'exacttrie':
         eng = ExactTrieEngine(W, cat, n_prefix=a.n_prefix, n_out=a.n_expand, fuse_first=True, ks=tuple(int(k) for k in a.ks.split(',')))
     else:
