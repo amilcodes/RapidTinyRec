@@ -21,12 +21,13 @@ at layer 14–22 of 28 from a small bridge distilled from their parent node's st
 prompts only, ≈30 s, no labels, frozen model). This is statistically lossless on Office from 6
 remaining layers on Office and 10 on Industrial once the distillation weights prefix rows by
 their bound, whereas early exit at the same cost loses 2.4–3.7 points of HR@1. With a hand-written engine (one CUDA graph per request, Triton attention for
-the fused first forward), certified late-entry decoding serves a request in **3.2 ms on an H100
-and 9.1 ms on an RTX A6000** (Hugging Face `generate`: 869 ms on the A6000), and **1,447 users/s**
-on one H100. Exact search is also an instrument: the beam-search curse grows with list length —
+the fused first forward), certified late-entry decoding serves a request in **3.1 ms on an H100
+and 9.0 ms on an RTX A6000** (Hugging Face `generate`: 869 ms on the A6000), and **1,447 users/s**
+on one H100 — while raising Office HR@10 from 0.1589 to 0.1712 (+1.23 points [+0.66, +1.81]) with a
+validation-chosen scoring rule (codebook-normalized first two codes, trie-normalized third code
+weighted 0.75). Exact search is also an instrument: the beam-search curse grows with list length —
 exact search under the training objective loses 4.3 points of HR@500 on Office — while a
-validation-chosen normalized, depth-discounted objective reverses it (+2.4 points HR@500, +1.1
-HR@10). FP16 matches BF16's speed with ~10× better fidelity; weight-only INT8/INT4 and FP8 do not
+validation-chosen normalized, depth-discounted objective reverses it (+2.4 points HR@500). FP16 matches BF16's speed with ~10× better fidelity; weight-only INT8/INT4 and FP8 do not
 help at these shapes.
 
 ## 1. Introduction
