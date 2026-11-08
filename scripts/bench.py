@@ -66,6 +66,8 @@ def main():
     ap.add_argument('--beam', type=int, default=50)
     ap.add_argument('--ks', default='1,5,10,20,50', help='K values for certificates (exacttrie)')
     ap.add_argument('--tree-fast', action='store_true', help='Triton prompt/node attention in the fused first forward')
+    ap.add_argument('--fp8-smooth', type=int, default=0, help='static FP8 W8A8 with SmoothQuant folding, calibrated on N held-out prompts')
+    ap.add_argument('--fp8-alpha', type=float, default=0.5)
     ap.add_argument('--fuse-store', action='store_true', help='compile K/V cache writes into the qkv kernel (with --tree-fast)')
     ap.add_argument('--late-entry', default=None, help='ENTRY:BRIDGE.pt - third-code forward runs layers ENTRY.. from a bridge')
     ap.add_argument('--n-expand', type=int, default=64)
@@ -128,6 +130,27 @@ def main():
         eng.set_template(lcp)
         meta['template_tokens'] = len(lcp)
         print(json.dumps({'stage': 'template', 'tokens': len(lcp), 'min_prompt': min(map(len, all_ids))}), flush=True)
+    if a.fp8_smooth:
+        from rapidtinyrec.speedrun import quant as Q
+        cset = set(cohort)
+        calib = [i for i in range(len(rows)) if i not in cset][:a.fp8_smooth]
+
+        def _calib():
+            with torch.inference_mode():
+                for i in calib:
+                    ids_ = all_ids[i]
+                    P_ = (len(ids_) + 7) // 8 * 8
+                    t_ = torch.full((1, P_), tok.eos_token_id, dtype=torch.long, device=dev)
+                    t_[0, :len(ids_)] = torch.tensor(ids_, device=dev)
+                    eng.run(t_, torch.tensor([len(ids_)], device=dev), eng.alloc(1, P_))
+        s_ = time.time()
+        st_ = Q.calibrate_absmax(W, _calib)
+        Q.apply_fp8_smooth(W, st_, alpha=a.fp8_alpha)
+        if a.template_cache:
+            eng.set_template(eng.template_ids)       # V rows changed: recompute the cached template K/V
+        meta['fp8_smooth'] = {'calib_prompts': len(calib), 'alpha': a.fp8_alpha, 's': time.time() - s_,
+                              'weight_bytes': W.param_bytes()}
+        print(json.dumps({'stage': 'fp8_smooth', **meta['fp8_smooth']}), flush=True)
     if a.attn == 'triton':
         from rapidtinyrec.speedrun import kernels
         chk = kernels.selfcheck(dt)

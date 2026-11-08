@@ -146,3 +146,106 @@ def get(scheme):
     if scheme.startswith('ao_'):
         return lambda W: _torchao(W, scheme)
     raise ValueError(scheme)
+
+
+# ---------------------------------------------------------------------------------------------
+# Static-scale FP8 (W8A8, e4m3) with SmoothQuant-style smoothing, for Hopper/Ada.
+# Per-input-channel smoothing factors s move activation outliers into the weights and are folded
+# exactly into the preceding operator (ln1 for qkv, ln2 for gate/up, the v rows of wqkv for o_proj,
+# the up rows of wgu for down). Activations then use one static per-tensor scale per projection,
+# so quantizing x is a pure elementwise op that torch.compile fuses into the preceding kernel.
+
+class FP8Static(torch.nn.Module):
+    """Tensor-wise static FP8: one scale for the weight, one calibrated scale for the activation.
+    FP8 keeps exponent bits, so per-tensor weight scaling loses little; both scales are 0-dim
+    device tensors created once, so a call is quantize (elementwise, fusable) + one cuBLASLt GEMM."""
+
+    def __init__(self, w, a_scale, b=None, out_dtype=torch.float16):
+        super().__init__()
+        wsc = w.float().abs().amax().clamp(min=1e-12) / 448.0
+        self.w8t = (w.float() / wsc).to(torch.float8_e4m3fn).t()             # [K,N] column-major view
+        self.sw = wsc.reshape(()).to(torch.float32)
+        self.sa = torch.tensor(float(a_scale), device=w.device, dtype=torch.float32)
+        self.inv_a = 1.0 / float(a_scale)
+        self.b = None if b is None else b.to(out_dtype)
+        self.out_dtype = out_dtype
+
+    def forward(self, x):
+        shp = x.shape
+        x2 = x.reshape(-1, shp[-1])
+        M = x2.shape[0]
+        pad = (-M) % 16
+        if pad:
+            x2 = F.pad(x2, (0, 0, 0, pad))
+        x8 = (x2.float() * self.inv_a).clamp(-448.0, 448.0).to(torch.float8_e4m3fn)
+        y = torch._scaled_mm(x8, self.w8t, scale_a=self.sa, scale_b=self.sw, bias=self.b, out_dtype=self.out_dtype)
+        return y[:M].reshape(*shp[:-1], -1)
+
+
+@torch.no_grad()
+def calibrate_absmax(W, run_fn):
+    """Per-input-channel |x| max for every projection, recorded while run_fn() runs the engine eagerly."""
+    stats = {}
+    orig = W.linear
+
+    def rec(x, w, b=None):
+        if isinstance(w, torch.Tensor) and w.dim() == 2 and w.shape[0] != W.embed.shape[0]:
+            m = x.reshape(-1, x.shape[-1]).abs().amax(0).float()
+            k = id(w)
+            stats[k] = torch.maximum(stats[k], m) if k in stats else m
+        return orig(x, w, b)
+
+    W.linear = rec
+    try:
+        run_fn()
+    finally:
+        W.linear = orig
+    return stats
+
+
+@torch.no_grad()
+def apply_fp8_smooth(W, stats, alpha=0.5, margin=1.0):
+    """Fold smoothing into the weights/norms, then replace projections with FP8Static modules."""
+    H, KV, hd, D, I = W.H, W.KV, W.hd, W.D, W.I
+    rep = H // KV
+    for layer in W.layers:
+        wq, wg, wo, wd = layer['wqkv'], layer['wgu'], layer['wo'], layer['wd']
+        ax = {n: stats[id(t)] for n, t in (('qkv', wq), ('gu', wg), ('o', wo), ('d', wd))}
+
+        def smooth(ax_, w):
+            aw = w.float().abs().amax(0).clamp(min=1e-5)
+            return (ax_.clamp(min=1e-5) ** alpha / aw ** (1 - alpha)).clamp(1e-3, 1e3)
+
+        # qkv: x = rms(h) * ln1 -> fold 1/s into ln1
+        s = smooth(ax['qkv'], wq)
+        layer['ln1'] = (layer['ln1'].float() / s).to(layer['ln1'].dtype)
+        wq_s = wq.float() * s[None]
+        # o_proj input = attention output; channel (head h, dim d) comes from v head h // rep:
+        # one factor per (kv head, dim), shared by the heads of a group, folded into the v rows of wqkv
+        so = smooth(ax['o'], wo).view(H, hd).view(KV, rep, hd).amax(1)          # [KV, hd]
+        so_full = so[:, None, :].expand(KV, rep, hd).reshape(H * hd)
+        v0 = (H + KV) * hd
+        wq_s[v0:] = wq_s[v0:] / so.reshape(-1)[:, None]
+        bq = layer['bqkv'].float().clone()
+        bq[v0:] = bq[v0:] / so.reshape(-1)
+        wo_s = wo.float() * so_full[None]
+        # gate/up: x = rms(h) * ln2 -> fold into ln2
+        sg = smooth(ax['gu'], wg)
+        layer['ln2'] = (layer['ln2'].float() / sg).to(layer['ln2'].dtype)
+        wg_s = wg.float() * sg[None]
+        # down input = silu(gate) * up -> fold into the up rows of wgu
+        sd = smooth(ax['d'], wd)
+        wg_s[I:] = wg_s[I:] / sd[:, None]
+        wd_s = wd.float() * sd[None]
+        # static activation scales after smoothing
+        a_qkv = (ax['qkv'] / s).amax().item() * margin / 448.0
+        a_o = (ax['o'] / so_full).amax().item() * margin / 448.0
+        a_gu = (ax['gu'] / sg).amax().item() * margin / 448.0
+        a_d = (ax['d'] / sd).amax().item() * margin / 448.0
+        od = W.dtype
+        layer['wqkv'] = FP8Static(wq_s, a_qkv, bq, od); layer['bqkv'] = None
+        layer['wo'] = FP8Static(wo_s, a_o, None, od)
+        layer['wgu'] = FP8Static(wg_s, a_gu, None, od)
+        layer['wd'] = FP8Static(wd_s, a_d, None, od)
+    W.linear = _dispatch
+    torch.cuda.empty_cache()
