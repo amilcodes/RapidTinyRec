@@ -164,9 +164,12 @@ class Forward:
     # Optional shared template: if `tmpl` = (kt [L,KV,T0,hd], vt) holds the K/V of a prefix
     # shared by every prompt, `x` covers only prompt positions T0..P-1 and attends to the
     # cached template as well (exact: causal attention never lets the template see later tokens).
-    def prefill_tree(self, x, xn, lengths, kcache, vcache, kpriv, vpriv, tmpl=None, capture=None, capture_prompt=None):
+    def prefill_tree(self, x, xn, lengths, kcache, vcache, kpriv, vpriv, tmpl=None, capture=None, capture_prompt=None,
+                     node_late=None):
         if self.tree_fast and self.attn == 'triton':
-            return self._prefill_tree_fast(x, xn, lengths, kcache, vcache, kpriv, vpriv, tmpl, capture, capture_prompt)
+            return self._prefill_tree_fast(x, xn, lengths, kcache, vcache, kpriv, vpriv, tmpl, capture, capture_prompt,
+                                           node_late=node_late)
+        assert node_late is None, 'first-level late entry needs the fast first forward (--tree-fast)'
         W = self.W
         B, Pn, _ = x.shape
         T0 = 0 if tmpl is None else tmpl[0].shape[2]
@@ -209,28 +212,45 @@ class Forward:
         return h[:, :Pn], h[:, Pn:]
 
     def _prefill_tree_fast(self, x, xn, lengths, kcache, vcache, kpriv, vpriv, tmpl, capture, capture_prompt,
-                           late=None):
+                           late=None, node_late=None):
         """Same math as prefill_tree with fewer kernels: the template K/V is copied into the cache once
         per request (all layers in one copy), each layer writes only its new K/V, prompt rows use a
         causal Triton kernel over the cache and trie-node rows use the shared-prefix beam kernel
-        (prompt prefix < L, private slot 0 = the node itself). No concat, repeat or mask tensors."""
+        (prompt prefix < L, private slot 0 = the node itself). No concat, repeat or mask tensors.
+        node_late = dict(entry, bridge, last_emb [B,D]): the first-level node rows join at `entry`
+        from bridge(last prompt token's state, E[a], E[last token]) (late entry of the second code).
+        late = one-pass tree (prefix rows join at late['entry'])."""
         from .kernels import beam_attention, prompt_attention
         W = self.W
         B, Pn, _ = x.shape
         T0 = 0 if tmpl is None else tmpl[0].shape[2]
         P = T0 + Pn
         n = xn.shape[1]
-        T = Pn + n
         dev = x.device
+        bi = torch.arange(B, device=dev)
         if T0:
             kcache[:, :, :, :T0].copy_(tmpl[0][:, None].expand(-1, B, -1, -1, -1))
             vcache[:, :, :, :T0].copy_(tmpl[1][:, None].expand(-1, B, -1, -1, -1))
-        pos = torch.cat([torch.arange(T0, P, device=dev)[None].expand(B, Pn), lengths[:, None].expand(B, n)], 1)
-        h = torch.cat([x, xn], 1)
+        ppos = torch.arange(T0, P, device=dev)[None].expand(B, Pn)
+        if node_late is None:
+            nc = n
+            pos = torch.cat([ppos, lengths[:, None].expand(B, n)], 1)
+            h = torch.cat([x, xn], 1)
+        else:
+            nc = 0
+            pos = ppos
+            h = x
         R = 0
         for li, layer in enumerate(W.layers):
+            if node_late is not None and li == node_late['entry']:
+                hl = h[bi, lengths - 1 - T0][:, None, None].expand(B, n, 1, W.D)
+                el = node_late['last_emb'][:, None, None].expand(B, n, 1, W.D)
+                x0 = node_late['bridge'](hl, xn[:, :, None], el)
+                h = torch.cat([h, x0[:, :, 0].to(h.dtype)], 1)
+                pos = torch.cat([ppos, lengths[:, None].expand(B, n)], 1)
+                nc = n
             if capture is not None and li in capture:
-                capture[li] = h[:, Pn:Pn + n].clone()
+                capture[li] = h[:, Pn:Pn + n].clone() if nc else None
             if capture_prompt is not None and li in capture_prompt:
                 capture_prompt[li] = h[:, :Pn].clone()
             if late is not None and li == late['entry']:
@@ -243,19 +263,21 @@ class Forward:
                 h = torch.cat([h, x0[:, :, 0].to(h.dtype)], 1)
                 pos = torch.cat([pos, (lengths[:, None] + 1).expand(B, R)], 1)
                 kp2, vp2 = late['kp'], late['vp']                               # [L,B,R,2,KV,hd]
-            if R == 0 and self.store_fn is not None:
+            if R == 0 and nc == n and self.store_fn is not None:
                 q = self.store_fn(h, layer, pos, kcache[li][:, :, T0:P], vcache[li][:, :, T0:P],
                                   kpriv[li][:, :, 0], vpriv[li][:, :, 0], Pn)
             else:
                 q, k, v = self.qkv(h, layer, pos)
                 kcache[li][:, :, T0:P] = k[:, :Pn].transpose(1, 2)
                 vcache[li][:, :, T0:P] = v[:, :Pn].transpose(1, 2)
-                kpriv[li][:, :, 0] = k[:, Pn:Pn + n]
-                vpriv[li][:, :, 0] = v[:, Pn:Pn + n]
-            o = torch.empty(B, T + R, W.H * W.hd, device=dev, dtype=h.dtype)
+                if nc:
+                    kpriv[li][:, :, 0] = k[:, Pn:Pn + n]
+                    vpriv[li][:, :, 0] = v[:, Pn:Pn + n]
+            o = torch.empty(B, Pn + nc + R, W.H * W.hd, device=dev, dtype=h.dtype)
             prompt_attention(q[:, :Pn], kcache[li], vcache[li], T0, self.scale, out=o[:, :Pn])
-            beam_attention(q[:, Pn:Pn + n, None], kcache[li], vcache[li], kpriv[li], vpriv[li], lengths, 0, self.scale,
-                           out=o[:, Pn:Pn + n].view(B, n, 1, W.H, W.hd))
+            if nc:
+                beam_attention(q[:, Pn:Pn + n, None], kcache[li], vcache[li], kpriv[li], vpriv[li], lengths, 0,
+                               self.scale, out=o[:, Pn:Pn + n].view(B, n, 1, W.H, W.hd))
             if R:
                 kp2[li][:, :, 0] = k[:, Pn + late['parent']]
                 vp2[li][:, :, 0] = v[:, Pn + late['parent']]

@@ -217,6 +217,25 @@ class ExactEngine3(ExactEngine):
         if self.W.dtype in (torch.float16, torch.bfloat16):
             self.bridge.half_(self.W.dtype)
 
+    node_late_cfg = None
+
+    def set_node_late(self, entry, bridge):
+        """First-level trie nodes join forward 1 at `entry` (bridge from the last prompt token's state)."""
+        assert self.fuse_first
+        assert self.late is None or self.late >= entry, 'third-code entry must be at or after the node entry'
+        br = bridge.to(self.W.device).eval()
+        if self.W.dtype in (torch.float16, torch.bfloat16):
+            br.half_(self.W.dtype)
+        self.node_late_cfg = (int(entry), br)
+
+    def _node_late(self, tokens, lengths):
+        if self.node_late_cfg is None:
+            return None
+        e, br = self.node_late_cfg
+        B = tokens.shape[0]
+        last = self.W.embed[tokens[torch.arange(B, device=tokens.device), lengths - 1]]
+        return dict(entry=e, bridge=br, last_emb=last)
+
     def _f2_input(self, cap, ai, b_tok):
         """Input rows for forward 2: token embeddings, or bridged parent states (late entry)."""
         W = self.W
@@ -249,7 +268,8 @@ class ExactEngine3(ExactEngine):
         if self.fuse_first:
             T0 = self._T0()
             hp, hn = fwd.prefill_tree(W.embed[tokens[:, T0:]], W.embed[cat.first][None].expand(B, nA, W.D), lengths,
-                                      bufs['kc'], bufs['vc'], bufs['kp2'], bufs['vp2'], tmpl=self.tmpl, capture=cap)
+                                      bufs['kc'], bufs['vc'], bufs['kp2'], bufs['vp2'], tmpl=self.tmpl, capture=cap,
+                                      node_late=self._node_late(tokens, lengths))
             la = self._lp(hp[torch.arange(B, device=dev), lengths - 1 - T0], 0, cat.first[None].expand(B, -1), None)
         else:
             pos = torch.arange(P, device=dev)[None, :].expand(B, P)
@@ -354,7 +374,8 @@ class ExactTrieEngine(ExactEngine3):
         T0 = self._T0()
         cap = None if self.late is None else {self.late: None}
         hp, hn = fwd.prefill_tree(W.embed[tokens[:, T0:]], W.embed[cat.first][None].expand(B, nA, W.D), lengths,
-                                  bufs['kc'], bufs['vc'], bufs['kp2'], bufs['vp2'], tmpl=self.tmpl, capture=cap)
+                                  bufs['kc'], bufs['vc'], bufs['kp2'], bufs['vp2'], tmpl=self.tmpl, capture=cap,
+                                      node_late=self._node_late(tokens, lengths))
         la = self._lp(hp[torch.arange(B, device=dev), lengths - 1 - T0], 0, cat.first[None].expand(B, -1), None)
         lb = self._lp(hn, 1, cat.t1[None].expand(B, nA, cat.W1), cat.v1[None].expand(B, nA, cat.W1))
         lb = lb.masked_fill(~cat.v1[None], neg_inf).view(B, nA * cat.W1)
