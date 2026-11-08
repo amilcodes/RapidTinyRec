@@ -1,5 +1,5 @@
 {
- "updated": "Nov 7, 3:40 AM ET (final)",
+ "updated": "Nov 8 (second session)",
  "ladder": [
   {
    "label": "HF generate, FP32 (prior)",
@@ -47,6 +47,16 @@
    "label": "certified exact, tuned codebook scoring",
    "run": "ladder2/M6_ex3_cb_w05_tmpl",
    "ours": true
+  },
+  {
+   "label": "certified exact, trie, multi-child prefixes only (M=16)",
+   "run": "finA/O_trie",
+   "ours": true
+  },
+  {
+   "label": "+ late entry for the third code (6 of 28 layers)",
+   "run": "finA/O_trie_L22w",
+   "ours": true
   }
  ],
  "compare": [
@@ -75,35 +85,121 @@
    "run": "wtsN/ex3_cb_w05_tmpl_fp16"
   },
   {
-   "label": "BF16 certified exact, trie, third code on 6 layers",
-   "run": "exitK/ex3_trie_exit6"
+   "label": "A6000: certified trie (M=16) + late entry",
+   "run": "finA/O_trie_L22w"
   },
   {
-   "label": "Industrial: FP16 beam-50, MiniOneRec scoring",
-   "run": "indT/ind_beam_tmpl_fp16"
+   "label": "A6000: certified tuned codebook + late entry",
+   "run": "finA/O_cb_L22w"
   },
   {
-   "label": "Industrial: BF16 certified exact, codebook",
-   "run": "indT/ind_ex3_cb_tmpl"
+   "label": "H100: certified trie (M=16), no learned parts",
+   "run": "finH/O_trie"
+  },
+  {
+   "label": "H100: certified trie (M=16) + late entry",
+   "run": "finH/O_trie_L22w"
+  },
+  {
+   "label": "H100: certified trie, w_c = 0.75 + late entry",
+   "run": "finH/O_trie75_L22w"
+  },
+  {
+   "label": "H100: certified codebook(a,b)+trie(c), w_c = 0.75 + late entry",
+   "run": "finH/O_cbtrie_L22w"
+  },
+  {
+   "label": "H100: certified tuned codebook + late entry",
+   "run": "finH/O_cb_L22w"
+  },
+  {
+   "label": "Industrial, H100: beam-50, MiniOneRec scoring",
+   "run": "finH/I_beam_full"
+  },
+  {
+   "label": "Industrial, H100: certified trie (M=16)",
+   "run": "finH/I_trie"
+  },
+  {
+   "label": "Industrial, H100: certified trie + late entry (10 layers)",
+   "run": "finH/I_trie_L18w"
   }
  ],
  "sim_tables": [],
  "findings": [
-  "Batch-1 cost is set by how many sequential forwards a request needs, not by beam width: one full forward on the A6000 costs 8.1 ms for 1 token and 9.8 ms for 50.",
-  "Certified exact decoding replaces beam search. One forward scores the prompt together with every first code; a second scores the best-bounded prefixes; an on-device test proves when the top-K is the global optimum. Checked against brute-force scoring of every item: 0 violations.",
-  "Office: 14.4 ms per request in one paired allocation (60\u00d7 faster than HF generate, 3.9\u00d7 faster than the prior BF16 stack) with top-10 proven optimal for 99.7% of users. With codebook scoring and the third code weighted 0.5 (chosen on the validation split), HR@10 rises from 0.1589 to 0.1700 (+1.11 pt, 95% CI +0.53 to +1.69) over the FP32 reference decode.",
-  "Industrial & Scientific: 14.0 ms vs 25.6 ms for the fully optimized full-semantics beam on the same A6000, at equal quality. No scoring rule beats MiniOneRec's own there, so the Office quality gain is dataset-specific and the rule has to be chosen on validation data.",
-  "Throughput: certified exact decoding serves 176 users/s on one A6000 at batch 32, vs 91 for the fully fused beam engine.",
-  "Why deep terms mislead: an item loses ~1.6 nats of third-code log-probability just for sharing its prefix with one sibling, and about 47% of the next-token mass leaks off the valid codebook. Beam-50 misses 14% of the exact top-10 under the training objective, yet exact search does not improve quality.",
-  "FP16 matches BF16's speed with about 10\u00d7 better fidelity to FP32 (top-10 identical for 484 vs 374 of 500 users). Weight-only INT8/INT4 barely help at 50\u2013200 rows per forward, and the logit lens shows SID codes are decided only in the last 6\u20139 of 28 layers.",
-  "FP8 on an L40S is slower than BF16 as implemented (15.9 vs 14.0 ms): quantizing activations at every matrix multiply costs more than the narrower weights save at 50\u2013200 rows."
+  "Certified exact decoding replaces beam search: one forward scores the prompt with every first code, a second scores the best-bounded prefixes, and an on-device test proves the top-K is the global optimum (0 violations against brute force, FP32).",
+  "The certificate's cost scales with K, not the catalog: under trie scoring certifying the top K expands about K prefixes at every K up to 1,000, and only multi-child prefixes need the second forward. Certified top-500: 3.8 ms on an H100 vs 18.1 ms for MiniOneRec's beam-500; 6.4\u00d7 its throughput.",
+  "Late entry: the third SID code does not need the lower 22 layers. A bridge distilled from the parent node's layer-22 state (validation prompts, no labels, 1\u20132 minutes) matches the full-depth second forward on HR@10 and NDCG@10 on both datasets; early exit at the same cost loses 2.4\u20133.7 points of HR@1.",
+  "Fastest certified decoder: 3.2 ms per request on an H100 and 9.1 ms on an RTX A6000 (Hugging Face generate: 869 ms on the A6000), 1,447 users/s on one H100.",
+  "The scoring rule is a first-order choice: on Office a validation-chosen codebook objective lifts HR@10 from 0.159 to 0.170 and HR@500 by 2.4 points; on Industrial nothing beats the original objective, and certified decoding matches it.",
+  "The beam-search curse grows with list length: under MiniOneRec's own objective exact search loses 1.8 / 2.5 / 3.5 / 4.3 points of HR@50 / 100 / 200 / 500 on Office. Beam search's prefix-first pruning acts as an implicit depth discount.",
+  "Negative results: one forward is not enough (a user-independent third-code table loses 4.8 points of HR@1; speculating the expansion set covers at most 29% of requests); late entry of the second code is a trade-off; INT8/INT4 weight-only and FP8 do not help at these shapes."
  ],
  "next": [
-  "Push the branch and open a PR on amilcodes/RapidTinyRec (not done; waiting for your go-ahead).",
-  "Matched-hardware comparison against FlashRec and NVIDIA's SID-GR engine, now that the scoring rule is known to matter.",
-  "A larger catalog (e.g. OneRec/RecIF or a 100k-item Amazon category) to test how certification rates and exact-decoding cost scale.",
-  "Training-time ideas the analysis points to: SID schemes without sibling penalties, or a depth-aware loss."
+  "Matched-hardware comparison against FlashRec and NVIDIA's SID-GR engine.",
+  "A larger catalog (e.g. a 100k-item Amazon category or OneRec's RecIF) to test certification and late entry at scale.",
+  "A persistent megakernel for the two forwards on the H100, where the engine is kernel-count-bound (\u22481,475 kernels per request).",
+  "Training-time variants suggested by late entry: SID decoders that read deeper codes from upper layers only."
  ],
  "notes": "<section class=\"panel\"><h2>How MiniOneRec decodes, and why it was slow</h2>\n<p>MiniOneRec turns a user's history into a prompt of about 100 tokens and asks a 1.5B-parameter Qwen2 model to write the next item's semantic ID: three code tokens <code>&lt;a&gt;&lt;b&gt;&lt;c&gt;</code>, then a forced newline and end-of-sequence. A catalog trie allows only codes that exist (88 first codes, 2,488 two-code prefixes, 3,444 items). Beam search keeps the 50 best partial IDs at each step. An item's score is the sum of five log-probabilities, each normalized over the whole 152k-token vocabulary.</p>\n<p>At batch size 1 every forward pass has to stream all ~3 GB of BF16 weights from GPU memory. On an RTX A6000 that alone takes about 4 ms, and a forward with 50 beam rows costs about the same as one with 1 row. Beam search makes five sequential forwards, so it is bound by how many times it re-reads the weights, not by the beam width. Hugging Face <code>generate</code> adds Python overhead on top and lands at 869 ms.</p></section>\n<section class=\"panel\"><h2>What changed</h2>\n<ul>\n<li><b>One CUDA graph per request.</b> A hand-written Qwen2 forward and a GPU-resident constrained beam search run the whole request \u2014 prompt, three code steps, the forced suffix and the final sort \u2014 as one replay.</li>\n<li><b>Fused forced suffix.</b> The newline and EOS are forced, so both are scored in one two-token forward instead of two (\u221210 ms).</li>\n<li><b>Trie-level prefill fusion.</b> All 88 first codes are appended to the prompt as tree nodes (each sees the prompt and itself). One forward gives the probability of every first code and of every second code under it. This removes another sequential step and is exact.</li>\n<li><b>Triton shared-prefix attention.</b> One kernel per layer attends the 50 beam rows to a single copy of the prompt's keys and values plus each row's few private tokens.</li>\n<li><b>Certified exact decoding.</b> Every term is a log-probability, so it is \u2264 0. The score of a first-two-code prefix therefore upper-bounds the score of every item under it. After the fused forward, every item has a bound. One more forward scores the best-bounded prefixes exactly. If the K-th exact score beats every remaining bound, the returned top-K is provably the best possible under the model's own scoring rule; no beam search is needed.</li>\n</ul></section>\n<section class=\"panel\"><h2>What exact decoding revealed</h2>\n<p>To test what exact search changes, we computed the FP32 log-probability of every catalog item for every test user on both datasets (about 16 million items per dataset) and replayed every search and scoring choice offline. Under MiniOneRec's own score, beam-50 misses 14% of the true top-10 on Office (6% on Industrial), yet finding the true optimum does not raise HR@10. Search error is not what limits quality.</p>\n<p>The scoring rule is what limits quality. The third code's log-probability falls by about 1.6 nats when an item shares its two-code prefix with even one sibling, and roughly half of the next-token mass leaks onto tokens that cannot be valid codes. On Office, a per-codebook softmax with the third code weighted 0.5 \u2014 chosen on the separate validation split \u2014 improves HR@10 by 1.1 points and NDCG@10 by 0.6 points. On Industrial the same tuning finds nothing better than the original rule, and dropping the forced newline/EOS terms there hurts. The rule is a real, dataset-dependent choice that should be made on validation data, and certified decoding makes any such rule exact.</p></section>\n<section class=\"panel\"><h2>Caveats</h2>\n<ul>\n<li>One model family (MiniOneRec, Qwen2-1.5B) and small catalogs; exact decoding cost grows with the number of first-level codes and with how loose the prefix bound is. The certificate tells you per request when it did not close.</li>\n<li>Trie, codebook and weighted scoring change the decoding objective (a decode-time choice, like FlashRec's per-codebook softmax); full-semantics numbers are reported separately (26.1 ms in FP16, top-1 identical to FP32 for 500/500 users).</li>\n<li>Industrial latencies on this page are from the A6000; an earlier Industrial run on an L40S measured 11.5 ms for certified decoding.</li>\n<li>Quality is SID-level HR/NDCG; 15 catalog SIDs are shared by two items. Latency is batch 1 on one RTX A6000 with setup, compilation and graph capture excluded.</li>\n</ul></section>\n",
- "sim_json": "research/sim_office_full.json"
+ "sim_json": "research/sim_office_full.json",
+ "ladder_h100": [
+  {
+   "label": "Speedrun engine, FP32",
+   "run": "h100M/H0_fp32_graph",
+   "ours": true
+  },
+  {
+   "label": "BF16, one CUDA graph per request",
+   "run": "h100M/H1_bf16_graph",
+   "ours": true
+  },
+  {
+   "label": "+ torch.compile",
+   "run": "h100M/H2_bf16_compile",
+   "ours": true
+  },
+  {
+   "label": "+ fused first level + Triton attention",
+   "run": "h100M/H3_bf16_ff_tc",
+   "ours": true
+  },
+  {
+   "label": "+ FP16 + cached prompt template",
+   "run": "h100M/H4_fp16_ff_tc_tmpl",
+   "ours": true
+  },
+  {
+   "label": "certified exact, trie scoring",
+   "run": "h100M/H5_ex3_trie_tmpl",
+   "ours": true
+  },
+  {
+   "label": "+ multi-child only, Triton prompt attention, compile",
+   "run": "finH/O_trie",
+   "ours": true
+  },
+  {
+   "label": "+ late entry for the third code",
+   "run": "finH/O_trie_L22w",
+   "ours": true
+  }
+ ],
+ "figures": [
+  {
+   "title": "Certifying the top K costs about K prefixes",
+   "path": "research/figures/certificate_kscale.png",
+   "note": "Prefixes whose bound exceeds the K-th exact score (median, band to p99), exhaustive FP32 scores of every test user. Under trie scoring only multi-child prefixes (dashed) need the second forward."
+  },
+  {
+   "title": "Late entry vs early exit for the third code",
+   "path": "research/figures/late_entry_frontier.png",
+   "note": "Office, all 4,866 test users, paired 95% intervals vs the full-depth third code. Bridges trained with uniform KL; prefix-weighted training (Office entry 22, Industrial entry 18) is lossless on HR@10 and NDCG@10 on both datasets."
+  },
+  {
+   "title": "Large candidate lists",
+   "path": "research/figures/large_k_latency.png",
+   "note": "Batch-1 latency vs list length K. Certified top-K stays two forwards; MiniOneRec's beam-K adds a forced-suffix forward over K rows."
+  }
+ ]
 }

@@ -216,7 +216,7 @@ code { font: 13px var(--mono); background: var(--accent-soft); padding: 1px 4px;
 <section class="panel"><h2>Speed and quality by configuration</h2><div class="scroll"><table>
 <thead><tr><th>configuration</th><th class=num>median ms</th><th class=num>p95 ms</th><th class=num>HR@1</th><th class=num>HR@5</th><th class=num>HR@10</th><th class=num>NDCG@10</th><th class=num>top-10 certified</th></tr></thead>
 <tbody>{{ROWS}}</tbody></table></div>
-<p class="note">Quality is SID-level HR/NDCG on the full test set (4,866 Office or 4,533 Industrial users). "Top-10 certified" is the share of users for whom the exact decoder proves its top-10 is the global optimum of its scoring rule. Latency comes from each configuration's own run on an RTX A6000; the no-suffix and codebook beam rows were measured with an earlier engine stage (no compile, no first-level fusion) and would run near 14 ms with the final engine.</p></section>
+<p class="note">Quality is SID-level HR/NDCG on the full test set (4,866 Office or 4,533 Industrial users). "Top-10 certified" is the share of users for whom the exact decoder proves its top-10 is the global optimum of its scoring rule. Latency comes from each configuration's own run, on an RTX A6000 unless the row says H100; the no-suffix and codebook beam rows were measured with an earlier engine stage (no compile, no first-level fusion). Late-entry rows use a bridge trained on MiniOneRec's validation split.</p></section>
 <section class="panel"><h2>Search × scoring rule (offline, exhaustive FP32)</h2>{{SIMS}}</section>
 {{NOTES}}
 <section><h2>Next</h2><ul>{{NEXT}}</ul></section>

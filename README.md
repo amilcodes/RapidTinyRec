@@ -35,19 +35,20 @@ a small bridge distilled from their parent node's state (no labels, frozen model
 | + first trie level fused into the prompt forward + Triton beam attention | 28.1 | 8.50 |
 | + FP16 + cached prompt template (top-1 identical to FP32 for 500/500 users) | 26.2 | 8.48 |
 | certified exact decoding (trie or tuned codebook scoring) | 14.4 | 5.6 |
-| + late entry for the third code | 9.7 | 4.2 |
-| + Triton prompt attention in the first forward + whole-layer compile | [TBD] | **3.3** |
+| + late entry for the third code | 9.5 | 4.2 |
+| + Triton prompt attention in the first forward (+ whole-layer compile, fused K/V stores on the H100) | **9.1** | **3.2** |
 
 - Certified decoding proves its top-10 globally optimal for ≥99.7% of users (0 violations
   against brute force). With codebook scoring and the third code weighted 0.5 (chosen on
   MiniOneRec's validation split) it improves HR@10 from 0.1589 to 0.1700 on all 4,866 Office test
   users; on Industrial & Scientific it matches the reference quality.
-- Late entry at layer 22 is statistically indistinguishable from the full-depth second forward on
-  Office (ΔHR@1 −0.12 [−0.37, +0.12]) and costs ≤0.35 pt HR@1 on Industrial.
+- Late entry is statistically indistinguishable from the full-depth second forward on HR@10 and
+  NDCG@10 on both datasets (6 of 28 layers on Office, 10 on Industrial; bridges trained on the
+  validation split only).
 - Large candidate lists stay cheap: certifying the top K needs ≈K prefixes, and only multi-child
   prefixes need the second forward. Certified top-500 takes 6.1 ms on an H100 vs 18.1 ms for
   MiniOneRec's beam-500 (17.95 vs 83.2 ms on the A6000), and serves 450 vs 71 users/s.
-- Throughput, certified top-10 with late entry: 1,369 users/s on one H100.
+- Throughput, certified top-10 with late entry: 1,447 users/s on one H100.
 
 Method, measurements and negative results: [`research/`](research/PLAN.md),
 paper draft [`research/paper_draft.md`](research/paper_draft.md).

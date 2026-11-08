@@ -11,7 +11,7 @@ while [ $# -ge 2 ]; do
     rc=$?
     grep --line-buffered -v -E "SettingWithCopy|it/s\]|caveats|history_item_sid|^$|A value is trying" $log | grep -E '^\{"stage"|Error|error|Traceback' | cut -c1-3000
     echo "=== EXIT $name $rc  $(date -u +%T)"
-    if [ $rc -ne 0 ] && grep -q "CUDA driver initialization failed\|CUDA-capable device" $log; then sleep 20; continue; fi
+    if [ $rc -ne 0 ] && grep -q "CUDA driver initialization failed\|CUDA-capable device\|previous error during capture" $log; then sleep 20; continue; fi
     break
   done
 done
