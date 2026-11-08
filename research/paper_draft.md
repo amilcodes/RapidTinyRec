@@ -249,39 +249,54 @@ Certification after the first forward alone happens for 44% of users at K=1 and 
 ### 5.2 Late entry: the third code does not need the lower layers
 
 The logit lens shows SID codes are decided in the last 6–9 of 28 layers, and early exit (running
-only the *first* k layers for the third code) keeps HR@10 but loses 3.3–3.7 points of HR@1. We
+only the *first* k layers for the third code) keeps HR@10 but loses 2.4–3.7 points of HR@1. We
 instead let the prefix rows of the second forward *enter late*: a row (a,b) starts at layer e with
 an input built from its parent node's residual stream at layer e — already computed for every
 first code in forward 1 — and runs layers e..27 with exact attention to the prompt and parent
-K/V. The input is produced by a small bridge,
+K/V. The input comes from a small bridge,
 
     x_e(a,b) = h_e(a) + R_e [h_e(a); E[b]; E[a]; 1] + MLP_e([rms(h_e(a)); E[b]; E[a]]),
 
 where R_e is a ridge fit (label-free) and the MLP (2,048 hidden units, output zero-initialized)
 is distilled from the model itself: KL between the full-depth and the late-entry third-code
-distributions on 3,000 MiniOneRec *validation* prompts, three epochs, ≈30 s on one H100. No
-item labels are used and the base model is frozen; the certificate stays valid for the
-late-entry objective.
+distributions on MiniOneRec *validation* prompts, weighting each prefix row half uniformly and
+half by the softmax of its bound U2 (the rows that decide the ranking). Training takes 1–2 minutes
+on one H100; no item labels are used and the base model is frozen. The certificate holds for the
+late-entry objective. At serving time the bridge runs in FP16 (two small GEMMs).
 
-Office, all 4,866 test users, validation-tuned codebook objective, FP16, paired against the
-full-depth third code (HR@1 0.0980, HR@10 0.1706, NDCG@10 0.1312):
+All test users, validation-tuned codebook objective (w_c = 0.5), FP16, paired against the
+full-depth third code (Office HR@1 0.0980 / HR@10 0.1706 / NDCG@10 0.1312; Industrial 0.0847 /
+0.1613 / 0.1181):
 
 | second forward | layers | ΔHR@1 | ΔHR@10 | ΔNDCG@10 | top-1 = full |
 |---|---:|---|---|---|---:|
-| early exit (first k layers) | 6 | −3.68 [−4.34, −3.08] | −0.84 [−1.29, −0.39] | −2.11 [−2.44, −1.77] | 53% |
-| late entry, parent state only | 6 | −2.7 (2,000 users) | — | −2.2 | 54% |
-| late entry, ridge bridge | 6 | −0.51 [−0.86, −0.14] | −0.58 [−1.05, −0.14] | −0.54 [−0.80, −0.29] | 66% |
-| **late entry, distilled bridge** | **6** | **−0.12 [−0.37, +0.12]** | **−0.12 [−0.35, +0.08]** | **−0.08 [−0.22, +0.04]** | **92%** |
-| late entry, distilled bridge | 4 | −0.27 [−0.58, +0.02] | +0.04 | −0.09 [−0.26, +0.07] | 90% |
-| late entry, distilled bridge | 2 | −0.45 [−0.78, −0.10] | −0.09 | −0.24 [−0.43, −0.06] | 86% |
+| Office, early exit (first k layers) | 6 | −3.68 [−4.34, −3.08] | −0.84 [−1.29, −0.39] | −2.11 [−2.44, −1.77] | 53% |
+| Office, late entry, ridge bridge | 6 | −0.51 [−0.86, −0.14] | −0.58 [−1.05, −0.14] | −0.54 [−0.80, −0.29] | 66% |
+| Office, late entry, distilled bridge (uniform KL) | 6 | −0.12 [−0.37, +0.12] | −0.12 [−0.35, +0.08] | −0.08 [−0.22, +0.04] | 92% |
+| **Office, late entry, distilled bridge (weighted KL)** | **6** | **+0.27 [+0.12, +0.45]** | **−0.04 [−0.25, +0.16]** | **+0.10 [−0.01, +0.20]** | **94%** |
+| Office, distilled bridge (uniform) | 2 / 4 / 10 / 14 | −0.45 / −0.27 / +0.06 / −0.02 | −0.09 / +0.04 / — / +0.14 | −0.24 / −0.09 / −0.00 / +0.05 | 86–94% |
+| Industrial, early exit | 10 | −2.38 [−2.96, −1.83] | −0.77 [−1.30, −0.20] | −1.80 [−2.18, −1.40] | 47% |
+| Industrial, distilled bridge (uniform KL) | 10 | −0.35 [−0.62, −0.11] | −0.04 [−0.31, +0.20] | −0.18 [−0.33, −0.04] | 86% |
+| **Industrial, distilled bridge (weighted KL)** | **10** | **−0.07 [−0.22, +0.09]** | **−0.04 [−0.24, +0.18]** | **−0.04 [−0.13, +0.05]** | **92%** |
 
-With six layers the distilled bridge is statistically indistinguishable from the full-depth
-second forward on every metric and still well above the MiniOneRec reference decode (HR@1
-0.0968 vs 0.0941, HR@10 0.1693 vs 0.1589). The second forward then reads 6/28 of the weights.
-In the engine (CUDA graph, FP16, H100, paired run): certified decoding **4.17 ms vs 5.57 ms**
-(−25%); quality on the full test set reproduces the offline evaluation exactly (HR@10 0.1693).
-[A6000: pending `runs/lateLA`.]
+With prefix-weighted distillation, late entry is statistically indistinguishable from the
+full-depth second forward on HR@10 and NDCG@10 on both datasets (Office at 6 remaining layers,
+Industrial at 10), and stays above the MiniOneRec reference decode (Office HR@10 0.1702 vs
+0.1589). The small HR@1 gain on Office is a calibration side effect of the bridged objective, not
+a claim we rely on. Late entry of the *second* code (the 88 first-code rows joining forward 1 at
+layer 22, bridged from the last prompt token) is a trade-off: ΔNDCG@10 −0.25 [−0.51, −0.01], and
+only 61% of top-10 prefixes agree with full depth; the second code decides set membership.
 
+Engine latency (CUDA graph, FP16, paired within one allocation; certified top-10):
+
+| | A6000 | H100 |
+|---|---:|---:|
+| certified exact, trie, M=16 | 13.65 | 5.03–5.47 |
+| + Triton prompt attention in forward 1 | 13.26 | 4.56 |
+| + late entry at layer 22 | **9.06** | 3.56 |
+| + whole-layer compile, FP16 bridge | 9.07 | **3.24** |
+| certified exact, tuned codebook, M=64 → + late entry 22 | 14.33 → 9.68 | 5.57 → 4.17 |
+| certified top-500 → + late entry (and fast forward 1 on the H100) | 17.95 → [TBD] | 6.06 → 3.81 |
 
 ## 6. What exact decoding reveals about the objective
 

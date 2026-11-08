@@ -109,7 +109,24 @@ def main():
         p = Path(s['path'])
         if p.exists():
             sims += f"<h3>{esc(s['title'])}</h3><div class=scroll>{md_table_to_html(p.read_text())}</div>"
+    ladder_h = []
+    for r in cfg.get('ladder_h100', []):
+        v = r.get('ms')
+        if v is None and r.get('run'):
+            res = get(runs, r['run'])
+            v = res and res.get('latency', {}).get('device_only', {}).get('median_ms')
+        ladder_h.append((r['label'], v, r.get('ours', False)))
+    figs = ''
+    import base64
+    for f in cfg.get('figures', []):
+        fp = Path(f['path'])
+        if fp.exists():
+            b64 = base64.b64encode(fp.read_bytes()).decode()
+            figs += (f"<section class=panel><h2>{esc(f['title'])}</h2><img alt=\"{esc(f['title'])}\" "
+                     f"src=\"data:image/png;base64,{b64}\" style=\"width:100%;height:auto;background:#fff;border-radius:4px\">"
+                     f"<p class=note>{f.get('note', '')}</p></section>")
     page = TEMPLATE.replace('{{LADDER}}', bar_chart(ladder)).replace('{{ROWS}}', '\n'.join(rows_html))
+    page = page.replace('{{LADDER_H100}}', bar_chart(ladder_h) if ladder_h else '').replace('{{FIGS}}', figs)
     page = page.replace('{{SIMS}}', sims).replace('{{FINDINGS}}', '\n'.join(f'<li>{x}</li>' for x in cfg.get('findings', [])))
     page = page.replace('{{UPDATED}}', esc(cfg.get('updated', ''))).replace('{{NEXT}}', '\n'.join(f'<li>{x}</li>' for x in cfg.get('next', [])))
     page = page.replace('{{NOTES}}', cfg.get('notes', ''))
@@ -186,13 +203,16 @@ code { font: 13px var(--mono); background: var(--accent-soft); padding: 1px 4px;
 </style>
 <div class="wrap">
 <header>
-  <div class="eyebrow">MiniOneRec · Qwen2-1.5B · beam 50 · RTX A6000 · updated {{UPDATED}}</div>
+  <div class="eyebrow">MiniOneRec · Qwen2-1.5B · RTX A6000 + H100 · updated {{UPDATED}}</div>
   <h1>RapidTinyRec Speedrun</h1>
-  <p class="lede">How fast can an LLM generative recommender decode, and is beam search even the right algorithm? Batch-1 latency on the frozen 500-user Office cohort; quality on all 4,866 Office test users.</p>
+  <p class="lede">How fast can an LLM generative recommender decode, and is beam search even the right algorithm? Batch-1 latency on the frozen 500-user Office cohort; quality on all 4,866 Office and 4,533 Industrial test users.</p>
 </header>
 <section><h2>Findings so far</h2><ul>{{FINDINGS}}</ul></section>
 <section class="panel"><h2>Latency ladder</h2><div class="scroll">{{LADDER}}</div>
-<p class="note">Orange rows are this overnight run's engine; grey rows are earlier RapidTinyRec results on the same GPU and cohort. Setup, compilation and graph capture are excluded.</p></section>
+<p class="note">Orange rows are the speedrun engine; grey rows are earlier RapidTinyRec results on the same GPU and cohort. Setup, compilation and graph capture are excluded.</p></section>
+<section class="panel"><h2>Latency ladder, H100</h2><div class="scroll">{{LADDER_H100}}</div>
+<p class="note">Same cohort and engine on one H100 (gpu-debug partition). The FP32 rung is the speedrun engine; Hugging Face was not re-measured on this GPU.</p></section>
+{{FIGS}}
 <section class="panel"><h2>Speed and quality by configuration</h2><div class="scroll"><table>
 <thead><tr><th>configuration</th><th class=num>median ms</th><th class=num>p95 ms</th><th class=num>HR@1</th><th class=num>HR@5</th><th class=num>HR@10</th><th class=num>NDCG@10</th><th class=num>top-10 certified</th></tr></thead>
 <tbody>{{ROWS}}</tbody></table></div>
