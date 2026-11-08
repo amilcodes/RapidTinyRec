@@ -445,3 +445,7 @@ See `lit_ledger.md`, `architecture_directions.md`, `kernel_techniques.md`.
   vs full depth everywhere: **ΔHR@1 +0.14 [−0.08, +0.39], ΔHR@10 +0.00 [−0.37, +0.35], ΔNDCG@10 +0.04 [−0.13,
   +0.22]**; top-1 = full 82%, top-10 overlap 80%. Lossless. Forward 1 then runs layers 0–17 on the prompt tail
   only.
+- **First-level late entry in the engine, H100 (`runs/nodeH`, paired, hybrid scoring, third code at 22):**
+  latency 3.06 → 3.04 ms (H100 is kernel-bound; fewer rows don't matter at B=1); **throughput 1,170 → 1,634
+  users/s at B=8 and 1,446 → 2,398 at B=32 (1.66×)**. B=64 failed: that code snapshot still had trainable bridge
+  parameters (autograd graphs recorded during capture; 38.6 GB at B=32 vs 7.7 GB) — fixed; rerun in `runs/casH`.
