@@ -93,13 +93,14 @@ def main():
     sched = torch.optim.lr_scheduler.LambdaLR(opt, lambda s: min(1.0, (s + 1) / a.warmup) * 0.5 * (1 + math.cos(math.pi * min(s, total) / total)))
     eos = tok.eos_token_id
     order = []
+    rng = random.Random(a.seed)          # own RNG: data.prompts() (MiniOneRec's dataset) reseeds `random` with 42
     step = 0
     t0 = time.time()
     log = []
     model.train()
     while step < total:
         if not order:
-            order = keep[:]; random.shuffle(order)
+            order = keep[:]; rng.shuffle(order)
         chunk = [order.pop() for _ in range(min(a.batch, len(order)))]
         seqs = [list(ids[i]) + list(tg[i][:2]) for i in chunk]
         Lm = max(len(s) for s in seqs)
