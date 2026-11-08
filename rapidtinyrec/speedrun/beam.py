@@ -279,7 +279,7 @@ class GraphRunner:
         if dev.type == 'cuda':
             s = torch.cuda.Stream()
             s.wait_stream(torch.cuda.current_stream())
-            with torch.cuda.stream(s):
+            with torch.cuda.stream(s), torch.no_grad():
                 for _ in range(warmup):
                     self.out = engine.run(self.tokens, self.lengths, self.bufs)
             torch.cuda.current_stream().wait_stream(s)
@@ -288,7 +288,7 @@ class GraphRunner:
                 if _POOL is None:
                     _POOL = torch.cuda.graph_pool_handle()
                 self.graph = torch.cuda.CUDAGraph()
-                with torch.cuda.graph(self.graph, pool=_POOL, capture_error_mode="relaxed"):
+                with torch.cuda.graph(self.graph, pool=_POOL, capture_error_mode="relaxed"), torch.no_grad():
                     self.out = engine.run(self.tokens, self.lengths, self.bufs)
                 torch.cuda.synchronize()
 
@@ -308,4 +308,5 @@ class GraphRunner:
         if self.graph is not None:
             self.graph.replay()
             return self.out
-        return self.engine.run(self.tokens, self.lengths, self.bufs)
+        with torch.no_grad():
+            return self.engine.run(self.tokens, self.lengths, self.bufs)

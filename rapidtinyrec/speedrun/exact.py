@@ -213,7 +213,7 @@ class ExactEngine3(ExactEngine):
         """Third-code forward runs only layers entry..L-1; its input is bridge(parent residual at
         `entry`, E[b], E[a]) (rapidtinyrec/speedrun/bridge.py). Needs fuse_first and no forced suffix."""
         assert self.fuse_first and self.suffix_mode == 'none' and self.exit_c is None
-        self.late, self.bridge = int(entry), bridge.to(self.W.device).eval()
+        self.late, self.bridge = int(entry), bridge.to(self.W.device).eval().requires_grad_(False)
         if self.W.dtype in (torch.float16, torch.bfloat16):
             self.bridge.half_(self.W.dtype)
 
@@ -223,7 +223,7 @@ class ExactEngine3(ExactEngine):
         """First-level trie nodes join forward 1 at `entry` (bridge from the last prompt token's state)."""
         assert self.fuse_first
         assert self.late is None or self.late >= entry, 'third-code entry must be at or after the node entry'
-        br = bridge.to(self.W.device).eval()
+        br = bridge.to(self.W.device).eval().requires_grad_(False)
         if self.W.dtype in (torch.float16, torch.bfloat16):
             br.half_(self.W.dtype)
         self.node_late_cfg = (int(entry), br)
