@@ -91,6 +91,16 @@ kernels per forward. [Roofline measurement: TBD `sweepH/roofline_*`.]
 Profile of the first engine version (BF16, eager): ≈24 ms GEMM at ≈65% of peak bandwidth,
 ≈14 ms in ≈4,000 small elementwise kernels, ≈3–4 ms in the 152k-row LM head.
 
+Two refinements from the final engine. (i) On the A6000 the fused first forward is
+*compute*-bound: its GEMMs take 4.84 / 5.78 / 6.58 / 7.19 ms per forward at 16 / 64 / 140 / 216 rows
+(cuBLAS; a tuned split-K Triton kernel helps only at ≤64 rows), and at 140 rows the gate/up GEMM
+already runs at ≈57 TFLOPS. Fewer rows, not better kernels, is the lever there. (ii) On the H100
+the engine is *kernel-count*-bound: the first certified decoder issued 2,555 kernels and 5.9 ms of GPU
+time per request, with GEMMs at ≈50% of HBM bandwidth (≈3.1 ms) and ≈2.8 ms of small copy,
+concatenation and attention-preparation kernels; streaming the weights twice would take ≈1.6 ms.
+Late entry (fewer layers in the second forward) and a Triton prompt attention (fewer kernels in the
+first) cut this to 1,474 kernels and 3.7 ms.
+
 ## 4. Engine
 
 - **Hand-written forward** from safetensors: concatenated QKV and gate/up projections,
@@ -446,6 +456,17 @@ recommendation quality.
 
 ## 10. Limitations
 
-One model family; small catalogs (exact decoding scales with the number of first-level codes
-and the prefix bound's tightness — the certificate tells you when it failed); A6000 (+L40S)
-only; batch-1 latency is the primary metric.
+- One model family (MiniOneRec, Qwen2-1.5B) and small catalogs (≈3.5k items, 48–88 first codes).
+  Exact decoding's first forward grows with the number of first codes (a 256-code first level is
+  still one forward of ≈300 rows); the second forward grows with ≈0.4 K multi-child prefixes; the
+  certificate reports when the bound was not tight enough. The one-pass variant (all multi-child
+  prefixes in the first forward) only makes sense for small catalogs.
+- Late entry adds a learned component (≈10 M parameters per entry layer). The certificate then
+  certifies the top-K of the *bridged* objective; we report quality against the full-depth
+  objective and the MiniOneRec reference decode on all test users, and train bridges on the
+  validation split only. Bridges are per model and per entry layer.
+- Batch-1 latency on two GPU types (RTX A6000, H100; L40S for FP8); throughput up to batch 64.
+  Absolute latency varies by up to ≈10% between allocations of the same GPU type; all
+  comparisons we draw conclusions from are paired within one allocation.
+- We did not run FlashRec or NVIDIA's SID-GR engine on matched hardware; our comparison points are
+  Hugging Face `generate`, the prior RapidTinyRec stacks and our own beam engine.
