@@ -452,3 +452,9 @@ See `lit_ledger.md`, `architecture_directions.md`, `kernel_techniques.md`.
 - **Industrial first-level late entry at layer 18 (weighted, `runs/casInd`):** ΔHR@1 −0.02 [−0.18, +0.11],
   ΔHR@10 +0.18 [−0.09, +0.46], ΔNDCG@10 +0.01 [−0.11, +0.13]; top-10 prefix agreement 82.7%. Lossless on both
   datasets.
+- **Cascade late entry in the engine, H100 (`runs/casH`, fixed code, paired):** hybrid scoring, third code at 22
+  only: 3.02 ms → + first-level codes at 18 (cascade bridges): **2.90 ms / 2.98 p95**; full-test HR@1 0.0995,
+  HR@10 **0.1712**, NDCG@10 0.1319; top-10 certified 100%. vs MiniOneRec FP32 decode: ΔHR@1 +0.53 [+0.16, +0.90],
+  ΔHR@10 +1.23 [+0.66, +1.83], ΔNDCG@10 +0.72 [+0.40, +1.05]; vs the third-code-only late entry: ΔHR@10 +0.00
+  [−0.33, +0.35]. Certified top-500 with both: 3.39 ms. FP16 baseline after the autograd fix (`runs/fp8sH` Q0):
+  3.13 ms (was 3.19).
