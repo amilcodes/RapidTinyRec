@@ -416,3 +416,11 @@ See `lit_ledger.md`, `architecture_directions.md`, `kernel_techniques.md`.
   | codebook w_c=0.5, three-stage M=64 + late entry | 9.17 | 3.10 | 0.1007 | 0.1702 | 0.1322 | +1.13 [+0.53, +1.71] |
   Headline: ΔHR@1 +0.68 [+0.33, +1.05], ΔNDCG@10 +0.79 [+0.48, +1.11], ΔHR@50 +1.05 [+0.39, +1.71]; top-10
   certified 100%. H100 latencies of configurations with the same work differ by up to ≈7% within one job.
+- **A6000 throughput, final config (trie M=16 + fast + late 22, `runs/finA`):** 107 / 246 / 265 / 267 users/s
+  (B = 1/8/32/64; B=32 capture failed once and passed on retry). H100 (`runs/finH`): 323 / 1,170 / 1,443 /
+  **1,464** users/s.
+- **First-level late entry, retrained with prefix-weighted KL (weights ½ uniform + ½ softmax(s(a)), 4,600
+  validation prompts, 6 epochs; `runs/bridgeBW`):** the 88 first-code rows join forward 1 at layer **18**:
+  ΔHR@1 +0.12 [−0.04, +0.31], ΔHR@10 +0.16 [−0.16, +0.49], ΔNDCG@10 +0.07 [−0.06, +0.21] (exact third code);
+  top-10 prefix agreement 80.5% (was 61% with uniform KL at layer 22). Lossless. Using it end to end needs a
+  third-code bridge trained on the late first-level states (cascade), in progress.
