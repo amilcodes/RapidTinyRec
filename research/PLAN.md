@@ -458,3 +458,8 @@ See `lit_ledger.md`, `architecture_directions.md`, `kernel_techniques.md`.
   ΔHR@10 +1.23 [+0.66, +1.83], ΔNDCG@10 +0.72 [+0.40, +1.05]; vs the third-code-only late entry: ΔHR@10 +0.00
   [−0.33, +0.35]. Certified top-500 with both: 3.39 ms. FP16 baseline after the autograd fix (`runs/fp8sH` Q0):
   3.13 ms (was 3.19).
+- **A6000 first-level late entry (`runs/nodeA`, paired, pre-fix code):** 7.87 → **7.14 ms** (−9%; forward 1 is
+  compute-bound on the A6000). This allocation ran ≈13% faster than `runs/finA` for the same configuration.
+- **Industrial cascade (`runs/casInd`):** first-level codes and third code both enter at layer 18; vs full depth
+  everywhere: ΔHR@1 −0.13 [−0.33, +0.07], ΔHR@10 +0.13 [−0.15, +0.44], ΔNDCG@10 −0.02 [−0.16, +0.11]; top-10
+  overlap 83.5%. Lossless on both datasets.
