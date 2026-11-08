@@ -14,7 +14,7 @@ import torch
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 from rapidtinyrec.speedrun.model import Qwen2Weights
 from rapidtinyrec.speedrun.beam import SidCatalog, BeamEngine, GraphRunner
-from rapidtinyrec.speedrun.exact import ExactEngine, ExactEngine3, ExactTrieEngine, OnePassTrieEngine
+from rapidtinyrec.speedrun.exact import ExactEngine, ExactEngine3, ExactTrieEngine, OnePassTrieEngine, InflightTrieEngine
 from rapidtinyrec.speedrun import data
 
 
@@ -54,7 +54,7 @@ def main():
     ap.add_argument('--throughput-users', type=int, default=1024)
     ap.add_argument('--repeats', type=int, default=1, help='timed passes over the cohort')
     ap.add_argument('--no-graph', action='store_true')
-    ap.add_argument('--engine', default='beam', choices=['beam', 'exact', 'exact3', 'exacttrie', 'onepass'])
+    ap.add_argument('--engine', default='beam', choices=['beam', 'exact', 'exact3', 'exacttrie', 'onepass', 'inflight'])
     ap.add_argument('--n-prefix', type=int, default=128)
     ap.add_argument('--norm', default='full', choices=['full', 'codebook', 'trie', 'cbtrie'])
     ap.add_argument('--attn', default='torch', choices=['torch', 'triton'])
@@ -72,6 +72,17 @@ def main():
     ap.add_argument('--late-entry-a', default=None, help='ENTRY:BRIDGE.pt - first-level trie nodes join forward 1 at ENTRY')
     ap.add_argument('--late-entry', default=None, help='ENTRY:BRIDGE.pt - third-code forward runs layers ENTRY.. from a bridge')
     ap.add_argument('--n-expand', type=int, default=64)
+    ap.add_argument('--lens', default=None, help='inflight engine: ridge lens [D+1,D] for the prefix-entry layer')
+    ap.add_argument('--bonus-file', default=None, help='per-user value term: torch file {logq [rows,S]} in test-row order')
+    ap.add_argument('--bonus-beta', type=float, default=0.0)
+    ap.add_argument('--pdl', action='store_true', help='inductor: programmatic dependent launch for Triton kernels (Hopper)')
+    ap.add_argument('--combo', action='store_true', help='inductor: combo kernels (horizontal fusion)')
+    ap.add_argument('--fused', default=None, choices=['fp16', 'int8'], help='fused-layer forward (wgemm kernels)')
+    ap.add_argument('--fused-cfg', default=None, help='JSON {gemm: [BN,BK,SPLIT,warps,stages]} for --fused')
+    ap.add_argument('--lens-a', default=None, help='inflight: lens for the first-level entry layer (with --n-first)')
+    ap.add_argument('--n-first', type=int, default=None, help='inflight: first codes entering forward 1 (default all)')
+    ap.add_argument('--fallback-prefix', type=int, default=16, help='inflight: two-forward fallback engine M')
+    ap.add_argument('--fallback-k', type=int, default=10, help='inflight: rerun users whose top-K is not certified')
     ap.add_argument('--profile', action='store_true', help='eager kernel-time breakdown for a few users')
     ap.add_argument('--check-exhaustive', type=int, default=0, help='compare first K cohort users against exhaustive exact scoring')
     a = ap.parse_args()
@@ -103,6 +114,11 @@ def main():
         eng = ExactEngine(W, cat, n_expand=a.n_expand, suffix_mode=a.suffix, norm=a.norm, fuse_first=a.fuse_first)
     elif a.engine == 'onepass':
         eng = OnePassTrieEngine(W, cat, n_out=a.n_expand, fuse_first=True, ks=tuple(int(k) for k in a.ks.split(',')))
+    elif a.engine == 'inflight':
+        eng = InflightTrieEngine(W, cat, n_prefix=a.n_prefix, n_out=a.n_expand, ks=tuple(int(k) for k in a.ks.split(',')),
+                                 norm=a.norm if a.norm in ('trie', 'cbtrie') else 'trie', n_first=a.n_first)
+        eng.set_lens(torch.load(a.lens, map_location='cpu'),
+                     torch.load(a.lens_a, map_location='cpu') if a.lens_a else None)
     elif a.engine == 'exacttrie':
         eng = ExactTrieEngine(W, cat, n_prefix=a.n_prefix, n_out=a.n_expand, fuse_first=True, ks=tuple(int(k) for k in a.ks.split(',')),
                               norm=a.norm if a.norm in ('trie', 'cbtrie') else 'trie')
@@ -173,10 +189,24 @@ def main():
             print(json.dumps({'stage': 'prompt_attn_selfcheck', **chk2}), flush=True)
             assert chk2['pass'], chk2
             eng.fwd.tree_fast = True
-    if a.compile != 'none':
+    if a.fused:
+        from rapidtinyrec.speedrun import fused as FU
+        assert a.attn == 'triton' and not a.compile_layer and not a.fuse_store
+        fcfg = {k: tuple(v) for k, v in json.loads(a.fused_cfg).items()} if a.fused_cfg else None
+        FU.adopt(eng, int8=a.fused == 'int8', cfg=fcfg)
+        if a.template_cache:
+            eng.set_template(eng.template_ids)      # template K/V with the fused (possibly INT8) numerics
+        meta['fused'] = {'kind': a.fused, 'cfg': eng.fwd.cfg, 'gemm_weight_bytes': eng.fwd.weight_bytes()}
+        print(json.dumps({'stage': 'fused', **meta['fused']}), flush=True)
+    if a.compile != 'none' and not a.fused:
         import torch._inductor.config as ic
         import torch._dynamo.config as dc
         ic.coordinate_descent_tuning = True
+        if a.pdl:
+            assert hasattr(ic.triton, 'enable_pdl'), 'this torch has no inductor PDL'
+            ic.triton.enable_pdl = True
+        if a.combo:
+            ic.combo_kernels = True
         dc.cache_size_limit = 1024
         if hasattr(dc, 'recompile_limit'):
             dc.recompile_limit = 1024
@@ -189,17 +219,40 @@ def main():
             eng.fwd.store_fn = torch.compile(eng.fwd.qkv_store, mode=a.compile, dynamic=False, fullgraph=True)
         eng.fwd.qkv = torch.compile(eng.fwd.qkv, mode=a.compile, dynamic=False, fullgraph=True)
         eng.fwd.post = torch.compile(eng.fwd.post, mode=a.compile, dynamic=False, fullgraph=True)
+    bonus = None
+    if a.bonus_file:
+        assert a.engine == 'exacttrie'
+        bonus = (a.bonus_beta * torch.load(a.bonus_file)['logq'].float().clamp(min=-30.0)).pin_memory()
+        assert bonus.shape == (len(rows), eng.S)
+        eng.enable_dynamic_bonus()
+        meta['bonus'] = {'file': a.bonus_file, 'beta': a.bonus_beta}
+
+    def put_bonus(r, idx):
+        if bonus is not None:
+            r.bufs['bonus'].zero_()
+            r.bufs['bonus'][:len(idx)].copy_(bonus[idx], non_blocking=True)
+    fb = None
+    if a.engine == 'inflight':
+        # two-forward certified engine sharing weights, compiled pieces, template, bridges and scoring
+        fb = ExactTrieEngine(W, cat, n_prefix=a.fallback_prefix, n_out=a.n_expand, ks=eng.ks, norm=eng.norm)
+        fb.fwd = eng.fwd
+        fb.tmpl, fb.template_ids = eng.tmpl, getattr(eng, 'template_ids', None)
+        fb.late, fb.bridge, fb.node_late_cfg = eng.late, eng.bridge, eng.node_late_cfg
+        fb.level_w, fb.suffix_w = eng.level_w, eng.suffix_w
+        fb_k = [k for k in eng.ks if k <= eng.N].index(a.fallback_k)
+        meta['fallback'] = {'n_prefix': a.fallback_prefix, 'k': a.fallback_k}
     torch.cuda.synchronize()
     meta.update(setup_load_s=time.time() - t0, catalog=cat.stats, weight_bytes=W.param_bytes(),
                 alloc_after_load=torch.cuda.memory_allocated())
     print(json.dumps({'stage': 'loaded', **{k: meta[k] for k in ('setup_load_s', 'catalog', 'weight_bytes')}}), flush=True)
     runners = {}
+    fb_stats = {'latency_reruns': 0, 'quality_reruns': 0, 'quality_users_uncertified': 0, 'throughput_reruns': 0}
 
-    def runner(B, P):
-        key = (B, P)
+    def runner(B, P, which=None):
+        key = (B, P, which)
         if key not in runners:
             s = time.time()
-            runners[key] = GraphRunner(eng, B, P, tok.eos_token_id, use_graph=not a.no_graph)
+            runners[key] = GraphRunner(fb if which == 'fb' else eng, B, P, tok.eos_token_id, use_graph=not a.no_graph)
             meta.setdefault('capture', []).append({'B': B, 'P': P, 's': time.time() - s,
                                                    'alloc': torch.cuda.memory_allocated()})
         return runners[key]
@@ -241,6 +294,8 @@ def main():
         for i in cohort:
             r = runner(1, bucket(len(all_ids[i]), a.pad_quantum))
             staged.append((i, r, *r.load([all_ids[i]])))
+            if fb is not None:
+                runner(1, bucket(len(all_ids[i]), a.pad_quantum), 'fb')
         # untimed warm pass
         for i, r, t, ln in staged[:20]:
             r(t, ln)
@@ -250,8 +305,13 @@ def main():
             for i, r, t, ln in staged:
                 torch.cuda.synchronize()
                 st = time.perf_counter()
+                put_bonus(r, [i])
                 o = r(t, ln)
                 torch.cuda.synchronize()
+                if fb is not None and not bool(o['certified'][0, fb_k]):
+                    o = runner(1, r.P, 'fb')(t, ln)        # certificate failed: two-forward engine
+                    torch.cuda.synchronize()
+                    fb_stats['latency_reruns'] += rep == 0
                 e1 = time.perf_counter()
                 sids = o['sids'].cpu(); sc = o['scores'].cpu(); tr = o['trans'].cpu() if 'trans' in o else None
                 e2 = time.perf_counter()
@@ -346,7 +406,17 @@ def main():
             r = runner(B, P)
             idl = [all_ids[i] for i in chunk] + [all_ids[chunk[0]]] * (B - len(chunk))
             t, ln = r.load(idl)
+            put_bonus(r, chunk)
             o = r(t, ln)
+            if fb is not None:
+                bad = ~o['certified'][:len(chunk), fb_k]
+                if bool(bad.any()):
+                    fb_stats['quality_reruns'] += 1
+                    fb_stats['quality_users_uncertified'] += int(bad.sum())
+                    o1 = {k_: v_.clone() for k_, v_ in o.items()}
+                    o2 = runner(B, P, 'fb')(t, ln)
+                    sel_ = torch.cat([bad, torch.zeros(B - len(chunk), dtype=torch.bool, device=bad.device)])
+                    o = {k_: torch.where(sel_.view(-1, *([1] * (o1[k_].dim() - 1))), o2[k_], o1[k_]) for k_ in ('sids', 'scores', 'certified')}
             sids = o['sids'].cpu().tolist()
             if 'certified' in o:
                 certs.extend(o['certified'].cpu().tolist()[:len(chunk)])
@@ -375,16 +445,22 @@ def main():
                     break
                 P = bucket(max(len(all_ids[i]) for i in chunk), a.pad_quantum)
                 r = runner(B, P)
-                batches.append((r, *r.load([all_ids[i] for i in chunk])))
-            for r, t, ln in batches[:3]:
+                batches.append((r, *r.load([all_ids[i] for i in chunk]), chunk))
+            for r, t, ln, ch in batches[:3]:
+                put_bonus(r, ch)
                 r(t, ln)
             torch.cuda.synchronize()
             lat = []
             s = time.perf_counter()
-            for r, t, ln in batches:
+            for r, t, ln, ch in batches:
                 st = time.perf_counter()
+                put_bonus(r, ch)
                 o = r(t, ln)
                 torch.cuda.synchronize()
+                if fb is not None and not bool(o['certified'][:, fb_k].all()):
+                    runner(B, r.P, 'fb')(t, ln)
+                    torch.cuda.synchronize()
+                    fb_stats['throughput_reruns'] += 1
                 lat.append(time.perf_counter() - st)
             el = time.perf_counter() - s
             n = len(batches) * B
@@ -392,6 +468,9 @@ def main():
                      'peak_alloc_gb': torch.cuda.max_memory_allocated() / 2**30}
             print(json.dumps({'stage': 'throughput', 'B': B, **tp[B]}), flush=True)
         results['throughput'] = tp
+    if fb is not None:
+        meta['fallback_stats'] = fb_stats
+        print(json.dumps({'stage': 'fallback', **fb_stats}), flush=True)
     meta['max_alloc_gb'] = torch.cuda.max_memory_allocated() / 2**30
     json.dump(results, open(out / 'results.json', 'w'), indent=1)
     print(json.dumps({'stage': 'done'}), flush=True)

@@ -489,3 +489,55 @@ See `lit_ledger.md`, `architecture_directions.md`, `kernel_techniques.md`.
   ΔNDCG@10 −2.70 [−3.12, −2.29]; vs MiniOneRec's FP32 decode ΔHR@10 −1.15. Top-1 equal to FP16 for 37% of users.
   Per-tensor activation and weight scales are too coarse here (and the bridge sees shifted layer-22 states); the
   finer-grained row-wise FP8 kernels are slower than FP16 at these shapes. Not usable as built.
+
+## Session 3 (night of 2026-11-08): literature sweep + new directions
+
+Literature (five parallel sweeps, ~400 papers, digests in `research/lit2/`): positioning changes —
+- **Certificate prior:** "Beyond the Beam" (arXiv 2609.33745, Sep 2026) states the same top-K certificate
+  (K-th scored item vs bound of every unscored item; log-probs ≤ 0), but as post-hoc completion after a beam-40,
+  full-vocabulary scores, ≤80 extra items, certifies top-20 for only 4.5–77.6% of queries. Older lineage:
+  Stahlberg & Byrne 2019 / Stahlberg et al. 2022 (exact n-best NMT), PLT best-first search, Fagin's TA.
+  → claim "first practical certified *decoder* (100% certified, 2 forwards, 2.9 ms on a 1.5B LLM)", not the
+  certificate itself.
+- **Trie normalization prior:** ZeroGR (2611.04715) renormalizes over valid children (for compute) and finds the
+  ranking effect negligible on a small model; our +1.2 pt on an LLM and the bound-tightness argument are new.
+- **Late entry priors:** GR4AD "LazyAR" (2602.22732) late-injects the previous SID at layer 6 of 9 in a *trained*
+  0.16B model; FIRP/Hidden Transfer (2404.12022) predicts mid-layer states of future tokens for drafting; BRIDGE
+  (2611.07425) per-level loop budgets. None: frozen backbone + same-depth parent-state bridge + certificate.
+- Leaderboard (same protocol, Office HR@10): ours 0.1712 (no training) vs MiniOneRec paper 0.1634, S-GRec 0.1689,
+  V-STAR 0.1746, SA-OPSD 0.1747, DASO 0.1834 (trained). Industrial: ours ≈0.160 vs SA-OPSD 0.1690.
+
+Experiments:
+- **In-flight expansion (one-forward certified decode): negative.** Choose prefix rows *inside* forward 1 at
+  the third-code entry layer from a tuned-lens estimate of U2, certify with exact scores at the end
+  (`InflightTrieEngine`, `scripts/inflight.py`, `runs/inflB`). Fraction of test users whose needed prefixes
+  (U2 ≥ K-th score; mean 4.5, p99 10 at K=10) all fall in the lens top-M: ridge lens at layer 22 33% (M=16),
+  55% (M=32), 78% (M=64); layer 24 57% / 81% / 94%; logit lens far worse. First-code pruning at layer 18 is
+  worse (needed first codes mean 29). The fallback rate kills the one-forward gain.
+- **Custom weight-streaming GEMM (Triton, FP16/INT8, fused norm/SwiGLU/residual epilogues): negative.**
+  `rapidtinyrec/speedrun/wgemm.py`, `scripts/wgemm_bench.py`, H100, 28 distinct weight copies per graph (no L2
+  reuse): cuBLAS wins at M ≥ 64 (qkv 6.1 vs 13.8 µs at M=144; gate-up 27 vs 50 µs); INT8 only wins at M=16
+  (gate-up 15.1 vs 23.7 µs, down 10.5 vs 14.6). The fused-layer forward (`fused.py`, FP32 residual updated in
+  place) is numerically sound (HR@10 0.1712 vs 0.1714; INT8 weights 0.1712, quality-neutral) but not faster.
+  cuBLAS small GEMMs sit at ~5.4 µs regardless of bytes (launch-latency floor).
+- **Value-augmented certified search** (`set_item_bonus`, `scripts/value_search.py`, `runs/valS`): exact top-K of
+  model score + λ·v[i] with prefix bound U2 + λ·max v (still 2 forwards, 100% certified at M=32).
+  Random "bids" (v ~ N(0,1)): LLM top-50 + rerank recovers 99.99% / 99.2% / 87.0% / **50.0%** of the exact
+  top-10 at λ = 0.25 / 0.5 / 1 / 2. Popularity prior (λ=0.2, validation-tuned): test HR@10 0.1739 vs 0.1714,
+  HR@50 0.2554 vs 0.2513 (rerank) — small.
+- **Two-sided bounds under trie normalization** (`scripts/lbound.py`, `runs/lbndA`): best child ≥ U − w_c log n ⇒
+  τ_L (K-th lower bound) and the expansion set E = {multi-child p : U(p) ≥ τ_L} are known after forward 1 and
+  *guarantee* the certificate. Office (cascade bridges, cbtrie 0.75): |E| mean 0.75 / 3.5 / 6.7 (K = 1/5/10;
+  p99 4 / 10 / 16, max 8 / 15 / 24) vs the minimal set |N| 0.60 / 2.3 / ≈4.5.
+- **Collaborative fusion inside certified search (`scripts/sasrec.py`, `scripts/fuse_search.py`, `runs/fuseC`):**
+  score = LLM score + β·log q_SASRec(i | history) (SASRec, 2 layers, d=64, trained on the train split in 58 s; alone: test HR@10 0.1500, NDCG@10 0.1156;
+  per-user item term → prefix bound U2 + β·max over the prefix's items; still 2 forwards, M=32, 100%
+  certified). β tuned on validation (0.5). **Office test (4,866): HR@10 0.1714 → 0.1825 (+1.11 [+0.62, +1.60]),
+  NDCG@10 0.1319 → 0.1391 (+0.72 [+0.45, +1.00]), HR@50 0.2513 → 0.2721 (+2.08 [+1.44, +2.69]), HR@1 +0.33
+  [−0.02, +0.70].** vs "LLM top-50 then rerank" at its own best β: HR@10 +0.25 [+0.08, +0.43], NDCG@10 +0.13
+  [+0.04, +0.23], HR@50 +2.08 (rerank cannot reach items outside the LLM's top 50). Office leaderboard: 0.1825
+  vs DASO 0.1834 (trained RL), SA-OPSD 0.1747, V-STAR 0.1746 — with no LLM training. vs MiniOneRec FP32
+  decode (0.1589): +2.36 pt.
+- **Dynamic per-token FP8 (W8A8, `--quant fp8`) is quality-neutral** (H100, `runs/tpfH` T1fp8): HR@10 0.1712,
+  NDCG@10 0.1315 vs FP16 0.1712 / 0.1319 — unlike static tensor-wise FP8 (−2.4 pt).
+- **Inductor PDL + combo kernels (H100, `runs/latH`):** 2.96 → 2.89 ms (−2.4%; same allocation).

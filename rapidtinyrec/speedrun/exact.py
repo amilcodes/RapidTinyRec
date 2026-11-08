@@ -353,6 +353,32 @@ class ExactTrieEngine(ExactEngine3):
         self.flat_a = cat.first.repeat_interleave(cat.W1)         # [nA*W1] first-code token
         self.flat_b = cat.t1.view(-1)
         assert int(self.single_flat.sum()) + self.M * cat.W2 >= self.N
+        self.bonus = None
+
+    def set_item_bonus(self, v):
+        """Value-augmented objective: score(i) = model score + v[i] (v [S] in `sid_tok` order, or [B,S] per
+        user for the next run() of a batch of B; any sign). Certified search stays exact with prefix bound
+        U2 + max of v over the prefix's items."""
+        self.bonus = None if v is None else self._bonus_tables(v.to(self.W.device, torch.float32))
+
+    dyn_bonus = False
+
+    def enable_dynamic_bonus(self):
+        """Per-request bonus read from bufs['bonus'] [B,S] inside run() (CUDA-graph friendly)."""
+        self.dyn_bonus = True
+
+    def _bonus_tables(self, v):
+        cat = self.cat
+        v = v[None] if v.dim() == 1 else v                              # [B or 1, S]
+        Bv = v.shape[0]
+        ninf = float('-inf')
+        V2 = torch.full((Bv, cat.t2.shape[0], cat.W2), ninf, device=v.device)
+        V2[:, self.sid_pair, self.sid_col] = v
+        nflat = len(cat.first) * cat.W1
+        vmax = torch.full((Bv, nflat), ninf, device=v.device)
+        vmax.scatter_reduce_(1, self.sid_flat[None].expand(Bv, -1), v, 'amax')
+        vone = torch.where(self.single_flat[None], V2[:, cat.pair_table.view(-1), 0], torch.zeros_like(vmax))
+        return dict(V2=V2.masked_fill(~cat.v2[None], 0.0), vmax=vmax.masked_fill(vmax == ninf, 0.0), vone=vone)
 
     def alloc(self, B, P):
         W, dev, dt = self.W, self.W.device, self.W.dtype
@@ -360,7 +386,8 @@ class ExactTrieEngine(ExactEngine3):
         z = lambda *s: torch.zeros(*s, device=dev, dtype=dt)
         return dict(kc=z(W.L, B, W.KV, P, W.hd), vc=z(W.L, B, W.KV, P, W.hd),
                     kp2=z(W.L, B, nA, 1, W.KV, W.hd), vp2=z(W.L, B, nA, 1, W.KV, W.hd),
-                    kp3=z(W.L, B, self.M, 2, W.KV, W.hd), vp3=z(W.L, B, self.M, 2, W.KV, W.hd))
+                    kp3=z(W.L, B, self.M, 2, W.KV, W.hd), vp3=z(W.L, B, self.M, 2, W.KV, W.hd),
+                    **({'bonus': torch.zeros(B, self.S, device=dev)} if self.dyn_bonus else {}))
 
     def run(self, tokens, lengths, bufs):
         W, cat, fwd, M, N = self.W, self.cat, self.fwd, self.M, self.N
@@ -380,9 +407,12 @@ class ExactTrieEngine(ExactEngine3):
         lb = self._lp(hn, 1, cat.t1[None].expand(B, nA, cat.W1), cat.v1[None].expand(B, nA, cat.W1))
         lb = lb.masked_fill(~cat.v1[None], neg_inf).view(B, nA * cat.W1)
         u2 = la.repeat_interleave(cat.W1, dim=1) + lb             # [B, nA*W1]
-        top2, pf = u2.masked_fill(~self.multi_flat[None], neg_inf).topk(M + 1, -1)
+        bo = self._bonus_tables(bufs['bonus']) if self.dyn_bonus else self.bonus
+        ub = u2 if bo is None else u2 + bo['vmax']                 # bound incl. the best item value below
+        top2, pf = ub.masked_fill(~self.multi_flat[None], neg_inf).topk(M + 1, -1)
         bound_pref = top2[:, M]
-        pf, u2m = pf[:, :M], top2[:, :M]
+        pf = pf[:, :M]
+        u2m = u2.gather(1, pf)
         ai, col = pf // cat.W1, pf % cat.W1
         b_tok = cat.t1[ai, col]
         pair = cat.pair_table[ai, col]
@@ -393,8 +423,10 @@ class ExactTrieEngine(ExactEngine3):
                      bufs['kp3'], bufs['vp3'], 1, lengths=lengths, n_layers=self.exit_c, start=start)
         t2, v2 = cat.t2[pair], cat.v2[pair]
         lc = self._lp(h[:, :, 0], 2, t2, v2).masked_fill(~v2, neg_inf)
+        if bo is not None:
+            lc = lc + (bo['V2'][0][pair] if bo['V2'].shape[0] == 1 else bo['V2'][bidx, pair])
         u3 = (u2m[..., None] + lc).view(B, M * cat.W2)
-        single = u2.masked_fill(~self.single_flat[None], neg_inf)
+        single = (u2 if bo is None else u2 + bo['vone']).masked_fill(~self.single_flat[None], neg_inf)
         pool = torch.cat([u3, single], 1)
         final, idx = pool.topk(N, -1)
         is_exp = idx < M * cat.W2
@@ -471,3 +503,137 @@ class OnePassTrieEngine(ExactTrieEngine):
         sid = torch.stack([a_tok, b_out, c_out], -1)
         cert = torch.ones(B, len([k for k in self.ks if k <= N]), dtype=torch.bool, device=dev)
         return {'sids': sid, 'scores': final, 'certified': cert}
+
+
+class InflightTrieEngine(ExactTrieEngine):
+    """Certified top-K in ONE forward: the SID tree grows inside the forward pass.
+
+    Prompt rows run all layers; first-code rows join at the first-level entry (late entry, bridge from
+    the last prompt token); at the third-code entry layer e a tuned lens on the states entering layer e
+    estimates every prefix bound U2 = s(a) + s(b|a), the M best multi-child prefixes by that *estimate*
+    join as extra rows (bridged from their parent's layer-e state) and run layers e..L-1 in the same
+    forward. The forward's output gives exact s(a), s(b|a) for every prefix and exact s(c|ab) for the
+    chosen ones, so the certificate is checked with exact quantities: K-th pool score >= best exact U2 of
+    any unchosen multi-child prefix. A poor estimate can only cost certification (caller falls back to
+    the two-forward engine), never correctness of a certified answer.
+
+    Optional first-level pruning (n_first=A): at the first-level entry a lens on the last prompt token
+    picks the A most promising first codes; only those enter. Items under an unchosen first code a are
+    bounded by the exact s(a) (from the prompt row at the top), which joins the certificate.
+    """
+
+    def __init__(self, W, cat, n_prefix=24, n_out=50, n_first=None, **kw):
+        super().__init__(W, cat, n_prefix=n_prefix, n_out=n_out, **kw)
+        self.lens = None
+        self.lens_a = None
+        self.A = n_first
+
+    @staticmethod
+    def _lens_pair(lens, W):
+        D = W.D
+        return (lens[:D].to(W.device, W.dtype).contiguous(), lens[D].to(W.device, torch.float32).contiguous())
+
+    def set_lens(self, lens, lens_a=None):
+        """lens [D+1, D] (fp32 ridge solution): final-normed state ~= [rms-normed h_e, 1] @ lens.
+        lens_a: the same for the first-level entry layer (needed with n_first)."""
+        self.lens = self._lens_pair(lens, self.W)
+        if lens_a is not None:
+            self.lens_a = self._lens_pair(lens_a, self.W)
+        assert self.A is None or self.lens_a is not None
+
+    def alloc(self, B, P):
+        W, dev, dt = self.W, self.W.device, self.W.dtype
+        nA = len(self.cat.first) if self.A is None else self.A
+        z = lambda *s: torch.zeros(*s, device=dev, dtype=dt)
+        return dict(kc=z(W.L, B, W.KV, P, W.hd), vc=z(W.L, B, W.KV, P, W.hd),
+                    kp2=z(W.L, B, nA, 1, W.KV, W.hd), vp2=z(W.L, B, nA, 1, W.KV, W.hd),
+                    kpr=z(W.L, B, self.M, 2, W.KV, W.hd), vpr=z(W.L, B, self.M, 2, W.KV, W.hd))
+
+    def _apply_lens(self, x, lens):
+        x = x.float()
+        x = (x * torch.rsqrt(x.pow(2).mean(-1, keepdim=True) + 1e-6)).to(self.W.dtype)
+        return ((x @ lens[0]).float() + lens[1]).to(self.W.dtype)
+
+    def run(self, tokens, lengths, bufs):
+        W, cat, fwd, M, N = self.W, self.cat, self.fwd, self.M, self.N
+        assert self.late is not None and self.lens is not None and fwd.tree_fast and fwd.attn == 'triton'
+        B, P = tokens.shape
+        dev = tokens.device
+        nA, W1 = len(cat.first), cat.W1
+        nS = nA if self.A is None else self.A
+        neg_inf = float('-inf')
+        T0 = self._T0()
+        last = lengths - 1 - T0
+        bi = torch.arange(B, device=dev)
+        sel = {}
+        multi2 = self.multi_flat.view(nA, W1)
+        single2 = self.single_flat.view(nA, W1)
+
+        def select_a(h):
+            y = self._apply_lens(h[bi, last], self.lens_a)
+            la_h = self._lp(y, 0, cat.first[None].expand(B, -1), None)
+            idx = la_h.topk(nS, -1).indices                       # [B,A] chosen first codes
+            sel['idx'] = idx
+            return idx
+
+        def select(h):
+            idx = sel['idx'] if self.A is not None else None
+            Pn = h.shape[1] - nS
+            y = self._apply_lens(torch.cat([h[bi, last][:, None], h[:, Pn:Pn + nS]], 1), self.lens)
+            la_h = self._lp(y[:, 0], 0, cat.first[None].expand(B, -1), None)
+            t1, v1 = (cat.t1[None].expand(B, nA, W1), cat.v1[None].expand(B, nA, W1)) if idx is None else (cat.t1[idx], cat.v1[idx])
+            lb_h = self._lp(y[:, 1:], 1, t1, v1).masked_fill(~v1, neg_inf)
+            if idx is not None:
+                la_h = la_h.gather(1, idx)
+            mul = multi2[None].expand(B, nA, W1) if idx is None else multi2[idx]
+            est = (la_h[..., None] + lb_h).masked_fill(~mul, neg_inf).view(B, nS * W1)
+            pf = est.topk(M, -1).indices                          # local flat j*W1+col, [B,M]
+            j, col = pf // W1, pf % W1
+            ai = j if idx is None else idx.gather(1, j)           # global first-code index
+            sel['pf'], sel['j'], sel['ai'], sel['col'] = pf, j, ai, col
+            return j, cat.t1[ai, col], cat.first[ai]
+        nl = self._node_late(tokens, lengths)
+        if self.A is not None:
+            assert nl is not None, 'first-level pruning needs first-level late entry'
+            nl['select'] = select_a
+        late = dict(entry=self.late, bridge=self.bridge, select=select, kp=bufs['kpr'], vp=bufs['vpr'])
+        hp, hn, hr = fwd._prefill_tree_fast(W.embed[tokens[:, T0:]], W.embed[cat.first][None].expand(B, nA, W.D), lengths,
+                                            bufs['kc'], bufs['vc'], bufs['kp2'], bufs['vp2'], self.tmpl, None, None,
+                                            late=late, node_late=nl)
+        la = self._lp(hp[bi, last], 0, cat.first[None].expand(B, -1), None)          # exact, all first codes
+        idx = sel.get('idx')
+        if idx is None:
+            t1, v1 = cat.t1[None].expand(B, nA, W1), cat.v1[None].expand(B, nA, W1)
+            la_s, mul, sgl = la, multi2[None].expand(B, nA, W1), single2[None].expand(B, nA, W1)
+            gflat = torch.arange(nA * W1, device=dev)[None].expand(B, -1)
+            bound_a = torch.full((B,), neg_inf, device=dev)
+        else:
+            t1, v1 = cat.t1[idx], cat.v1[idx]
+            la_s, mul, sgl = la.gather(1, idx), multi2[idx], single2[idx]
+            gflat = (idx[..., None] * W1 + torch.arange(W1, device=dev)).view(B, -1)
+            chosen_a = torch.zeros_like(la, dtype=torch.bool).scatter_(1, idx, True)
+            bound_a = la.masked_fill(chosen_a, neg_inf).max(1).values          # items under unchosen a <= s(a)
+        lb = self._lp(hn, 1, t1, v1).masked_fill(~v1, neg_inf)
+        u2 = (la_s[..., None] + lb).view(B, nS * W1)                         # exact bounds, chosen first codes
+        mul, sgl = mul.reshape(B, -1), sgl.reshape(B, -1)
+        pf, ai, col = sel['pf'], sel['ai'], sel['col']
+        chosen = torch.zeros_like(u2, dtype=torch.bool).scatter_(1, pf, True)
+        bound = torch.maximum(u2.masked_fill(~mul | chosen, neg_inf).max(1).values, bound_a)
+        b_tok = cat.t1[ai, col]
+        pair = cat.pair_table[ai, col]
+        t2, v2 = cat.t2[pair], cat.v2[pair]
+        lc = self._lp(hr, 2, t2, v2).masked_fill(~v2, neg_inf)
+        u3 = (u2.gather(1, pf)[..., None] + lc).view(B, M * cat.W2)
+        single = u2.masked_fill(~sgl, neg_inf)
+        pool = torch.cat([u3, single], 1)
+        final, pidx = pool.topk(N, -1)
+        is_exp = pidx < M * cat.W2
+        e_idx = pidx.clamp(max=M * cat.W2 - 1)
+        row = e_idx // cat.W2
+        s_glob = gflat.gather(1, (pidx - M * cat.W2).clamp(min=0))
+        a_tok = torch.where(is_exp, cat.first[ai.gather(1, row)], self.flat_a[s_glob])
+        b_out = torch.where(is_exp, b_tok.gather(1, row), self.flat_b[s_glob])
+        c_out = torch.where(is_exp, t2.reshape(B, -1).gather(1, e_idx), self.single_c[s_glob])
+        sid = torch.stack([a_tok, b_out, c_out], -1)
+        cert = torch.stack([final[:, kk - 1] >= bound for kk in self.ks if kk <= N], -1)
+        return {'sids': sid, 'scores': final, 'certified': cert, 'next_bound': bound}

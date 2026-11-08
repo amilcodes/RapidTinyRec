@@ -261,6 +261,46 @@ rows; beam-500 needs four forwards of 500 rows each (three with trie scoring).
   requests with 128 guessed prefixes; certification needs the near-boundary prefixes too.
 Certification after the first forward alone happens for 44% of users at K=1 and 0.5% at K=10.
 
+### 5.1b Two-sided bounds: the expansion set is known after the first forward
+
+Upper bounds alone say which prefixes *might* hold a top-K item. Trie normalization also gives a
+**lower bound**: the third-code term is a log-softmax over the n_p valid children of p = (a,b), so its
+largest child has log-prob ≥ −log n_p, and some item under p scores at least L(p) = U(p) − w_c log n_p
+(U(p) = s(a) + w_b s(b|a), exact after forward 1). Single-child items are exactly scored by forward 1.
+
+- **Prop. 1 (soundness; known).** If the K-th exact pool score ≥ U of every unexpanded prefix, the pool's
+  top K is the global top K (all terms ≤ 0). [Stahlberg & Byrne 2019; Stahlberg et al. 2022; Fagin's TA;
+  stated for GR as post-hoc beam completion in Beyond the Beam, 2609.33745.]
+- **Prop. 2 (necessity / instance optimality).** Let τ* be the true K-th score. Any algorithm whose only
+  information about an unexpanded prefix is U(p) must expand every multi-child p with U(p) > τ*: the
+  children's log-softmax can put its mass on one child scoring U(p) − ε > τ*, which would enter the top K.
+  So N = {p : U(p) > τ*} is a lower bound for every bound-based decoder, and best-first expansion by U
+  reaches it (up to ties).
+- **Prop. 3 (guaranteed expansion set).** Let τ_L be the K-th largest value of {exact single-child scores}
+  ∪ {L(p) : p multi-child}. K distinct items score ≥ τ_L, so τ_L ≤ τ*. Expanding
+  E = {p multi-child : U(p) ≥ τ_L} ⊇ N always certifies: the pool then contains those K items, and every
+  unexpanded prefix has U < τ_L. |E| is computed on device right after forward 1; E \ N contains only
+  prefixes with τ_L ≤ U < τ*, a band of width ≤ τ* − τ_L ≤ w_c log n_max.
+- Codebook or full-vocabulary normalization of the last level admits no such lower bound (the valid
+  children can hold arbitrarily little mass), so this is a property of trie normalization only.
+
+Measured on all test users (`scripts/lbound.py`, `runs/lbndA`; |E| mean / p99 / max vs the minimal |N|
+mean / max):
+
+| K | Office (cascade late entry, cbtrie 0.75) | Office (trie, full depth) | Industrial (cbtrie 0.75) |
+|---|---|---|---|
+| 1 | 0.8 / 4 / 8 vs 0.6 / 3 | 0.8 / 4 / 13 vs 0.6 / 5 | 1.0 / 5 / 9 vs 0.7 / 4 |
+| 10 | 6.7 / 16 / 24 vs 4.5 / 13 | 7.0 / 18 / 26 vs 4.9 / 13 | 10.6 / 23 / 29 vs 5.0 / 14 |
+| 50 | 29.7 / 50 / 62 vs 21.7 / 43 | 30.4 / 53 / 62 vs 22.7 / 44 | 41.5 / 62 / 75 vs 25.1 / 45 |
+| 100 | 54.6 / 83 / 99 vs 41.5 / 71 | 55.7 / 86 / 101 vs 43.2 / 80 | 72.7 / 102 / 116 vs 47.9 / 81 |
+| 500 | 203 / 248 / 267 vs 166 / 220 | 206 / 255 / 276 vs 172 / 225 | 259 / 318 / 342 vs 188 / 256 |
+
+The guaranteed set is ≤ 1.1 K prefixes on average at every K (0.41 K at K=500) and 1.2–2.1× the provable
+minimum. In serving terms: forward 2 is a fixed-shape graph with M rows; with M ≥ max |E| (Office top-10:
+24) certification is guaranteed before forward 2 runs, and an overflow (|E| > M) is detected after
+forward 1 rather than discovered after forward 2. Our M=16 configuration covers |E| for 99% of Office
+users and still certifies 100% because E over-approximates N.
+
 ### 5.2 Late entry: the third code does not need the lower layers
 
 The logit lens shows SID codes are decided in the last 6–9 of 28 layers, and early exit (running
@@ -374,6 +414,35 @@ These are consistent with SID-MLP's observation that SID difficulty concentrates
 code: preference information lives in lp(a) and lp(b|a), while deeper terms are dominated by
 catalog structure.
 
+### 6.x Exact search under value-augmented objectives
+
+Production rankers rarely serve the model's log-probability alone: they add item-level terms (priors,
+bids, freshness, a collaborative model's opinion). With beam search such a term can only be applied
+after the beam has pruned. Certified search handles any additive item term v_u(i) exactly: the bound of
+prefix p becomes U(p) + max_{i under p} v_u(i) (a scatter-max per request), the expansion is still one
+forward of M rows, and the certificate is unchanged (`set_item_bonus`; per-user terms are read from a
+device buffer inside the CUDA graph).
+
+*Search error of beam-then-rerank.* With a synthetic per-item value v ~ N(0,1) weighted by λ, "LLM top-50
+then rerank" (an upper bound on any beam-50 + rerank pipeline) recovers 99.99 / 99.2 / 87.0 / **50.0%** of
+the exact top-10 at λ = 0.25 / 0.5 / 1 / 2 (Office, 2,000 users); certified search stays 100% certified
+at M = 32.
+
+*Collaborative fusion.* A SASRec (2 layers, d = 64, train split, 58 s on one GPU; alone: test HR@10 0.1500, NDCG@10 0.1156) supplies
+v_u(i) = β log q(i | history). β is chosen on validation (0.5). Office test, all 4,866 users:
+
+| decoder (Office test) | HR@1 | HR@10 | NDCG@10 | HR@50 |
+|---|---:|---:|---:|---:|
+| LLM, certified (cbtrie 0.75, both bridges) | 0.0993 | 0.1714 | 0.1319 | 0.2513 |
+| LLM top-50, then rerank with β log q (β = 0.5) | 0.1021 | 0.1800 | 0.1377 | 0.2513 |
+| **certified exact, LLM + β log q** | **0.1025** | **0.1825** | **0.1391** | **0.2721** |
+
+vs the LLM alone: ΔHR@10 +1.11 [+0.62, +1.60], ΔNDCG@10 +0.72 [+0.45, +1.00], ΔHR@50 +2.08 [+1.44, +2.69];
+vs rerank: ΔHR@10 +0.25 [+0.08, +0.43], ΔNDCG@10 +0.13 [+0.04, +0.23]. Against MiniOneRec's FP32 beam decode
+of the same checkpoint (0.1589) this is +2.36 points of HR@10 with no LLM training — on par with the best
+*trained* result we found on the same split (DASO, 0.1834) and above S-GRec, V-STAR and SA-OPSD
+(0.1689–0.1747). [Industrial: TBD `runs/fuseI`; H100 latency with the in-graph term: TBD `runs/fusH`.]
+
 ## 7. Precision and quantization
 
 | precision (fused + Triton beam, full semantics) | ms | top-1 = FP32 | top-10 set = FP32 | identical 50-lists | max \|Δscore\| |
@@ -453,6 +522,14 @@ state at the same depth (which the trie-level prefill already computes), and the
 forward that it shortens sits inside a certified search, so the speed-up composes with exactness
 guarantees for the (bridged) objective. We find the third SID code needs only its last 6–14 of 28
 layers when entered this way, whereas the second code is more sensitive.
+Closest in concept, GR4AD's LazyAR (2602.22732) *trains* a 9-layer decoder whose first 6 layers ignore the
+previous SID and fuses it in at layer 6 (+117% QPS); BRIDGE (2611.07425) trains a looped decoder with
+per-level iteration budgets (4,2,1). Closest in mechanism, FIRP / Hidden Transfer (2404.12022) predicts
+the mid-layer states of *unknown* future tokens with linear maps for drafting and must verify them;
+SwiftKV, CALM, ReplaceMe and LLM-Streamline map a token's own state across skipped layers. Ours conditions
+on the *known* child token, maps across tokens at a fixed depth, needs no verification, and is post hoc
+on a frozen 28-layer LLM. SID nodes are always the last positions, so no later token ever needs a
+child's K/V below its entry layer (the missing-KV problem of CALM, SkipDecode and D-LLM does not arise).
 
 **Search and scoring.** DiGR (2602.07847) scores every legal SID of an LLM recommender by brute
 force (5 s/user) and finds it beats beam-50; 2611.01072 studies beam's first-step losses for
@@ -460,10 +537,19 @@ TIGER with an offline exhaustive reference; Item-Supported Decoding (2607.24995)
 prefixes with an external ranker. Wu et al. (SIGIR'25) bound the error of constrained
 decoding; grammar-aligned decoding (2405.21047) shows mask-then-renormalize distorts LLM
 distributions. In machine translation, exact search exposed that the model's MAP output is
-often worse than beam's (Stahlberg & Byrne, 2019; Meister et al., 2020). To our knowledge no
-prior work makes exact search over the SID trie fast enough to serve, gives a per-request
-optimality certificate, or measures how forced suffix tokens and normalization choices change
-recommendation quality.
+often worse than beam's (Stahlberg & Byrne, 2019; Meister et al., 2020). The certificate itself is known: exact n-best NMT search prunes with the
+n-th best score against prefix log-probs ≤ 0 (Stahlberg, Kulikov & Kumar, ACL'22); probabilistic label
+trees get exact top-k by best-first search; Fagin's threshold algorithm is the canonical instance-optimal
+"stop when the bound is beaten". For generative recommendation, *Beyond the Beam* (2609.33745) states the
+same top-K certificate, but as post-hoc completion after a beam-40 search, with full-vocabulary scores,
+at most 80 teacher-forced extra items, and certified top-20 for 4.5–77.6% of queries. We make the
+certificate the decoder: every prefix is bounded in one tree-attention forward, the expansion set is
+chosen (and, under trie normalization, guaranteed sufficient) before the second forward, and 100% of
+requests certify. On normalization, ZeroGR (2611.04715) renormalizes over valid trie children to save
+compute and finds the ranking effect negligible on a small model; on a 1.5B LLM we measure +1.2 pt HR@10
+from the scoring rule and show that trie normalization is what makes the bound tight (and two-sided).
+Value-guided and value-aware decoders (V-STAR, UAGR, GR4AD-X) patch premature pruning of high-value items
+heuristically; certified search handles an additive item-value term exactly (§6).
 
 ## 10. Limitations
 

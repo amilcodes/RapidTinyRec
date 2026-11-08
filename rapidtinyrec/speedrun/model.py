@@ -243,6 +243,12 @@ class Forward:
         R = 0
         for li, layer in enumerate(W.layers):
             if node_late is not None and li == node_late['entry']:
+                if 'select' in node_late:
+                    # in-flight pruning of first-level rows: only the chosen [B,n'] first codes enter
+                    idx = node_late['select'](h)
+                    node_late['chosen'] = idx
+                    xn = xn[bi[:, None], idx]
+                    n = idx.shape[1]
                 hl = h[bi, lengths - 1 - T0][:, None, None].expand(B, n, 1, W.D)
                 el = node_late['last_emb'][:, None, None].expand(B, n, 1, W.D)
                 x0 = node_late['bridge'](hl, xn[:, :, None], el)
@@ -254,12 +260,24 @@ class Forward:
             if capture_prompt is not None and li in capture_prompt:
                 capture_prompt[li] = h[:, :Pn].clone()
             if late is not None and li == late['entry']:
-                # one-pass tree: prefix rows (a,b) join here, input bridged from their parent's state
-                par, bt = late['parent'], late['b_tok']                         # [R] node index, b token
-                R = par.shape[0]
-                ha = h[:, Pn + par][:, :, None]
-                x0 = late['bridge'](ha, W.embed[bt][None, :, None].expand(B, R, 1, W.D),
-                                    W.embed[late['a_tok']][None, :, None].expand(B, R, 1, W.D))
+                # one-pass tree: prefix rows (a,b) join here, input bridged from their parent's state.
+                # Static: every listed prefix ([R] indices). In-flight: late['select'](h) chooses [B,R]
+                # prefixes per user from the states entering this layer (estimate only; the caller
+                # certifies with the exact scores that come out of the same forward).
+                if 'select' in late:
+                    par, bt, at = late['select'](h)                             # [B,R] each
+                    late['chosen'] = par
+                    R = par.shape[1]
+                    ha = h[bi[:, None], Pn + par][:, :, None]
+                    x0 = late['bridge'](ha, W.embed[bt][:, :, None], W.embed[at][:, :, None])
+                    par_k = (bi[:, None], Pn + par)
+                else:
+                    par, bt = late['parent'], late['b_tok']                     # [R] node index, b token
+                    R = par.shape[0]
+                    ha = h[:, Pn + par][:, :, None]
+                    x0 = late['bridge'](ha, W.embed[bt][None, :, None].expand(B, R, 1, W.D),
+                                        W.embed[late['a_tok']][None, :, None].expand(B, R, 1, W.D))
+                    par_k = (slice(None), Pn + par)
                 h = torch.cat([h, x0[:, :, 0].to(h.dtype)], 1)
                 pos = torch.cat([pos, (lengths[:, None] + 1).expand(B, R)], 1)
                 kp2, vp2 = late['kp'], late['vp']                               # [L,B,R,2,KV,hd]
@@ -279,8 +297,8 @@ class Forward:
                 beam_attention(q[:, Pn:Pn + n, None], kcache[li], vcache[li], kpriv[li], vpriv[li], lengths, 0,
                                self.scale, out=o[:, Pn:Pn + n].view(B, n, 1, W.H, W.hd))
             if R:
-                kp2[li][:, :, 0] = k[:, Pn + late['parent']]
-                vp2[li][:, :, 0] = v[:, Pn + late['parent']]
+                kp2[li][:, :, 0] = k[par_k]
+                vp2[li][:, :, 0] = v[par_k]
                 kp2[li][:, :, 1] = k[:, Pn + n:]
                 vp2[li][:, :, 1] = v[:, Pn + n:]
                 beam_attention(q[:, Pn + n:, None], kcache[li], vcache[li], kp2[li], vp2[li], lengths, 1, self.scale,
