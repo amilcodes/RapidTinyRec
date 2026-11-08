@@ -449,3 +449,6 @@ See `lit_ledger.md`, `architecture_directions.md`, `kernel_techniques.md`.
   latency 3.06 → 3.04 ms (H100 is kernel-bound; fewer rows don't matter at B=1); **throughput 1,170 → 1,634
   users/s at B=8 and 1,446 → 2,398 at B=32 (1.66×)**. B=64 failed: that code snapshot still had trainable bridge
   parameters (autograd graphs recorded during capture; 38.6 GB at B=32 vs 7.7 GB) — fixed; rerun in `runs/casH`.
+- **Industrial first-level late entry at layer 18 (weighted, `runs/casInd`):** ΔHR@1 −0.02 [−0.18, +0.11],
+  ΔHR@10 +0.18 [−0.09, +0.46], ΔNDCG@10 +0.01 [−0.11, +0.13]; top-10 prefix agreement 82.7%. Lossless on both
+  datasets.
