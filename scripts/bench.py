@@ -69,6 +69,7 @@ def main():
     ap.add_argument('--fp8-smooth', type=int, default=0, help='static FP8 W8A8 with SmoothQuant folding, calibrated on N held-out prompts')
     ap.add_argument('--fp8-alpha', type=float, default=0.5)
     ap.add_argument('--fuse-store', action='store_true', help='compile K/V cache writes into the qkv kernel (with --tree-fast)')
+    ap.add_argument('--late-entry-a', default=None, help='ENTRY:BRIDGE.pt - first-level trie nodes join forward 1 at ENTRY')
     ap.add_argument('--late-entry', default=None, help='ENTRY:BRIDGE.pt - third-code forward runs layers ENTRY.. from a bridge')
     ap.add_argument('--n-expand', type=int, default=64)
     ap.add_argument('--profile', action='store_true', help='eager kernel-time breakdown for a few users')
@@ -115,6 +116,14 @@ def main():
         br_.load_state_dict(sd_)
         eng.set_late_entry(int(e_), br_)
         meta['late_entry'] = {'entry': int(e_), 'bridge': path_}
+    if a.late_entry_a:
+        from rapidtinyrec.speedrun.bridge import Bridge
+        e_, path_ = a.late_entry_a.split(':', 1)
+        sd_ = torch.load(path_, map_location='cpu')
+        br_ = Bridge(W.D, sd_['inp.weight'].shape[0])
+        br_.load_state_dict(sd_)
+        eng.set_node_late(int(e_), br_)
+        meta['late_entry_a'] = {'entry': int(e_), 'bridge': path_}
     if a.weights:
         wb, wc, ws = (float(x) for x in a.weights.split(','))
         eng.set_weights(wb, wc, ws)
