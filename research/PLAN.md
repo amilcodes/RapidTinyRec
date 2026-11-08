@@ -623,3 +623,23 @@ Experiments:
 - **Industrial extra SFT epoch (`runs/sftI`, aligned loss):** test ΔHR@10 +0.49 [−0.15, +1.13], ΔNDCG@10 +0.01,
   **ΔHR@50 +1.81 [+0.95, +2.65]**; validation ΔHR@10 −0.35 [−0.97, +0.24], ΔHR@50 +1.19 [+0.31, +2.05]. One more
   epoch helps deep recall on both datasets; top-10 only on Office.
+- **Cascade bridges for the fine-tuned backbone (`runs/sftB2_22`, `sftB2_26`):** third code at 22: ΔHR@1 −0.29
+  [−0.58, 0.00], ΔHR@10 −0.02 [−0.35, +0.35], ΔNDCG@10 −0.15 [−0.33, +0.02] (≈lossless); at 26: ΔHR@1 −0.60
+  [−0.92, −0.27], ΔNDCG@10 −0.27 [−0.47, −0.07] (not lossless). The deepest lossless entry depends on the
+  backbone (released Office: 26; fine-tuned Office: 22; Industrial: 18) — pick it on validation per model.
+- **Seed bug:** `train_sft.py --seed` had no effect (MiniOneRec's dataset class reseeds `random` with 42 inside
+  `data.prompts()`), so the "seed 1" run reproduced seed 0 bit-for-bit. Consequence: aligned and control runs
+  saw the identical data order (a cleaner control). Fixed (own `random.Random(seed)`); seed-1 reruns of both
+  losses queued (`runs/sftS1`, `runs/sftS2`).
+- **Fine-tuned full stack (`runs/sftFull`: extra SFT epoch + its own bridges (first level 18, cascade third code
+  22) + SASRec β=0.3, M=16):** Office test HR@10 **0.1854**, NDCG@10 0.1387, HR@50 0.2758 (top-10 certified
+  99.86%). vs released full depth: ΔHR@10 +1.77 [+1.07, +2.45], ΔNDCG@10 +0.83 [+0.44, +1.20], ΔHR@50 +3.12
+  [+2.28, +3.97]; vs released + bridges + fusion (`runs/fusH` B16, 0.1827): ΔHR@10 +0.27 [−0.31, +0.84] (n.s.) —
+  fusion carries most of the gain; the extra epoch adds little on top.
+- **Industrial final (H100, `runs/finalIH`, one allocation):** MiniOneRec beam-50 semantics 8.37 ms (HR@10
+  0.1582); certified trie M=16 4.08 ms; + both bridges (18/18) **3.11 ms** (HR@10 0.1619, NDCG@10 0.1178); +
+  SASRec term 3.45 ms (HR@10 **0.1670**, NDCG@10 0.1220); FP8 + bridges + fusion throughput **3,542 / 3,738
+  users/s** (B = 64 / 128), HR@10 0.1661, NDCG@10 0.1215.
+- **A6000 final (`runs/finalA`, Office):** beam-50 semantics 22.4 ms; certified trie 11.4 ms; + both bridges
+  (first level 18, third code 26) **6.38 ms**; + SASRec term 6.44 ms (HR@10 0.1825, NDCG@10 0.1388); throughput
+  with fusion 485 / 502 users/s (B = 32 / 64). (HF `generate` FP32: 868.8 ms → 135× at batch 1.)

@@ -86,6 +86,13 @@ users; `runs/finalH`).**
 | certified top-500 with fusion | 2.92 | 3.03 | — | — | top-500: 100% |
 | throughput, FP8 dynamic + fusion, B = 128 | 3,155 users/s | | 0.1819 | 0.1382 | 100% |
 
+**Industrial (H100, `runs/finalIH`):** beam-50 semantics 8.37 ms (HR@10 0.1582) → certified 4.08 → both
+bridges at layer 18 3.11 ms (0.1619) → + SASRec term 3.45 ms (**0.1670**, NDCG@10 0.1220); FP8 + fusion
+3,738 users/s at B = 128. **A6000 (Office, `runs/finalA`):** beam-50 semantics 22.4 ms → certified 11.4 → both
+bridges (third code at 26) 6.38 → + SASRec term 6.44 ms (HR@10 0.1825); HF `generate` FP32 868.8 ms.
+**Fine-tuned backbone (one more SFT epoch, own bridges at 18/22, SASRec β = 0.3):** Office HR@10 0.1854 (+1.77
+[+1.07, +2.45] over the released checkpoint at full depth; +0.27 n.s. over the released checkpoint with fusion).
+
 \*MiniOneRec FP32 reference decode: 0.1589. Quality rows for the bridge configurations come from the
 matching quality runs (`runs/casH`, `runs/e26H`, `runs/baseEV`).
 
