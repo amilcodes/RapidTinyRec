@@ -481,3 +481,6 @@ See `lit_ledger.md`, `architecture_directions.md`, `kernel_techniques.md`.
   Office A6000 (`runs/casA`) 119 / 398 / 465 / **483**; Industrial A6000 (`runs/casIA`) 129 / 461 / 563 / 596;
   Industrial H100 (`runs/casIH`) 309 / 1,783 / 2,858 / **3,068**; Office H100 (`runs/casH`) 325 / 1,677 / 2,436 /
   2,575. Industrial A6000 latency: 11.18 ms (no bridges) → 7.67 ms (both bridges), paired.
+- **Static FP8 with SmoothQuant folding, H100 (`runs/fp8sH`, paired, hybrid scoring + third-code bridge +
+  compile-layer):** FP16 3.13 ms → **FP8 2.65 ms / 2.83 p95** (−15%; weights 3.56 → 2.25 GB incl. FP16 embedding);
+  calibration 64 held-out prompts, 1.8 s. Full-test quality pending.
