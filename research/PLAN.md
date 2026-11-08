@@ -346,3 +346,14 @@ See `lit_ledger.md`, `architecture_directions.md`, `kernel_techniques.md`.
   ΔNDCG@10 −0.25 [−0.51, −0.01]; only 61% of top-10 prefixes agree with full depth. Stacked with the c-bridge
   (trained on full-depth parent states): ΔHR@1 −1.79. The second code decides set membership and needs its
   lower layers more than the third code does.
+- **Triton prompt attention for the fused first forward (`--tree-fast`, H100, `runs/fastH`):** trie engine
+  M=16: 5.47 → **4.56 ms**, identical full-test quality (HR@10 0.1652); + late entry 22: **3.56 ms**
+  (HR@1 0.0962, HR@10 0.1679); + whole-layer compile: **3.31 ms / 3.40 p95**. Late entry without the fast
+  first forward: 4.16 ms (3.79 with compile-layer). Self-check of the prompt kernel vs FP32: max err ≤ 0.009.
+- **A6000 MiniOneRec beam baselines:** full-semantics beam-100 30.6 ms, beam-500 83.2 ms (vs certified top-100
+  14.7, top-500 17.95 ms: 2.1× / 4.6×); trie beam-500 25.95 ms.
+- **Industrial bridges (validation-trained, all 4,533 test users, vs full depth HR@1 0.0847 / HR@10 0.1613 /
+  NDCG@10 0.1181):** entry 22: ΔHR@1 −0.31 [−0.60, −0.02], ΔHR@10 −0.22 [−0.51, +0.07], ΔNDCG@10 −0.29
+  [−0.44, −0.13]; entry 18: −0.35 [−0.62, −0.11] / −0.04 / −0.18 [−0.33, −0.04]; ridge −0.8 to −1.0; early
+  exit −2.4. Office entry 14: −0.02 / +0.14 / +0.05 (lossless). Late entry is lossless on Office from 10
+  layers and costs ≈0.2–0.35 pt on Industrial; retraining with prefix-weighted KL queued (`runs/bridgeW`).

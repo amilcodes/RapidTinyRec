@@ -66,6 +66,7 @@ def main():
     ap.add_argument('--beam', type=int, default=50)
     ap.add_argument('--ks', default='1,5,10,20,50', help='K values for certificates (exacttrie)')
     ap.add_argument('--tree-fast', action='store_true', help='Triton prompt/node attention in the fused first forward')
+    ap.add_argument('--fuse-store', action='store_true', help='compile K/V cache writes into the qkv kernel (with --tree-fast)')
     ap.add_argument('--late-entry', default=None, help='ENTRY:BRIDGE.pt - third-code forward runs layers ENTRY.. from a bridge')
     ap.add_argument('--n-expand', type=int, default=64)
     ap.add_argument('--profile', action='store_true', help='eager kernel-time breakdown for a few users')
@@ -151,6 +152,8 @@ def main():
             assert a.attn == 'triton'
             eng.fwd.compile_layer(a.compile)   # decode steps: whole layer compiled
             # prefill paths still use the separately compiled pieces
+        if a.fuse_store:
+            eng.fwd.store_fn = torch.compile(eng.fwd.qkv_store, mode=a.compile, dynamic=False, fullgraph=True)
         eng.fwd.qkv = torch.compile(eng.fwd.qkv, mode=a.compile, dynamic=False, fullgraph=True)
         eng.fwd.post = torch.compile(eng.fwd.post, mode=a.compile, dynamic=False, fullgraph=True)
     torch.cuda.synchronize()

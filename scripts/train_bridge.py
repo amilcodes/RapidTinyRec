@@ -115,6 +115,9 @@ def main():
     ap.add_argument('--lr', type=float, default=5e-4); ap.add_argument('--hidden', type=int, default=2048)
     ap.add_argument('--eval-users', type=int, default=0, help='0 = all test users')
     ap.add_argument('--weights', default='1,0.5,0')
+    ap.add_argument('--row-weight', type=float, default=0.0,
+                    help='mix of prefix-probability weighting in the KL (0 = uniform over the M rows)')
+    ap.add_argument('--tag', default='')
     a = ap.parse_args()
     out = Path(a.out); out.mkdir(parents=True, exist_ok=True)
     dev = torch.device('cuda')
@@ -170,7 +173,10 @@ def main():
             tgt = S.c_logp(st['h_full'])
             x0 = br(st['hA'], W.embed[st['b_tok']][:, :, None], W.embed[st['a_tok']][:, :, None])
             lp = S.c_logp(S.late(st, x0))
-            loss = F.kl_div(lp, tgt, log_target=True, reduction='batchmean') / lp.shape[1]
+            kl = F.kl_div(lp, tgt, log_target=True, reduction='none').sum(-1)          # [B, M]
+            M_ = kl.shape[1]
+            w = (1 - a.row_weight) / M_ + a.row_weight * st['u2m'].float().softmax(-1)
+            loss = (kl * w).sum(-1).mean()
             opt.zero_grad(set_to_none=True)
             loss.backward()
             torch.nn.utils.clip_grad_norm_(br.parameters(), 1.0)
@@ -178,7 +184,7 @@ def main():
             run.append(loss.item())
         log.append({'epoch': ep + 1, 'train_kl': statistics.mean(run), 'held_kl': held_loss(), 's': time.time() - t0})
         print(json.dumps({'stage': 'train', **log[-1]}), flush=True)
-    torch.save(br.state_dict(), out / f'bridge_e{e}.pt')
+    torch.save(br.state_dict(), out / f'bridge_e{e}{a.tag}.pt')
     del W, eng, S
     torch.cuda.empty_cache()
 
@@ -238,7 +244,7 @@ def main():
             for key in ('HR@1', 'HR@10', 'NDCG@10'):
                 res[n][f'd{key}_vs_full'] = boot([per[n][u][key] for u in users], [per['full'][u][key] for u in users])
     print(json.dumps({'stage': 'bridge_eval', **res}), flush=True)
-    (out / f'bridge_e{e}.json').write_text(json.dumps(res, indent=1))
+    (out / f'bridge_e{e}{a.tag}.json').write_text(json.dumps(res, indent=1))
 
 
 if __name__ == '__main__':
