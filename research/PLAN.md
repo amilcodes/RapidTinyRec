@@ -649,3 +649,14 @@ Experiments:
   / certified exact fused: K=200 0.3799 / 0.3993 / **0.4017**; K=500 0.5231 / 0.5231 / **0.5438 (+2.1)**;
   top-10…200 certified 100%, **top-500 only 85.2% at M=256** (Industrial needs a larger expansion budget for
   K=500 under the fused objective; the uncertified lists are still the best found among 256 prefixes).
+- **Seed-1 control (`runs/sftS2`, full-vocabulary CE):** aligned vs control (seed 1) ΔHR@10 +0.06 [−0.21, +0.35]
+  test, −0.18 [−0.49, +0.12] validation. The aligned-loss negative replicates across seeds.
+
+### Session 3 summary (end of night, 2026-11-08 ~08:15 UTC)
+New, kept: exact objective fusion (Office HR@10 0.1825 at 2.72 ms H100; Industrial 0.1670 at 3.45 ms;
+HR@500 +4.0 / +2.1); filters exact (5% eligibility: top-50-then-filter recovers 30%); two-sided trie bounds
+(guaranteed expansion set ≈0.7–1.1 K); third code at layer 26 on Office (2.75 ms, lossless vs full depth);
+dynamic FP8 throughput (3,155 / 3,738 users/s). Model branch: an extra SFT epoch +0.8–0.9 HR@10 on Office
+(2 seeds), +1.8–2.0 HR@50 on both datasets; full stack 0.1854. Negatives: in-flight one-forward expansion,
+custom Triton GEMMs, GemLite INT8, max-autotune, aligned training loss, layer-26 entry on Industrial and on
+the fine-tuned backbone. All commits local on `speedrun/overnight-20261107` (not pushed).
