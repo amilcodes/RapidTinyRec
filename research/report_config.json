@@ -62,6 +62,25 @@
    "label": "same, codebook(a,b)+trie(c) scoring, w_c = 0.75",
    "run": "finA/O_cbtrie_L22w",
    "ours": true
+  },
+  {
+   "label": "final paired run: MiniOneRec beam-50 semantics, FP16 engine",
+   "run": "finalA/A0beam"
+  },
+  {
+   "label": "final: certified exact (trie M=16, cbtrie 0.75)",
+   "run": "finalA/A1trie",
+   "ours": true
+  },
+  {
+   "label": "final: both bridges, third code at layer 26",
+   "run": "finalA/A2br26",
+   "ours": true
+  },
+  {
+   "label": "final: + SASRec term in the graph (HR@10 0.1825)",
+   "run": "finalA/A3fus",
+   "ours": true
   }
  ],
  "compare": [
@@ -141,6 +160,7 @@
  "sim_tables": [],
  "findings": [
   "Exact search makes objective fusion exact: adding a per-user collaborative term (\u03b2\u00b7log q from a SASRec trained in one minute) inside certified search keeps two forwards and 100% certification and lifts Office HR@10 from 0.1714 to 0.1825 (+1.11 [+0.62, +1.60]; MiniOneRec's FP32 beam decode: 0.1589) and HR@500 by 4.0 points \u2014 beam-then-rerank cannot change the candidate set. Industrial: +0.51 [+0.07, +0.95]. With random item values, LLM-top-50-then-rerank recovers only 50% of the exact top-10.",
+  "Same stack on Industrial (H100): MiniOneRec beam-50 semantics 8.37 ms (HR@10 0.1582) \u2192 certified with both bridges at layer 18 3.11 ms (0.1619) \u2192 + SASRec term 3.45 ms (0.1670); FP8 + fusion 3,738 users/s. On the A6000 (Office): 22.4 ms beam \u2192 6.44 ms with fusion (HR@10 0.1825); HF generate: 869 ms.",
   "Two-sided bounds: under trie normalization the best child of an n-child prefix scores at least \u2212log n, so the set of prefixes that guarantees the certificate is known right after the first forward. It averages \u2264 1.1\u00b7K prefixes at every K up to 500 and is within 1.2\u20132.1\u00d7 of the provable minimum for any bound-based decoder.",
   "Late entry goes to the top 2 layers on Office: the third code enters at layer 26 of 28 (cascade bridge on the layer-18 first-level states), lossless against the full-depth model (\u0394HR@10 +0.12 [\u22120.27, +0.51]); certified top-10 in 2.75 ms on an H100 (2.72 ms with the SASRec term; MiniOneRec beam-50 in the same engine and allocation: 8.43 ms; certified top-500 with fusion: 2.92 ms). Industrial loses 0.46 pt HR@1 at layer 26 and keeps layer 18.",
   "Filters are exact too: with 5% of items eligible, filtering the LLM's top 50 recovers only 30.5% of the exact filtered top-10 (HR@10 0.018 vs 0.029); certified search answers in the same two forwards, 100% certified under every filter tried.",
