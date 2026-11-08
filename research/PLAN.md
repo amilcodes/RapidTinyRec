@@ -484,3 +484,8 @@ See `lit_ledger.md`, `architecture_directions.md`, `kernel_techniques.md`.
 - **Static FP8 with SmoothQuant folding, H100 (`runs/fp8sH`, paired, hybrid scoring + third-code bridge +
   compile-layer):** FP16 3.13 ms → **FP8 2.65 ms / 2.83 p95** (−15%; weights 3.56 → 2.25 GB incl. FP16 embedding);
   calibration 64 held-out prompts, 1.8 s. Full-test quality pending.
+- **Static FP8 quality: negative (`runs/fp8sH` Q1, α=0.5).** 2.65 ms, but full-test HR@1 0.0684 / HR@10 0.1473 /
+  NDCG@10 0.1057: vs the same FP16 configuration ΔHR@1 −3.25 [−3.80, −2.71], ΔHR@10 −2.38 [−3.04, −1.75],
+  ΔNDCG@10 −2.70 [−3.12, −2.29]; vs MiniOneRec's FP32 decode ΔHR@10 −1.15. Top-1 equal to FP16 for 37% of users.
+  Per-tensor activation and weight scales are too coarse here (and the bridge sees shifted layer-22 states); the
+  finer-grained row-wise FP8 kernels are slower than FP16 at these shapes. Not usable as built.
