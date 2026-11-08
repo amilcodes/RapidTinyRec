@@ -227,10 +227,17 @@ def main():
         eng.enable_dynamic_bonus()
         meta['bonus'] = {'file': a.bonus_file, 'beta': a.bonus_beta}
 
-    def put_bonus(r, idx):
+    def stage_bonus(idx, B):
+        """Host-side staging (outside the timer, like prompts): pinned [B,S] rows."""
+        if bonus is None:
+            return None
+        st = torch.zeros(B, bonus.shape[1]).pin_memory()
+        st[:len(idx)] = bonus[idx]
+        return st
+
+    def put_bonus(r, idx, staged=None):
         if bonus is not None:
-            r.bufs['bonus'].zero_()
-            r.bufs['bonus'][:len(idx)].copy_(bonus[idx], non_blocking=True)
+            r.bufs['bonus'].copy_(staged if staged is not None else stage_bonus(idx, r.B), non_blocking=True)
     fb = None
     if a.engine == 'inflight':
         # two-forward certified engine sharing weights, compiled pieces, template, bridges and scoring
@@ -293,19 +300,20 @@ def main():
         staged = []
         for i in cohort:
             r = runner(1, bucket(len(all_ids[i]), a.pad_quantum))
-            staged.append((i, r, *r.load([all_ids[i]])))
+            staged.append((i, r, *r.load([all_ids[i]]), stage_bonus([i], 1)))
             if fb is not None:
                 runner(1, bucket(len(all_ids[i]), a.pad_quantum), 'fb')
         # untimed warm pass
-        for i, r, t, ln in staged[:20]:
+        for i, r, t, ln, sb in staged[:20]:
+            put_bonus(r, [i], sb)
             r(t, ln)
         torch.cuda.synchronize()
         times, times_d2h, per_user, recs, recs_cert = [], [], [], [], []
         for rep in range(a.repeats):
-            for i, r, t, ln in staged:
+            for i, r, t, ln, sb in staged:
                 torch.cuda.synchronize()
                 st = time.perf_counter()
-                put_bonus(r, [i])
+                put_bonus(r, [i], sb)
                 o = r(t, ln)
                 torch.cuda.synchronize()
                 if fb is not None and not bool(o['certified'][0, fb_k]):
@@ -445,16 +453,16 @@ def main():
                     break
                 P = bucket(max(len(all_ids[i]) for i in chunk), a.pad_quantum)
                 r = runner(B, P)
-                batches.append((r, *r.load([all_ids[i] for i in chunk]), chunk))
+                batches.append((r, *r.load([all_ids[i] for i in chunk]), stage_bonus(chunk, B)))
             for r, t, ln, ch in batches[:3]:
-                put_bonus(r, ch)
+                put_bonus(r, None, ch)
                 r(t, ln)
             torch.cuda.synchronize()
             lat = []
             s = time.perf_counter()
             for r, t, ln, ch in batches:
                 st = time.perf_counter()
-                put_bonus(r, ch)
+                put_bonus(r, None, ch)
                 o = r(t, ln)
                 torch.cuda.synchronize()
                 if fb is not None and not bool(o['certified'][:, fb_k].all()):

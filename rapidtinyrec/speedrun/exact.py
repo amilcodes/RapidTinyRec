@@ -378,7 +378,9 @@ class ExactTrieEngine(ExactEngine3):
         vmax = torch.full((Bv, nflat), ninf, device=v.device)
         vmax.scatter_reduce_(1, self.sid_flat[None].expand(Bv, -1), v, 'amax')
         vone = torch.where(self.single_flat[None], V2[:, cat.pair_table.view(-1), 0], torch.zeros_like(vmax))
-        return dict(V2=V2.masked_fill(~cat.v2[None], 0.0), vmax=vmax.masked_fill(vmax == ninf, 0.0), vone=vone)
+        # vmax stays -inf where every item below a prefix is excluded (filters): such prefixes are never
+        # expanded and never bound the certificate; prefixes with no items are masked by the caller anyway.
+        return dict(V2=V2.masked_fill(~cat.v2[None], 0.0), vmax=vmax, vone=vone)
 
     def alloc(self, B, P):
         W, dev, dt = self.W, self.W.device, self.W.dtype

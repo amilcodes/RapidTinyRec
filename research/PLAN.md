@@ -590,3 +590,36 @@ Experiments:
   (0.1677): +1.75.
 - **Original bridges on the fine-tuned model (`runs/sftBr`):** entry 22 HR@10 0.1743 / NDCG@10 0.1315, entry 26
   0.1714 / 0.1294 (vs 0.1767 / 0.1345 full depth) → bridges should be retrained for a fine-tuned backbone.
+- **Model branch control — the aligned loss is NOT what helps (`runs/sftV2`, full-vocabulary CE, same data,
+  steps, lr):** test HR@10 0.1753 / NDCG@10 0.1337 / HR@50 0.2643 (vs released +0.76 [+0.12, +1.40] / +0.33
+  [−0.03, +0.70] / +1.97 [+1.15, +2.71]). Aligned vs control: ΔHR@10 +0.14 [−0.16, +0.47], ΔNDCG@10 +0.08
+  [−0.07, +0.24], ΔHR@50 0.00; validation ΔHR@10 −0.14 [−0.43, +0.14]. **Conclusion: one more SFT epoch on the
+  train split helps the released checkpoint (+0.8–0.9 HR@10, +2.0 HR@50); aligning the loss with the
+  decoder's restricted normalization adds nothing measurable.** Negative for the "align training with
+  decoding" hypothesis (agents flagged it as an open gap). Pure-trie loss variant cancelled.
+- **Latency tail with the fusion term on gpu2802 (`runs/e26fH`):** 27% of requests at 12–17 ms in every length
+  bucket, only with the per-request bonus copy and only on that node (`runs/fusH` on gpu2801: p95 3.30) →
+  pageable host-to-device copy inside the timer. Fixed: bonus rows staged in pinned memory outside the timer
+  (as prompts are). Re-measured in `runs/finalH`.
+- **Filtered retrieval (`scripts/filter_search.py`, `runs/filtS`, Office, 2,000 users, filter = item term 0/−∞,
+  certified at M=32 for 100% of users under every filter):** recall of the exact filtered top-10 by
+  "LLM certified top-50, then filter" / "top-500, then filter": 50% eligible 99.6 / 99.6%; 20% 92.8 / 99.7%;
+  **5% eligible 30.5% / 99.7%** (3.05 items survive in the top 50); category filter 25% of first codes 88.3 /
+  99.7%; 10% of first codes 68.0 / 99.8%. HR@10 at 5% eligibility: exact 0.029 vs top-50-then-filter 0.018.
+  Two forwards regardless of selectivity; filter-after-retrieval needs ~10× the candidate list to match.
+- **Bridges retrained for the fine-tuned backbone (`runs/sftB1`, ~2 min each):** third code at 22 ΔHR@10 0.00
+  [−0.18, +0.18], first-level at 18 ΔHR@10 0.00 [−0.33, +0.37] vs that model's full depth — the recipe
+  transfers; cascade third-code bridges (22, 26) training (`runs/sftB2_*`).
+- **Final paired H100 ladder (`runs/finalH`, one allocation, Office, batch 1, median of 2×500):** MiniOneRec
+  beam-50 semantics in our FP16 engine 8.43 ms → certified exact (trie M=16, cbtrie 0.75, PDL) 4.35 → + both
+  bridges (third code 22) 2.93 → third code 26 **2.75 ms**.
+- **Final paired H100 ladder, continued (`runs/finalH`):** + SASRec term in the graph (entry 26, pinned staging):
+  **2.72 ms / 2.97 p95, HR@10 0.1829, NDCG@10 0.1390, top-10 certified 100%** (tail fixed); certified top-500
+  with fusion + entry 26: **2.92 ms** (top-500 certified 100%; MiniOneRec beam-500 18.1 ms in `runs/largeKH`);
+  FP8 dynamic + entry 26 + fusion: 3,006 / 3,155 users/s (B = 64 / 128), HR@10 0.1819, NDCG@10 0.1382.
+- **Industrial deeper entry (cascade, `runs/bridgeI22`, `bridgeI24`):** entry 22 ΔHR@1 −0.29 [−0.55, −0.04],
+  ΔHR@10 0.00, ΔNDCG@10 −0.12 [−0.27, +0.03]; entry 24 ΔHR@1 −0.51 [−0.82, −0.22], ΔNDCG@10 −0.32. Deepest
+  lossless entry on Industrial stays 18.
+- **Industrial extra SFT epoch (`runs/sftI`, aligned loss):** test ΔHR@10 +0.49 [−0.15, +1.13], ΔNDCG@10 +0.01,
+  **ΔHR@50 +1.81 [+0.95, +2.65]**; validation ΔHR@10 −0.35 [−0.97, +0.24], ΔHR@50 +1.19 [+0.31, +2.05]. One more
+  epoch helps deep recall on both datasets; top-10 only on Office.
