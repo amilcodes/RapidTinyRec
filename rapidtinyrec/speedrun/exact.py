@@ -283,3 +283,82 @@ class ExactEngine3(ExactEngine):
         cert = torch.stack([final[:, kk - 1] >= next_bound for kk in self.ks if kk <= N], -1)
         return {'sids': sid.gather(1, order[..., None].expand(B, N, 3)), 'scores': final,
                 'certified': cert, 'next_bound': next_bound}
+
+
+class ExactTrieEngine(ExactEngine3):
+    """Certified top-K under trie-normalized scoring that never expands single-child prefixes.
+
+    Under trie normalization the third-code term is a log-softmax over the valid children of
+    (a, b), so it is exactly 0 when (a, b) has one child: every item under a single-child prefix
+    is exactly scored by forward 1 (prompt + all first codes). Forward 2 expands only the M best
+    multi-child prefixes. Candidate pool = children of expanded prefixes (exact) + all
+    single-child items (exact); certificate: K-th pool score >= best unexpanded multi-child U2.
+    Cost: two forwards for any K; forward 2 carries M rows (about 0.4 K for top-K).
+    """
+
+    def __init__(self, W, cat, n_prefix=16, n_out=50, fuse_first=True, ks=(1, 5, 10, 20, 50), **kw):
+        kw.pop('norm', None); kw.pop('suffix_mode', None)
+        super().__init__(W, cat, n_prefix=n_prefix, n_expand=n_out, fuse_first=fuse_first, norm='trie',
+                         suffix_mode='none', ks=ks, **kw)
+        self.N = n_out
+        nA = len(cat.first)
+        nchild = cat.v2.sum(-1)                                   # [pairs]
+        valid = cat.v1.view(-1)
+        nflat = torch.where(valid, nchild[cat.pair_table.view(-1)], torch.zeros_like(valid, dtype=nchild.dtype))
+        self.multi_flat = nflat >= 2                              # [nA*W1]
+        self.single_flat = nflat == 1
+        self.single_c = cat.t2[cat.pair_table.view(-1), 0]        # the only child (valid where single_flat)
+        self.flat_a = cat.first.repeat_interleave(cat.W1)         # [nA*W1] first-code token
+        self.flat_b = cat.t1.view(-1)
+        assert int(self.single_flat.sum()) + self.M * cat.W2 >= self.N
+
+    def alloc(self, B, P):
+        W, dev, dt = self.W, self.W.device, self.W.dtype
+        nA = len(self.cat.first)
+        z = lambda *s: torch.zeros(*s, device=dev, dtype=dt)
+        return dict(kc=z(W.L, B, W.KV, P, W.hd), vc=z(W.L, B, W.KV, P, W.hd),
+                    kp2=z(W.L, B, nA, 1, W.KV, W.hd), vp2=z(W.L, B, nA, 1, W.KV, W.hd),
+                    kp3=z(W.L, B, self.M, 2, W.KV, W.hd), vp3=z(W.L, B, self.M, 2, W.KV, W.hd))
+
+    def run(self, tokens, lengths, bufs):
+        W, cat, fwd, M, N = self.W, self.cat, self.fwd, self.M, self.N
+        B, P = tokens.shape
+        dev = tokens.device
+        nA = len(cat.first)
+        bidx = torch.arange(B, device=dev)[:, None]
+        neg_inf = float('-inf')
+        pmask = torch.where(torch.arange(P, device=dev)[None, :] < lengths[:, None], 0.0, torch.finfo(torch.float32).min)
+        L0 = lengths[:, None, None]
+        T0 = self._T0()
+        hp, hn = fwd.prefill_tree(W.embed[tokens[:, T0:]], W.embed[cat.first][None].expand(B, nA, W.D), lengths,
+                                  bufs['kc'], bufs['vc'], bufs['kp2'], bufs['vp2'], tmpl=self.tmpl)
+        la = self._lp(hp[torch.arange(B, device=dev), lengths - 1 - T0], 0, cat.first[None].expand(B, -1), None)
+        lb = self._lp(hn, 1, cat.t1[None].expand(B, nA, cat.W1), cat.v1[None].expand(B, nA, cat.W1))
+        lb = lb.masked_fill(~cat.v1[None], neg_inf).view(B, nA * cat.W1)
+        u2 = la.repeat_interleave(cat.W1, dim=1) + lb             # [B, nA*W1]
+        top2, pf = u2.masked_fill(~self.multi_flat[None], neg_inf).topk(M + 1, -1)
+        bound_pref = top2[:, M]
+        pf, u2m = pf[:, :M], top2[:, :M]
+        ai, col = pf // cat.W1, pf % cat.W1
+        b_tok = cat.t1[ai, col]
+        pair = cat.pair_table[ai, col]
+        for kp, kp2 in ((bufs['kp3'], bufs['kp2']), (bufs['vp3'], bufs['vp2'])):
+            kp[:, :, :, 0] = kp2[:, bidx, ai, 0]
+        h = fwd.step(W.embed[b_tok][:, :, None], (L0 + 1).expand(B, M, 1), bufs['kc'], bufs['vc'], pmask,
+                     bufs['kp3'], bufs['vp3'], 1, lengths=lengths, n_layers=self.exit_c)
+        t2, v2 = cat.t2[pair], cat.v2[pair]
+        lc = self._lp(h[:, :, 0], 2, t2, v2).masked_fill(~v2, neg_inf)
+        u3 = (u2m[..., None] + lc).view(B, M * cat.W2)
+        single = u2.masked_fill(~self.single_flat[None], neg_inf)
+        pool = torch.cat([u3, single], 1)
+        final, idx = pool.topk(N, -1)
+        is_exp = idx < M * cat.W2
+        e_idx = idx.clamp(max=M * cat.W2 - 1)
+        row = e_idx // cat.W2
+        s_idx = (idx - M * cat.W2).clamp(min=0)
+        a_tok = torch.where(is_exp, cat.first[ai.gather(1, row)], self.flat_a[s_idx])
+        b_out = torch.where(is_exp, b_tok.gather(1, row), self.flat_b[s_idx])
+        c_out = torch.where(is_exp, t2.reshape(B, -1).gather(1, e_idx), self.single_c[s_idx])
+        sid = torch.stack([a_tok, b_out, c_out], -1)
+        cert = torch.stack([final[:, kk - 1] >= bound_pref for kk in self.ks if kk <= N], -1)
+        return {'sids': sid, 'scores': final, 'certified': cert, 'next_bound': bound_pref}

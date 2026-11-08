@@ -14,7 +14,7 @@ import torch
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 from rapidtinyrec.speedrun.model import Qwen2Weights
 from rapidtinyrec.speedrun.beam import SidCatalog, BeamEngine, GraphRunner
-from rapidtinyrec.speedrun.exact import ExactEngine, ExactEngine3
+from rapidtinyrec.speedrun.exact import ExactEngine, ExactEngine3, ExactTrieEngine
 from rapidtinyrec.speedrun import data
 
 
@@ -54,7 +54,7 @@ def main():
     ap.add_argument('--throughput-users', type=int, default=1024)
     ap.add_argument('--repeats', type=int, default=1, help='timed passes over the cohort')
     ap.add_argument('--no-graph', action='store_true')
-    ap.add_argument('--engine', default='beam', choices=['beam', 'exact', 'exact3'])
+    ap.add_argument('--engine', default='beam', choices=['beam', 'exact', 'exact3', 'exacttrie'])
     ap.add_argument('--n-prefix', type=int, default=128)
     ap.add_argument('--norm', default='full', choices=['full', 'codebook', 'trie'])
     ap.add_argument('--attn', default='torch', choices=['torch', 'triton'])
@@ -64,6 +64,7 @@ def main():
     ap.add_argument('--compile-layer', action='store_true', help='compile whole decode layers incl. Triton attention')
     ap.add_argument('--weights', default=None, help='depth-discounted scoring weights wb,wc,ws')
     ap.add_argument('--beam', type=int, default=50)
+    ap.add_argument('--ks', default='1,5,10,20,50', help='K values for certificates (exacttrie)')
     ap.add_argument('--n-expand', type=int, default=64)
     ap.add_argument('--profile', action='store_true', help='eager kernel-time breakdown for a few users')
     ap.add_argument('--check-exhaustive', type=int, default=0, help='compare first K cohort users against exhaustive exact scoring')
@@ -94,6 +95,8 @@ def main():
         eng = BeamEngine(W, cat, beam=a.beam, suffix_mode=a.suffix, norm=a.norm, fuse_first=a.fuse_first)
     elif a.engine == 'exact':
         eng = ExactEngine(W, cat, n_expand=a.n_expand, suffix_mode=a.suffix, norm=a.norm, fuse_first=a.fuse_first)
+    elif a.engine == 'exacttrie':
+        eng = ExactTrieEngine(W, cat, n_prefix=a.n_prefix, n_out=a.n_expand, fuse_first=True, ks=tuple(int(k) for k in a.ks.split(',')))
     else:
         eng = ExactEngine3(W, cat, n_prefix=a.n_prefix, n_expand=a.n_expand, suffix_mode=a.suffix, norm=a.norm, fuse_first=a.fuse_first, exit_c=a.exit_c)
     if a.weights:
