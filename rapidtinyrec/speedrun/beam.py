@@ -288,7 +288,7 @@ class GraphRunner:
                 if _POOL is None:
                     _POOL = torch.cuda.graph_pool_handle()
                 self.graph = torch.cuda.CUDAGraph()
-                with torch.cuda.graph(self.graph, pool=_POOL):
+                with torch.cuda.graph(self.graph, pool=_POOL, capture_error_mode="relaxed"):
                     self.out = engine.run(self.tokens, self.lengths, self.bufs)
                 torch.cuda.synchronize()
 
