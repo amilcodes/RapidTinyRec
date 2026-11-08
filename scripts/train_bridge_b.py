@@ -34,6 +34,8 @@ def main():
     ap.add_argument('--epochs', type=int, default=3); ap.add_argument('--batch', type=int, default=16)
     ap.add_argument('--lr', type=float, default=5e-4); ap.add_argument('--hidden', type=int, default=2048)
     ap.add_argument('--weights', default='1,0.5,0')
+    ap.add_argument('--row-weight', type=float, default=0.0, help='mix of softmax(s(a)) weighting over a-node rows')
+    ap.add_argument('--tag', default='')
     a = ap.parse_args()
     out = Path(a.out); out.mkdir(parents=True, exist_ok=True)
     dev = torch.device('cuda')
@@ -121,13 +123,15 @@ def main():
             st = f1(ctx, train[k:k + a.batch], grad_bridge=br)
             tgt = b_logp(eng, cat, st['hn'])
             lp = b_logp(eng, cat, st['hn_late'])
-            loss = F.kl_div(lp, tgt, log_target=True, reduction='batchmean') / lp.shape[1]
+            kl = F.kl_div(lp, tgt, log_target=True, reduction='none').sum(-1)            # [B, nA]
+            w = (1 - a.row_weight) / kl.shape[1] + a.row_weight * st['la'].float().softmax(-1)
+            loss = (kl * w).sum(-1).mean()
             opt.zero_grad(set_to_none=True); loss.backward()
             torch.nn.utils.clip_grad_norm_(br.parameters(), 1.0); opt.step(); sched.step()
             run.append(loss.item())
         log.append({'epoch': ep + 1, 'train_kl': statistics.mean(run), 'held_kl': held_kl(), 's': time.time() - t0})
         print(json.dumps({'stage': 'train_b', **log[-1]}), flush=True)
-    torch.save(br.state_dict(), out / f'bridge_b_e{e}.pt')
+    torch.save(br.state_dict(), out / f'bridge_b_e{e}{a.tag}.pt')
     del W, eng, ctx
     torch.cuda.empty_cache()
 
@@ -201,7 +205,7 @@ def main():
             for key in ('HR@1', 'HR@10', 'NDCG@10'):
                 res[n][f'd{key}_vs_full'] = boot([per[n][u][key] for u in us], [per['full'][u][key] for u in us])
     print(json.dumps({'stage': 'bridge_b_eval', **res}), flush=True)
-    (out / f'bridge_b_e{e}.json').write_text(json.dumps(res, indent=1))
+    (out / f'bridge_b_e{e}{a.tag}.json').write_text(json.dumps(res, indent=1))
 
 
 if __name__ == '__main__':
