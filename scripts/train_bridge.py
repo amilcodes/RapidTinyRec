@@ -49,9 +49,11 @@ def build(release, dtype, dev, weights, tmpl_ids=None):
 class Stage:
     """Forward 1 + prefix selection + full-depth forward 2 for a chunk of users (no grad)."""
 
-    def __init__(self, tok, ids, cat, W, eng, entry):
+    def __init__(self, tok, ids, cat, W, eng, entry, b_bridge=None, b_entry=None):
         self.tok, self.ids, self.cat, self.W, self.eng, self.e = tok, ids, cat, W, eng, entry
         self.c_idx = torch.nonzero(cat.level_mask[2]).flatten()      # columns of sid_head for level c
+        self.bb, self.eb = b_bridge, b_entry                          # cascade: late first-level rows
+        assert b_bridge is None or b_entry <= entry
 
     @torch.no_grad()
     def __call__(self, chunk):
@@ -68,10 +70,28 @@ class Stage:
         T0 = eng._T0()
         nA, M, D = len(cat.first), eng.M, W.D
         cap = {self.e: None}
+        capP = {self.eb: None} if self.bb is not None else None
         hp, hn = fwd.prefill_tree(W.embed[t[:, T0:]], W.embed[cat.first][None].expand(B, nA, D), lengths,
-                                  bufs['kc'], bufs['vc'], bufs['kp2'], bufs['vp2'], tmpl=eng.tmpl, capture=cap)
+                                  bufs['kc'], bufs['vc'], bufs['kp2'], bufs['vp2'], tmpl=eng.tmpl, capture=cap,
+                                  capture_prompt=capP)
         bi = torch.arange(B, device=dev)
         la = eng._lp(hp[bi, lengths - 1 - T0], 0, cat.first[None].expand(B, -1), None)
+        pmask = torch.where(torch.arange(P, device=dev)[None] < lengths[:, None], 0.0, torch.finfo(torch.float32).min)
+        if self.bb is not None:
+            # late first-level rows: enter at eb from the last prompt token's state; their K/V (layers >= eb)
+            # go to separate buffers; their state entering layer e is the parent state for the third code
+            kp2l, vp2l = torch.zeros_like(bufs['kp2']), torch.zeros_like(bufs['vp2'])
+            hl = capP[self.eb][bi, lengths - 1 - T0][:, None, None].expand(B, nA, 1, D)
+            el = W.embed[t[bi, lengths - 1]][:, None, None].expand(B, nA, 1, D)
+            ea_ = W.embed[cat.first][None, :, None].expand(B, nA, 1, D)
+            x0b = self.bb(hl, ea_, el).to(W.dtype)
+            capL = {self.e: None}
+            if self.e == self.eb:
+                capL[self.e] = x0b[:, :, 0].clone()
+            hnl = fwd.step(x0b, lengths[:, None, None].expand(B, nA, 1), bufs['kc'], bufs['vc'], pmask, kp2l, vp2l, 0,
+                           lengths=lengths, start=self.eb, capture=capL if self.e > self.eb else None)
+            hn = hnl[:, :, 0]
+            hA_src = capL[self.e] if self.e == self.eb else capL[self.e][:, :, 0]
         lb = eng._lp(hn, 1, cat.t1[None].expand(B, nA, cat.W1), cat.v1[None].expand(B, nA, cat.W1))
         lb = lb.masked_fill(~cat.v1[None], float('-inf')).view(B, nA * cat.W1)
         u2m, pf = (la.repeat_interleave(cat.W1, dim=1) + lb).topk(M, -1)
@@ -81,13 +101,18 @@ class Stage:
         for kp, kp2 in ((bufs['kp3'], bufs['kp2']), (bufs['vp3'], bufs['vp2'])):
             kp[:, :, :, 0] = kp2[:, bi[:, None], ai, 0]
         pos = (lengths[:, None, None] + 1).expand(B, M, 1)
-        pmask = torch.where(torch.arange(P, device=dev)[None] < lengths[:, None], 0.0, torch.finfo(torch.float32).min)
         capB = {self.e: None}
         h = fwd.step(W.embed[b_tok][:, :, None], pos, bufs['kc'], bufs['vc'], pmask, bufs['kp3'], bufs['vp3'], 1,
                      lengths=lengths, capture=capB)
+        hA = cap[self.e][bi[:, None], ai][:, :, None]
+        if self.bb is not None:
+            # student parents: late first-level states and K/V (teacher above used the full-depth ones)
+            hA = hA_src[bi[:, None], ai][:, :, None]
+            for kp, kp2 in ((bufs['kp3'], kp2l), (bufs['vp3'], vp2l)):
+                kp[:, :, :, 0] = kp2[:, bi[:, None], ai, 0]
         return dict(B=B, chunk=chunk, bufs=bufs, lengths=lengths, pos=pos, pmask=pmask, u2m=u2m, ai=ai,
                     a_tok=a_tok, b_tok=b_tok, t2=cat.t2[pair], v2=cat.v2[pair], h_full=h[:, :, 0],
-                    hA=cap[self.e][bi[:, None], ai][:, :, None], hB=capB[self.e])
+                    hA=hA, hB=capB[self.e])
 
     def late(self, st, x0):
         """Layers e..L-1 for the prefix rows starting from x0 [B,M,1,D] (differentiable)."""
@@ -118,6 +143,8 @@ def main():
     ap.add_argument('--row-weight', type=float, default=0.0,
                     help='mix of prefix-probability weighting in the KL (0 = uniform over the M rows)')
     ap.add_argument('--tag', default='')
+    ap.add_argument('--b-bridge', default=None, help='first-level bridge (cascade training/eval)')
+    ap.add_argument('--b-entry', type=int, default=None)
     a = ap.parse_args()
     out = Path(a.out); out.mkdir(parents=True, exist_ok=True)
     dev = torch.device('cuda')
@@ -129,7 +156,11 @@ def main():
     tmpl_ids = list(eng.template_ids)
     users = list(range(len(rows))); random.shuffle(users)
     held = users[:200]; train = users[200:200 + a.train_users]
-    S = Stage(tok, ids, cat, W, eng, e)
+    bb = None
+    if a.b_bridge:
+        sd_b = torch.load(a.b_bridge, map_location='cpu')
+        bb = Bridge(W.D, sd_b['inp.weight'].shape[0]); bb.load_state_dict(sd_b); bb = bb.to(dev).eval()
+    S = Stage(tok, ids, cat, W, eng, e, bb, a.b_entry)
     D = W.D
     br = Bridge(D, a.hidden).to(dev)
     sid_emb = W.embed[cat.sid_ids].float()
@@ -191,6 +222,7 @@ def main():
     # ---------------- evaluation on the test split (fp16 model, same template rule as the engine)
     tok, rows, ids, targets, cat, W, eng = build(a.release, torch.float16, dev, wts)
     S = Stage(tok, ids, cat, W, eng, e)
+    Sc = Stage(tok, ids, cat, W, eng, e, bb, a.b_entry) if bb is not None else S
     br.eval()
     order = sorted(range(len(rows)), key=lambda i: len(ids[i]))
     if a.eval_users:
@@ -201,31 +233,33 @@ def main():
     br_ridge = Bridge(W.D, a.hidden).to(dev); br_ridge.load_state_dict(br.state_dict())
     torch.nn.init.zeros_(br_ridge.out.weight); torch.nn.init.zeros_(br_ridge.out.bias)
     t0 = time.time()
+
+    def ranked(st, h):
+        B = st['B']
+        lc = S.c_scores(h, st)
+        top = (st['u2m'][..., None] + lc).view(B, -1).topk(20, -1).indices
+        row = top // cat.W2
+        sid = torch.stack([st['a_tok'].gather(1, row), st['b_tok'].gather(1, row), st['t2'].view(B, -1).gather(1, top)], -1)
+        return [[tuple(x) for x in u] for u in sid.cpu().tolist()]
+
     with torch.no_grad():
         for k in range(0, len(order), a.batch):
-            st = S(order[k:k + a.batch])
-            B = st['B']
-            eb, ea = W.embed[st['b_tok']][:, :, None], W.embed[st['a_tok']][:, :, None]
-            hs = {'full': st['h_full'],
-                  'ridge': S.late(st, br_ridge(st['hA'], eb, ea)),
-                  'mlp': S.late(st, br(st['hA'], eb, ea))}
+            chunk = order[k:k + a.batch]
+            st = S(chunk)
+            stc = Sc(chunk) if Sc is not S else st
+            eb, ea = W.embed[stc['b_tok']][:, :, None], W.embed[stc['a_tok']][:, :, None]
+            lists = {'full': ranked(st, st['h_full']),
+                     'ridge': ranked(stc, Sc.late(stc, br_ridge(stc['hA'], eb, ea))),
+                     'mlp': ranked(stc, Sc.late(stc, br(stc['hA'], eb, ea)))}
             hx = eng.fwd.step(W.embed[st['b_tok']][:, :, None], st['pos'], st['bufs']['kc'], st['bufs']['vc'], st['pmask'],
                               st['bufs']['kp3'], st['bufs']['vp3'], 1, lengths=st['lengths'], n_layers=W.L - e)
-            hs['exit'] = hx[:, :, 0]
-            lc_full = S.c_scores(hs['full'], st)
-            full_top = (st['u2m'][..., None] + lc_full).view(B, -1).topk(20, -1).indices
-            multi = st['v2'].sum(-1) >= 2
-            for n, h in hs.items():
-                lc = S.c_scores(h, st)
-                top = (st['u2m'][..., None] + lc).view(B, -1).topk(20, -1).indices
-                row = top // cat.W2
-                sid = torch.stack([st['a_tok'].gather(1, row), st['b_tok'].gather(1, row), st['t2'].view(B, -1).gather(1, top)], -1).cpu().tolist()
-                for j, i in enumerate(st['chunk']):
-                    per[n][i] = data.rank_metrics([tuple(x) for x in sid[j]], targets[i], ks=(1, 5, 10, 20))
-                same1 = (top[:, 0] == full_top[:, 0]).float()
-                ov10 = (top[:, :10, None] == full_top[:, None, :10]).any(-1).float().mean(-1)
-                cm = ((lc.argmax(-1) == lc_full.argmax(-1)) | ~multi).float().mean(-1)
-                agree[n].append(torch.stack([same1, ov10, cm], -1).cpu())
+            lists['exit'] = ranked(st, hx[:, :, 0])
+            for n, L in lists.items():
+                for j, i in enumerate(chunk):
+                    per[n][i] = data.rank_metrics(L[j], targets[i], ks=(1, 5, 10, 20))
+                    f = lists['full'][j]
+                    agree[n].append(torch.tensor([float(L[j][0] == f[0]), len(set(L[j][:10]) & set(f[:10])) / 10, float('nan')]))
+            agree_stack = None
 
     def boot(x, y, n=2000):
         d = torch.tensor(x) - torch.tensor(y)
@@ -234,11 +268,12 @@ def main():
         return [d.mean().item(), bs[int(.025 * n)].item(), bs[int(.975 * n)].item()]
 
     users = sorted(per['full'])
-    res = {'setup': {'gpu': torch.cuda.get_device_name(0), 'entry': e, 'train_users': len(train), 'held_users': len(held),
+    res = {'setup': {'gpu': torch.cuda.get_device_name(0), 'entry': e, 'b_entry': a.b_entry, 'cascade': bb is not None,
+                     'train_users': len(train), 'held_users': len(held),
                      'eval_users': len(users), 'weights': a.weights, 'eval_s': time.time() - t0}, 'train_log': log}
     for n in names:
         m = {key: statistics.mean(per[n][u][key] for u in users) for key in per[n][users[0]]}
-        g = torch.cat(agree[n]).mean(0).tolist()
+        g = torch.stack(agree[n]).nanmean(0).tolist()
         res[n] = {**m, 'top1_same_as_full': g[0], 'top10_overlap_full': g[1], 'c_argmax_agree': g[2]}
         if n != 'full':
             for key in ('HR@1', 'HR@10', 'NDCG@10'):
