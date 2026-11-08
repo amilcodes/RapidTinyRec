@@ -471,3 +471,6 @@ See `lit_ledger.md`, `architecture_directions.md`, `kernel_techniques.md`.
   MiniOneRec beam (8.37 ms, `runs/finH`): ΔHR@10 +0.22 [−0.38, +0.79], ΔNDCG@10 −0.06 [−0.35, +0.23], ΔHR@1 −0.22
   [−0.55, +0.11]; vs full-depth certified: ΔHR@10 +0.13 [−0.15, +0.42]. A6000 baseline (third-code bridge only,
   `runs/casA` C0): 8.96 ms.
+- **A6000 throughput with the first-level bridge (`runs/nodeA` N1tp, pre-fix code):** 136 / 407 / 470 users/s at
+  B = 1/8/32 vs 120 / 253 / 274 without → **1.72× at B=32**. B=64 ran out of memory on that snapshot (38 GB at
+  B=32 from the autograd bug); fixed-code run in `runs/casA`.
