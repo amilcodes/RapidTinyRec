@@ -424,3 +424,13 @@ See `lit_ledger.md`, `architecture_directions.md`, `kernel_techniques.md`.
   ΔHR@1 +0.12 [−0.04, +0.31], ΔHR@10 +0.16 [−0.16, +0.49], ΔNDCG@10 +0.07 [−0.06, +0.21] (exact third code);
   top-10 prefix agreement 80.5% (was 61% with uniform KL at layer 22). Lossless. Using it end to end needs a
   third-code bridge trained on the late first-level states (cascade), in progress.
+- **Industrial final (`runs/finA`, `runs/finH`; all 4,533 test users; paired vs our fastest FP16 engine for
+  MiniOneRec's own beam-50 on the same GPU):** MiniOneRec beam 25.75 ms (A6000) / 8.37 ms (H100), HR@10 0.1582;
+  certified trie M=16 12.89 / 4.23 ms, HR@10 0.1588 (+0.09 [−0.44, +0.62]); **+ late entry (layer 18, weighted
+  bridge) 9.40 / 3.22 ms**, HR@10 0.1597 (+0.18 [−0.38, +0.71]), HR@1 −0.29 [−0.64, +0.07], NDCG@10 −0.08
+  [−0.36, +0.20] — quality-neutral at 2.7× / 2.6× the speed. Late vs full depth (same engine): HR@1 −0.11
+  [−0.29, +0.04], HR@10 +0.09, NDCG@10 −0.01.
+- **Office certified top-500 + late entry (final config):** 10.09 ms A6000, 3.36 ms H100; top-500 certified 100%.
+- First-level late entry at layer 22 (weighted): ΔHR@1 −0.12, ΔHR@10 −0.12, ΔNDCG@10 −0.12 (all n.s.), 71% top-10
+  prefix agreement — layer 18 is better (81%). With the old third-code bridge stacked on late first-level
+  states: ΔHR@1 −1.05 [−1.46, −0.68] → cascade-trained third-code bridge queued (`runs/bridgeCas`).
