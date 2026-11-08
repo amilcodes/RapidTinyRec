@@ -255,3 +255,55 @@ See `lit_ledger.md`, `architecture_directions.md`, `kernel_techniques.md`.
   0.1589 FP32 reference). Throughput of the tuned decoder: 67.8 (B=1), 160.5 (B=8), 176.2 (B=32)
   users/s. **869 → 14.4 ms = 60.4× (HF FP32 → certified FP16); 56.5 → 14.4 = 3.9× over the prior
   BF16 stack; 114.8 → 14.4 = 8.0× over the prior FP32 exact stack.**
+
+## Status log (2026-11-07/08, second session)
+
+- **Can the second forward go? No, not for free** (`scripts/onepass.py`, exhaustive FP32 Office, 4,866 test
+  users, validation-tuned codebook objective). Replacing the per-user third-code term by a user-independent
+  per-item table fit on validation: HR@1 0.050 vs 0.098 (−4.8 pt [−5.5, −4.1]), NDCG@10 −2.9 pt. Item identity
+  explains 77% of the variance of s(c|ab) overall but only 42% within each user's top-50; sibling order agrees
+  72%. The third code carries user-specific ranking signal for the top slot.
+- **Speculating the second forward's prefixes before the first forward does not work** (`scripts/speculate.py`,
+  356 Office users present in both validation and test). To certify top-10 a predictor must cover every prefix
+  with U2 > s_10. Best hit rate at 128 guessed prefixes: 29% (previous request's top prefixes + history
+  prefixes); history alone 6%, popularity 4%. The previous request's top-10 overlaps the next one by 31%.
+- **Certificate expansion sets are ~K under trie scoring** (`research/kscale.json`, both datasets). Prefixes
+  with U2 > s_K, median / p90 / p99: Office trie K=10 10/12/14, K=100 104/111/117, K=500 489/510/524,
+  K=1000 932/960/979; Industrial similar. Codebook (w_c=0.5) has a heavier tail (K=10 p99 35, K=500 p99 1,058).
+  Under the full-vocabulary objective the bound is loose: K=10 p90 1,715 of 2,488 prefixes.
+- **Single-child prefixes need no second forward under trie normalization** (s(c|ab)=0 exactly). Office: 581
+  of 2,488 prefixes have ≥2 children (1,537 of 3,444 items). Multi-child prefixes needed, median/p90/p99:
+  K=10 5/8/10, K=50 22/31/38, K=100 43/55/64, K=500 175/198/213 (Industrial K=500 205/238/259). One-forward
+  certification is still rare (K=1: 44%, K=10: 0.5%). New engine `ExactTrieEngine` (`--engine exacttrie`)
+  expands only multi-child prefixes; matches ExactEngine3 rank-for-rank and score-for-score on MPS FP32.
+- **Large-K search error (exhaustive FP32 simulation, `research/beam_recall_largeK.json`).** Recall of the exact
+  top-W by beam-W: full objective Office 44% (W=10), 49% (50), 53% (100), 64% (500); Industrial 62/67/69/79%.
+  Trie objective: Office 84/95/96/99.6%; Industrial 87/95/97/99.9%.
+- **The beam-search curse grows with list length** (`research/largeK_hr.json`, paired bootstrap vs the
+  MiniOneRec decode = full objective, beam-W). Exact search under the full objective: Office HR@50 −1.8 pt
+  [−2.5, −1.1], HR@100 −2.5, HR@200 −3.5, HR@500 −4.3 [−5.3, −3.2]; Industrial −0.1 to −0.7 (n.s.). Codebook
+  w_c=0.5, exact: Office HR@100 +2.3 [+1.5, +3.0], HR@500 +2.4 [+1.4, +3.3]; Industrial HR@200 +0.9 [+0.1, +1.6],
+  HR@500 +0.9 [+0.0, +1.8]. Trie: Office HR@500 +1.0, Industrial −1.6. Beam search's prefix-first pruning acts as
+  an implicit depth discount; with an explicit discount, exactness stops hurting.
+- **Validation-tuned trie family (`research/hybrid_rule.json`).** w_c chosen on validation = 0.75 for trie and
+  for a codebook(a,b)+trie(c) hybrid. Office HR@10 vs reference: codebook +1.15, hybrid +0.92 [+0.33, +1.52],
+  trie +0.76 [+0.16, +1.34]; Industrial all +0.29 (n.s.). The trie rules need 9/35/204 second-forward rows (p99)
+  for K=10/50/500 vs 35/180/1,058 for codebook.
+- **H100 (gpu-debug, one allocation, 2×500 requests per rung, Office):** FP32 graph 48.3 → BF16 graph 20.1 →
+  +compile 12.9 → +fused first level + Triton 8.50 → +FP16 + template 8.48 (top-1 = FP32 500/500) → **certified
+  exact trie 5.57 / 5.74 p95; validation-tuned codebook 5.66 / 5.76** (HR@10 0.1697). FP8 W8A8 6.01 ms (slower
+  again, quality equal). Throughput, tuned codebook: 178 / 726 / 904 / 920 users/s at B = 1/8/32/64.
+  Profile: 2,555 kernels and 5.9 ms GPU time per request; GEMMs ≈3.1 ms (≈50% of H100 HBM bandwidth), glue
+  ≈2.8 ms (≈200 copy kernels for K/V cache writes, template concat, repeat_interleave, masked SDPA). On H100
+  the engine is kernel-count-bound; the weight-streaming floor for two forwards is ≈1.6 ms.
+- **Skinny GEMMs on the A6000 (`scripts/gemm_bench.py`):** per forward (28 layers, GEMMs only) cuBLAS 4.84 /
+  5.78 / 6.58 / 7.19 ms at M = 16 / 64 / 140 / 216 rows; a tuned split-K Triton kernel only helps at M ≤ 64
+  (5.28 ms at M=64, 9%). At M=140 the gate/up GEMM already runs at ≈57 TFLOPS: the A6000's first forward
+  (prompt tail + 88 trie nodes) is compute-bound, so fewer rows, not better kernels, is the lever there.
+- **Late entry for the third-code forward (`scripts/late_entry.py`, Office, 2,000 test users, codebook
+  w_c=0.5, Quadro RTX 6000 FP16).** Prefix rows enter at layer e with an input built from the parent node's
+  residual stream at layer e. Same-cost comparison at 6 remaining layers (e=22): full forward HR@1 0.140 /
+  NDCG@10 0.175; ridge bridge (h_a, E[b], E[a] → h_b, fit on 600 held-out prompts, no labels) 0.132 / 0.169;
+  early exit (first 6 layers) 0.086 / 0.145; parent state only 0.113 / 0.152 (adding E[b]−E[a] changes
+  nothing). The bridge recovers most of what early exit loses but leaves −0.8 pt HR@1; its relative residual is
+  ≈0.62 at every depth. A trade-off (F2 at 6/28 layers), not a free win.

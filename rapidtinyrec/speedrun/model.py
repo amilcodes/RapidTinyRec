@@ -152,7 +152,7 @@ class Forward:
     # Optional shared template: if `tmpl` = (kt [L,KV,T0,hd], vt) holds the K/V of a prefix
     # shared by every prompt, `x` covers only prompt positions T0..P-1 and attends to the
     # cached template as well (exact: causal attention never lets the template see later tokens).
-    def prefill_tree(self, x, xn, lengths, kcache, vcache, kpriv, vpriv, tmpl=None):
+    def prefill_tree(self, x, xn, lengths, kcache, vcache, kpriv, vpriv, tmpl=None, capture=None):
         W = self.W
         B, Pn, _ = x.shape
         T0 = 0 if tmpl is None else tmpl[0].shape[2]
@@ -171,6 +171,8 @@ class Forward:
         mask = torch.where(node_q[None], to_prompt | self_ok[None], causal[None])     # [B,T,T0+T]
         h = torch.cat([x, xn], 1)
         for li, layer in enumerate(W.layers):
+            if capture is not None and li in capture:
+                capture[li] = h[:, Pn:].clone()      # node residual stream entering layer li
             q, k, v = self.qkv(h, layer, pos)
             kt = k.transpose(1, 2)
             vt = v.transpose(1, 2)
@@ -221,7 +223,10 @@ class Forward:
     # -- beam step: x [B, R, Q, D] (R beams per user, Q new tokens per beam)
     # prefix K/V: [B, KV, P, hd] with additive prefix mask [B, P]
     # private K/V: [B, R, S, KV, hd]; the new tokens occupy slots [s0, s0+Q)
-    def step(self, x, pos, kcache, vcache, pmask, kpriv, vpriv, s0, lengths=None, n_layers=None):
+    def step(self, x, pos, kcache, vcache, pmask, kpriv, vpriv, s0, lengths=None, n_layers=None, start=0,
+             capture=None):
+        """start > 0: x is the residual stream entering layer `start` (late entry); layers below are
+        skipped for these rows. capture: dict {layer: None} filled with the input of those layers."""
         W = self.W
         B, R, Q, _ = x.shape
         rep = W.H // W.KV
@@ -234,9 +239,15 @@ class Forward:
         cmask = torch.where(si <= s0 + qi, 0.0, neg)  # [Q, S]
         if self.attn == 'triton' and self.layer_fn is not None:
             for i, layer in enumerate(W.layers[:n_layers]):
+                if i < start:
+                    continue
                 x = self.layer_fn(x, pos, kcache[i], vcache[i], kpriv[i], vpriv[i], lengths, s0, layer)
             return self.final(x)
         for i, layer in enumerate(W.layers[:n_layers]):
+            if i < start:
+                continue
+            if capture is not None and i in capture:
+                capture[i] = x.clone()
             q, k, v = self.qkv(x, layer, pos)  # q [B,R,Q,H,hd], k/v [B,R,Q,KV,hd]
             kpriv[i][:, :, s0:S] = k
             vpriv[i][:, :, s0:S] = v
