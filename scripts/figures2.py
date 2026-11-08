@@ -91,6 +91,12 @@ for ax, job, gpu in ((axes[0], 'largeK', 'RTX A6000'), (axes[1], 'largeKH', 'H10
     bt = [None, lat(job, 'Bt50'), lat(job, 'Bt100'), lat(job, 'Bt200'), lat(job, 'Bt500')]
     bf = [None, None, lat(job, 'Bf100'), None, lat(job, 'Bf500')]
     ax.plot(K, cert, '-o', color=ACC, ms=4, label='certified top-K (trie, two forwards)')
+    late = {'largeK': [(10, lat('fastA', 'A2fast_late22')), (500, lat('fastA', 'A8_500'))],
+            'largeKH': [(10, lat('storeH', 'S1store')), (500, lat('oneH', 'T256L22'))]}[job]
+    late = [(k, v) for k, v in late if v]
+    if late:
+        ax.plot([k for k, _ in late], [v for _, v in late], '--D', color=ACC, mfc='white', ms=4,
+                label='certified top-K + late entry + fast first forward')
     kk = [k for k, v in zip(K, bt) if v]; ax.plot(kk, [v for v in bt if v], '-s', color=ACC2, ms=4, label='beam-K, trie scoring')
     kk = [k for k, v in zip(K, bf) if v]; ax.plot(kk, [v for v in bf if v], '-^', color=BASE, ms=4, label='beam-K, MiniOneRec scoring')
     ax.set_xscale('log'); ax.set_xlabel('K'); ax.set_ylabel('median ms, batch 1'); ax.set_title(gpu); ax.set_ylim(0, None)
