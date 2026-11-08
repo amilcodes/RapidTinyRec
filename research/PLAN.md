@@ -643,3 +643,9 @@ Experiments:
 - **A6000 final (`runs/finalA`, Office):** beam-50 semantics 22.4 ms; certified trie 11.4 ms; + both bridges
   (first level 18, third code 26) **6.38 ms**; + SASRec term 6.44 ms (HR@10 0.1825, NDCG@10 0.1388); throughput
   with fusion 485 / 502 users/s (B = 32 / 64). (HF `generate` FP32: 868.8 ms → 135× at batch 1.)
+- **Seed-1 rerun (fixed RNG, `runs/sftS1`):** aligned-loss fine-tune vs released: ΔHR@10 +0.86 [+0.21, +1.54],
+  ΔHR@50 +1.93 [+1.11, +2.71] (seed 0: +0.90 / +1.97); seed 1 vs seed 0: ΔHR@10 −0.04 [−0.55, +0.47]. Robust.
+- **Industrial fused objective at large K (`runs/fuseKI`, β=0.5, bridges 18/18):** HR@K LLM / top-500-then-rerank
+  / certified exact fused: K=200 0.3799 / 0.3993 / **0.4017**; K=500 0.5231 / 0.5231 / **0.5438 (+2.1)**;
+  top-10…200 certified 100%, **top-500 only 85.2% at M=256** (Industrial needs a larger expansion budget for
+  K=500 under the fused objective; the uncertified lists are still the best found among 256 prefixes).
