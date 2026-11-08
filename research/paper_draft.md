@@ -143,6 +143,8 @@ p95 ms; HF and prior rows from earlier RapidTinyRec measurements on the same GPU
 | + FP16 + cached template | 26.2 | 27.7 | top-1 = FP32 500/500 |
 | certified exact, trie scoring | **14.4** | 15.7 | top-50 certified 99.9%; HR@10 0.1648 |
 | certified exact, codebook, w_c = 0.5 (tuned on validation) | **14.4** | 15.6 | top-10 certified 99.7%; HR@10 0.1700 |
+| certified exact, trie, multi-child prefixes only (M=16) + Triton prompt attention (`runs/finA`) | 13.25 | 14.40 | top-10 certified 100%; HR@10 0.1652 |
+| + late entry for the third code (bridge at layer 22, trained on validation) | **8.98** | 10.23 | HR@10 0.1669; top-10 certified 100% |
 
 Same ladder on an H100 (`runs/h100M`, one allocation, 2 × 500 requests per rung):
 
@@ -155,6 +157,8 @@ Same ladder on an H100 (`runs/h100M`, one allocation, 2 × 500 requests per rung
 | + FP16 + cached template | 8.48 | 8.59 | top-1 = FP32 500/500 |
 | certified exact, trie | **5.57** | 5.74 | top-50 certified 100% (cohort) |
 | certified exact, codebook w_c = 0.5 | **5.66** | 5.76 | HR@10 0.1697 (full test) |
+| certified exact, trie, M=16 + Triton prompt attention + whole-layer compile + fused K/V stores (`runs/finH`) | 4.37 | 4.52 | HR@10 0.1652 |
+| + late entry for the third code (layer 22) | **3.32** | 3.44 | HR@10 0.1669 (3.16 ms in `runs/storeH`) |
 
 On the H100 the engine is kernel-bound rather than bandwidth-bound: 2,555 kernels and 5.9 ms
 of GPU time per request, of which GEMMs are ≈3.1 ms (≈50% of HBM bandwidth) and small

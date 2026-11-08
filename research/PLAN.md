@@ -3,6 +3,22 @@
 Working title: **"Beam search is optional: certified exact and roofline-bound inference for
 LLM-based generative recommenders."**
 
+## Current best results (2026-11-08)
+
+Batch 1, frozen 500-user Office cohort, FP16, one CUDA graph per request; quality on all test users.
+
+| decoder | A6000 ms | H100 ms | Office HR@10 | notes |
+|---|---:|---:|---:|---|
+| HF `generate`, FP32 (reference decode) | 868.8 | — | 0.1589 | MiniOneRec beam-50 |
+| speedrun engine, FP16, MiniOneRec semantics | 26.2 | 8.5 | 0.1587 | top-1 = FP32 500/500 |
+| certified exact (three-stage, M=64) | 14.4 | 5.6 | 0.1650 / 0.1700 | trie / tuned codebook |
+| certified exact, trie, multi-child only (M=16) + Triton prompt attention | 13.25 | 4.37 | 0.1652 | no learned parts; FP32 brute-force check: 0 violations |
+| **+ late entry for the third code (bridge, layer 22)** | **8.98** | **3.16–3.32** | 0.1669 | bridge trained on validation only |
+| certified top-500 + late entry | 10.6 | 3.8 | — | MiniOneRec beam-500: 83.2 / 18.1 ms |
+
+Throughput (H100, certified top-10 + late entry): 1,447 users/s at B=64. Late entry is lossless on HR@10 and
+NDCG@10 on both datasets (Office 6 of 28 layers, Industrial 10). Details and every number's run: below.
+
 ## What the literature review says (Nov 2026)
 
 See `lit_ledger.md`, `architecture_directions.md`, `kernel_techniques.md`.
