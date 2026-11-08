@@ -36,12 +36,14 @@ a small bridge distilled from their parent node's state (no labels, frozen model
 | + FP16 + cached prompt template (top-1 identical to FP32 for 500/500 users) | 26.2 | 8.48 |
 | certified exact decoding (trie or tuned codebook scoring) | 14.4 | 5.6 |
 | + late entry for the third code | 9.5 | 4.2 |
-| + Triton prompt attention in the first forward (+ whole-layer compile, fused K/V stores on the H100) | **9.1** | **3.2** |
+| + Triton prompt attention in the first forward (+ whole-layer compile, fused K/V stores on the H100) | 9.0 | 3.2 |
+| same, codebook(a,b)+trie(c) scoring with the third code weighted 0.75 (validation-tuned) | **9.0** | **3.1** |
 
 - Certified decoding proves its top-10 globally optimal for ≥99.7% of users (0 violations
-  against brute force). With codebook scoring and the third code weighted 0.5 (chosen on
-  MiniOneRec's validation split) it improves HR@10 from 0.1589 to 0.1700 on all 4,866 Office test
-  users; on Industrial & Scientific it matches the reference quality.
+  against brute force). The fastest configuration also scores best: with codebook normalization
+  for the first two codes, trie normalization for the third and the third code weighted 0.75
+  (chosen on MiniOneRec's validation split), HR@10 rises from 0.1589 to 0.1712 on all 4,866 Office
+  test users (+1.23 pt [+0.66, +1.81]); on Industrial & Scientific it matches the reference quality.
 - Late entry is statistically indistinguishable from the full-depth second forward on HR@10 and
   NDCG@10 on both datasets (6 of 28 layers on Office, 10 on Industrial; bridges trained on the
   validation split only).

@@ -13,7 +13,8 @@ Batch 1, frozen 500-user Office cohort, FP16, one CUDA graph per request; qualit
 | speedrun engine, FP16, MiniOneRec semantics | 26.2 | 8.5 | 0.1587 | top-1 = FP32 500/500 |
 | certified exact (three-stage, M=64) | 14.4 | 5.6 | 0.1650 / 0.1700 | trie / tuned codebook |
 | certified exact, trie, multi-child only (M=16) + Triton prompt attention | 13.25 | 4.37 | 0.1652 | no learned parts; FP32 brute-force check: 0 violations |
-| **+ late entry for the third code (bridge, layer 22)** | **8.98** | **3.16–3.32** | 0.1669 | bridge trained on validation only |
+| + late entry for the third code (bridge, layer 22) | 8.98 | 3.16–3.32 | 0.1669 | bridge trained on validation only |
+| **codebook(a,b)+trie(c) scoring, w_c=0.75, + late entry** | **9.02** | **3.08** | **0.1712** | ΔHR@10 +1.23 [+0.66, +1.81] vs reference |
 | certified top-500 + late entry | 10.6 | 3.8 | — | MiniOneRec beam-500: 83.2 / 18.1 ms |
 
 Throughput (H100, certified top-10 + late entry): 1,447 users/s at B=64. Late entry is lossless on HR@10 and
@@ -403,3 +404,15 @@ See `lit_ledger.md`, `architecture_directions.md`, `kernel_techniques.md`.
 - **A6000 certified top-500 + fast first forward + late entry: 10.58 ms** (vs 17.95 ms without late entry; vs
   83.2 ms for MiniOneRec's beam-500 → 7.9×). A6000 throughput (trie M=16 + fast + late 22): 105 / 239 / 258
   users/s at B = 1/8/32.
+- **Final paired runs, Office (`runs/finA` A6000, `runs/finH` H100; FP16, Triton prompt attention; H100 also
+  compile-layer + fused stores; late entry = prefix-weighted bridge at layer 22; all 4,866 test users; Δ vs the
+  FP32 MiniOneRec reference decode, paired bootstrap):**
+  | decoder | A6000 ms | H100 ms | HR@1 | HR@10 | NDCG@10 | ΔHR@10 vs reference |
+  |---|---:|---:|---:|---:|---:|---|
+  | trie M=16, no late entry | 13.25 | 4.37 | — | 0.1652 | — | |
+  | trie + late entry | 8.98 | 3.32 | 0.1007 | 0.1669 | 0.1307 | +0.80 [+0.23, +1.40] |
+  | trie w_c=0.75 + late entry | 8.99 | 3.08 | 0.1005 | 0.1697 | 0.1320 | +1.07 [+0.47, +1.64] |
+  | **codebook(a,b)+trie(c), w_c=0.75 + late entry** | **9.02** | **3.08** | 0.1009 | **0.1712** | **0.1327** | **+1.23 [+0.66, +1.81]** |
+  | codebook w_c=0.5, three-stage M=64 + late entry | 9.17 | 3.10 | 0.1007 | 0.1702 | 0.1322 | +1.13 [+0.53, +1.71] |
+  Headline: ΔHR@1 +0.68 [+0.33, +1.05], ΔNDCG@10 +0.79 [+0.48, +1.11], ΔHR@50 +1.05 [+0.39, +1.71]; top-10
+  certified 100%. H100 latencies of configurations with the same work differ by up to ≈7% within one job.
