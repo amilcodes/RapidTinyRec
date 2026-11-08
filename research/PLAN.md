@@ -474,3 +474,6 @@ See `lit_ledger.md`, `architecture_directions.md`, `kernel_techniques.md`.
 - **A6000 throughput with the first-level bridge (`runs/nodeA` N1tp, pre-fix code):** 136 / 407 / 470 users/s at
   B = 1/8/32 vs 120 / 253 / 274 without → **1.72× at B=32**. B=64 ran out of memory on that snapshot (38 GB at
   B=32 from the autograd bug); fixed-code run in `runs/casA`.
+- **A6000 with both bridges (`runs/casA`, fixed code, paired):** third-code bridge only 8.96 ms → both bridges
+  **8.20 ms / 8.79 p95**; full-test HR@1 0.0993, HR@10 0.1712, NDCG@10 0.1318 (= H100). Industrial A6000 baseline
+  (certified trie, no bridges, `runs/casIA`): 11.18 ms.
