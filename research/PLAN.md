@@ -439,3 +439,9 @@ See `lit_ledger.md`, `architecture_directions.md`, `kernel_techniques.md`.
   2.21 (1.5–1.8×); FP8 row-wise with BF16 output 1.64 / 1.56 / 1.72 / 1.62 / 2.85 (slower than FP16 at ≤224 rows —
   why the earlier per-token FP8 path lost). Static tensor-wise FP8 with SmoothQuant folding (smoothing factors
   folded into ln1, ln2, the v rows of wqkv and the up rows of wgu; `--fp8-smooth`) queued (`runs/fp8sH`).
+- **Cascade late entry (`runs/bridgeCas`):** first-level rows enter forward 1 at layer 18 (weighted bridge_b),
+  the third-code bridge is distilled on those late first-level states and K/V (target: the full-depth model's
+  third-code distribution), prefix rows enter forward 2 at layer 22. Office, all test users, codebook w_c=0.5,
+  vs full depth everywhere: **ΔHR@1 +0.14 [−0.08, +0.39], ΔHR@10 +0.00 [−0.37, +0.35], ΔNDCG@10 +0.04 [−0.13,
+  +0.22]**; top-1 = full 82%, top-10 overlap 80%. Lossless. Forward 1 then runs layers 0–17 on the prompt tail
+  only.
