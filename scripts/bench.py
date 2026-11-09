@@ -75,6 +75,8 @@ def main():
     ap.add_argument('--lens', default=None, help='inflight engine: ridge lens [D+1,D] for the prefix-entry layer')
     ap.add_argument('--bonus-file', default=None, help='per-user value term: torch file {logq [rows,S]} in test-row order')
     ap.add_argument('--bonus-beta', type=float, default=0.0)
+    ap.add_argument('--catalog', default=None, help='catalog file override (e.g. synthetic catalogs from scale_catalog.py)')
+    ap.add_argument('--collab', default=None, help='SASRec dir (sasrec.pt): value term computed inside the graph from the history')
     ap.add_argument('--pdl', action='store_true', help='inductor: programmatic dependent launch for Triton kernels (Hopper)')
     ap.add_argument('--combo', action='store_true', help='inductor: combo kernels (horizontal fusion)')
     ap.add_argument('--fused', default=None, choices=['fp16', 'int8'], help='fused-layer forward (wgemm kernels)')
@@ -102,7 +104,7 @@ def main():
     all_ids = data.prompts(a.release, tok, rows)
     targets = [data.sid_tokens(tok, r['item_sid']) for r in rows]
     cohort = data.cohort500(rows)
-    cat = SidCatalog(tok, Path(a.release) / data.CATALOG, dev)
+    cat = SidCatalog(tok, a.catalog or Path(a.release) / data.CATALOG, dev)
     quant = None
     if a.quant != 'none':
         from rapidtinyrec.speedrun import quant as Q
@@ -219,25 +221,33 @@ def main():
             eng.fwd.store_fn = torch.compile(eng.fwd.qkv_store, mode=a.compile, dynamic=False, fullgraph=True)
         eng.fwd.qkv = torch.compile(eng.fwd.qkv, mode=a.compile, dynamic=False, fullgraph=True)
         eng.fwd.post = torch.compile(eng.fwd.post, mode=a.compile, dynamic=False, fullgraph=True)
-    bonus = None
+    bonus, aux_key = None, 'bonus'
     if a.bonus_file:
-        assert a.engine == 'exacttrie'
+        assert a.engine == 'exacttrie' and not a.collab
         bonus = (a.bonus_beta * torch.load(a.bonus_file)['logq'].float().clamp(min=-30.0)).pin_memory()
         assert bonus.shape == (len(rows), eng.S)
         eng.enable_dynamic_bonus()
         meta['bonus'] = {'file': a.bonus_file, 'beta': a.bonus_beta}
+    if a.collab:
+        # per-request input is the user's history (item ids); SASRec runs inside the graph on a side stream
+        assert a.engine == 'exacttrie'
+        from rapidtinyrec.speedrun.collab import SASRecHead, history_ids
+        head = SASRecHead.from_dir(a.collab, a.release, tok, eng.sid_tok, a.bonus_beta, device=dev)
+        eng.set_collab(head)
+        bonus, aux_key = history_ids(rows, head.L).pin_memory(), 'hist'
+        meta['collab'] = {'dir': a.collab, 'beta': a.bonus_beta, 'L': head.L, 'in_graph': True}
 
     def stage_bonus(idx, B):
-        """Host-side staging (outside the timer, like prompts): pinned [B,S] rows."""
+        """Host-side staging (outside the timer, like prompts): pinned [B,S] bonus rows or [B,L] history rows."""
         if bonus is None:
             return None
-        st = torch.zeros(B, bonus.shape[1]).pin_memory()
+        st = torch.zeros(B, bonus.shape[1], dtype=bonus.dtype).pin_memory()
         st[:len(idx)] = bonus[idx]
         return st
 
     def put_bonus(r, idx, staged=None):
         if bonus is not None:
-            r.bufs['bonus'].copy_(staged if staged is not None else stage_bonus(idx, r.B), non_blocking=True)
+            r.bufs[aux_key].copy_(staged if staged is not None else stage_bonus(idx, r.B), non_blocking=True)
     fb = None
     if a.engine == 'inflight':
         # two-forward certified engine sharing weights, compiled pieces, template, bridges and scoring

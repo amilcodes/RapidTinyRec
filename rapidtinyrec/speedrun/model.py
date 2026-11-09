@@ -27,7 +27,13 @@ class Qwen2Weights:
         self.theta = cfg.get('rope_theta', 10000.0)
         self.dtype = dtype
         self.device = device
-        sd = load_file(str(ckpt / 'model.safetensors'), device='cpu')
+        idx = ckpt / 'model.safetensors.index.json'
+        if (ckpt / 'model.safetensors').exists():
+            sd = load_file(str(ckpt / 'model.safetensors'), device='cpu')
+        else:                                                  # sharded checkpoint (e.g. 3B / 7B)
+            sd = {}
+            for shard in sorted(set(json.loads(idx.read_text())['weight_map'].values())):
+                sd.update(load_file(str(ckpt / shard), device='cpu'))
 
         def w(name):
             return sd[name].to(device=device, dtype=dtype).contiguous()
