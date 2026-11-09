@@ -76,6 +76,7 @@ def main():
     ap.add_argument('--bonus-file', default=None, help='per-user value term: torch file {logq [rows,S]} in test-row order')
     ap.add_argument('--bonus-beta', type=float, default=0.0)
     ap.add_argument('--catalog', default=None, help='catalog file override (e.g. synthetic catalogs from scale_catalog.py)')
+    ap.add_argument('--collab-compile', action='store_true', help='torch.compile the in-graph SASRec head')
     ap.add_argument('--collab', default=None, help='SASRec dir (sasrec.pt): value term computed inside the graph from the history')
     ap.add_argument('--pdl', action='store_true', help='inductor: programmatic dependent launch for Triton kernels (Hopper)')
     ap.add_argument('--combo', action='store_true', help='inductor: combo kernels (horizontal fusion)')
@@ -233,6 +234,8 @@ def main():
         assert a.engine == 'exacttrie'
         from rapidtinyrec.speedrun.collab import SASRecHead, history_ids
         head = SASRecHead.from_dir(a.collab, a.release, tok, eng.sid_tok, a.bonus_beta, device=dev)
+        if a.collab_compile:
+            head.compile()
         eng.set_collab(head)
         bonus, aux_key = history_ids(rows, head.L).pin_memory(), 'hist'
         meta['collab'] = {'dir': a.collab, 'beta': a.bonus_beta, 'L': head.L, 'in_graph': True}
@@ -365,7 +368,7 @@ def main():
                 agree['top10_set_equal'] += set(rs[:10]) == set(ms[:10])
                 refsc = dict(zip(rs, rr['sequence_logp']))
                 d = [abs(refsc[s] - v) for s, v in zip(ms, rec['scores']) if s in refsc]
-                agree['max_abs_score_diff'] = max(agree['max_abs_score_diff'], max(d))
+                agree['max_abs_score_diff'] = max(agree['max_abs_score_diff'], max(d, default=float('inf')))
             lat['agreement_vs_fp32_reference'] = agree
         if a.check_exhaustive:
             ref_eng = ExactEngine(W, cat, n_expand=64, suffix_mode=a.suffix if a.suffix != 'separate' else 'fused', norm=a.norm)

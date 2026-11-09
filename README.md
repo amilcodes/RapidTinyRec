@@ -39,7 +39,8 @@ a small bridge distilled from their parent node's state (no labels, frozen model
 | + Triton prompt attention in the first forward (+ whole-layer compile, fused K/V stores on the H100) | 9.0 | 3.2 |
 | same, codebook(a,b)+trie(c) scoring with the third code weighted 0.75 (validation-tuned) | 9.0 | 3.1 |
 | + first-level late entry (layer 18), third code at layer 26 — final paired runs | 6.4 | **2.75** |
-| + SASRec term inside the certified search (HR@10 0.1825) | **6.4** | **2.72** |
+| + SASRec term inside the certified search (HR@10 0.1825; precomputed SASRec rows) | **6.4** | **2.72** |
+| same, SASRec itself computed inside the CUDA graph from the user's history (end to end) | — | **2.89** |
 
 - Certified decoding proves its top-10 globally optimal for ≥99.7% of users (0 violations
   against brute force). The fastest configuration also scores best: with codebook normalization
@@ -57,7 +58,9 @@ a small bridge distilled from their parent node's state (no labels, frozen model
   layer 26 and dynamic FP8: 3,155 users/s (Office), 3,738 (Industrial).
 - **Exact objective fusion** (third session): any additive item term (prior, bid, filter, collaborative score)
   keeps two forwards and the certificate. A SASRec term (1-minute training) lifts Office HR@10 from 0.1714 to
-  0.1825 (+1.11 [+0.62, +1.60]) and HR@500 by 4.0 points at 2.72 ms; Industrial +0.51 [+0.07, +0.95] at 3.45 ms.
+  0.1825 (+1.11 [+0.62, +1.60]) and HR@500 by 4.0 points at 2.72 ms (2.89 ms with SASRec computed inside the
+  graph); Industrial +0.51 [+0.07, +0.95] at 3.45 ms (3.09 ms in-graph in a later allocation). Certified fused
+  top-500 reaches 100% of users on Industrial at M = 512 (4.23 ms).
   Under a 5%-eligibility filter, filtering the LLM's top-50 recovers only 30% of the exact filtered top-10.
 - **Two-sided bounds**: under trie normalization the set of prefixes that guarantees the certificate is known
   after the first forward (≤ 1.1·K on average).

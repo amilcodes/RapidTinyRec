@@ -6,9 +6,14 @@
 #   oscar.sh log NAME [N]        # tail slurm log
 # The command sees $PY, $REL, $REF, $OUT.
 set -euo pipefail
-HOST=aagraw73@sshcampus.ccv.brown.edu
+# Off campus without VPN: open a shared connection once (password + Duo), then every call reuses it:
+#   ssh -fN -o ControlMaster=yes -o ControlPersist=12h -o ControlPath=~/.ssh/cm-%r@%h:%p aagraw73@ssh.ccv.brown.edu
+CM="$HOME/.ssh/cm-%r@%h:%p"
+if [ -n "${OSCAR_HOST:-}" ]; then HOST=$OSCAR_HOST
+elif [ -S "$HOME/.ssh/cm-aagraw73@ssh.ccv.brown.edu:22" ]; then HOST=aagraw73@ssh.ccv.brown.edu
+else HOST=aagraw73@sshcampus.ccv.brown.edu; fi
 ROOT=/oscar/scratch/aagraw73/speedrun
-SSHO="-o BatchMode=yes -o LogLevel=ERROR -o ConnectTimeout=20"
+SSHO="-o BatchMode=yes -o LogLevel=ERROR -o ConnectTimeout=20 -o ControlPath=$CM"
 REPO=$(cd "$(dirname "$0")/.." && pwd)
 LOCAL_RUNS="$REPO/../runs"
 case "$1" in

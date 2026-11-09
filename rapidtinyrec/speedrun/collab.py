@@ -67,16 +67,23 @@ class SASRecHead:
         return cls(state, item_to_sid(release, tok, sid_tok.cpu(), n), len(sid_tok), beta, device=device, **kw)
 
     def logits(self, seq):
-        """seq [B, L] (0 = pad) -> item logits [B, n] (column j = item id j)."""
+        """seq [B, L] (0 = pad) -> item logits [B, n] (column j = item id j). Only the last position is read,
+        so the last layer computes its query, attention output and FFN for that position alone."""
         B, L = seq.shape
         H, dh = self.heads, self.d // self.heads
         x = self.item[seq] * math.sqrt(self.d) + self.pos[None, :L]
         x = x * (seq != 0)[..., None].to(x.dtype)
-        for ly in self.layers:
+        nl = len(self.layers)
+        for li, ly in enumerate(self.layers):
+            last = li == nl - 1
             h = F.layer_norm(x, (self.d,), ly['norm1.weight'], ly['norm1.bias'], self.eps)
             q, k, v = F.linear(h, ly['self_attn.in_proj_weight'], ly['self_attn.in_proj_bias']).view(B, L, 3, H, dh).unbind(2)
-            att = torch.einsum('bqhd,bkhd->bhqk', q, k) * self.scale + self.causal[:L, :L]
-            o = torch.einsum('bhqk,bkhd->bqhd', att.softmax(-1), v).reshape(B, L, self.d)
+            if last:
+                q, x = q[:, -1:], x[:, -1:]
+                att = torch.einsum('bqhd,bkhd->bhqk', q, k) * self.scale
+            else:
+                att = torch.einsum('bqhd,bkhd->bhqk', q, k) * self.scale + self.causal[:L, :L]
+            o = torch.einsum('bhqk,bkhd->bqhd', att.softmax(-1), v).reshape(B, x.shape[1], self.d)
             x = x + F.linear(o, ly['self_attn.out_proj.weight'], ly['self_attn.out_proj.bias'])
             h = F.layer_norm(x, (self.d,), ly['norm2.weight'], ly['norm2.bias'], self.eps)
             x = x + F.linear(F.gelu(F.linear(h, ly['linear1.weight'], ly['linear1.bias'])), ly['linear2.weight'], ly['linear2.bias'])
@@ -89,6 +96,17 @@ class SASRecHead:
         q = torch.zeros(seq.shape[0], self.S + 1, device=p.device).index_add_(1, self.item2sid, p)
         return q[:, :self.S].log()
 
+    def bonus(self, seq):
+        return self.logq(seq).clamp(min=self.floor) * self.beta
+
+    _fn = None
+
+    def compile(self):
+        """torch.compile the whole head. Experimental: inside the engine's CUDA graph (side stream) it returned
+        wrong values on H100 (runs/collabO2), so bench.py does not use it by default."""
+        self._fn = torch.compile(self.bonus, dynamic=False, fullgraph=True)
+        return self
+
     def __call__(self, seq, out=None):
-        b = self.logq(seq).clamp(min=self.floor) * self.beta
+        b = (self._fn or self.bonus)(seq)
         return b if out is None else out.copy_(b)
