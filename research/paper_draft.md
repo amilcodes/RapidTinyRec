@@ -360,7 +360,7 @@ cascade late entry, cbtrie 0.75). Quality is meaningless on synthetic items; cos
 
 | catalog | SIDs | prefixes (max children) | \|N\| K=10 / 50 / 500 | \|E\| K=10 | top-10 cert. M=16 / 32 | top-50 cert. M=64 / 128 | A6000 ms, M=16 / 64 |
 |---|---:|---:|---|---:|---|---|---|
-| real | 3,444 | 2,488 (12) | 4.7 / 22 / 167 | 7.3 | 100 / 100% | 100 / 100% | 6.38 (finalA) |
+| real | 3,444 | 2,488 (12) | 4.7 / 22 / 167 | 7.3 | 100 / 100% | 100 / 100% | 6.33 / — |
 | siblings | 100k | 2,488 (60) | 8.3 / 42 / 412 | 272 | 100 / 100% | 99.6 / 100% | 6.34 / 6.41 |
 | siblings | 300k | 2,488 (145) | 8.4 / 41 / 396 | 537 | 99.8 / 100% | 98.2 / 100% | 6.34 / 6.42 |
 | prefixes | 100k | 19,853 (45) | 8.4 / 45 / 417 | 48 | 100 / 100% | 100 / 100% | 6.35 / 6.41 |
@@ -369,7 +369,9 @@ cascade late entry, cbtrie 0.75). Quality is meaningless on synthetic items; cos
 - **The minimal expansion is flat in catalog size**: |N| ≈ 8.4 / 42 / 410 for K = 10 / 50 / 500 from 10k to 1M
   SIDs (all sizes in `research/scale_catalog_office.json`). It is smaller on the real catalog only because 1,907
   of its 2,488 prefixes have a single child and are exact after forward 1.
-- **So is the latency at a fixed budget**: forward 1 carries the prompt and the 88 first-level rows whatever the
+- **So is the latency at a fixed budget**: in one allocation (`runs/scaleP`, 2×500 requests each) the real
+  catalog takes 6.33 / 6.32 ms (run before and after) and the 1M-SID catalog 6.36 ms at M = 16 and 6.36 ms at
+  M = 32 (+0.5%); siblings-300k at M = 32 6.35 ms. Forward 1 carries the prompt and the 88 first-level rows whatever the
   catalog (the second code is a restricted LM head over ≤ 256 codes), forward 2 carries M rows, and the third-code
   head has ≤ 256 columns. Certified top-10 at M = 16 holds for ≥ 99.6% of users at every size and at M = 32 for
   100%; top-50 needs M = 64 (≥ 98.2%) or 128 (100%); top-500 needs M ≥ 512 on the dense catalogs (|N| ≈ 410;

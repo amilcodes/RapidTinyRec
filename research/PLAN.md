@@ -681,3 +681,19 @@ Oscar refused key auth from an off-campus network (no Brown VPN), so this sessio
   Industrial SFT + GDPO (RL) pair (`onesfour/MiniOneRec-1.5B-SFT-GDPO`, own SID index). `models_job.sh` runs
   beam-50 vs certified, retrains bridges (entries scaled by depth), and adds fusion. OpenOneRec (Qwen3, 8,192-way
   codebooks) would be the real cross-family test, but its RecIF data is gated on Hugging Face.
+- **Results (Oscar via a shared off-campus SSH connection, 2026-11-09):**
+  - *SASRec in the graph (`runs/collabO`, `collabI`, H100):* Office 2.89 ms / p95 2.97 end to end vs 2.66 ms with
+    precomputed rows (same allocation; repeated in `runs/collabO2`: 2.66 / 2.89); Industrial 3.09 vs 3.07 ms (the side
+    stream hides SASRec there). Quality identical (paired ΔHR@10 0.00 both; same top-10 set for 99.0% / 99.6% of
+    users, rest FP16 near-ties vs half-precision stored rows). FP8 throughput with SASRec in the graph: Office 3,048 /
+    3,134, Industrial 3,581 / 3,660 users/s at B = 64 / 128. Trimming SASRec's last layer to the last position changed
+    nothing (launch-bound); a `torch.compile`d head was faster (top-500 2.87 vs 3.08 ms) but returned wrong values
+    inside the graph (top-500 HR@1 0.034 vs 0.062) — not used.
+  - *Fused top-500:* Office 3.08 ms (M = 256, 100%), 3.28 ms (M = 512); Industrial 3.50 ms at M = 256 (83.2%
+    certified) → **4.23 ms at M = 512, 100% certified**.
+  - *Catalog scaling (`runs/scaleA`, `scaleP`, A6000; `research/scale_catalog_office.json`):* minimal expansion
+    |N| flat at ≈ 8.4 / 42 / 410 (K = 10 / 50 / 500) from 10k to 1M SIDs (real: 4.7 / 22 / 167 thanks to 1,907
+    single-child prefixes); guaranteed |E| grows with branching (K = 10: 7 → 290–537). Certified top-10 ≥ 99.6% at
+    M = 16 and 100% at M = 32 at every size; top-50 ≥ 98.2% at M = 64, 100% at M = 128; top-500 needs M ≥ 512 on
+    dense catalogs. Same-allocation latency (M = 16): real 6.33 / 6.32 ms, 1M SIDs 6.36 ms (M = 32: 6.36 ms).
+  - Report v10 published (same URL).
