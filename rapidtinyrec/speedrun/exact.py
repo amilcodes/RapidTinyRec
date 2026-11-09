@@ -367,6 +367,15 @@ class ExactTrieEngine(ExactEngine3):
         """Per-request bonus read from bufs['bonus'] [B,S] inside run() (CUDA-graph friendly)."""
         self.dyn_bonus = True
 
+    collab = None
+
+    def set_collab(self, head):
+        """Compute the per-request bonus inside run() from bufs['hist'] [B, L] (user history item ids) with
+        `head` (collab.SASRecHead), on a side stream that overlaps forward 1."""
+        self.collab = head
+        self.dyn_bonus = head is not None
+        self._side = torch.cuda.Stream() if head is not None and self.W.device.type == 'cuda' else None
+
     def _bonus_tables(self, v):
         cat = self.cat
         v = v[None] if v.dim() == 1 else v                              # [B or 1, S]
@@ -389,7 +398,24 @@ class ExactTrieEngine(ExactEngine3):
         return dict(kc=z(W.L, B, W.KV, P, W.hd), vc=z(W.L, B, W.KV, P, W.hd),
                     kp2=z(W.L, B, nA, 1, W.KV, W.hd), vp2=z(W.L, B, nA, 1, W.KV, W.hd),
                     kp3=z(W.L, B, self.M, 2, W.KV, W.hd), vp3=z(W.L, B, self.M, 2, W.KV, W.hd),
-                    **({'bonus': torch.zeros(B, self.S, device=dev)} if self.dyn_bonus else {}))
+                    **({'bonus': torch.zeros(B, self.S, device=dev)} if self.dyn_bonus else {}),
+                    **({'hist': torch.zeros(B, self.collab.L, dtype=torch.long, device=dev)} if self.collab else {}))
+
+    def _collab_start(self, bufs):
+        """Fork: compute bufs['bonus'] from bufs['hist'] on the side stream (in place, so the graph keeps it)."""
+        if self.collab is None:
+            return
+        if self._side is None:
+            self.collab(bufs['hist'], out=bufs['bonus'])
+            return
+        main = torch.cuda.current_stream()
+        self._side.wait_stream(main)
+        with torch.cuda.stream(self._side):
+            self.collab(bufs['hist'], out=bufs['bonus'])
+
+    def _collab_join(self):
+        if self.collab is not None and self._side is not None:
+            torch.cuda.current_stream().wait_stream(self._side)
 
     def run(self, tokens, lengths, bufs):
         W, cat, fwd, M, N = self.W, self.cat, self.fwd, self.M, self.N
@@ -402,6 +428,7 @@ class ExactTrieEngine(ExactEngine3):
         L0 = lengths[:, None, None]
         T0 = self._T0()
         cap = None if self.late is None else {self.late: None}
+        self._collab_start(bufs)
         hp, hn = fwd.prefill_tree(W.embed[tokens[:, T0:]], W.embed[cat.first][None].expand(B, nA, W.D), lengths,
                                   bufs['kc'], bufs['vc'], bufs['kp2'], bufs['vp2'], tmpl=self.tmpl, capture=cap,
                                       node_late=self._node_late(tokens, lengths))
@@ -409,6 +436,7 @@ class ExactTrieEngine(ExactEngine3):
         lb = self._lp(hn, 1, cat.t1[None].expand(B, nA, cat.W1), cat.v1[None].expand(B, nA, cat.W1))
         lb = lb.masked_fill(~cat.v1[None], neg_inf).view(B, nA * cat.W1)
         u2 = la.repeat_interleave(cat.W1, dim=1) + lb             # [B, nA*W1]
+        self._collab_join()
         bo = self._bonus_tables(bufs['bonus']) if self.dyn_bonus else self.bonus
         ub = u2 if bo is None else u2 + bo['vmax']                 # bound incl. the best item value below
         top2, pf = ub.masked_fill(~self.multi_flat[None], neg_inf).topk(M + 1, -1)
