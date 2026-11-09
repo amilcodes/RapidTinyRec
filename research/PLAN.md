@@ -660,3 +660,24 @@ dynamic FP8 throughput (3,155 / 3,738 users/s). Model branch: an extra SFT epoch
 (2 seeds), +1.8–2.0 HR@50 on both datasets; full stack 0.1854. Negatives: in-flight one-forward expansion,
 custom Triton GEMMs, GemLite INT8, max-autotune, aligned training loss, layer-26 entry on Industrial and on
 the fine-tuned backbone. All commits local on `speedrun/overnight-20261107` (not pushed).
+
+## Session 4 (2026-11-09)
+Oscar refused key auth from an off-campus network (no Brown VPN), so this session started with local work.
+- **SASRec inside the graph (`collab.py`, `bench.py --collab`):** SASRec inference rewritten as plain tensor ops
+  (CPU check vs the training module: logits within 1.4e-5, clamped log q within 2.1e-5). The engine forks a side
+  stream at the start of `run()` and joins before the bound is used (after forward 1), so the per-request input
+  is the 20-item history and the latency includes SASRec. Queued: `collab_job.sh` (file vs graph, top-500 at
+  M = 256 / 512, FP8 throughput) on both datasets.
+- **Diversity caps (negative, `research/diversity_office.json`):** exact top-10 with ≤ 1–3 items per first code
+  or per (a, b), from certified top-500 lists (500-user cohort, LLM-only and fused): top-50-then-diversify recovers
+  99.7–100% of the exact capped top-10 and returns 10 items for ≥ 99.4% of users, because a top-50 list already
+  spans ~24–25 first codes. Diversity caps are not where exact search matters on these catalogs.
+- **Catalog scaling (queued, `scale_catalog.py`):** synthetic denser catalogs on the real model (the vocabulary can
+  address 88 × 256 × 256 = 5.8M SIDs): `siblings` adds third codes under the 2,488 real prefixes (up to 300k),
+  `prefixes` adds new (b, c) under real first codes (up to 1M). Measures certification at M, the guaranteed and
+  minimal expansion sets, and latency (`bench.py --catalog`).
+- **Other backbones (planned):** public MiniOneRec-format SFT checkpoints of Qwen2.5-3B and 7B (HF
+  `acdxuan/minionerec`; same 600 SID tokens and ids as the release, so same catalog and test split) and an
+  Industrial SFT + GDPO (RL) pair (`onesfour/MiniOneRec-1.5B-SFT-GDPO`, own SID index). `models_job.sh` runs
+  beam-50 vs certified, retrains bridges (entries scaled by depth), and adds fusion. OpenOneRec (Qwen3, 8,192-way
+  codebooks) would be the real cross-family test, but its RecIF data is gated on Hugging Face.
