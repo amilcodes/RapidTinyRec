@@ -17,7 +17,9 @@ was recently stated for generative recommendation as a post-hoc beam completion;
 and show what makes it cheap. Under **trie normalization** the bounds are two-sided — the best child of a
 prefix with n children scores at least −log n — so the set of prefixes to expand is known, and
 certification guaranteed, right after the first forward; that set averages ≤ 1.1·K prefixes at every K
-up to 500 and is within 1.2–2.1× of the provable minimum for any bound-based decoder. We further find that
+up to 500 and is within 1.2–2.1× of the provable minimum for any bound-based decoder. On synthetic catalogs of up to 1M SIDs on the
+same model, the minimal expansion stays flat (≈8 prefixes for a certified top-10) and so does latency at a fixed
+budget. We further find that
 **deeper SID codes do not need the lower layers**: prefix rows *enter* the second forward at layer 26 of
 28 (first-level rows at layer 18) from small bridges distilled from the parent node's state on the
 frozen model (validation prompts only, no labels), losslessly against the full-depth model
@@ -55,6 +57,9 @@ Contributions:
 - **Two-sided bounds under trie normalization**: the expansion set that guarantees the certificate is
   computed after the first forward; it averages ≤ 1.1·K prefixes at every K and is within 1.2–2.1× of the
   instance-optimal set (Props. 2–3). Codebook or full-vocabulary normalization admits no such bound.
+- **Catalog scaling**: on denser synthetic catalogs (10k–1M SIDs) scored by the real model, the minimal
+  expansion set is flat in catalog size (|N| ≈ 8.4 / 42 / 410 for K = 10 / 50 / 500) and certified top-10 latency
+  at M = 16 is unchanged (6.34–6.38 ms on an A6000); the two-sided guarantee loosens with branching.
 - **Late entry**: deeper SID codes skip the lower layers via bridges distilled from the parent node's
   state at the same depth (frozen model, no labels); the third code needs only the top 2 of 28 layers
   and the second the top 10, losslessly against the full-depth model on both datasets.
@@ -342,6 +347,40 @@ minimum. In serving terms: forward 2 is a fixed-shape graph with M rows; with M 
 24) certification is guaranteed before forward 2 runs, and an overflow (|E| > M) is detected after
 forward 1 rather than discovered after forward 2. Our M=16 configuration covers |E| for 99% of Office
 users and still certifies 100% because E over-approximates N.
+
+### 5.1c Catalog scaling: the expansion the certificate needs does not grow with the catalog
+
+The released catalogs are small (3,444 SIDs), but the model's vocabulary addresses 88 × 256 × 256 = 5.8M SIDs, so we
+densify the trie and run the real model on real prompts (`scripts/scale_catalog.py`, 500 Office test users,
+cascade late entry, cbtrie 0.75). Quality is meaningless on synthetic items; cost and certification are not.
+*siblings* adds third codes under the 2,488 real (a, b) prefixes (10k–300k SIDs, up to 145 children per prefix);
+*prefixes* adds new (b, c) under the 88 real first codes, with codes drawn from the real per-level frequencies
+(10k–1M SIDs, up to 22,488 prefixes and 215 children). |N| is the minimal set any bound-based decoder must expand
+(Prop. 2), |E| the guaranteed set (Prop. 3); certification is that of the deployed engine at budget M.
+
+| catalog | SIDs | prefixes (max children) | \|N\| K=10 / 50 / 500 | \|E\| K=10 | top-10 cert. M=16 / 32 | top-50 cert. M=64 / 128 | A6000 ms, M=16 / 64 |
+|---|---:|---:|---|---:|---|---|---|
+| real | 3,444 | 2,488 (12) | 4.7 / 22 / 167 | 7.3 | 100 / 100% | 100 / 100% | 6.38 (finalA) |
+| siblings | 100k | 2,488 (60) | 8.3 / 42 / 412 | 272 | 100 / 100% | 99.6 / 100% | 6.34 / 6.41 |
+| siblings | 300k | 2,488 (145) | 8.4 / 41 / 396 | 537 | 99.8 / 100% | 98.2 / 100% | 6.34 / 6.42 |
+| prefixes | 100k | 19,853 (45) | 8.4 / 45 / 417 | 48 | 100 / 100% | 100 / 100% | 6.35 / 6.41 |
+| prefixes | 1M | 22,488 (215) | 8.4 / 41 / 411 | 290 | 99.6 / 100% | 99.2 / 100% | 6.36 / 6.40 |
+
+- **The minimal expansion is flat in catalog size**: |N| ≈ 8.4 / 42 / 410 for K = 10 / 50 / 500 from 10k to 1M
+  SIDs (all sizes in `research/scale_catalog_office.json`). It is smaller on the real catalog only because 1,907
+  of its 2,488 prefixes have a single child and are exact after forward 1.
+- **So is the latency at a fixed budget**: forward 1 carries the prompt and the 88 first-level rows whatever the
+  catalog (the second code is a restricted LM head over ≤ 256 codes), forward 2 carries M rows, and the third-code
+  head has ≤ 256 columns. Certified top-10 at M = 16 holds for ≥ 99.6% of users at every size and at M = 32 for
+  100%; top-50 needs M = 64 (≥ 98.2%) or 128 (100%); top-500 needs M ≥ 512 on the dense catalogs (|N| ≈ 410;
+  83–100% certified at M = 512).
+- **The two-sided guarantee does not scale**: |E| grows with the number of children (K = 10: 7 → 290–537)
+  because the −w_c log n lower bound loosens. The certificate itself uses the forward-2 scores and is unaffected,
+  so on dense tries size forward 2 by a fixed M (with a fallback for the rare uncertified request), not by E.
+- Caveat: synthetic items have no training signal of their own; the model scores them through their codes. A model
+  trained on a 1M-item catalog may spread or sharpen its prefix distribution differently.
+
+![catalog scaling](figures/catalog_scaling.png)
 
 ### 5.2 Late entry: the third code does not need the lower layers
 
@@ -636,7 +675,8 @@ heuristically; certified search handles an additive item-value term exactly (§6
 
 ## 10. Limitations
 
-- One model family (MiniOneRec, Qwen2-1.5B) and small catalogs (≈3.5k items, 48–88 first codes).
+- One model family (MiniOneRec, Qwen2-1.5B) and small real catalogs (≈3.5k items, 48–88 first codes); larger
+  catalogs only synthetically (up to 1M SIDs on the real model, §5.1c).
   Exact decoding's first forward grows with the number of first codes (a 256-code first level is
   still one forward of ≈300 rows); the second forward grows with ≈0.4 K multi-child prefixes; the
   certificate reports when the bound was not tight enough. The one-pass variant (all multi-child
