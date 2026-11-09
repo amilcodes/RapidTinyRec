@@ -1,7 +1,6 @@
 # Beam Search Is Optional: Certified, Late-Entry Decoding for LLM Generative Recommenders
 
-*Working draft, 2026-11-08. Every number cites a run under `runs/` (GPU named in each table).
-Sections marked [TBD] wait on runs that are queued.*
+*Working draft, 2026-11-09. Every number cites a run under `runs/` (GPU named in each table).*
 
 ## Abstract
 
@@ -134,7 +133,10 @@ it carries until arithmetic dominates (~150–200 tokens for 155 dense BF16 TFLO
 issues 5 sequential forwards (prompt; inputs a, b, c, \n), so its floor is ≈20–23 ms in BF16
 and ≈40–45 ms in FP32, and its cost barely depends on the beam width. The levers are
 therefore (i) fewer sequential forwards, (ii) fewer bytes per forward, (iii) fewer and fused
-kernels per forward. [Roofline measurement: TBD `sweepH/roofline_*`.]
+kernels per forward. Measured (`runs/sweepH/roofline_*`, A6000, BF16, one forward of the full model incl. the
+152k-row LM head, 3.56 GB of weights): 8.05 / 8.91 / 9.84 / 12.2 / 16.1 / 28.7 / 53.8 ms at 1 / 16 / 50 / 128 /
+256 / 512 / 1,024 query rows, i.e. 442 GB/s effective at one row (58% of peak) and flat to ≈64 rows; weight-only
+INT8 / INT4 (GemLite) cut the one-row forward to 5.2 / 4.4 ms but lose their advantage by 88–128 rows.
 
 Profile of the first engine version (BF16, eager): ≈24 ms GEMM at ≈65% of peak bandwidth,
 ≈14 ms in ≈4,000 small elementwise kernels, ≈3–4 ms in the 152k-row LM head.
@@ -479,8 +481,10 @@ acts as an implicit depth discount; once the discount is explicit, exactness sto
 score = lp(a) + w_b lp(b|a) + w_c lp(c|ab) + w_s(lp(\n)+lp(EOS)), is a two/three-parameter
 decode-time calibration that keeps every term ≤ 0, so certified exact decoding applies unchanged.
 In-sample on a quarter of the Office test users, w = (0.75, 0.3, 0.3) raises HR@10 by ~10%
-relative. [TBD: weights tuned on MiniOneRec's validation split, evaluated once on test, both
-datasets — `scripts/tune_weights.py`.] Why the deep terms mislead (exhaustive FP32 scores, 1,217 Office users × 3,444 SIDs):
+relative. Weights are tuned on MiniOneRec's validation split (grid, max NDCG@10, exhaustive scores) and
+evaluated once on test (`scripts/tune_weights.py`): on Office this selects a discounted third code (w_c = 0.5–0.75,
++1.0–1.2 HR@10 over the reference decode); on Industrial no rule beats the original objective significantly (tuned
+codebook +0.35 [−0.26, +0.97]), so the scoring rule must be chosen per dataset. Why the deep terms mislead (exhaustive FP32 scores, 1,217 Office users × 3,444 SIDs):
 - **Sibling penalty.** lp(c|ab) falls with the number of catalog items sharing the prefix
   (a,b): median −0.87, −2.46, −3.05, −3.38, −4.12 for 1, 2, 3, 4, 6 siblings (Pearson r = −0.36
   between lp(c|ab) and sibling count over each user's top-50) — steeper than the −log k of an
