@@ -51,8 +51,9 @@ every SID and user), `scripts/simulate.py` (offline search × scoring study),
 | large candidate lists | `--engine exacttrie --n-prefix 256 --n-expand 500 --ks 100,200,500` + late entry | — / 3.8 ms, top-500 certified 100% |
 | **fastest, Office (third session)** | `--engine exacttrie --n-prefix 16 --n-expand 50 --norm cbtrie --weights 1,0.75,0 --tree-fast --compile-layer --fuse-store --pdl --combo --late-entry-a 18:bridge_b_e18_w.pt --late-entry 26:bridge_e26_cas.pt` | 6.4 / **2.75 ms**, lossless vs full depth |
 | **best quality, still fast** | same + `--bonus-file sasrec_test.pt --bonus-beta 0.5` (per-user β·log q_SASRec, in the graph) | 6.4 / **2.72 ms**, HR@10 0.1825 |
+| same, end to end | same + `--collab DIR_WITH_sasrec.pt --bonus-beta 0.5` instead of `--bonus-file` (SASRec runs inside the graph on a side stream; the request carries the 20-item history) | — / **2.89 ms**, identical quality |
 | throughput | same + `--quant fp8` (dynamic per-token FP8, quality-neutral) | 3,155 users/s at B=128 (H100) |
-| Industrial | bridges at 18/18 (`casInd`), entry 26 is not lossless there | — / 3.11 ms (3.45 with fusion) |
+| Industrial | bridges at 18/18 (`casInd`), entry 26 is not lossless there | — / 3.11 ms (3.45 with fusion; 3.09 with `--collab` in a later allocation); fused top-500 needs `--n-prefix 512` for 100% certified (4.23 ms) |
 
 Deepest lossless third-code entry is model-dependent (released Office: 26; fine-tuned Office: 22; Industrial:
 18): choose it on validation. New flags: `--bonus-file/--bonus-beta` (per-user item term), `--pdl`, `--combo`,

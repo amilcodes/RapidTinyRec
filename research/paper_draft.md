@@ -25,7 +25,8 @@ frozen model (validation prompts only, no labels), losslessly against the full-d
 per request), a certified top-10 takes **2.75 ms on an H100** (MiniOneRec's beam-50 in the same engine and
 allocation: 8.43 ms; Hugging Face `generate`: 869 ms on an A6000), and a certified top-500 2.92 ms (beam-500:
 18.1 ms). Exact search also makes **objective fusion exact**:
-adding a per-user collaborative term (β·log q from a 1-minute SASRec) inside the certified search keeps
+adding a per-user collaborative term (β·log q from a 1-minute SASRec, itself computed inside the same CUDA graph:
+2.89 ms end to end) inside the certified search keeps
 two forwards and 100% certification and raises Office HR@10 from 0.1714 to **0.1825** (+1.11 [+0.62, +1.60];
 +2.36 points over MiniOneRec's FP32 beam decode of the same checkpoint, with no LLM training) and HR@500 by
 **4.0 points**, where beam-then-rerank cannot change the candidate set; Industrial gains +0.51 [+0.07,
@@ -62,7 +63,8 @@ Contributions:
   Office and +0.51 HR@10 on Industrial at ~3 ms, beating beam-then-rerank wherever the term moves items
   outside the LLM's own top list.
 - **Engine and ladders** (A6000, H100) with a fidelity gate at every rung; batch-1 certified top-10 in
-  2.75 ms on an H100 (2.72 ms with the fused SASRec term), certified top-500 in 2.92 ms.
+  2.75 ms on an H100 (2.89 ms with the fused SASRec term, SASRec computed in the graph), certified top-500
+  in 2.92 ms (3.08 ms fused, SASRec included).
 - **Model branch (mostly negative)**: one more SFT epoch helps the released checkpoint (+0.8 HR@10,
   +2.0 HR@50; with the SASRec term HR@10 0.1852), but a loss aligned with the decoder's restricted
   normalization is no better than full-vocabulary CE (ΔHR@10 +0.14 [−0.16, +0.47]).
@@ -82,17 +84,24 @@ users; `runs/finalH`).**
 | certified exact, trie M=16, cbtrie 0.75 (full depth) | 4.35 | 4.53 | 0.1677 | 0.1304 | 100% |
 | + both bridges (first level at 18, third code at 22) | 2.93 | 3.05 | 0.1712 | 0.1319 | 100% |
 | third code at 26 (top 2 of 28 layers) | 2.75 | 3.00 | 0.1689 | 0.1304 | 100% |
-| + SASRec term inside the certified search (β = 0.5) | **2.72** | 2.97 | **0.1829** | **0.1390** | 100% |
-| certified top-500 with fusion | 2.92 | 3.03 | — | — | top-500: 100% |
+| + SASRec term inside the certified search (β = 0.5), SASRec computed in the graph† | **2.89** | 2.97 | **0.1825** | **0.1388** | 100% |
+| certified top-500 with fusion (SASRec in the graph)† | 3.08 | 3.16 | — | — | top-500: 100% |
 | throughput, FP8 dynamic + fusion, B = 128 | 3,155 users/s | | 0.1819 | 0.1382 | 100% |
 
 **Industrial (H100, `runs/finalIH`):** beam-50 semantics 8.37 ms (HR@10 0.1582) → certified 4.08 → both
-bridges at layer 18 3.11 ms (0.1619) → + SASRec term 3.45 ms (**0.1670**, NDCG@10 0.1220); FP8 + fusion
+bridges at layer 18 3.11 ms (0.1619) → + SASRec term 3.45 ms (**0.1670**, NDCG@10 0.1220; 3.09 ms with
+SASRec in the graph in a later allocation, `runs/collabI`); certified fused top-500 for 100% of users at M = 512
+in 4.23 ms; FP8 + fusion
 3,738 users/s at B = 128. **A6000 (Office, `runs/finalA`):** beam-50 semantics 22.4 ms → certified 11.4 → both
 bridges (third code at 26) 6.38 → + SASRec term 6.44 ms (HR@10 0.1825); HF `generate` FP32 868.8 ms.
 **Fine-tuned backbone (one more SFT epoch, own bridges at 18/22, SASRec β = 0.3):** Office HR@10 0.1854 (+1.77
 [+1.07, +2.45] over the released checkpoint at full depth; +0.27 n.s. over the released checkpoint with fusion).
 
+†`runs/collabO` (one allocation): the per-request input is the 20-item history and SASRec (2 layers, d = 64)
+runs on a side stream inside the graph; with SASRec rows precomputed per user and copied in (the earlier
+setting), the same allocation measures 2.66 ms (top-500: 2.92 ms in `runs/finalH`). Quality is identical
+(paired ΔHR@10 0.00; 99.0% of users get the same top-10 set, the rest FP16 near-ties). On Industrial the side stream
+hides SASRec completely (3.09 vs 3.07 ms, `runs/collabI`).
 \*MiniOneRec FP32 reference decode: 0.1589. Quality rows for the bridge configurations come from the
 matching quality runs (`runs/casH`, `runs/e26H`, `runs/baseEV`).
 
@@ -486,9 +495,12 @@ of the same checkpoint (0.1589) this is +2.36 points of HR@10 with no LLM traini
 (0.1689–0.1747). Industrial (`runs/fuseI`, β = 0.5): HR@10 0.1617 → 0.1668 (+0.51 [+0.07, +0.95]), NDCG@10
 +0.42 [+0.19, +0.66], HR@50 +0.84 [+0.22, +1.48]. At large K the fused certified top-500 lifts HR@500 by 4.0
 points on Office (0.504 → 0.543) and 2.1 on Industrial (0.523 → 0.544), where reranking the LLM's own top 500
-cannot change the set; Industrial top-500 certifies for 85% of users at M = 256 under the fused objective
-(100% on Office). On the H100 the in-graph term costs ≈0 ms on Office (2.75 → 2.72 ms) and 0.34 ms on
-Industrial (3.11 → 3.45 ms).
+cannot change the set; Industrial top-500 certifies for 83–85% of users at M = 256 under the fused objective
+and for 100% at M = 512 (4.23 vs 3.50 ms, `runs/collabI`; Office: 100% at M = 256). End to end, with SASRec
+computed inside the graph on a side stream from the user's 20-item history, the fused decoder takes 2.89 ms on
+Office (2.66 ms with precomputed SASRec rows, same allocation) and 3.09 ms on Industrial (3.07 ms), at identical
+quality; FP8 throughput with in-graph SASRec is 3,048 / 3,134 (Office) and 3,581 / 3,660 (Industrial) users/s at
+B = 64 / 128. (A `torch.compile`d SASRec head was faster but returned wrong values inside the graph; not used.)
 
 ### 6.y Training the model the decoder sees
 
