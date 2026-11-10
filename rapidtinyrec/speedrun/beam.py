@@ -20,7 +20,8 @@ class SidCatalog:
         sids = [l.split('\t')[0].strip() for l in lines]
         toks = []
         for s in sids:
-            parts = re.findall(r'<[a-z]_\d+>', s)
+            from . import data as _data
+            parts = re.findall(r'<[a-z]_\d+>', s)[:_data.SID_LEVELS]
             ids = tok.convert_tokens_to_ids(parts)
             assert len(ids) == 3 and all(isinstance(i, int) and i >= 0 for i in ids), s
             toks.append(tuple(ids))

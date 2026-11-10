@@ -19,10 +19,10 @@ def _beam_attn_kernel(Q, KP, VP, KS, VS, O, LEN, scale,
                       sob, sor, sot, soh,
                       R, s0, P,
                       IEEE: tl.constexpr, NQ: tl.constexpr, REP: tl.constexpr, D: tl.constexpr,
-                      BP: tl.constexpr, BS: tl.constexpr, BM: tl.constexpr):
+                      BP: tl.constexpr, BS: tl.constexpr, BM: tl.constexpr, KVH: tl.constexpr):
     pid = tl.program_id(0)
-    g = pid % 2
-    br = pid // 2
+    g = pid % KVH
+    br = pid // KVH
     r = br % R
     b = br // R
     m = tl.arange(0, BM)                 # packed (query token, head-in-group)
@@ -74,7 +74,7 @@ def beam_attention(q, kc, vc, kp, vp, lengths, s0, scale, out=None):
     B, R, NQ, H, D = q.shape
     KV, P = kc.shape[1], kc.shape[2]
     REP = H // KV
-    assert KV == 2 and kc.stride(3) == 1 and kp.stride(4) == 1 and q.stride(4) == 1
+    assert H % KV == 0 and kc.stride(3) == 1 and kp.stride(4) == 1 and q.stride(4) == 1
     BP = max(16, triton.next_power_of_2(P))
     BS = 16
     BM = max(16, triton.next_power_of_2(NQ * REP))
@@ -85,7 +85,7 @@ def beam_attention(q, kc, vc, kp, vp, lengths, s0, scale, out=None):
         kc.stride(0), kc.stride(1), kc.stride(2),
         kp.stride(0), kp.stride(1), kp.stride(2), kp.stride(3),
         o.stride(0), o.stride(1), o.stride(2), o.stride(3),
-        R, s0, P, IEEE=q.dtype == torch.float32, NQ=NQ, REP=REP, D=D, BP=BP, BS=BS, BM=BM, num_warps=4)
+        R, s0, P, IEEE=q.dtype == torch.float32, NQ=NQ, REP=REP, D=D, BP=BP, BS=BS, BM=BM, KVH=KV, num_warps=4)
     return o if out is not None else o.view(B, R, NQ, H * D)
 
 
@@ -142,17 +142,18 @@ def selfcheck(dtype, device='cuda'):
     torch.manual_seed(0)
     out = {}
     ok = True
-    for (B, R, NQ, s0, P) in [(1, 50, 1, 0, 96), (1, 50, 2, 2, 128), (2, 88, 3, 1, 80), (3, 50, 1, 1, 112)]:
-        q = torch.randn(B, R, NQ, 12, 128, device=device, dtype=dtype) * 3
-        kc = torch.randn(B, 2, P, 128, device=device, dtype=dtype) * 3
+    for (B, R, NQ, s0, P, H, KV) in [(1, 50, 1, 0, 96, 12, 2), (1, 50, 2, 2, 128, 12, 2), (2, 88, 3, 1, 80, 12, 2),
+                                     (3, 50, 1, 1, 112, 12, 2), (1, 50, 1, 1, 96, 28, 4), (2, 16, 2, 0, 80, 16, 2)]:
+        q = torch.randn(B, R, NQ, H, 128, device=device, dtype=dtype) * 3
+        kc = torch.randn(B, KV, P, 128, device=device, dtype=dtype) * 3
         vc = torch.randn_like(kc)
-        kp = torch.randn(B, R, 4, 2, 128, device=device, dtype=dtype) * 3
+        kp = torch.randn(B, R, 4, KV, 128, device=device, dtype=dtype) * 3
         vp = torch.randn_like(kp)
         lengths = torch.randint(P - 15, P + 1, (B,), device=device)
         r = reference(q, kc, vc, kp, vp, lengths, s0, 128 ** -0.5)
         a = (beam_attention(q, kc, vc, kp, vp, lengths, s0, 128 ** -0.5).float() - r).abs().max().item()
         t = (torch_path(q, kc, vc, kp, vp, lengths, s0, 128 ** -0.5).float() - r).abs().max().item()
-        out[f'{B},{R},{NQ},{s0},{P}'] = {'triton': a, 'torch': t}
+        out[f'{B},{R},{NQ},{s0},{P},{H}/{KV}'] = {'triton': a, 'torch': t}
         ok &= a <= 1.5 * t + 1e-3
     out['pass'] = bool(ok)
     return out
@@ -168,12 +169,12 @@ def _prompt_attn_kernel(Q, K, V, O, scale,
                         sqb, sqt, sqh, skb, skh, skp, sob, sot, soh,
                         T0, Pn, P, NCH,
                         IEEE: tl.constexpr, CQ: tl.constexpr, REP: tl.constexpr, D: tl.constexpr,
-                        BP: tl.constexpr, BM: tl.constexpr):
+                        BP: tl.constexpr, BM: tl.constexpr, KVH: tl.constexpr):
     pid = tl.program_id(0)
     c = pid % NCH
     bg = pid // NCH
-    g = bg % 2
-    b = bg // 2
+    g = bg % KVH
+    b = bg // KVH
     m = tl.arange(0, BM)
     tl_ = m // REP
     head = g * REP + m % REP
@@ -207,7 +208,7 @@ def prompt_attention(q, kc, vc, T0, scale, out=None, CQ=8):
     B, Pn, H, D = q.shape
     KV, P = kc.shape[1], kc.shape[2]
     REP = H // KV
-    assert KV == 2 and kc.stride(3) == 1 and q.stride(3) == 1
+    assert H % KV == 0 and kc.stride(3) == 1 and q.stride(3) == 1
     if out is None:
         out = torch.empty(B, Pn, H * D, device=q.device, dtype=q.dtype)
     o4 = out.view(B, Pn, H, D)
@@ -218,7 +219,7 @@ def prompt_attention(q, kc, vc, T0, scale, out=None, CQ=8):
         q, kc, vc, o4, scale,
         q.stride(0), q.stride(1), q.stride(2), kc.stride(0), kc.stride(1), kc.stride(2),
         o4.stride(0), o4.stride(1), o4.stride(2),
-        T0, Pn, P, nch, IEEE=q.dtype == torch.float32, CQ=CQ, REP=REP, D=D, BP=BP, BM=BM, num_warps=4)
+        T0, Pn, P, nch, IEEE=q.dtype == torch.float32, CQ=CQ, REP=REP, D=D, BP=BP, BM=BM, KVH=KV, num_warps=4)
     return out
 
 
@@ -237,13 +238,14 @@ def prompt_reference(q, kc, vc, T0, scale):
 def selfcheck_prompt(dtype, device='cuda'):
     torch.manual_seed(0)
     out, ok = {}, True
-    for (B, T0, Pn, P) in [(1, 69, 7, 80), (1, 69, 52, 128), (3, 69, 20, 96), (2, 0, 40, 48)]:
-        q = torch.randn(B, Pn, 12, 128, device=device, dtype=dtype) * 3
-        kc = torch.randn(B, 2, P, 128, device=device, dtype=dtype) * 3
+    for (B, T0, Pn, P, H, KV) in [(1, 69, 7, 80, 12, 2), (1, 69, 52, 128, 12, 2), (3, 69, 20, 96, 12, 2),
+                                  (2, 0, 40, 48, 12, 2), (1, 69, 20, 96, 28, 4), (2, 69, 9, 80, 16, 2)]:
+        q = torch.randn(B, Pn, H, 128, device=device, dtype=dtype) * 3
+        kc = torch.randn(B, KV, P, 128, device=device, dtype=dtype) * 3
         vc = torch.randn_like(kc)
         r = prompt_reference(q, kc, vc, T0, 128 ** -0.5)
         a = (prompt_attention(q, kc, vc, T0, 128 ** -0.5).float() - r).abs().max().item()
-        out[f'{B},{T0},{Pn},{P}'] = a
+        out[f'{B},{T0},{Pn},{P},{H}/{KV}'] = a
         ok &= a < (2e-2 if dtype != torch.float32 else 1e-4)
     out['pass'] = bool(ok)
     return out
