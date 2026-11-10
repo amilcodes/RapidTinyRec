@@ -381,6 +381,10 @@ cascade late entry, cbtrie 0.75). Quality is meaningless on synthetic items; cos
   head has ≤ 256 columns. Certified top-10 at M = 16 holds for ≥ 99.6% of users at every size and at M = 32 for
   100%; top-50 needs M = 64 (≥ 98.2%) or 128 (100%); top-500 needs M ≥ 512 on the dense catalogs (|N| ≈ 410;
   83–100% certified at M = 512).
+- **Industrial replicates it** (48 first codes, cascade bridges at 18, `runs/scaleI`, A40,
+  `research/scale_catalog_industrial.json`): |N| ≈ 7.8 / 38 / 350 for K = 10 / 50 / 500 from 10k to 1M SIDs (real:
+  5.2 / 25 / 186); certified top-10 ≥ 98.6% at M = 16 and 100% at M = 32, top-50 100% at M = 128, at every size;
+  latency at M = 16: real catalog 9.24 / 9.24 ms (before / after), 1M SIDs 9.32 ms (M = 32: 9.28 ms).
 - **The two-sided guarantee does not scale**: |E| grows with the number of children (K = 10: 7 → 290–537)
   because the −w_c log n lower bound loosens. The certificate itself uses the forward-2 scores and is unaffected,
   so on dense tries size forward 2 by a fixed M (with a fallback for the rare uncertified request), not by E.
