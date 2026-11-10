@@ -26,9 +26,12 @@ if [ "$P" = A ]; then
   $PY scripts/train_bridge_b.py $T --entry $EB --tag _w --bridge-c $OUT/bridge/bridge_e${EC}_w.pt 2>&1 | eval $G | cut -c1-900
   $PY scripts/train_bridge.py $T --entry $EC --b-entry $EB --b-bridge $OUT/bridge/bridge_b_e${EB}_w.pt --tag _cas 2>&1 | eval $G | cut -c1-900
 else
+  BC="--late-entry $EC:$BD/bridge_e${EC}_w.pt"
   BR="--late-entry-a $EB:$BD/bridge_b_e${EB}_w.pt --late-entry $EC:$BD/bridge_e${EC}_cas.pt"
   bash scripts/run_cfgs.sh \
+    M2c_conly "$COMMON $BC --modes latency,quality --repeats 1" \
     M2_br "$COMMON $BR --modes latency,quality --repeats 1" \
-    M3_fus "$COMMON $BR --collab $S/runs/fuseC/out/sasrec --bonus-beta 0.5 --modes latency,quality --repeats 1" \
-    M4_tp8 "$COMMON $BR --collab $S/runs/fuseC/out/sasrec --bonus-beta 0.5 --quant fp8 --modes throughput --throughput-batches 32,64"
+    M3_fus "$COMMON $BC --collab $S/runs/fuseC/out/sasrec --bonus-beta 0.5 --modes latency,quality --repeats 1" \
+    M4_tp8 "$COMMON $BC --collab $S/runs/fuseC/out/sasrec --bonus-beta 0.5 --quant fp8 --modes throughput,quality --throughput-batches 32,64" \
+    M5_beam "--fuse-first --template-cache --dtype float16 --attn triton --compile default --modes latency --repeats 1"
 fi
