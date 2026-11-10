@@ -705,3 +705,14 @@ Oscar refused key auth from an off-campus network (no Brown VPN), so this sessio
   scoring. RL sharpens the distribution: top-50 certified at M = 16 for 26–31% of users vs 14–20% (SFT). Under this
   evaluation GDPO is −1.96 [−2.71, −1.19] HR@10 vs its SFT parent (cbtrie); GDPO was trained against full-vocabulary
   4-code beam rewards, so this is decoding-objective mismatch, not a verdict on RL.
+- **Other backbones, same SID index and test set (HF acdxuan/minionerec, community SFT with MiniOneRec's script;
+  weaker than the release: beam-50 HR@10 0.1488 (3B), 0.1443 (7B) vs 0.1587 (1.5B)). Kernels generalized to any
+  KV-head count (7B: 28 / 4).**
+  - *3B (36 layers, `runs/m3B_A`, `m3B_B`, H100):* beam-50 13.01 ms → certified full depth 6.91 ms (ΔHR@10 +0.12
+    [−0.18, +0.43] vs beam; top-10 certified 100%) → third-code bridge at 28 of 36 **4.70 ms** (ΔHR@10 −0.06 [−0.31,
+    +0.18] vs full depth) → + SASRec in the graph 5.03 ms, **HR@10 0.1716 (+2.22 [+1.64, +2.79]), NDCG@10 +2.06,
+    HR@50 +3.49** (β = 0.5 from the 1.5B, not retuned); FP8 + fusion 955 users/s (B = 32/64), HR@10 0.1702. First-level
+    bridge at 23 of 36 (3 epochs) is not lossless (ΔHR@10 −0.37 [−0.74, −0.02]; cascade −0.45) and saves only 0.16 ms.
+  - *7B (28 layers, `runs/m7B_A`):* beam-50 21.07 ms → certified full depth 11.74 ms (ΔHR@10 +0.04 [−0.25, +0.33];
+    top-10 certified 99.96%). Bridges: third code at 22 −0.10 [−0.31, +0.10]; first level at 18 −0.18 [−0.49, +0.08];
+    cascade −0.25 [−0.55, +0.04] (NDCG −0.07) — ≈ lossless as on the 1.5B.
