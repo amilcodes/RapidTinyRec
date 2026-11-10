@@ -51,9 +51,14 @@ def prompts(release, tok, rows):
         return [ds[i]['input_ids'] for i in range(len(rows))]
 
 
+# Indices that disambiguate colliding items with a 4th code (<d_k>): SPEEDRUN_SID_LEVELS=3 merges each
+# collision group into its 3-code SID (targets and catalog; prompts keep the full history).
+SID_LEVELS = int(os.environ.get('SPEEDRUN_SID_LEVELS', '0')) or None
+
+
 def sid_tokens(tok, sid):
     import re
-    return tuple(tok.convert_tokens_to_ids(re.findall(r'<[a-z]_\d+>', sid)))
+    return tuple(tok.convert_tokens_to_ids(re.findall(r'<[a-z]_\d+>', sid)[:SID_LEVELS]))
 
 
 def rank_metrics(ranked, target, ks=(1, 3, 5, 10, 20, 50)):
