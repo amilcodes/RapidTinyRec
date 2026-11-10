@@ -56,6 +56,9 @@ Contributions:
 - **Two-sided bounds under trie normalization**: the expansion set that guarantees the certificate is
   computed after the first forward; it averages ≤ 1.1·K prefixes at every K and is within 1.2–2.1× of the
   instance-optimal set (Props. 2–3). Codebook or full-vocabulary normalization admits no such bound.
+- **Other backbones**: on public 3B and 7B checkpoints with the same SID index, certification, the full-depth
+  speedup and lossless third-code late entry carry over (4.70 / 7.78 ms vs 13.0 / 21.1 ms beam-50), and fusion adds
+  +2.2 / +2.4 HR@10; on an RL-tuned (GDPO) checkpoint certification gets cheaper.
 - **Catalog scaling**: on denser synthetic catalogs (10k–1M SIDs) scored by the real model, the minimal
   expansion set is flat in catalog size (|N| ≈ 8.4 / 42 / 410 for K = 10 / 50 / 500) and certified top-10 latency
   at M = 16 is unchanged (6.34–6.38 ms on an A6000); the two-sided guarantee loosens with branching.
@@ -444,6 +447,46 @@ trie 12.89 / 4.23 ms, HR@10 0.1588; **+ late entry at layer 18: 9.40 / 3.22 ms, 
 +0.18 [−0.38, +0.71], ΔNDCG@10 −0.08 [−0.36, +0.20], ΔHR@1 −0.29 [−0.64, +0.07]) — quality-neutral at
 2.7× / 2.6× the speed.
 
+### 5.3 Other backbones: 3B and 7B, and an RL-tuned checkpoint
+
+Everything above uses the released 1.5B checkpoint. Public MiniOneRec-format checkpoints let us test the method
+on other backbones without training them ourselves (all H100, batch 1, all test users, paired against each model's
+own baselines):
+
+- **Qwen2.5-3B and -7B** SFT with MiniOneRec's script on Office (HF `acdxuan/minionerec`), with the *same* 600 SID
+  tokens, catalog and test split as the release. Both are weaker than the released 1.5B under beam-50 (HR@10 0.1488
+  and 0.1443 vs 0.1587); we evaluate the decoder, not the checkpoints. The 7B has 4 KV heads, so the Triton
+  attention kernels were generalized to any group size.
+- **An SFT / RL pair** on Industrial with its own RQ-VAE index (HF `onesfour/MiniOneRec-1.5B-SFT-GDPO`; GDPO is a
+  GRPO variant trained with constrained beam-search rollouts). Its index gives 19% of items a fourth code that
+  separates collisions; our 3-level decoder merges each of the 268 collision groups into one SID, so both decoders
+  below are evaluated on 3-code groups under trie normalization without the forced suffix.
+
+| backbone | beam-50 ms | certified, full depth ms (ΔHR@10 vs beam) | + bridges ms (ΔHR@10 vs full depth) | + SASRec in the graph: ms, HR@10 (Δ) |
+|---|---:|---|---|---|
+| 1.5B (release) | 8.43 | 4.35 (+0.90 HR@10 vs beam) | 2.75, both bridges (+0.12 [−0.27, +0.51]) | 2.89, 0.1825 (+1.11) |
+| 3B (36 layers) | 13.01 | 6.91 (+0.12 [−0.18, +0.43]); top-10 cert. 100% | 4.70, third code at 28 (−0.06 [−0.31, +0.18]) | 5.03, **0.1716 (+2.22 [+1.64, +2.79])** |
+| 7B (28 layers) | 21.07 | 11.74 (+0.04 [−0.25, +0.33]); 99.96% | 7.78, third code at 22 (−0.02 [−0.18, +0.14]); both bridges 7.56 (−0.25 [−0.60, +0.08]) | 8.00, **0.1683 (+2.38 [+1.81, +2.96])** |
+| 1.5B SFT (Industrial, own index) | 5.81 | 4.67 (+0.02 [−0.04, +0.09]); 100% | — | — |
+| 1.5B GDPO (RL) | 5.81 | 5.02 (−0.02 [−0.07, 0.00]); 100% | — | — |
+
+- **Certification and the 1.8–1.9× full-depth speedup carry over unchanged** to a deeper (36-layer) and a wider
+  (7B) model; certified top-10 is 99.8–100% everywhere. With the third-code bridge the 3B and 7B decode in 4.70 and
+  7.78 ms, 2.8× and 2.7× faster than their own beam-50 at equal quality (beam re-timed in the same allocations: 13.01
+  and 21.05 ms). FP8 + fusion throughput: 955 (3B) and 467 (7B) users/s at B = 32, quality-neutral (HR@10 0.1702,
+  0.1679).
+- **Late entry transfers with the same recipe** (entry layers scaled by depth, 3 epochs, validation prompts only):
+  the third-code bridge is lossless on both; the first-level bridge is ≈lossless on 7B (−0.18 [−0.49, +0.08]) but
+  not on 3B at layer 23 of 36 (−0.37 [−0.74, −0.02]), where it would save only 0.16 ms — choose entries on
+  validation per model, as for the fine-tuned 1.5B (§6.y).
+- **Fusion helps more when the LLM is weaker**: the same SASRec term and β add +2.22 / +2.38 HR@10 and +3.49 / +3.43
+  HR@50 to the 3B / 7B (vs +1.11 / +2.08 on the 1.5B), lifting both above the released 1.5B LLM alone.
+- **RL sharpens the distribution and makes certification cheaper**, but does not change beam's search error under
+  trie scoring: top-50 is certified at M = 16 for 26–31% of users with GDPO vs 14–20% with SFT; beam-50 and exact
+  return the same top-10 set for 95–96% of users on both. Under this (merged-collision, trie) evaluation GDPO trails
+  its SFT parent by 1.96 [1.19, 2.71] HR@10; GDPO was optimized for full-vocabulary 4-code beam decoding, so this is
+  a decoding-objective mismatch, not a verdict on RL.
+
 ## 6. What exact decoding reveals about the objective
 
 **Beam search error is real but is not what limits quality.** From exhaustive FP32 scores of every
@@ -681,8 +724,11 @@ heuristically; certified search handles an additive item-value term exactly (§6
 
 ## 10. Limitations
 
-- One model family (MiniOneRec, Qwen2-1.5B) and small real catalogs (≈3.5k items, 48–88 first codes); larger
-  catalogs only synthetically (up to 1M SIDs on the real model, §5.1c).
+- One model family (MiniOneRec format on Qwen2/2.5, 1.5B–7B, §5.3) and small real catalogs (≈3.5k items, 48–88
+  first codes); larger catalogs only synthetically (up to 1M SIDs on the real model, §5.1c). The 3B / 7B / GDPO
+  checkpoints are community releases; indices with a 4th collision code are evaluated with collision groups merged.
+  A different family with wide codebooks (OpenOneRec, 8,192 codes per level) would need a first-level expansion
+  budget, which we have not built.
   Exact decoding's first forward grows with the number of first codes (a 256-code first level is
   still one forward of ≈300 rows); the second forward grows with ≈0.4 K multi-child prefixes; the
   certificate reports when the bound was not tight enough. The one-pass variant (all multi-child
