@@ -55,11 +55,13 @@ code { font: 13px var(--mono); background: var(--accent-soft); padding: 1px 4px;
 </style>
 <div class="wrap">
 <header>
-  <div class="eyebrow">MiniOneRec · Qwen2-1.5B · RTX A6000 + H100 · updated Nov 9 (fourth session)</div>
+  <div class="eyebrow">MiniOneRec · Qwen2-1.5B · RTX A6000 + H100 · updated Nov 9 (fourth session, late)</div>
   <h1>RapidTinyRec Speedrun</h1>
   <p class="lede">How fast can an LLM generative recommender decode, and is beam search even the right algorithm? Batch-1 latency on the frozen 500-user Office cohort; quality on all 4,866 Office and 4,533 Industrial test users.</p>
 </header>
-<section><h2>Findings so far</h2><ul><li>Catalog scaling (synthetic, real model): on denser catalogs of 10k to 1M SIDs scored by the released model, the minimal set of prefixes any bound-based decoder must expand stays flat (about 8.4 / 42 / 410 for top-10 / 50 / 500), certified top-10 at M = 16 holds for at least 99.6% of users (100% at M = 32), and latency at a fixed budget does not move (6.34 to 6.42 ms on an A6000 vs 6.38 ms on the real catalog). The two-sided guarantee loosens as prefixes get more children; the certificate does not.</li>
+<section><h2>Findings so far</h2><ul><li>Other backbones (public MiniOneRec-format checkpoints, same SID index and test set): on Qwen2.5-3B and -7B, certified decoding keeps 99.8 to 100% certification and equal quality, and with a third-code bridge decodes in 4.70 / 7.78 ms vs 13.01 / 21.05 ms for beam-50 (2.8x / 2.7x). The same SASRec term adds +2.22 / +2.38 HR@10 (+3.5 HR@50), twice its gain on the released 1.5B. On an Industrial SFT vs RL (GDPO) pair, RL sharpens the distribution (top-50 certified at M = 16 for 31% vs 20% of users); beam's search error under trie scoring stays negligible on both.</li>
+<li>Catalog scaling replicates on Industrial: the minimal expansion stays about 7.8 prefixes for top-10 from 10k to 1M SIDs, certified top-10 is 100% at M = 32 at every size, and A40 latency moves from 9.24 ms (real catalog) to 9.28 to 9.32 ms (1M SIDs).</li>
+<li>Catalog scaling (synthetic, real model): on denser catalogs of 10k to 1M SIDs scored by the released model, the minimal set of prefixes any bound-based decoder must expand stays flat (about 8.4 / 42 / 410 for top-10 / 50 / 500), certified top-10 at M = 16 holds for at least 99.6% of users (100% at M = 32), and latency at a fixed budget does not move (6.34 to 6.42 ms on an A6000 vs 6.38 ms on the real catalog). The two-sided guarantee loosens as prefixes get more children; the certificate does not.</li>
 <li>End-to-end fusion: SASRec now runs inside the decoder's CUDA graph on a side stream, so the request carries only the user's 20-item history. Office 2.89 ms (2.66 ms with precomputed SASRec rows, same allocation), Industrial 3.09 ms (3.07 ms); quality identical; FP8 throughput unchanged (3,134 / 3,660 users/s at B = 128).</li>
 <li>Industrial certified top-500 with fusion reaches 100% of users at M = 512 (4.23 ms; 83% at M = 256).</li>
 <li>Negative: diversity caps (at most 1 to 3 items per category) do not need exact search here; the LLM's top 50 already spans about 25 first codes, so top-50-then-diversify recovers 99.7 to 100% of the exact capped top-10. A torch.compile'd SASRec head returned wrong values inside the CUDA graph and is not used.</li>
@@ -308,8 +310,8 @@ code { font: 13px var(--mono); background: var(--accent-soft); padding: 1px 4px;
 <li>Quality is SID-level HR/NDCG; 15 catalog SIDs are shared by two items. Latency is batch 1 on one RTX A6000 with setup, compilation and graph capture excluded.</li>
 </ul></section>
 
-<section><h2>Next</h2><ul><li>Other backbones in MiniOneRec's format: public Qwen2.5-3B / 7B SFT checkpoints (same SID index) and an Industrial SFT vs RL (GDPO) pair (waiting on approval to download).</li>
-<li>A second model family: OpenOneRec (Qwen3, 8,192-way codebooks) needs a first-level expansion budget; its benchmark data is gated on Hugging Face.</li>
+<section><h2>Next</h2><ul><li>Retune β and the scoring weights per backbone on validation (the 3B / 7B runs reuse the 1.5B's).</li>
+<li>A second model family with wide codebooks (OpenOneRec, 8,192 codes per level) needs a first-level expansion budget; its benchmark data is gated on Hugging Face.</li>
 <li>Matched-hardware comparison against FlashRec and NVIDIA's SID-GR engine.</li>
-<li>A persistent megakernel for the two forwards (the engine is kernel-count-bound at batch 1).</li></ul></section>
+<li>A 4-level certified decoder for indices that separate collisions with a fourth code.</li></ul></section>
 </div>

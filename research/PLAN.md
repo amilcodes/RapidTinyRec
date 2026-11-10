@@ -716,3 +716,9 @@ Oscar refused key auth from an off-campus network (no Brown VPN), so this sessio
   - *7B (28 layers, `runs/m7B_A`):* beam-50 21.07 ms → certified full depth 11.74 ms (ΔHR@10 +0.04 [−0.25, +0.33];
     top-10 certified 99.96%). Bridges: third code at 22 −0.10 [−0.31, +0.10]; first level at 18 −0.18 [−0.49, +0.08];
     cascade −0.25 [−0.55, +0.04] (NDCG −0.07) — ≈ lossless as on the 1.5B.
+  - *7B timed (`runs/m7B_B`):* third code at 22 **7.78 ms** (ΔHR@10 −0.02 [−0.18, +0.14] vs full depth), both bridges
+    7.56 ms (−0.25 [−0.60, +0.08]); + SASRec in the graph 8.00 ms, **HR@10 0.1683 (+2.38 [+1.81, +2.96]), HR@50 +3.43**;
+    FP8 + fusion 467 / 459 users/s (B = 32 / 64), HR@10 0.1679; beam-50 re-timed 21.05 ms.
+- **Industrial catalog scaling (`runs/scaleI`, A40):** |N| ≈ 7.8 / 38 / 350 (K = 10 / 50 / 500) from 10k to 1M SIDs
+  (real 5.2 / 25 / 186); top-10 certified ≥ 98.6% at M = 16, 100% at M = 32; top-50 100% at M = 128; latency M = 16
+  real 9.24 / 9.24 ms, 1M 9.32 ms (M = 32: 9.28 ms).

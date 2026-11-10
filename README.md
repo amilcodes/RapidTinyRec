@@ -62,6 +62,11 @@ a small bridge distilled from their parent node's state (no labels, frozen model
   graph); Industrial +0.51 [+0.07, +0.95] at 3.45 ms (3.09 ms in-graph in a later allocation). Certified fused
   top-500 reaches 100% of users on Industrial at M = 512 (4.23 ms).
   Under a 5%-eligibility filter, filtering the LLM's top-50 recovers only 30% of the exact filtered top-10.
+- **Fourth session.** (1) *Catalog scaling*: on synthetic catalogs of 10k–1M SIDs scored by the real model, the
+  prefixes the certificate needs stay flat (≈8 for top-10) and latency at a fixed budget moves by <1% (Office and
+  Industrial). (2) *Other backbones*: on public 3B / 7B MiniOneRec-format checkpoints, certified decoding with a
+  third-code bridge takes 4.70 / 7.78 ms vs 13.0 / 21.1 ms for beam-50 at equal quality, and the SASRec term adds
+  +2.2 / +2.4 HR@10. (3) *End-to-end fusion*: SASRec now runs inside the CUDA graph (2.89 ms Office).
 - **Two-sided bounds**: under trie normalization the set of prefixes that guarantees the certificate is known
   after the first forward (≤ 1.1·K on average).
 
