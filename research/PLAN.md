@@ -697,3 +697,11 @@ Oscar refused key auth from an off-campus network (no Brown VPN), so this sessio
     M = 16 and 100% at M = 32 at every size; top-50 ≥ 98.2% at M = 64, 100% at M = 128; top-500 needs M ≥ 512 on
     dense catalogs. Same-allocation latency (M = 16): real 6.33 / 6.32 ms, 1M SIDs 6.36 ms (M = 32: 6.36 ms).
   - Report v10 published (same URL).
+- **SFT vs RL (GDPO) pair (`runs/gdpoP`, H100, HF onesfour/MiniOneRec-1.5B-SFT-GDPO, Industrial with its own
+  RQ-VAE index; 19% of items carry a 4th collision code → merged into 268 3-code groups, `SPEEDRUN_SID_LEVELS=3`;
+  trie objective, no forced suffix; full depth, no bridges):** beam-50 5.81 / 5.81 ms vs certified exact 4.67 / 5.02 ms
+  (SFT / GDPO), top-10 certified 100% for both; beam vs exact ΔHR@10 +0.02 [−0.04, +0.09] (SFT) and −0.02
+  [−0.07, 0.00] (GDPO), same top-10 set for 95–96% of users (overlap 99.5%) — negligible search error under trie
+  scoring. RL sharpens the distribution: top-50 certified at M = 16 for 26–31% of users vs 14–20% (SFT). Under this
+  evaluation GDPO is −1.96 [−2.71, −1.19] HR@10 vs its SFT parent (cbtrie); GDPO was trained against full-vocabulary
+  4-code beam rewards, so this is decoding-objective mismatch, not a verdict on RL.
