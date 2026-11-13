@@ -78,7 +78,7 @@ a small bridge distilled from their parent node's state (no labels, frozen model
   after the first forward (≤ 1.1·K on average).
 
 Method, measurements and negative results: [`research/`](research/PLAN.md),
-paper draft [`research/paper_draft.md`](research/paper_draft.md).
+paper draft [`research/paper_draft.md`](research/paper_draft.md) (LaTeX and PDF: [`research/paper/`](research/paper/main.pdf)).
 
 ## Performance
 

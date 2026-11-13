@@ -1,0 +1,292 @@
+% Bibliography for main.tex. Entries for 2025-2026 preprints carry the arXiv id and the
+% system name as recorded in research/lit_ledger.md and research/lit2/; several still need
+% full titles and author lists before submission (marked TODO).
+
+% ---- models, data, baselines ---------------------------------------------------------
+% TODO: full author names
+@misc{ax2510.24431,
+  title  = {{{MiniOneRec}: An Open-Source Framework for Scaling Generative Recommendation}},
+  author = {Kong and others},
+  year   = {2025},
+  note   = {arXiv:2510.24431},
+}
+@misc{ax2407.10671,
+  title  = {{{Qwen2} Technical Report}},
+  author = {Yang, An and others},
+  year   = {2024},
+  note   = {arXiv:2407.10671},
+}
+@inproceedings{kang2018,
+  title     = {{Self-Attentive Sequential Recommendation}},
+  author    = {Kang, Wang-Cheng and McAuley, Julian},
+  booktitle = {IEEE International Conference on Data Mining (ICDM)},
+  year      = {2018},
+}
+@inproceedings{rajput2023,
+  title     = {{Recommender Systems with Generative Retrieval}},
+  author    = {Rajput, Shashank and others},
+  booktitle = {Advances in Neural Information Processing Systems (NeurIPS)},
+  year      = {2023},
+}
+
+% ---- deployed GR systems and serving engines ---------------------------------------------
+@misc{ax2506.13695,
+  title  = {{{OneRec} Technical Report}},
+  author = {{Kuaishou OneRec Team}},
+  year   = {2025},
+  note   = {arXiv:2506.13695},
+}
+@misc{ax2508.20900,
+  title  = {{{OneRec-V2} Technical Report}},
+  author = {{Kuaishou OneRec Team}},
+  year   = {2025},
+  note   = {arXiv:2508.20900},
+}
+% TODO: full title and authors
+@misc{ax2602.22732,
+  title  = {{{GR4AD}: generative recommendation for advertising (LazyAR, ``Late-Inject Autoregression'')}},
+  author = {{Kuaishou}},
+  year   = {2026},
+  note   = {arXiv:2602.22732},
+}
+% TODO: full title and authors
+@misc{ax2608.00938,
+  title  = {{{GRACE}: generative ads retrieval with beam-as-query cross-attention}},
+  author = {{Meta}},
+  year   = {2026},
+  note   = {arXiv:2608.00938},
+}
+% TODO: authors
+@misc{ax2504.10507,
+  title  = {{{PinRec}: Outcome-Conditioned, Multi-Token Generative Retrieval for Industry-Scale Recommendation Systems}},
+  author = {{Pinterest}},
+  year   = {2025},
+  note   = {arXiv:2504.10507},
+}
+@misc{spotify2026,
+  title        = {{Advancing generative recommendation inference: our collaboration with {NVIDIA} on {TensorRT-LLM}}},
+  author       = {{Spotify Engineering}},
+  year         = {2026},
+  howpublished = {\url{https://engineering.atspotify.com/2026/10/advancing-generative-recommendation-inference-our-collaboration-with-nvidia-on-tensorrt-llm}},
+}
+@misc{nvidiasidgr,
+  title        = {{recsys-examples: {SID}-based generative retrieval inference}},
+  author       = {{NVIDIA}},
+  year         = {2026},
+  howpublished = {\url{https://github.com/NVIDIA/recsys-examples}},
+}
+@misc{flashrec,
+  title        = {{{FlashRec}: a serving engine for semantic-ID generative recommendation}},
+  author       = {{Sohu MPTC}},
+  year         = {2026},
+  howpublished = {\url{https://github.com/sohu-mptc/FlashRec}},
+  note         = {Version 0.1.2, commit 1089682},
+}
+% TODO: full title and authors
+@misc{ax2512.11529,
+  title  = {{xGR}: generative recommendation serving on {xLLM}},
+  author = {{JD and Beihang University}},
+  year   = {2025},
+  note   = {arXiv:2512.11529},
+}
+% TODO: full title and authors
+@misc{ax2607.04068,
+  title  = {{UniSGR / STARK}},
+  author = {{Alibaba AIDC}},
+  year   = {2026},
+  note   = {arXiv:2607.04068},
+}
+% TODO: full title and authors
+@misc{ax2602.22647,
+  title  = {{{STATIC}: static constraint decoding for generative retrieval}},
+  author = {{Google / YouTube}},
+  year   = {2026},
+  note   = {arXiv:2602.22647, KDD 2026},
+}
+% TODO: full title and authors
+@misc{ax2607.10044,
+  title  = {{FlashTrie}},
+  year   = {2026},
+  note   = {arXiv:2607.10044},
+}
+
+% ---- faster generation by changing the model -------------------------------------------
+% TODO: full title and authors
+@misc{ax2511.18793,
+  title  = {{NEZHA}},
+  author = {{Alibaba and CityU}},
+  year   = {2025},
+  note   = {arXiv:2511.18793, WWW 2026},
+}
+% TODO: full title and authors
+@misc{ax2605.12617,
+  title  = {{SID-MLP}},
+  author = {{UCSD and Snap}},
+  year   = {2026},
+  note   = {arXiv:2605.12617},
+}
+% TODO: full title
+@misc{ax2610.32980,
+  title  = {{Deco}},
+  author = {Gusak and Oseledets and Frolov},
+  year   = {2026},
+  note   = {arXiv:2610.32980},
+}
+% TODO: full title and authors
+@misc{ax2611.07425,
+  title  = {{BRIDGE}},
+  year   = {2026},
+  note   = {arXiv:2611.07425},
+}
+
+% ---- layer skipping ---------------------------------------------------------------------
+@inproceedings{schuster2022,
+  title     = {{Confident Adaptive Language Modeling}},
+  author    = {Schuster, Tal and Fisch, Adam and Gupta, Jai and Dehghani, Mostafa and Bahri, Dara and Tran, Vinh Q. and Tay, Yi and Metzler, Donald},
+  booktitle = {Advances in Neural Information Processing Systems (NeurIPS)},
+  year      = {2022},
+}
+@inproceedings{elhoushi2024,
+  title     = {{{LayerSkip}: Enabling Early Exit Inference and Self-Speculative Decoding}},
+  author    = {Elhoushi, Mostafa and others},
+  booktitle = {Proceedings of ACL},
+  year      = {2024},
+}
+@misc{raposo2024,
+  title  = {{Mixture-of-Depths: Dynamically allocating compute in transformer-based language models}},
+  author = {Raposo, David and others},
+  year   = {2024},
+  note   = {arXiv:2404.02258},
+}
+@misc{delcorro2023,
+  title  = {{{SkipDecode}: Autoregressive Skip Decoding with Batching and Caching for Efficient {LLM} Inference}},
+  author = {Del Corro, Luciano and others},
+  year   = {2023},
+  note   = {arXiv:2307.02628},
+}
+@inproceedings{li2024eagle,
+  title     = {{{EAGLE}: Speculative Sampling Requires Rethinking Feature Uncertainty}},
+  author    = {Li, Yuhui and Wei, Fangyun and Zhang, Chao and Zhang, Hongyang},
+  booktitle = {International Conference on Machine Learning (ICML)},
+  year      = {2024},
+}
+% TODO: check title
+@misc{ax2404.12022,
+  title  = {{Parallel decoding via hidden transfer ({FIRP})}},
+  author = {Wu and others},
+  year   = {2024},
+  note   = {arXiv:2404.12022, NLPCC 2024},
+}
+
+% ---- search and scoring --------------------------------------------------------------------
+% TODO: full title and authors
+@misc{ax2602.07847,
+  title  = {{DiGR}},
+  year   = {2026},
+  note   = {arXiv:2602.07847},
+}
+% TODO: full author names
+@misc{ax2611.01072,
+  title  = {{Where Beam Search Loses Top-Ranked Items: First-Step Coverage in Generative Recommendation}},
+  author = {Yao and Zhu},
+  year   = {2026},
+  note   = {arXiv:2611.01072},
+}
+% TODO: full title and authors
+@misc{ax2607.24995,
+  title  = {{Item-Supported Decoding}},
+  year   = {2026},
+  note   = {arXiv:2607.24995},
+}
+% TODO: full author names
+@inproceedings{ax2504.09935,
+  title     = {{Constrained Auto-Regressive Decoding Constrains Generative Retrieval}},
+  author    = {Wu and others},
+  booktitle = {Proceedings of SIGIR},
+  year      = {2025},
+  note      = {arXiv:2504.09935},
+}
+@inproceedings{ax2405.21047,
+  title     = {{Grammar-Aligned Decoding}},
+  author    = {Park, Kanghee and others},
+  booktitle = {Advances in Neural Information Processing Systems (NeurIPS)},
+  year      = {2024},
+  note      = {arXiv:2405.21047},
+}
+@inproceedings{stahlberg2019,
+  title     = {{On {NMT} Search Errors and Model Errors: Cat Got Your Tongue?}},
+  author    = {Stahlberg, Felix and Byrne, Bill},
+  booktitle = {Proceedings of EMNLP-IJCNLP},
+  year      = {2019},
+}
+@inproceedings{meister2020,
+  title     = {{If beam search is the answer, what was the question?}},
+  author    = {Meister, Clara and Cotterell, Ryan and Vieira, Tim},
+  booktitle = {Proceedings of EMNLP},
+  year      = {2020},
+}
+@inproceedings{stahlberg2022,
+  title     = {{Uncertainty Determines the Adequacy of the Mode and the Tractability of Decoding in Sequence-to-Sequence Models}},
+  author    = {Stahlberg, Felix and Kulikov, Ilia and Kumar, Shankar},
+  booktitle = {Proceedings of ACL},
+  year      = {2022},
+}
+@article{fagin2003,
+  title   = {{Optimal aggregation algorithms for middleware}},
+  author  = {Fagin, Ronald and Lotem, Amnon and Naor, Moni},
+  journal = {Journal of Computer and System Sciences},
+  volume  = {66},
+  number  = {4},
+  pages   = {614--656},
+  year    = {2003},
+}
+% TODO: full author names
+@misc{ax2609.33745,
+  title  = {{Beyond the Beam: Constructive Repair and Candidate Completion for Generative Recommendation}},
+  author = {Zhao and others},
+  year   = {2026},
+  note   = {arXiv:2609.33745},
+}
+% TODO: full title and authors
+@misc{ax2611.04715,
+  title  = {{ZeroGR}},
+  author = {{HKU and Kuaishou}},
+  year   = {2026},
+  note   = {arXiv:2611.04715},
+}
+
+% ---- quality on the same split -----------------------------------------------------------
+% TODO: authors
+@misc{ax2608.20611,
+  title  = {{{DASO}: Difficulty-Aware {SID} Optimization}},
+  author = {{Meta and Penn State}},
+  year   = {2026},
+  note   = {arXiv:2608.20611},
+}
+% TODO: full title and authors
+@misc{ax2602.10606,
+  title  = {{S-GRec}},
+  year   = {2026},
+  note   = {arXiv:2602.10606},
+}
+% TODO: authors
+@misc{ax2602.10699,
+  title  = {{{V-STAR}: Value-Guided Structured Sampling}},
+  author = {{Tencent}},
+  year   = {2026},
+  note   = {arXiv:2602.10699},
+}
+% TODO: authors
+@misc{ax2611.01568,
+  title  = {{{SA-OPSD}: Search-Aware On-Policy Self-Distillation with Sibling Alignment}},
+  author = {{Kuaishou and University of Amsterdam}},
+  year   = {2026},
+  note   = {arXiv:2611.01568},
+}
+% TODO: full title and authors
+@misc{ax2611.02981,
+  title  = {{{UAGR}: utility-aware generative recommendation}},
+  author = {{Kuaishou}},
+  year   = {2026},
+  note   = {arXiv:2611.02981},
+}
