@@ -67,6 +67,13 @@ a small bridge distilled from their parent node's state (no labels, frozen model
   Industrial). (2) *Other backbones*: on public 3B / 7B MiniOneRec-format checkpoints, certified decoding with a
   third-code bridge takes 4.70 / 7.78 ms vs 13.0 / 21.1 ms for beam-50 at equal quality, and the SASRec term adds
   +2.2 / +2.4 HR@10. (3) *End-to-end fusion*: SASRec now runs inside the CUDA graph (2.89 ms Office).
+- **Against an industry engine (fifth session).** FlashRec (sohu-mptc/FlashRec, a public SID-GR serving engine with
+  CUDA-graph wide beam and a fused trie kernel), ported to Qwen2 and run on the same H100 and prompts: 11.5 ms per
+  request and 408–500 users/s, vs 2.57 ms and 2,681 users/s (FP16; 3,148 with FP8) for certified decoding. Our
+  beam-50 matches FlashRec's throughput, so the gain is the decoder's. FlashRec's GPU time alone (6.78 ms) exceeds
+  our end-to-end latency. Quality: certified matches an exact implementation of FlashRec's objective (HR@10 0.1689 vs
+  0.1679) and the fused decoder adds +1.46 [+0.88, +2.01]. NVIDIA's SID-GR example is not runnable from public code
+  (its decode-attention kernel is a private submodule). Details: paper §8.1, `scripts/flashrec_job.sh`.
 - **Two-sided bounds**: under trie normalization the set of prefixes that guarantees the certificate is known
   after the first forward (≤ 1.1·K on average).
 

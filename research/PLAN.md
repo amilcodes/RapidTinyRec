@@ -722,3 +722,39 @@ Oscar refused key auth from an off-campus network (no Brown VPN), so this sessio
 - **Industrial catalog scaling (`runs/scaleI`, A40):** |N| ≈ 7.8 / 38 / 350 (K = 10 / 50 / 500) from 10k to 1M SIDs
   (real 5.2 / 25 / 186); top-10 certified ≥ 98.6% at M = 16, 100% at M = 32; top-50 100% at M = 128; latency M = 16
   real 9.24 / 9.24 ms, 1M 9.32 ms (M = 32: 9.28 ms).
+
+## Session 5 (2026-11-10): same-GPU comparison against an industry engine
+
+- **NVIDIA SID-GR cannot be reproduced from public code.** `NVIDIA/recsys-examples/examples/sid-gr-inference` imports
+  its decode attention (`gr-decode_atten`, CuTe DSL) from `third_party/gr-decode-attention`, a submodule pointing at
+  `../gr-decode-attention.git`; neither `NVIDIA/gr-decode-attention` nor the fork named in its README
+  (`cb521/...`) is public (HTTP 404, checked 2026-11-10), and the in-repo choices are `--decode-backend fake|real`.
+  The "real" backend, which carries its headline numbers (17.6 ms batch 1, ctx 1000, beam 256), is therefore not
+  runnable by outside parties. Its model code is also Qwen3-only.
+- **FlashRec instead** (`sohu-mptc/FlashRec` 0.1.2 @ 1089682, Apache-2.0): fully public (CUDA-graph wide beam incl.
+  expansion, fused CUDA trie kernel, restricted per-codebook LM head, radix prefix cache, cross-request decode waves,
+  FP8 W8A8 + FP8 KV). Qwen3-only, so `scripts/flashrec_qwen2.py` adds Qwen2 (QKV bias into the fused qkv_proj, no
+  QK-norm, `HAS_NORM` constexpr in its fused Triton QK-norm/RoPE/FP8-KV kernel) — 3 files, ~60 lines.
+- Harness: `scripts/export_workload.py` (our exact prompt token ids, targets, cohort, shared prefix, SID layout as
+  level-grouped token ids, catalog as token triples), `scripts/flashrec_bench.py` (FlashRec's offline API in its own
+  venv; template pinned in its radix cache, other prefixes evicted before every timed request),
+  `scripts/flashrec_setup.sh`, `scripts/flashrec_job.sh smoke|latency|throughput`.
+- FlashRec's objective = beam search over a per-level codebook log-softmax, no suffix = our
+  `--norm codebook --suffix none` beam-50 (agreement reference, same allocation).
+- **Results (H100, one allocation each; `runs/frLat`, `runs/frTp`, `runs/frCand`):**
+  - Batch-1 latency (FlashRec: `engine.generate()` wall; ours: graph replay, + D2H): FlashRec BF16 11.48 / FP16 11.71
+    (11.80 re-run) / FP8 14.22 ms; ours beam-50 under FlashRec's objective 5.15 (5.19), beam-50 MiniOneRec 8.36,
+    certified 18/26 2.57 (2.59), + SASRec in graph 2.83 (2.85) ms. FlashRec GPU-kernel time 6.78 ms / request
+    (1,878 kernels, profiler) > our end-to-end. Decode graphs captured (19 sizes); trie JIT loaded.
+  - Throughput (users/s, B = 16/32/64/128): FlashRec FP16 408/431/428/500, FP8 433/370/363/489; ours beam-50
+    457/478/489, certified FP16 2,310/2,559/2,678/2,681, FP8 2,391/2,896/3,077/3,148.
+  - Quality (all users): FlashRec FP16 = BF16 HR@10 0.1644, FP8 0.1554 (−0.90 [−1.32, −0.47]); ours beam-50 under its
+    objective 0.1679 (+0.35 [+0.04, +0.64] vs FlashRec FP16). Fused certified vs that exact objective +1.46
+    [+0.88, +2.01] HR@10, +2.57 HR@50; certified 18/26 vs it +0.10 (n.s.).
+  - Agreement with exact beam under the same objective (500-user cohort): top-1 80%, top-10 overlap 81%.
+- **FlashRec numerical drift (diagnosed, not resolved):** its `beam_score` = cum / length (length_penalty 1);
+  first-code log-probs differ from HF FP32 by 0.23 nats mean (HF FP16 0.002, BF16 0.02: `runs/precChk`). Unchanged
+  with radix / graph / fused expand / per-codebook head off (`runs/frDiag`), with a 12-KV-head copy of the
+  checkpoint (`runs/frMHA`, rules out GQA-6), with contiguous Q/K before RoPE (`runs/frDiag3`), lm_head == embed
+  exactly; widening its 2×beam candidate cut to 256 changes nothing (bit-identical quality). Patch verified
+  (bias loaded, no QK-norm). Paper uses our exact implementation of its objective as its quality.

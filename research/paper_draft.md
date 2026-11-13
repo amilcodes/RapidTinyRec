@@ -25,7 +25,9 @@ frozen model (validation prompts only, no labels), losslessly against the full-d
 (ΔHR@10 +0.12 [−0.27, +0.51], ΔNDCG@10 0.00 [−0.20, +0.20]). With a hand-written engine (one CUDA graph
 per request), a certified top-10 takes **2.75 ms on an H100** (MiniOneRec's beam-50 in the same engine and
 allocation: 8.43 ms; Hugging Face `generate`: 869 ms on an A6000), and a certified top-500 2.92 ms (beam-500:
-18.1 ms). Exact search also makes **objective fusion exact**:
+18.1 ms). On the same H100 and workload, FlashRec, a public engine built for SID decoding (CUDA-graph wide beam, fused
+trie kernel), takes 11.5 ms per request and serves ≤ 0.5k users/s; certified decoding serves 2.7k (FP16) to 3.1k
+(FP8) users/s, while the two engines run beam search at the same throughput. Exact search also makes **objective fusion exact**:
 adding a per-user collaborative term (β·log q from a 1-minute SASRec, itself computed inside the same CUDA graph:
 2.89 ms end to end) inside the certified search keeps
 two forwards and 100% certification and raises Office HR@10 from 0.1714 to **0.1825** (+1.11 [+0.62, +1.60];
@@ -72,6 +74,10 @@ Contributions:
 - **Engine and ladders** (A6000, H100) with a fidelity gate at every rung; batch-1 certified top-10 in
   2.75 ms on an H100 (2.89 ms with the fused SASRec term, SASRec computed in the graph), certified top-500
   in 2.92 ms (3.08 ms fused, SASRec included).
+- **Same-GPU comparison with a public SID-GR engine** (FlashRec, ported to Qwen2; §8.1): 4.5× lower batch-1 latency
+  (2.57 vs 11.5 ms) and 5.4–6.4× higher throughput on an H100, at equal or better quality (+1.46 HR@10 with fusion
+  over an exact implementation of FlashRec's objective). Both engines run beam search at the same throughput, so
+  the gain is the decoder's. NVIDIA's SID-GR engine is not reproducible from public code.
 - **Model branch (mostly negative)**: one more SFT epoch helps the released checkpoint (+0.8 HR@10,
   +2.0 HR@50; with the SASRec term HR@10 0.1852), but a loss aligned with the decoder's restricted
   normalization is no better than full-vocabulary CE (ΔHR@10 +0.14 [−0.16, +0.47]).
@@ -663,6 +669,62 @@ beam-500 with trie scoring 132 / 229 / 253 (B = 1/4/8); MiniOneRec's beam-500 (f
 forced suffix) 54 / 68 / 71 — **6.4×** at the largest batch each fits. Certified top-100: 185 / 689 /
 858 (B = 1/8/32) vs trie beam-100 169 / 628 / 740.
 
+### 8.1 Against a public SID-GR engine on the same GPU
+
+We compare with FlashRec 0.1.2 (sohu-mptc/FlashRec @ 1089682, Apache-2.0), the open-source engine built for
+this workload: CUDA-graph wide beam including the expansion step, a fused CUDA trie kernel, a restricted
+per-codebook LM head, a radix prefix cache and cross-request decode waves, FP8 by default. NVIDIA's SID-GR
+example could not be run as published: its decode-attention kernel is a private submodule (`gr-decode-attention`;
+the repository it points to and the fork named in its README return 404), so outside users get only a placeholder
+backend. FlashRec supports Qwen3 only; a 60-line patch (`scripts/flashrec_qwen2.py`) adds Qwen2 (QKV bias, no
+QK-norm). It decodes our exact prompt token ids and catalog (3,444 SIDs, beam 50, 3 steps) with its own CUDA graphs
+(captured at 19 sizes) and JIT trie kernel (verified loaded). Its radix cache holds our 69-token shared prefix (the
+counterpart of our template cache) and every other prefix is evicted before each timed request. FlashRec latency is
+the wall time of its offline API, `engine.generate()`, from token ids to ranked beams on the host; ours is a pinned
+host prompt through one graph replay (+ the copy of the ranked list to the host). One H100 allocation per table
+(`runs/frLat`, `runs/frTp`; `scripts/flashrec_job.sh`, `scripts/compare_flashrec.py`).
+
+| engine / decoder (H100, batch 1) | median ms | p95 | HR@10, all 4,866 users |
+|---|---:|---:|---:|
+| FlashRec BF16 | 11.48 | 11.64 | 0.1644 |
+| FlashRec FP16 | 11.71 | 12.02 | 0.1644 |
+| FlashRec FP8 (its default) | 14.22 | 14.45 | 0.1554 |
+| ours, beam-50 under FlashRec's objective (per-level codebook softmax, no suffix) | 5.15 (5.19) | 5.30 | 0.1679 |
+| ours, beam-50, MiniOneRec semantics | 8.36 (8.39) | 9.04 | 0.1587 |
+| ours, certified, late entry 18 / 26 | **2.57** (2.59) | 2.65 | 0.1689† |
+| ours, certified + SASRec term computed in the graph | **2.83** (2.85) | 2.92 | **0.1825**† |
+
+Parentheses: with the device-to-host copy. †Quality of the same configurations from earlier runs (`runs/e26H`,
+`runs/collabO`); beam-50 MiniOneRec semantics from `runs/finalH`.
+
+| users/s (H100), B = 16 / 32 / 64 / 128 | |
+|---|---|
+| FlashRec FP16 | 408 / 431 / 428 / 500 |
+| FlashRec FP8 | 433 / 370 / 363 / 489 |
+| ours, beam-50 | 457 / 478 / 489 / — |
+| ours, certified, FP16 | **2,310 / 2,559 / 2,678 / 2,681** |
+| ours, certified, dynamic FP8 | **2,391 / 2,896 / 3,077 / 3,148** |
+
+- **4.5× lower latency and 5.4–6.4× higher throughput.** The gap is not an artifact of the timing boundary:
+  FlashRec's CUDA-kernel time alone is 6.78 ms per request (1,878 kernels; profiler over 50 requests), more than our
+  end-to-end 2.57 ms; the rest of its 11.7 ms is host-side scheduling.
+- **The engines are comparable; the decoder is not.** Running beam-50, our engine and FlashRec reach the same
+  throughput (457–489 vs 408–500 users/s); the 5–6× comes from certified decoding processing fewer tokens per user.
+  At batch 1 our beam-50 under FlashRec's own objective is 2.3× faster than FlashRec.
+- **FP8 does not pay at batch 1 on this checkpoint**: FlashRec's default is slower than BF16 (14.2 vs 11.5 ms) and
+  loses 0.90 HR@10 [−1.32, −0.47] against its own FP16.
+- **Quality.** Paired against FlashRec FP16: our exact beam under its objective +0.35 HR@10 [+0.04, +0.64], certified
+  (late entry 18/26) +0.45 [+0.00, +0.90], certified with both bridges at 18/22 +0.68 [+0.25, +1.15], fused +1.81
+  [+1.23, +2.36]. Part of FlashRec's deficit is numerical: on our Qwen2 port its first-code log-probabilities differ
+  from the Hugging Face FP32 model by 0.23 nats on average (half-precision HF: 0.002 in FP16, 0.02 in BF16), and its
+  top-1 agrees with exact beam under the same objective for 80% of users. We could not attribute this to its prefix
+  cache, CUDA graphs, fused expansion, per-codebook head, GQA grouping (a 12-KV-head copy of the checkpoint drifts
+  the same), output-layer tying or Q/K layout; widening its per-beam candidate cut from 2×beam to the full codebook
+  changes nothing. We therefore take our exact implementation of its objective (0.1679) as the quality FlashRec's
+  design would reach: certified decoding matches it (+0.10 [−0.31, +0.58]) at half the latency of that beam search,
+  and the fused certified decoder adds +1.46 [+0.88, +2.01] HR@10 and +2.57 HR@50. Latency and throughput are
+  unaffected by the numerical question (the computation is the same).
+
 ## 9. Related work
 
 **GR serving engines.** FlashRec (Sohu, 2026; open source) combines wide-beam CUDA graphs, a
@@ -670,7 +732,8 @@ fused trie kernel, a per-codebook restricted LM head with restricted log-softmax
 prefix caching, cross-request beam batching and FP8, and reports throughput against
 SGLang/vLLM/TRT-LLM with 86–92% beam-set overlap to HF. NVIDIA's SID-GR inference example
 separates shared context KV from per-beam KV with a custom decode-attention kernel (17.6 ms at
-batch 1 for Qwen3-1.7B, beam 256, on an H100) and fixes output length with `ignore_eos`.
+batch 1 for Qwen3-1.7B, beam 256, on an H100) and fixes output length with `ignore_eos`; that kernel is a
+private submodule, so the published configuration cannot be reproduced (§8.1 compares against FlashRec instead).
 xGR (2512.11529) separates shared/unshared KV, terminates sorting early and filters items with
 masks; GRACE (2608.00938) captures the whole SID loop in one CUDA graph and treats beams as the
 query dimension of cross-attention; GR4AD (2602.22732) reports per-mechanism QPS for
@@ -744,5 +807,8 @@ heuristically; certified search handles an additive item-value term exactly (§6
 - Batch-1 latency on two GPU types (RTX A6000, H100; L40S for FP8); throughput up to batch 64.
   Absolute latency varies by up to ≈10% between allocations of the same GPU type; all
   comparisons we draw conclusions from are paired within one allocation.
-- We did not run FlashRec or NVIDIA's SID-GR engine on matched hardware; our comparison points are
-  Hugging Face `generate`, the prior RapidTinyRec stacks and our own beam engine.
+- The industry-engine comparison (§8.1) is against one engine, FlashRec, ported to Qwen2 by us; its log-probabilities
+  on the port differ from the reference model by 0.23 nats for reasons we could not isolate, so we use an exact
+  implementation of its objective as its quality. NVIDIA's SID-GR engine could not be run: its decode-attention
+  kernel is not public. Neither comparison covers long contexts (our prompts are 76–121 tokens; both engines target
+  1k–5k-token contexts) or wide beams (≥ 256), where their KV-sharing designs matter most.
