@@ -77,4 +77,12 @@ python scripts/train_bridge.py --train-release VALID_RELEASE --release RELEASE -
   --entry 22 --row-weight 0.5 --epochs 6 --train-users 4600 --tag _w                 # late-entry bridge
 ```
 
+**Comparing against FlashRec** (public SID-GR engine; paper §8.1): `scripts/flashrec_setup.sh` (clone, Qwen2 patch
+`scripts/flashrec_qwen2.py`, own venv), `scripts/export_workload.py` (our prompts, targets, catalog and SID layout),
+`scripts/flashrec_bench.py` (FlashRec's offline API on that workload: latency, quality, throughput, `--profile`),
+`scripts/flashrec_job.sh smoke|latency|cand|throughput` (both engines in one allocation),
+`scripts/compare_flashrec.py` (tables, agreement, paired bootstrap). FlashRec JIT-compiles kernels: it needs `nvcc`
+and its venv's `ninja` on `PATH`. Diagnostics of its numerical drift: `score_check.py`, `flashrec_diag.py`,
+`flashrec_diag2.py`, `precision_check.py`, `expand_kv_heads.py`.
+
 Measurements, protocol and the research log live in `research/`.
