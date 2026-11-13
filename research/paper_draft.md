@@ -1,6 +1,6 @@
 # Beam Search Is Optional: Certified, Late-Entry Decoding for LLM Generative Recommenders
 
-*Working draft, 2026-11-09. Every number cites a run under `runs/` (GPU named in each table).*
+*Working draft, 2026-11-13. Every number cites a run under `runs/` (GPU named in each table).*
 
 ## Abstract
 
