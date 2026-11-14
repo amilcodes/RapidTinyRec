@@ -1,8 +1,10 @@
 #!/usr/bin/env python3
-"""Render the Markdown paper draft as LaTeX.
+"""Render the Markdown research log (research/paper_draft.md) as a long-form LaTeX lab log.
 
-usage: python3 scripts/paper_tex.py [research/paper_draft.md] [research/paper/main.tex]
-then:  cd research/paper && latexmk -pdf main.tex
+The submission paper is research/paper/main.tex, written by hand; this is the exhaustive record.
+
+usage: python3 scripts/paper_tex.py [research/paper_draft.md] [research/paper/lab_log.tex]
+then:  cd research/paper && latexmk -pdf lab_log.tex
 
 research/paper_draft.md stays the source of truth. This handles the Markdown subset the draft
 uses (headings, paragraphs, lists, pipe tables, code spans, emphasis, one image) and adds the
@@ -15,7 +17,7 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent.parent
 SRC = Path(sys.argv[1]) if len(sys.argv) > 1 else ROOT / 'research' / 'paper_draft.md'
-OUT = Path(sys.argv[2]) if len(sys.argv) > 2 else ROOT / 'research' / 'paper' / 'main.tex'
+OUT = Path(sys.argv[2]) if len(sys.argv) > 2 else ROOT / 'research' / 'paper' / 'lab_log.tex'
 
 # ----------------------------------------------------------------------------------------------
 # hand-written pieces
