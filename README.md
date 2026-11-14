@@ -17,6 +17,69 @@ BF16**. BF16 is available as an **experimental opt-in**; FP32 remains the defaul
 These modes change rankings; see the
 [precision and quality comparison](#reduced-precision-results) below.
 
+### Speedrun engine, certified exact decoding and late entry (research branch)
+
+A from-scratch engine ([`rapidtinyrec/speedrun`](SPEEDRUN.md)) runs a whole request as one
+CUDA graph and replaces beam search with **certified exact decoding**: every term of an item's
+score is a log-probability ≤ 0, so one forward over the prompt and every first-level trie node
+bounds every item, and a second small forward proves when the returned top-K is the global
+optimum. **Late entry** makes that second forward cheap: prefix rows start at layer 22 of 28 from
+a small bridge distilled from their parent node's state (no labels, frozen model).
+
+| batch 1, 500 Office users, median ms | RTX A6000 | H100 |
+| :--- | ---: | ---: |
+| HF `generate`, FP32 | 868.8 | — |
+| speedrun engine, FP32 | 100.8 | 48.3 |
+| BF16, one CUDA graph per request | 42.1 | 20.1 |
+| + torch.compile | 35.0 | 12.9 |
+| + first trie level fused into the prompt forward + Triton beam attention | 28.1 | 8.50 |
+| + FP16 + cached prompt template (top-1 identical to FP32 for 500/500 users) | 26.2 | 8.48 |
+| certified exact decoding (trie or tuned codebook scoring) | 14.4 | 5.6 |
+| + late entry for the third code | 9.5 | 4.2 |
+| + Triton prompt attention in the first forward (+ whole-layer compile, fused K/V stores on the H100) | 9.0 | 3.2 |
+| same, codebook(a,b)+trie(c) scoring with the third code weighted 0.75 (validation-tuned) | 9.0 | 3.1 |
+| + first-level late entry (layer 18), third code at layer 26 — final paired runs | 6.4 | **2.75** |
+| + SASRec term inside the certified search (HR@10 0.1825; precomputed SASRec rows) | **6.4** | **2.72** |
+| same, SASRec itself computed inside the CUDA graph from the user's history (end to end) | — | **2.89** |
+
+- Certified decoding proves its top-10 globally optimal for ≥99.7% of users (0 violations
+  against brute force). The fastest configuration also scores best: with codebook normalization
+  for the first two codes, trie normalization for the third and the third code weighted 0.75
+  (chosen on MiniOneRec's validation split), HR@10 rises from 0.1589 to 0.1712 on all 4,866 Office
+  test users (+1.23 pt [+0.66, +1.81]). On Industrial & Scientific it matches MiniOneRec's own
+  beam-50 (HR@10 0.1597 vs 0.1582, n.s.) at 9.4 ms vs 25.8 ms on the A6000 and 3.2 ms vs 8.4 ms on the H100.
+- Late entry is statistically indistinguishable from the full-depth second forward on HR@10 and
+  NDCG@10 on both datasets (6 of 28 layers on Office, 10 on Industrial; bridges trained on the
+  validation split only).
+- Large candidate lists stay cheap: certifying the top K needs ≈K prefixes, and only multi-child
+  prefixes need the second forward. Certified top-500 takes 6.1 ms on an H100 vs 18.1 ms for
+  MiniOneRec's beam-500 (17.95 vs 83.2 ms on the A6000), and serves 450 vs 71 users/s.
+- Throughput, certified top-10 with late entry: 1,447 users/s on one H100; with both bridges, the third code at
+  layer 26 and dynamic FP8: 3,155 users/s (Office), 3,738 (Industrial).
+- **Exact objective fusion** (third session): any additive item term (prior, bid, filter, collaborative score)
+  keeps two forwards and the certificate. A SASRec term (1-minute training) lifts Office HR@10 from 0.1714 to
+  0.1825 (+1.11 [+0.62, +1.60]) and HR@500 by 4.0 points at 2.72 ms (2.89 ms with SASRec computed inside the
+  graph); Industrial +0.51 [+0.07, +0.95] at 3.45 ms (3.09 ms in-graph in a later allocation). Certified fused
+  top-500 reaches 100% of users on Industrial at M = 512 (4.23 ms).
+  Under a 5%-eligibility filter, filtering the LLM's top-50 recovers only 30% of the exact filtered top-10.
+- **Fourth session.** (1) *Catalog scaling*: on synthetic catalogs of 10k–1M SIDs scored by the real model, the
+  prefixes the certificate needs stay flat (≈8 for top-10) and latency at a fixed budget moves by <1% (Office and
+  Industrial). (2) *Other backbones*: on public 3B / 7B MiniOneRec-format checkpoints, certified decoding with a
+  third-code bridge takes 4.70 / 7.78 ms vs 13.0 / 21.1 ms for beam-50 at equal quality, and the SASRec term adds
+  +2.2 / +2.4 HR@10. (3) *End-to-end fusion*: SASRec now runs inside the CUDA graph (2.89 ms Office).
+- **Against an industry engine (fifth session).** FlashRec (sohu-mptc/FlashRec, a public SID-GR serving engine with
+  CUDA-graph wide beam and a fused trie kernel), ported to Qwen2 and run on the same H100 and prompts: 11.5 ms per
+  request and 408–500 users/s, vs 2.57 ms and 2,681 users/s (FP16; 3,148 with FP8) for certified decoding. Our
+  beam-50 matches FlashRec's throughput, so the gain is the decoder's. FlashRec's GPU time alone (6.78 ms) exceeds
+  our end-to-end latency. Quality: certified matches an exact implementation of FlashRec's objective (HR@10 0.1689 vs
+  0.1679) and the fused decoder adds +1.46 [+0.88, +2.01]. NVIDIA's SID-GR example is not runnable from public code
+  (its decode-attention kernel is a private submodule). Details: paper §8.1, `scripts/flashrec_job.sh`.
+- **Two-sided bounds**: under trie normalization the set of prefixes that guarantees the certificate is known
+  after the first forward (≤ 1.1·K on average).
+
+Method, measurements and negative results: [`research/`](research/PLAN.md),
+paper draft [`research/paper_draft.md`](research/paper_draft.md) (LaTeX and PDF: [`research/paper/`](research/paper/main.pdf)).
+
 ## Performance
 
 Office checkpoint · RTX A6000 · FP32 · batch 1 · beam 50. Each row is a separate

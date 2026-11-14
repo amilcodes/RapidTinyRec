@@ -1,0 +1,90 @@
+{
+ "office": {
+  "1": {
+   "multi_med": 1.0,
+   "multi_p90": 1.0,
+   "multi_p99": 2.0,
+   "one_forward_cert": 0.44266337156295776
+  },
+  "5": {
+   "multi_med": 2.0,
+   "multi_p90": 4.0,
+   "multi_p99": 6.0,
+   "one_forward_cert": 0.05219893157482147
+  },
+  "10": {
+   "multi_med": 5.0,
+   "multi_p90": 8.0,
+   "multi_p99": 10.0,
+   "one_forward_cert": 0.004521167371422052
+  },
+  "20": {
+   "multi_med": 9.0,
+   "multi_p90": 14.0,
+   "multi_p99": 18.0,
+   "one_forward_cert": 0.0
+  },
+  "50": {
+   "multi_med": 22.0,
+   "multi_p90": 31.0,
+   "multi_p99": 38.0,
+   "one_forward_cert": 0.0
+  },
+  "100": {
+   "multi_med": 43.0,
+   "multi_p90": 55.0,
+   "multi_p99": 64.0,
+   "one_forward_cert": 0.0
+  },
+  "500": {
+   "multi_med": 175.0,
+   "multi_p90": 198.0,
+   "multi_p99": 213.0,
+   "one_forward_cert": 0.0
+  }
+ },
+ "ind": {
+  "1": {
+   "multi_med": 1.0,
+   "multi_p90": 1.0,
+   "multi_p99": 3.0,
+   "one_forward_cert": 0.34281933307647705
+  },
+  "5": {
+   "multi_med": 3.0,
+   "multi_p90": 5.0,
+   "multi_p99": 7.0,
+   "one_forward_cert": 0.016545334830880165
+  },
+  "10": {
+   "multi_med": 6.0,
+   "multi_p90": 9.0,
+   "multi_p99": 12.0,
+   "one_forward_cert": 0.0008824178366921842
+  },
+  "20": {
+   "multi_med": 12.0,
+   "multi_p90": 17.0,
+   "multi_p99": 21.0,
+   "one_forward_cert": 0.0
+  },
+  "50": {
+   "multi_med": 29.0,
+   "multi_p90": 37.0,
+   "multi_p99": 42.6800422668457,
+   "one_forward_cert": 0.0
+  },
+  "100": {
+   "multi_med": 53.0,
+   "multi_p90": 65.0,
+   "multi_p99": 75.0,
+   "one_forward_cert": 0.0
+  },
+  "500": {
+   "multi_med": 205.0,
+   "multi_p90": 238.0,
+   "multi_p99": 259.0,
+   "one_forward_cert": 0.0
+  }
+ }
+}
