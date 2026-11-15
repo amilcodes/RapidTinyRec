@@ -517,6 +517,15 @@ at $M=32$, at every size. Industrial replicates this ($|N|\approx7.8/38/350$). T
 \emph{not} scale: $|E|$ grows with branching as the $-\log n_p$ lower bound loosens. On dense tries, Forward~2
 should therefore be sized by a fixed $M$, with a fallback for the rare uncertified request.
 
+\paragraph{First-level width.} The released model has only 88 first-code tokens, so we time wider first levels
+by borrowing the 512 deeper code tokens as extra first codes, each with a real first code's subtree (up to 600
+first codes and 23k SIDs, trie scoring, full depth). Forward~1 carries one tree node per first code, so it
+grows: certified decoding takes 4.28, 4.52, 5.11 and 6.38\,ms at 88, 176, 352 and 600 first codes, and certifies
+every top-10. Beam-50 with the same fused first level grows in step (5.08 to 7.42\,ms). Beam-50 without it does
+not grow, at 6.49\,ms (also without the cached template). The full-depth crossover is therefore near 600 first
+codes. Tokenizers with thousands of first codes would need a budget on the first level as well, or late entry
+for its rows, which costs 10 of 28 layers per row.
+
 \begin{figure}[t]
 \centering
 \includegraphics[width=\linewidth]{catalog_scaling.pdf}

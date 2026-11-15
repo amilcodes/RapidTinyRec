@@ -68,6 +68,79 @@ def _beam_attn_kernel(Q, KP, VP, KS, VS, O, LEN, scale,
              out.to(O.dtype.element_ty), mask=mvalid[:, None])
 
 
+# Long prompts: the kernel above holds the whole prompt K/V tile in shared memory (fine up to a few hundred
+# tokens). For longer prompts the same computation streams the prompt in BLK-token blocks with an online softmax.
+@triton.jit
+def _beam_attn_tiled_kernel(Q, KP, VP, KS, VS, O, LEN, scale,
+                            sqb, sqr, sqt, sqh,
+                            skpb, skph, skpp,
+                            sksb, sksr, skss, sksh,
+                            sob, sor, sot, soh,
+                            R, s0, P,
+                            IEEE: tl.constexpr, NQ: tl.constexpr, REP: tl.constexpr, D: tl.constexpr,
+                            BLK: tl.constexpr, BS: tl.constexpr, BM: tl.constexpr, KVH: tl.constexpr):
+    pid = tl.program_id(0)
+    g = pid % KVH
+    br = pid // KVH
+    r = br % R
+    b = br // R
+    m = tl.arange(0, BM)
+    t = m // REP
+    hh = m % REP
+    head = g * REP + hh
+    mvalid = m < NQ * REP
+    d = tl.arange(0, D)
+    q = tl.load(Q + b * sqb + r * sqr + t[:, None] * sqt + head[:, None] * sqh + d[None, :],
+                mask=mvalid[:, None], other=0.0)
+    q = (q.to(tl.float32) * scale).to(Q.dtype.element_ty)
+    L = tl.load(LEN + b)
+    m_i = tl.full((BM,), -1.0e30, tl.float32)
+    l_i = tl.zeros((BM,), tl.float32)
+    acc = tl.zeros((BM, D), tl.float32)
+    for start in range(0, P, BLK):
+        p = start + tl.arange(0, BLK)
+        kp = tl.load(KP + b * skpb + g * skph + p[:, None] * skpp + d[None, :], mask=(p < P)[:, None], other=0.0)
+        if IEEE:
+            sp = tl.dot(q, tl.trans(kp), input_precision="ieee")
+        else:
+            sp = tl.dot(q, tl.trans(kp))
+        sp = tl.where(p[None, :] < L, sp, float('-inf'))
+        m_new = tl.maximum(m_i, tl.max(sp, 1))
+        alpha = tl.exp(m_i - m_new)
+        e = tl.exp(sp - m_new[:, None])
+        l_i = l_i * alpha + tl.sum(e, 1)
+        vp = tl.load(VP + b * skpb + g * skph + p[:, None] * skpp + d[None, :], mask=(p < P)[:, None], other=0.0)
+        if IEEE:
+            acc = acc * alpha[:, None] + tl.dot(e, vp, input_precision="ieee")
+        else:
+            acc = acc * alpha[:, None] + tl.dot(e.to(vp.dtype), vp)
+        m_i = m_new
+    s = tl.arange(0, BS)
+    ks = tl.load(KS + b * sksb + r * sksr + s[:, None] * skss + g * sksh + d[None, :],
+                 mask=(s < s0 + NQ)[:, None], other=0.0)
+    if IEEE:
+        ss = tl.dot(q, tl.trans(ks), input_precision="ieee")
+    else:
+        ss = tl.dot(q, tl.trans(ks))
+    ss = tl.where(s[None, :] <= s0 + t[:, None], ss, float('-inf'))
+    m_new = tl.maximum(m_i, tl.max(ss, 1))
+    alpha = tl.exp(m_i - m_new)
+    es = tl.exp(ss - m_new[:, None])
+    l_i = l_i * alpha + tl.sum(es, 1)
+    vs = tl.load(VS + b * sksb + r * sksr + s[:, None] * skss + g * sksh + d[None, :],
+                 mask=(s < s0 + NQ)[:, None], other=0.0)
+    if IEEE:
+        acc = acc * alpha[:, None] + tl.dot(es, vs, input_precision="ieee")
+    else:
+        acc = acc * alpha[:, None] + tl.dot(es.to(vs.dtype), vs)
+    out = acc / l_i[:, None]
+    tl.store(O + b * sob + r * sor + t[:, None] * sot + head[:, None] * soh + d[None, :],
+             out.to(O.dtype.element_ty), mask=mvalid[:, None])
+
+
+TILE_ABOVE = 256   # prompt lengths (padded to a power of two) above this use the streaming kernels
+
+
 def beam_attention(q, kc, vc, kp, vp, lengths, s0, scale, out=None):
     """q [B,R,Q,H,hd] (unscaled); kc/vc [B,KV,P,hd]; kp/vp [B,R,S,KV,hd]; returns [B,R,Q,H*hd].
     out: optional [B,R,Q,H,hd]-viewable tensor to write into."""
@@ -79,6 +152,16 @@ def beam_attention(q, kc, vc, kp, vp, lengths, s0, scale, out=None):
     BS = 16
     BM = max(16, triton.next_power_of_2(NQ * REP))
     o = torch.empty(B, R, NQ, H, D, device=q.device, dtype=q.dtype) if out is None else out
+    if BP > TILE_ABOVE:
+        _beam_attn_tiled_kernel[(B * R * KV,)](
+            q, kc, vc, kp, vp, o, lengths, scale,
+            q.stride(0), q.stride(1), q.stride(2), q.stride(3),
+            kc.stride(0), kc.stride(1), kc.stride(2),
+            kp.stride(0), kp.stride(1), kp.stride(2), kp.stride(3),
+            o.stride(0), o.stride(1), o.stride(2), o.stride(3),
+            R, s0, P, IEEE=q.dtype == torch.float32, NQ=NQ, REP=REP, D=D, BLK=64, BS=BS, BM=BM, KVH=KV,
+            num_warps=4)
+        return o if out is not None else o.view(B, R, NQ, H * D)
     _beam_attn_kernel[(B * R * KV,)](
         q, kc, vc, kp, vp, o, lengths, scale,
         q.stride(0), q.stride(1), q.stride(2), q.stride(3),
@@ -143,7 +226,8 @@ def selfcheck(dtype, device='cuda'):
     out = {}
     ok = True
     for (B, R, NQ, s0, P, H, KV) in [(1, 50, 1, 0, 96, 12, 2), (1, 50, 2, 2, 128, 12, 2), (2, 88, 3, 1, 80, 12, 2),
-                                     (3, 50, 1, 1, 112, 12, 2), (1, 50, 1, 1, 96, 28, 4), (2, 16, 2, 0, 80, 16, 2)]:
+                                     (3, 50, 1, 1, 112, 12, 2), (1, 50, 1, 1, 96, 28, 4), (2, 16, 2, 0, 80, 16, 2),
+                                     (1, 50, 1, 1, 1100, 12, 2), (2, 16, 2, 0, 3100, 12, 2)]:
         q = torch.randn(B, R, NQ, H, 128, device=device, dtype=dtype) * 3
         kc = torch.randn(B, KV, P, 128, device=device, dtype=dtype) * 3
         vc = torch.randn_like(kc)
@@ -202,6 +286,51 @@ def _prompt_attn_kernel(Q, K, V, O, scale,
              (acc / den[:, None]).to(O.dtype.element_ty), mask=mvalid[:, None])
 
 
+@triton.jit
+def _prompt_attn_tiled_kernel(Q, K, V, O, scale,
+                              sqb, sqt, sqh, skb, skh, skp, sob, sot, soh,
+                              T0, Pn, P, NCH,
+                              IEEE: tl.constexpr, CQ: tl.constexpr, REP: tl.constexpr, D: tl.constexpr,
+                              BLK: tl.constexpr, BM: tl.constexpr, KVH: tl.constexpr):
+    pid = tl.program_id(0)
+    c = pid % NCH
+    bg = pid // NCH
+    g = bg % KVH
+    b = bg // KVH
+    m = tl.arange(0, BM)
+    tl_ = m // REP
+    head = g * REP + m % REP
+    t = c * CQ + tl_
+    mvalid = (tl_ < CQ) & (t < Pn)
+    d = tl.arange(0, D)
+    q = tl.load(Q + b * sqb + t[:, None] * sqt + head[:, None] * sqh + d[None, :], mask=mvalid[:, None], other=0.0)
+    q = (q.to(tl.float32) * scale).to(Q.dtype.element_ty)
+    m_i = tl.full((BM,), -1.0e30, tl.float32)
+    l_i = tl.zeros((BM,), tl.float32)
+    acc = tl.zeros((BM, D), tl.float32)
+    hi = tl.minimum(P, T0 + (c + 1) * CQ)          # causal: nothing past the chunk's last position
+    for start in range(0, hi, BLK):
+        p = start + tl.arange(0, BLK)
+        k = tl.load(K + b * skb + g * skh + p[:, None] * skp + d[None, :], mask=(p < P)[:, None], other=0.0)
+        if IEEE:
+            sc = tl.dot(q, tl.trans(k), input_precision="ieee")
+        else:
+            sc = tl.dot(q, tl.trans(k))
+        sc = tl.where((p[None, :] <= T0 + t[:, None]) & (p[None, :] < P), sc, float('-inf'))
+        m_new = tl.maximum(m_i, tl.max(sc, 1))
+        alpha = tl.exp(m_i - m_new)
+        e = tl.exp(sc - m_new[:, None])
+        l_i = l_i * alpha + tl.sum(e, 1)
+        v = tl.load(V + b * skb + g * skh + p[:, None] * skp + d[None, :], mask=(p < P)[:, None], other=0.0)
+        if IEEE:
+            acc = acc * alpha[:, None] + tl.dot(e, v, input_precision="ieee")
+        else:
+            acc = acc * alpha[:, None] + tl.dot(e.to(v.dtype), v)
+        m_i = m_new
+    tl.store(O + b * sob + t[:, None] * sot + head[:, None] * soh + d[None, :],
+             (acc / l_i[:, None]).to(O.dtype.element_ty), mask=mvalid[:, None])
+
+
 def prompt_attention(q, kc, vc, T0, scale, out=None, CQ=8):
     """q [B,Pn,H,hd] (unscaled, positions T0..T0+Pn-1); kc/vc [B,KV,P,hd] with P >= T0+Pn.
     Returns [B,Pn,H*hd] (written into `out` if given)."""
@@ -215,6 +344,13 @@ def prompt_attention(q, kc, vc, T0, scale, out=None, CQ=8):
     BP = max(16, triton.next_power_of_2(P))
     BM = max(16, triton.next_power_of_2(CQ * REP))
     nch = triton.cdiv(Pn, CQ)
+    if BP > TILE_ABOVE:
+        _prompt_attn_tiled_kernel[(B * KV * nch,)](
+            q, kc, vc, o4, scale,
+            q.stride(0), q.stride(1), q.stride(2), kc.stride(0), kc.stride(1), kc.stride(2),
+            o4.stride(0), o4.stride(1), o4.stride(2),
+            T0, Pn, P, nch, IEEE=q.dtype == torch.float32, CQ=CQ, REP=REP, D=D, BLK=64, BM=BM, KVH=KV, num_warps=4)
+        return out
     _prompt_attn_kernel[(B * KV * nch,)](
         q, kc, vc, o4, scale,
         q.stride(0), q.stride(1), q.stride(2), kc.stride(0), kc.stride(1), kc.stride(2),
@@ -239,7 +375,8 @@ def selfcheck_prompt(dtype, device='cuda'):
     torch.manual_seed(0)
     out, ok = {}, True
     for (B, T0, Pn, P, H, KV) in [(1, 69, 7, 80, 12, 2), (1, 69, 52, 128, 12, 2), (3, 69, 20, 96, 12, 2),
-                                  (2, 0, 40, 48, 12, 2), (1, 69, 20, 96, 28, 4), (2, 69, 9, 80, 16, 2)]:
+                                  (2, 0, 40, 48, 12, 2), (1, 69, 20, 96, 28, 4), (2, 69, 9, 80, 16, 2),
+                                  (1, 69, 1040, 1120, 12, 2), (1, 69, 3040, 3120, 12, 2)]:
         q = torch.randn(B, Pn, H, 128, device=device, dtype=dtype) * 3
         kc = torch.randn(B, KV, P, 128, device=device, dtype=dtype) * 3
         vc = torch.randn_like(kc)
