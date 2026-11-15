@@ -47,7 +47,8 @@ B = [16, 32, 64, 128]
 series = [
     ('ours, certified, dynamic FP8', B, [2391, 2896, 3077, 3148], OURS, '-', 'D'),
     ('ours, certified, FP16', B, [2310, 2559, 2678, 2681], OURS, '--', 'D'),
-    ('ours, beam-50', B[:3], [457, 478, 489], ALT, '-', 'o'),
+    ('ours, beam-50, FlashRec objective', B[:3], [905, 947, 970], ALT, '-', 'o'),
+    ('ours, beam-50, MiniOneRec objective', B[:3], [457, 478, 489], ALT, '--', 'o'),
     ('FlashRec FP16', B, [408, 431, 428, 500], BASE, '-', 's'),
     ('FlashRec FP8', B, [433, 370, 363, 489], BASE, '--', 's'),
 ]

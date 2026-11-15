@@ -73,6 +73,8 @@ sclF)
   C1M=$S/runs/scaleA/out/catalogs/prefixes_1000000.txt
   bash scripts/run_cfgs.sh \
     F_real_M16       "$CERT $CB $BASE --late-entry-a $BR18 --late-entry $BR26 --modes latency" \
+    F_real_M50       "--engine exacttrie --n-prefix 50 --n-expand 50 --tree-fast --fuse-store --compile-layer $CB $BASE --late-entry-a $BR18 --late-entry $BR26 --modes latency" \
+    F_real_full_M50  "--engine exacttrie --n-prefix 50 --n-expand 50 --tree-fast --fuse-store --compile-layer $CB $BASE --modes latency" \
     F_real_M16_v     "$CERT $CB $BASE --late-entry-a $BR18 --late-entry $BR26 --modes latency --random-bonus 0.5" \
     F_1M_M16         "$CERT $CB $BASE --late-entry-a $BR18 --late-entry $BR26 --modes latency --catalog $C1M" \
     F_1M_M16_v       "$CERT $CB $BASE --late-entry-a $BR18 --late-entry $BR26 --modes latency --catalog $C1M --random-bonus 0.5" \

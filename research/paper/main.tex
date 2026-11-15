@@ -43,9 +43,11 @@ of the model's objective. Under trie normalization the bounds are two-sided, so 
 the certificate are known after the first forward. We also find that deeper SID codes do not need the lower
 layers: prefix rows can enter the second forward at layer 26 of 28 through a small, label-free bridge from
 their parent's state, with HR@10 and NDCG@10 statistically unchanged. Exact search also makes \emph{objective fusion} exact: an additive
-per-item term, such as a collaborative model's score, keeps the certificate. On MiniOneRec (Qwen2-1.5B), a
-certified top-10 takes 2.57\,ms on an H100. On the same GPU and prompts, FlashRec, a public SID serving
-engine, takes 11.5\,ms and serves 5.4--6.4$\times$ fewer users per second. Fusing a 1-minute SASRec model into
+per-item term, such as a collaborative model's score, keeps the certificate. On MiniOneRec (Qwen2-1.5B) on an
+H100, in one engine and under one objective, the certified decoder with late entry takes 2.61\,ms per request
+against 5.13\,ms for beam-50, with 2.7$\times$ the throughput at equal HR@10; certification alone accounts for
+1.2$\times$, late entry for the rest. A public SID serving engine, FlashRec, takes 11.5\,ms on the same GPU and
+prompts. Fusing a 1-minute SASRec model into
 the certified search raises HR@10 by 1.36 points, to 0.1825, at 2.83\,ms per request.
 \end{abstract}
 
@@ -96,10 +98,11 @@ what makes it cheap.
 \item \textbf{Exact objective fusion} (\S\ref{sec:fusion}). Any additive item term keeps the certificate,
   including priors, bids, eligibility filters and collaborative scores. Beam-then-rerank cannot change which
   items are retrieved; fused certified search can.
-\item \textbf{Evaluation} (\S\ref{sec:experiments}). On the same H100 and prompts, certified decoding is
-  4.5$\times$ faster per request than FlashRec~\cite{flashrec} and serves 5.4--6.4$\times$ more users per
-  second. Both engines run beam search at the same throughput, so the gain comes from the decoder. Results
-  hold on two datasets and on 3B and 7B backbones.
+\item \textbf{Evaluation} (\S\ref{sec:experiments}). A controlled comparison (same engine, objective and
+  precision) attributes the speed. Certification alone is 1.2$\times$ faster than beam-50, and with late entry
+  2.0$\times$ faster with 2.7$\times$ the throughput, at equal HR@10. Against FlashRec~\cite{flashrec} on the
+  same H100, our engine adds another 2.2$\times$, for 4.5$\times$ per request in total. Results hold on two
+  datasets and on 3B and 7B backbones.
 \end{itemize}
 
 \begin{figure}[t]
@@ -314,57 +317,73 @@ decode-attention kernel is a private submodule. (iv) Beam-then-rerank with the s
 \label{sec:exp-speed}
 
 \begin{table}[t]
-\caption{Same H100 allocation, Office, batch 1. Latency is the median over $2\times500$ requests; throughput
-is users/s at the largest batch each decoder fits (B = 128; 64 for our beam-50). HR@10 is over all 4,866 test
-users; for the two certified rows it comes from runs of the same configuration in other allocations.}
+\caption{Controlled comparison: one engine, FP16, H100, Office, batch 1; one allocation per objective. Latency is
+the median over $2\times500$ requests; users/s at $B=64$; HR@10 over all 4,866 test users. ``top-1'': share of
+users whose top item equals that of the certified full-depth decoder under the same objective (exact).}
 \label{tab:speed}
 \vspace{-2mm}
-\small
-\setlength{\tabcolsep}{3.2pt}
-\begin{tabular*}{\linewidth}{@{\extracolsep{\fill}}lrrrr@{}}
+\footnotesize
+\setlength{\tabcolsep}{2.6pt}
+\begin{tabular*}{\linewidth}{@{\extracolsep{\fill}}lrrrrr@{}}
 \toprule
-decoder & ms & p95 & users/s & HR@10 \\
+decoder & ms & p95 & users/s & HR@10 & top-1 \\
 \midrule
-FlashRec, BF16                         & 11.48 & 11.64 & --    & 0.1644 \\
-FlashRec, FP16                         & 11.71 & 12.02 & 500   & 0.1644 \\
-FlashRec, FP8 (default)                & 14.22 & 14.45 & 489   & 0.1554 \\
+\multicolumn{6}{@{}l}{\emph{cbtrie objective (ours)}} \\
+beam-50                               & 5.13 & 5.22 & 970   & 0.1681 & 99.9\% \\
+certified, full depth                 & 4.21 & 4.34 & 1,301 & 0.1677 & exact \\
+\quad + third-code bridge (layer 22)  & 3.06 & 3.31 & --    & 0.1706 & 95.8\% \\
+\quad + first-level bridge (18; 26)   & \textbf{2.61} & 2.71 & \textbf{2,624} & 0.1687 & 79.5\% \\
 \midrule
-ours, beam-50, MiniOneRec objective    & 8.36  & 9.04  & --    & 0.1587 \\
-ours, beam-50, FlashRec objective      & 5.15  & 5.30  & 489   & 0.1679 \\
-ours, certified                        & \textbf{2.57} & 2.65 & 2,681 & 0.1689 \\
-\quad + dynamic FP8                    & --    & --    & \textbf{3,148} & -- \\
-ours, certified + SASRec term          & 2.83  & 2.92  & --    & \textbf{0.1825} \\
+\multicolumn{6}{@{}l}{\emph{codebook objective (FlashRec's)}} \\
+beam-50                               & 5.21 & 5.27 & 970   & 0.1681 & 99.9\% \\
+certified, full depth ($M=64$)        & 4.45 & 4.61 & 958   & 0.1681 & exact \\
+\quad + third-code bridge (layer 22)  & 3.40 & 3.51 & --    & 0.1697 & 92.7\% \\
+\midrule
+\multicolumn{6}{@{}l}{\emph{full vocabulary + forced suffix (MiniOneRec's)}} \\
+beam-50                               & 8.34 & 9.06 & --    & 0.1587 & -- \\
 \bottomrule
 \end{tabular*}
 \vspace{-3mm}
 \end{table}
 
-Table~\ref{tab:speed} and Fig.~\ref{fig:headline} compare all decoders in one allocation. Certified decoding
-takes 2.57\,ms, 4.5$\times$ less than FlashRec and 3.3$\times$ less than MiniOneRec's beam search in our own
-engine. The gap does not depend on where the timer stops. FlashRec's GPU kernels alone take 6.78\,ms per request
-(1,878 kernels, profiled over 50 requests), more than our whole end-to-end time; the rest of its 11.7\,ms is
-host-side scheduling. FP8, FlashRec's default, is slower than BF16 at batch 1 on this 1.5B model and costs
-$-0.90\,[-1.32,-0.47]$ HR@10.
-
-\emph{The engines are comparable; the decoders are not.} With beam-50, our engine and FlashRec serve the same
-number of users per second (457--489 vs.\ 408--500 across batch sizes 16--128; Fig.~\ref{fig:throughput}).
-Certified decoding serves 2,310--2,681 users/s in FP16 and up to 3,148 with dynamic per-token FP8, which is
-quality-neutral. That is 5.4--6.4$\times$ FlashRec. It simply processes fewer rows per user: 88 tree nodes and
-16 prefix rows, against 88 + 150 rows for beam-50 in the same engine.
-
-Long candidate lists stay cheap. A certified top-500 takes 2.92\,ms, against 18.1\,ms for MiniOneRec's beam-500,
-and serves 450 vs.\ 71 users/s. The second forward grows with the number of multi-child prefixes the certificate
-needs (about $0.4K$), not with the beam width.
+\paragraph{Where the speed comes from.} Table~\ref{tab:speed} changes one thing at a time. Under the cbtrie
+objective, certification alone is 1.22$\times$ faster than beam-50 at batch 1 and gives 1.34$\times$ its
+throughput. With the first trie level fused into Forward~1, beam-50 also needs only two forwards. It expands the
+50 best prefixes, while the certificate proves that 16 suffice. Under this objective beam-50 is already almost
+exact: its top-10 overlaps the exact one by 99.6\%. The larger lever is late entry. The third-code bridge brings
+the decoder to 3.06\,ms, and adding the first-level bridge brings it to 2.61\,ms: 2.0$\times$ faster than beam-50 at
+equal HR@10, with 2.7$\times$ its throughput. Late entry is not tied to certification and would shorten beam's
+second step as well; Appendix~\ref{app:extra} measures the bridged decoder at beam's width. The bridges trade
+fidelity for speed, as \S\ref{sec:exp-late} quantifies. Without trie normalization, certification buys little:
+under FlashRec's codebook objective it needs $M=64$, is 1.17$\times$ faster than beam with equal throughput, and
+certifies 98.2\% of top-10s. Under MiniOneRec's objective, beam search costs 8.34\,ms, because the forced suffix
+adds a forward.
 
 \begin{figure}[t]
 \centering
 \includegraphics[width=0.92\linewidth]{flashrec_throughput.pdf}
 \vspace{-3mm}
-\caption{Throughput on one H100. With beam-50, both engines serve the same number of users; certified decoding
-serves 5.4--6.4$\times$ more.}
+\caption{Throughput on one H100. Under FlashRec's own objective our engine's beam-50 serves about 2$\times$
+FlashRec; the certified decoder with bridges serves 2.7$\times$ our beam (FlashRec and certified: one allocation;
+our beam-50: the allocation of Table~\ref{tab:speed}).}
 \label{fig:throughput}
 \vspace{-3mm}
 \end{figure}
+
+\paragraph{Against FlashRec.} On the same H100 and prompts, FlashRec takes 11.48\,ms (BF16) or 11.71\,ms (FP16)
+per request and serves 408--500 users/s. Its default FP8 is slower (14.22\,ms) and costs $-0.90\,[-1.32,-0.47]$
+HR@10 on this 1.5B model. In that allocation the deployed certified decoder takes 2.57\,ms (2.83\,ms with the
+SASRec term) and serves 2,310--2,681 users/s (3,148 with dynamic FP8), so it is 4.5$\times$ faster per request
+with 5.4--6.4$\times$ the throughput (Fig.~\ref{fig:headline}). That gap splits into two factors. Our engine runs
+beam-50 under FlashRec's own objective in 5.2\,ms at 970 users/s, about 2.2$\times$ FlashRec. The decoder adds
+about 2$\times$ on top. The engine factor does not depend on where the timer stops: FlashRec's GPU kernels alone
+take 6.78\,ms per request (1,878 kernels, profiled over 50 requests), and the rest of its 11.7\,ms is host-side
+scheduling.
+
+\paragraph{Long candidate lists.} A certified top-500 takes 2.92\,ms with bridges. Beam-500 takes 7.2\,ms under
+trie scoring and 18.1\,ms under MiniOneRec's objective, and serves 253 and 71 users/s against 450. The second
+forward grows with the number of multi-child prefixes the certificate needs (about $0.4K$), not with the beam
+width.
 
 \subsection{RQ2: Quality and exact fusion}
 \label{sec:exp-quality}
@@ -626,10 +645,12 @@ tokens; serving engines target 1k--5k) or wide beams ($\ge256$), where shared-K/
 
 \section{Conclusion}
 For LLM generative recommenders with catalog-sized tries, beam search is optional. Two fixed-shape forwards
-return the exact top-$K$ of the model's objective with a per-request certificate, and late entry makes the
-second forward nearly free. Exactness also makes fusion with item-level terms exact. The result is 2.6\,ms per
-request on an H100, 4.5$\times$ faster than a public SID serving engine, and 136$\times$ faster than Hugging Face
-decoding on an A6000, with better quality than the model's own beam search.
+return the exact top-$K$ of the model's objective with a per-request certificate, at slightly lower cost than
+beam-50 in the same engine. Late entry, which predicts a child row's state from its parent's, makes the second
+forward nearly free, at the price of a learned approximation whose ranking differs from the full model's.
+Exactness pays off where beam search's approximation shows: fused objectives, filters and long candidate lists.
+The deployed decoder takes 2.6\,ms per request on an H100: 2.0$\times$ faster than beam-50 in our engine and
+4.5$\times$ faster than a public SID serving engine.
 
 \bibliographystyle{ACM-Reference-Format}
 \bibliography{refs}
