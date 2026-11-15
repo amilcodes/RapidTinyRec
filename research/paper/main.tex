@@ -353,8 +353,11 @@ throughput. With the first trie level fused into Forward~1, beam-50 also needs o
 exact: its top-10 overlaps the exact one by 99.6\%. The larger lever is late entry. The third-code bridge brings
 the decoder to 3.06\,ms, and adding the first-level bridge brings it to 2.61\,ms: 2.0$\times$ faster than beam-50 at
 equal HR@10, with 2.7$\times$ its throughput. Late entry is not tied to certification and would shorten beam's
-second step as well; Appendix~\ref{app:extra} measures the bridged decoder at beam's width. The bridges trade
-fidelity for speed, as \S\ref{sec:exp-late} quantifies. Without trie normalization, certification buys little:
+second step as well. With bridges, expanding beam's 50 prefixes costs the same as 16 (2.61 vs.\ 2.60\,ms; at
+full depth 4.64 vs.\ 4.21\,ms). Expanding all 581 multi-child prefixes scores every item in the catalog exactly
+in 3.24\,ms, still faster than beam-50 at full depth (6.33\,ms without bridges). Once the second forward is two
+layers deep, the certificate's value is the guarantee, not the rows it saves. The bridges trade fidelity for
+speed, as \S\ref{sec:exp-late} quantifies. Without trie normalization, certification buys little:
 under FlashRec's codebook objective it needs $M=64$, is 1.17$\times$ faster than beam with equal throughput, and
 certifies 98.2\% of top-10s. Under MiniOneRec's objective, beam search costs 8.34\,ms, because the forced suffix
 adds a forward.
@@ -379,6 +382,15 @@ beam-50 under FlashRec's own objective in 5.2\,ms at 970 users/s, about 2.2$\tim
 about 2$\times$ on top. The engine factor does not depend on where the timer stops: FlashRec's GPU kernels alone
 take 6.78\,ms per request (1,878 kernels, profiled over 50 requests), and the rest of its 11.7\,ms is host-side
 scheduling.
+
+\paragraph{Long prompts.} Our prompts are short (76--121 tokens), while serving engines target 1k--5k-token
+contexts. We lengthen every prompt by repeating the user's own history after the shared template (latency only).
+The deployed decoder takes 2.61, 7.59 and 21.4\,ms at about 100, 1,100 and 3,150 tokens; beam-50 under the same
+objective takes 5.10, 11.5 and 37.0\,ms. The prompt forward is shared, but beam's second step attends over the
+whole prompt for 50 rows, where certified decoding uses 16 rows that run only the top two layers. Certified
+decoding therefore stays 1.5--2$\times$ faster, and the absolute gap grows with the prompt. These runs use a
+streaming (online-softmax) version of our Triton attention kernels; the original kernels hold the whole prompt in
+shared memory and stop at a few hundred tokens.
 
 \paragraph{Long candidate lists.} A certified top-500 takes 2.92\,ms with bridges. Beam-500 takes 7.2\,ms under
 trie scoring and 18.1\,ms under MiniOneRec's objective, and serves 253 and 71 users/s against 450. The second
@@ -662,8 +674,9 @@ We evaluate one model family: MiniOneRec on Qwen2/2.5, from 1.5B to 7B. The real
 first levels (thousands of codes) would need a budget on the first-level expansion as well. Late entry adds a
 learned component per model and per entry layer, and the certificate then certifies the bridged objective;
 we report quality against the full-depth model throughout. The industry comparison covers one engine, ported by
-us, with an unexplained numerical drift. Neither comparison covers long contexts (our prompts are 76--121
-tokens; serving engines target 1k--5k) or wide beams ($\ge256$), where shared-K/V designs matter most.
+us, with an unexplained numerical drift, and short prompts. Long prompts (up to 3k tokens) and wider first
+levels (up to 600 codes) are measured only in our engine, with synthetic content; wide beams ($\ge256$), where
+shared-K/V designs matter most, are not covered.
 
 \section{Conclusion}
 For LLM generative recommenders with catalog-sized tries, beam search is optional. Two fixed-shape forwards

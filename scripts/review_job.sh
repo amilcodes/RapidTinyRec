@@ -1,6 +1,6 @@
 #!/bin/bash
 # Experiments asked for by the first external review (paper §4, Appendix). One H100 allocation per section.
-# usage (inside oscar.sh submit): bash scripts/review_job.sh ctlA|ctlB|ver1|ver2|ver3|sclW|sclL|sclF
+# usage (inside oscar.sh submit): bash scripts/review_job.sh ctlA|ctlB|ver1|ver2|ver3|sclW|sclL|sclF|sclF2
 # (H100s are on gpu-debug, < 1 h per job: each objective's comparison stays inside one job.)
 #   ctl  controlled comparison: same engine, FP16, same objective. cbtrie objective: beam-50, certified at full depth,
 #        + standalone third-code bridge (22), + both bridges (18/26, deployed). FlashRec's objective (codebook, no suffix): beam-50, certified (exact3),
@@ -81,5 +81,16 @@ sclF)
     F_1M_M16         "$CERT $CB $BASE --late-entry-a $BR18 --late-entry $BR26 --modes latency --catalog $C1M" \
     F_1M_M16_v       "$CERT $CB $BASE --late-entry-a $BR18 --late-entry $BR26 --modes latency --catalog $C1M --random-bonus 0.5" \
     F_1M_M32         "--engine exacttrie --n-prefix 32 --n-expand 50 --tree-fast --fuse-store --compile-layer $CB $BASE --late-entry-a $BR18 --late-entry $BR26 --modes latency --catalog $C1M"
+  ;;
+sclF2)
+  # fusion on a dense catalog: the prefix bound adds the max item term over many children, so it loosens
+  C1M=$S/runs/scaleA/out/catalogs/prefixes_1000000.txt
+  args=()
+  for M in 64 128 256 512; do
+    args+=(G_1M_v_M$M "--engine exacttrie --n-prefix $M --n-expand 50 --tree-fast --fuse-store --compile-layer $CB $BASE --late-entry-a $BR18 --late-entry $BR26 --modes latency --catalog $C1M --random-bonus 0.5")
+  done
+  bash scripts/run_cfgs.sh "${args[@]}" \
+    G_real_v_M16_s1  "$CERT $CB $BASE --late-entry-a $BR18 --late-entry $BR26 --modes latency --random-bonus 1.0" \
+    G_1M_v_M64_s01   "--engine exacttrie --n-prefix 64 --n-expand 50 --tree-fast --fuse-store --compile-layer $CB $BASE --late-entry-a $BR18 --late-entry $BR26 --modes latency --catalog $C1M --random-bonus 0.1"
   ;;
 esac

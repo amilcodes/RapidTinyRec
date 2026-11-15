@@ -148,7 +148,7 @@ def main():
     # ---------------- scaling
     print('\n== serving boundary (latency only; quality meaningless on synthetic items)')
     out['scale'] = {}
-    for job in ('rv_sclW', 'rv_sclL', 'rv_sclF'):
+    for job in ('rv_sclW', 'rv_sclL2', 'rv_sclF', 'rv_sclF2'):
         d = root / job
         if not d.exists():
             continue
