@@ -494,8 +494,17 @@ $K$ & $|E|$ & $|N|$ & $|E|$ & $|N|$ \\
 \paragraph{The guaranteed set is small.} Table~\ref{tab:bounds} shows that the set known after Forward~1 averages
 at most $1.1K$ prefixes at every $K$ ($0.41K$ at $K=500$) and is 1.2--2.1$\times$ the provable minimum. Our
 $M=16$ configuration covers $|E|$ for 99\% of Office users and still certifies 100\% of them, because $E$
-over-approximates $N$. Against brute-force FP32 scoring of all 3,444 SIDs under trie scoring, the full-depth
-decoder certified the top-10 of all 300 users checked and none was wrong.
+over-approximates $N$.
+
+\paragraph{Verification.} We check the deployed precision and objective (FP16, cbtrie) against scoring every
+item. The reference is the same engine with all 581 multi-child prefixes expanded, so its pool is the whole
+catalog. At full depth the decoder certifies the top-10 of all 4,866 test users. For 117 users the list differs
+from the exhaustive one, but only by FP16 near-ties (largest score gap 0.016); a separate exhaustive scorer
+agrees on all 500 cohort users. With both bridges the decoder also certifies all 4,866 users. It matches its own
+exhaustive scores up to near-ties (116 users, largest gap 0.022) and has no violations. In FP32 the near-ties
+vanish: the certified top-10 equals the exhaustive top-10 for all 500 cohort users under cbtrie, and for all 300
+users checked under trie scoring. The search is exact; what late entry changes is the
+objective (\S\ref{sec:exp-late}).
 
 \paragraph{Catalog size.} The released catalogs are small, but the model's codes address
 $88\times256\times256=5.8$M SIDs. We densify the trie up to 1M SIDs, by adding siblings under real prefixes or
@@ -555,7 +564,11 @@ full-depth HR@10 (Appendix~\ref{app:extra}). The deployed configuration enters t
 statistically unchanged, and it cuts the certified top-10 from 4.35 to 2.75\,ms on an H100. It is not a copy of
 the full-depth ranking: top-1 agrees for 79.8\% of users and the top-10 sets overlap by 77\%. The bridged model is
 a different ranker of equal measured quality, and the certificate is a statement about it, not about the
-full-depth model. Late entry of the \emph{second} code below layer
+full-depth model. The difference lies in the objective, not the search: scored exhaustively, the bridged and
+full-depth models agree on top-1 for 79.6\% of users. Nearly all of it comes from the first-level bridge. With
+only the third-code bridge (layer 22), top-1 agrees for 95.8\% of users and the top-10 overlap is 94\%
+(Table~\ref{tab:speed}), at 3.06 instead of 2.61\,ms. That configuration is the faithful choice when agreement
+with the full model matters. Late entry of the \emph{second} code below layer
 18 is a trade-off (NDCG@10 $-0.25\,[-0.51,-0.01]$). That code decides set membership, so we stop at 18. The best
 entry layer depends on the model: 26 for the released Office model, 22 after one more fine-tuning epoch, and 18
 on Industrial. We choose it on validation.
