@@ -475,8 +475,8 @@ $K$ & $|E|$ & $|N|$ & $|E|$ & $|N|$ \\
 \paragraph{The guaranteed set is small.} Table~\ref{tab:bounds} shows that the set known after Forward~1 averages
 at most $1.1K$ prefixes at every $K$ ($0.41K$ at $K=500$) and is 1.2--2.1$\times$ the provable minimum. Our
 $M=16$ configuration covers $|E|$ for 99\% of Office users and still certifies 100\% of them, because $E$
-over-approximates $N$. Against brute-force FP32 scoring of all 3,444 SIDs, we found no certified request whose
-top-$K$ was wrong.
+over-approximates $N$. Against brute-force FP32 scoring of all 3,444 SIDs under trie scoring, the full-depth
+decoder certified the top-10 of all 300 users checked and none was wrong.
 
 \paragraph{Catalog size.} The released catalogs are small, but the model's codes address
 $88\times256\times256=5.8$M SIDs. We densify the trie up to 1M SIDs, by adding siblings under real prefixes or

@@ -758,3 +758,40 @@ Oscar refused key auth from an off-campus network (no Brown VPN), so this sessio
   checkpoint (`runs/frMHA`, rules out GQA-6), with contiguous Q/K before RoPE (`runs/frDiag3`), lm_head == embed
   exactly; widening its 2×beam candidate cut to 256 changes nothing (bit-identical quality). Patch verified
   (bias loaded, no QK-norm). Paper uses our exact implementation of its objective as its quality.
+
+## Session 6 (2026-11-15): answering the first external review
+
+A reviewer (a friend of the author, on the ACM draft) raised four points; all four hold.
+1. *The headline speedup mixes changes* (scoring rule, bridges, suffix forwards, engine). Planned: a same-engine,
+   same-objective, same-precision comparison in one allocation: beam-50 vs certified (full depth) vs + third-code
+   bridge vs + both bridges, under cbtrie and under FlashRec's codebook objective (`scripts/review_job.sh ctlA/ctlB`).
+   Table 2 mixed bridge configurations (0.1714 = bridges 18/22, 0.1689 = 18/26); now one configuration (18/26)
+   throughout, where fusion adds +1.36 HR@10 [+0.82, +1.85] (was reported as +1.11 against the 18/22 baseline).
+2. *"Without loss" overstated.* Measured from existing lists (all 4,866 Office users, vs full-depth cbtrie M=16):
+
+   | bridges | HR@10 | top-1 agrees | top-10 overlap |
+   |---|---:|---:|---:|
+   | third code only, entry 22 (`bridge_e22_w`) | 0.1712 | 95.6% | 94.0% |
+   | first level 18 + third 22 (cascade) | 0.1712 | 81.6% | 78.6% |
+   | first level 18 + third 24 | 0.1695 | 81.1% | 77.9% |
+   | first level 18 + third 26 (deployed) | 0.1689 | 79.8% | 77.1% |
+
+   Aggregate quality is unchanged, but the **first-level bridge** makes the bridged model a different ranker; the
+   third-code bridge alone is nearly faithful. The first-level bridge's held-out KL was still falling at epoch 6 on
+   4,600 validation prompts (0.038), so we retrain it label-free on 38k train-split prompts
+   (`scripts/bridge_data_job.sh`). The exhaustive check behind "0 violations" covered the full-depth decoder only;
+   `review_job.sh ver1-3` verifies the bridged decoder against its own objective scored for every item (same engine
+   with all 581 multi-child prefixes expanded).
+3. *Prop. 3's width bound is false* (counterexample: K = 2, two winners under one prefix). Removed from the proof;
+   E ⊇ N and the certificate are unaffected.
+4. *Serving boundary.* `review_job.sh sclW/sclL/sclF`: wider first levels (88..600 first codes, borrowing the
+   512 deeper code tokens, latency only), +1k/+3k prompt tokens, fusion on 1M SIDs with the scatter-max inside the
+   timed graph, and p99 with a fallback rerun at M = 32.
+
+Bug found while setting this up: under `--norm cbtrie`, `ExactEngine.exhaustive` gave the third code
+lp(c|ab) = 0 (a single-token log-softmax), and `--check-exhaustive` built its reference without the engine's level
+weights. Neither affected reported results: every exhaustive check on record is FP32 with unit weights under trie
+or full scoring (`certT/V16`: exacttrie, trie, M=16, 300 users, 300 certified, 0 violations; `certV`: exact3 trie
+300/300 and full-vocabulary no-suffix 190/200, 0 violations). BF16 runs of the single-bound engine did violate
+(`sweepB`: 3 and 8 of 100 users), so precision matters for the certificate. The paper's "no violations" therefore
+covers FP32, full depth, trie scoring only; the deployed decoder (FP16, cbtrie, bridged) is checked in `ver1-3`.
