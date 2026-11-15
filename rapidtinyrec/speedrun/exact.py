@@ -178,7 +178,7 @@ class ExactEngine(ScoreMixin):
                 x = W.embed[sid[..., 1]][:, :, None]
                 h = fwd.step(x, (L0 + 1).expand(1, n, 1), bufs['kc'], bufs['vc'], pmask, kp3, vp3, 1, lengths=lengths)
                 pr = self.sid_pair[idx][None]
-                if self.norm == 'trie':
+                if self.norm in ('trie', 'cbtrie'):   # cbtrie: trie-normalized third code
                     lcs = self._lp(h[:, :, 0], 2, cat.t2[pr], cat.v2[pr])
                     lc = lcs.gather(-1, self.sid_col[idx][None, :, None])[..., 0]
                 else:

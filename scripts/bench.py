@@ -88,6 +88,10 @@ def main():
     ap.add_argument('--fallback-k', type=int, default=10, help='inflight: rerun users whose top-K is not certified')
     ap.add_argument('--profile', action='store_true', help='eager kernel-time breakdown for a few users')
     ap.add_argument('--check-exhaustive', type=int, default=0, help='compare first K cohort users against exhaustive exact scoring')
+    ap.add_argument('--extra-context', type=int, default=0,
+                    help='latency scaling: insert T tokens of the user\'s own history after the shared template (quality meaningless)')
+    ap.add_argument('--random-bonus', type=float, default=0.0,
+                    help='timing of fusion on synthetic catalogs: a random per-item term (sigma) copied per request like --bonus-file')
     a = ap.parse_args()
     out = Path(a.out); out.mkdir(parents=True, exist_ok=True)
     torch.backends.cuda.matmul.allow_tf32 = a.tf32
@@ -103,6 +107,13 @@ def main():
     rows = data.test_rows(a.release)
     t0 = time.time()
     all_ids = data.prompts(a.release, tok, rows)
+    if a.extra_context:
+        k_ = len(all_ids[0])
+        for ids_ in all_ids:
+            k_ = min(k_, next((j for j, (x, y) in enumerate(zip(all_ids[0], ids_)) if x != y), min(len(all_ids[0]), len(ids_))))
+        body_ = lambda ids_: ids_[k_:-8] or ids_[k_:]
+        all_ids = [ids_[:k_] + (body_(ids_) * (a.extra_context // len(body_(ids_)) + 1))[:a.extra_context] + ids_[k_:]
+                   for ids_ in all_ids]
     targets = [data.sid_tokens(tok, r['item_sid']) for r in rows]
     cohort = data.cohort500(rows)
     cat = SidCatalog(tok, a.catalog or Path(a.release) / data.CATALOG, dev)
@@ -229,6 +240,12 @@ def main():
         assert bonus.shape == (len(rows), eng.S)
         eng.enable_dynamic_bonus()
         meta['bonus'] = {'file': a.bonus_file, 'beta': a.bonus_beta}
+    if a.random_bonus:
+        assert a.engine == 'exacttrie' and not a.bonus_file and not a.collab
+        g_ = torch.Generator().manual_seed(0)
+        bonus = (a.random_bonus * torch.randn(1, eng.S, generator=g_)).expand(len(rows), eng.S)
+        eng.enable_dynamic_bonus()
+        meta['bonus'] = {'random_sigma': a.random_bonus, 'S': eng.S}
     if a.collab:
         # per-request input is the user's history (item ids); SASRec runs inside the graph on a side stream
         assert a.engine == 'exacttrie'
@@ -343,6 +360,7 @@ def main():
                     ranked = [tuple(x) for x in sids[0].tolist()]
                     per_user.append(data.rank_metrics(ranked, targets[i]))
                     recs.append({'row': i, 'L': len(all_ids[i]), 'ms': 1e3 * (e1 - st), 'sids': [list(x) for x in ranked],
+                                 'cert': recs_cert[-1] if 'certified' in o else None,
                                  'scores': sc[0].tolist(), 'trans': tr[0].tolist() if tr is not None else None})
         lat = {'device_only': dist(times), 'with_d2h': dist(times_d2h), 'metrics_500': agg_metrics(per_user),
                'by_length': {}}
@@ -373,6 +391,7 @@ def main():
         if a.check_exhaustive:
             ref_eng = ExactEngine(W, cat, n_expand=64, suffix_mode=a.suffix if a.suffix != 'separate' else 'fused', norm=a.norm)
             ref_eng.fwd.attn = eng.fwd.attn
+            ref_eng.level_w, ref_eng.suffix_w = eng.level_w, eng.suffix_w   # same objective as the engine under test
             st = {'n': 0, 'top1_match': 0, 'cert_violations': 0, 'cert_top10_users': 0}
             for k in (1, 5, 10, 20, 50):
                 st[f'search_recall@{k}'] = 0.0
@@ -419,6 +438,9 @@ def main():
         order = sorted(range(len(rows)), key=lambda i: len(all_ids[i]))
         per_user = [None] * len(rows)
         tops = [None] * len(rows)
+        tops50 = [None] * len(rows)
+        scores10 = [None] * len(rows)
+        cert_row = [None] * len(rows)
         certs = []
         s = time.time()
         for k in range(0, len(order), B):
@@ -439,12 +461,18 @@ def main():
                     sel_ = torch.cat([bad, torch.zeros(B - len(chunk), dtype=torch.bool, device=bad.device)])
                     o = {k_: torch.where(sel_.view(-1, *([1] * (o1[k_].dim() - 1))), o2[k_], o1[k_]) for k_ in ('sids', 'scores', 'certified')}
             sids = o['sids'].cpu().tolist()
+            scs = o['scores'].float().cpu().tolist()
             if 'certified' in o:
-                certs.extend(o['certified'].cpu().tolist()[:len(chunk)])
+                cl_ = o['certified'].cpu().tolist()[:len(chunk)]
+                certs.extend(cl_)
+                for j, i in enumerate(chunk):
+                    cert_row[i] = cl_[j]
             for j, i in enumerate(chunk):
                 ranked = [tuple(x) for x in sids[j]]
                 per_user[i] = data.rank_metrics(ranked, targets[i])
                 tops[i] = ranked[:10]
+                tops50[i] = ranked[:50]
+                scores10[i] = scs[j][:50]
         torch.cuda.synchronize()
         q = {'n': len(rows), 'metrics': agg_metrics(per_user), 'wall_s': time.time() - s}
         if certs:
@@ -452,6 +480,9 @@ def main():
             q['certified_rate'] = {f'top{k}': statistics.mean(c[j] for c in certs) for j, k in enumerate(ks)}
         results['quality'] = q
         json.dump({'per_user': per_user, 'top10': tops}, open(out / 'quality_users.json', 'w'))
+        # ranked lists (top 50), their scores and per-K certificates, for offline agreement / verification analyses
+        json.dump({'top50': tops50, 'scores50': scores10, 'cert': cert_row,
+                   'ks': [k for k in eng.ks if k <= eng.N] if certs else None}, open(out / 'quality_lists.json', 'w'))
         print(json.dumps({'stage': 'quality', **q}), flush=True)
     # ---------------- throughput (batched users, sorted-by-length batches)
     if 'throughput' in modes:

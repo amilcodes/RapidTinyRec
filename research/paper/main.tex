@@ -42,11 +42,11 @@ best-bounded prefixes exactly, and an on-device test certifies that the returned
 of the model's objective. Under trie normalization the bounds are two-sided, so the prefixes that guarantee
 the certificate are known after the first forward. We also find that deeper SID codes do not need the lower
 layers: prefix rows can enter the second forward at layer 26 of 28 through a small, label-free bridge from
-their parent's state, without loss. Exact search also makes \emph{objective fusion} exact: an additive
+their parent's state, with HR@10 and NDCG@10 statistically unchanged. Exact search also makes \emph{objective fusion} exact: an additive
 per-item term, such as a collaborative model's score, keeps the certificate. On MiniOneRec (Qwen2-1.5B), a
 certified top-10 takes 2.57\,ms on an H100. On the same GPU and prompts, FlashRec, a public SID serving
 engine, takes 11.5\,ms and serves 5.4--6.4$\times$ fewer users per second. Fusing a 1-minute SASRec model into
-the certified search raises HR@10 by 1.11 points, to 0.1825, at 2.83\,ms per request.
+the certified search raises HR@10 by 1.36 points, to 0.1825, at 2.83\,ms per request.
 \end{abstract}
 
 \keywords{generative recommendation, semantic IDs, constrained decoding, exact search, LLM inference}
@@ -90,8 +90,9 @@ what makes it cheap.
   of the instance-optimal set. On synthetic catalogs of up to 1M SIDs, the required expansion stays flat.
 \item \textbf{Late entry} (\S\ref{sec:late}). A child row's state at layer $e$ is predicted from its parent's
   state at the same depth, using a small bridge distilled from the frozen model without labels. The third code
-  then needs only the top 2 of 28 layers, and the first-level rows only the top 10, with no measurable quality
-  loss.
+  then needs only the top 2 of 28 layers, and the first-level rows only the top 10, with HR@10 and NDCG@10
+  statistically unchanged. The bridge is an approximation: the ranking it returns differs from the full-depth
+  model's for many users, so the certificate covers the bridged objective.
 \item \textbf{Exact objective fusion} (\S\ref{sec:fusion}). Any additive item term keeps the certificate,
   including priors, bids, eligibility filters and collaborative scores. Beam-then-rerank cannot change which
   items are retrieved; fused certified search can.
@@ -126,13 +127,14 @@ prefix. The test splits contain 4,866 (Office) and 4,533 (Industrial) users.
 
 \paragraph{Scores.} For a prompt $x$ and item $i=\langle a,b,c\rangle$ we write
 \begin{equation}
-s(i) = \lp(a) + w_b\,\lp(b\mid a) + w_c\,\lp(c\mid a,b) + w_s\,\lp(\nl,\mathrm{EOS}\mid a,b,c),
+s(i) = \lp(a) + w_b\,\lp(b\mid a) + w_c\,\lp(c\mid a,b) + w_s\,\lp(\sigma\mid a,b,c),
 \label{eq:score}
 \end{equation}
 where each $\lp$ is a log-probability under one of three \emph{normalizations}. \emph{Full}: log-softmax over the
 whole vocabulary, which is MiniOneRec's training objective. \emph{Codebook}: log-softmax over the 256 codes of
 that level, as in FlashRec. \emph{Trie}: log-softmax over the valid children of the current prefix. MiniOneRec
-decodes with beam width 50, full normalization, $w=(1,1,1)$, and scores a forced newline and EOS after $c$. Our
+decodes with beam width 50, full normalization and $w=(1,1,1)$; its prompt format forces a newline and EOS after
+$c$, and $\lp(\sigma\mid a,b,c)$ is the log-probability of that forced suffix $\sigma$. Our
 default, \emph{cbtrie}, uses codebook normalization for $a$ and $b$, trie normalization for $c$, and
 $w=(1,0.75,0)$. These weights were chosen on the validation split. Every term in Eq.~\ref{eq:score} is $\le 0$,
 the property all our bounds rely on.
@@ -192,7 +194,7 @@ $a\in A$ to the prompt as a \emph{tree node}: node $a$ attends to the prompt and
 first SID token would occupy. One forward thus yields $\lp(a)$ for all $a$ and $\lp(b\mid a)$ for every valid
 $(a,b)$, which is $\U$ for the whole trie (Fig.~\ref{fig:overview}). Forward~2 feeds the token $b$ for the $M$
 prefixes with the largest $\U$, reusing the K/V of their parent nodes, and yields exact scores for all their
-children. (If the forced suffix is scored, a third forward over the $N$ best items adds $\lp(\nl,\mathrm{EOS})$;
+children. (If the forced suffix is scored, a third forward over the $N$ best items adds $\lp(\sigma)$;
 our default sets $w_s=0$.) Algorithm~\ref{alg:certified} returns the pool sorted by exact score with a per-$K$
 certificate.
 
@@ -209,7 +211,7 @@ algorithm~\cite{fagin2003}. What makes it cheap here is that all bounds come fro
 \label{alg:certified}
 \small
 \begin{algorithmic}[1]
-\Require prompt $x$; trie with first codes $A$; budget $M$
+\Require prompt $x$; trie with first codes $A$; budget $M$; trie-normalized $c$ and $w_s=0$ (line 5)
 \State $\lp(a),\ \lp(b\mid a)\ \forall (a,b)$ $\gets$ \textsc{Forward}$\big([x;\,A \text{ as tree nodes}]\big)$
 \State $\U(a,b) \gets \lp(a) + w_b\,\lp(b\mid a)$ \Comment{$\ge$ every item under $(a,b)$}
 \State $P \gets$ the $M$ multi-child prefixes with the largest $\U$
@@ -368,9 +370,9 @@ serves 5.4--6.4$\times$ more.}
 \label{sec:exp-quality}
 
 \begin{table}[t]
-\caption{Quality on all test users (Office 4,866; Industrial 4,533). Fused vs.\ certified: HR@10
-$+1.11\,[+0.62,+1.60]$ (Office), $+0.51\,[+0.07,+0.95]$ (Industrial). Fused vs.\ rerank: HR@10
-$+0.25\,[+0.08,+0.43]$. Paired differences in points, 95\% bootstrap intervals.}
+\caption{Quality on all test users (Office 4,866; Industrial 4,533), deployed configuration (bridges at layers
+18 and 26). Fused vs.\ certified: HR@10 $+1.36\,[+0.82,+1.85]$, NDCG@10 $+0.85\,[+0.57,+1.12]$ (Office);
+HR@10 $+0.51\,[+0.07,+0.95]$ (Industrial). Paired differences in points, 95\% bootstrap intervals.}
 \label{tab:quality}
 \vspace{-2mm}
 \footnotesize
@@ -381,9 +383,9 @@ decoder & HR@1 & HR@10 & NDCG@10 & HR@50 \\
 \midrule
 \multicolumn{5}{@{}l}{\emph{Office}} \\
 MiniOneRec beam-50 (FP32)     & 0.0947 & 0.1589 & 0.1249 & 0.2370 \\
-certified (cbtrie)            & 0.0993 & 0.1714 & 0.1319 & 0.2513 \\
-certified, then SASRec rerank & 0.1021 & 0.1800 & 0.1377 & 0.2513 \\
-certified + SASRec (fused)    & \textbf{0.1025} & \textbf{0.1825} & \textbf{0.1391} & \textbf{0.2721} \\
+certified, full depth         & 0.0988 & 0.1677 & 0.1304 & 0.2446 \\
+certified, bridged            & 0.0976 & 0.1689 & 0.1304 & 0.2489 \\
+certified + SASRec (fused)    & \textbf{0.1025} & \textbf{0.1825} & \textbf{0.1389} & \textbf{0.2715} \\
 \midrule
 \multicolumn{5}{@{}l}{\emph{Industrial}} \\
 MiniOneRec beam-50            & -- & 0.1582 & -- & -- \\
@@ -395,8 +397,8 @@ certified + SASRec (fused)    & -- & \textbf{0.1668} & -- & -- \\
 \end{table}
 
 \paragraph{The decoder improves quality before fusion.} On Office, certified decoding with the cbtrie objective
-reaches HR@10 0.1714, against 0.1589 for MiniOneRec's FP32 beam decode of the same checkpoint
-(Table~\ref{tab:quality}). This gain comes from the scoring rule, not from exactness. Restricted
+reaches HR@10 0.1677 at full depth and 0.1689 with bridges, against 0.1589 for MiniOneRec's FP32 beam decode of
+the same checkpoint (Table~\ref{tab:quality}). This gain comes from the scoring rule, not from exactness. Restricted
 normalizations, which production engines adopt for speed, score better than the training objective even under
 beam-50 (HR@10 0.1667 codebook, 0.1648 trie, vs.\ 0.1589 full), and the validation-tuned weight
 $w_c=0.75$ discounts the third code, which carries a catalog-structure penalty unrelated to the user
@@ -404,10 +406,11 @@ $w_c=0.75$ discounts the third code, which carries a catalog-structure penalty u
 and certified decoding is at least as good as beam (Table~\ref{tab:quality}).
 
 \paragraph{Fusion changes what is retrieved.} Adding $\beta\log q_{\text{SASRec}}$ inside the certified search
-raises Office HR@10 by $+1.11$ points and beats reranking the same list by $+0.25$. That is $+2.36$ over MiniOneRec's own decode, with no LLM training, and
+raises Office HR@10 by $+1.36$ points. That is $+2.36$ over MiniOneRec's own decode, with no LLM training, and
 on par with the best \emph{trained} result we know of on this split (0.1834~\cite{ax2608.20611}). Reranking the
-LLM's top-50 with the same term recovers most of the HR@10 gain. It cannot change the candidate set, so its HR@50
-does not move (0.2513), while fusion adds 2.08 points. At $K=500$ fusion lifts HR@500 from 0.504 to 0.543 on
+LLM's top-50 with the same term recovers most of the HR@10 gain (with bridges at 18/22: 0.1800 vs.\ 0.1825 fused,
+$\Delta=+0.25\,[+0.08,+0.43]$). It cannot change the candidate set, so its HR@50 does not move, while fusion adds
+2.26 points. At $K=500$ fusion lifts HR@500 from 0.504 to 0.543 on
 Office and from 0.523 to 0.544 on Industrial. Certification is unaffected: 100\% of Office users certify the
 fused top-10. The fused top-500 needs $M=256$ on Office; on Industrial, $M=512$ (4.23\,ms) certifies all users.
 
@@ -529,8 +532,11 @@ the users. Late entry with a distilled bridge is statistically indistinguishable
 NDCG@10 on both datasets. The prefix-weighted KL loss matters: with a uniform loss, HR@1 drops by 0.35 points on
 Industrial. With 2 to 14 remaining layers, the distilled bridge stays within $-0.09$ to $+0.14$ points of
 full-depth HR@10 (Appendix~\ref{app:extra}). The deployed configuration enters the first code at layer 18 and the third at layer
-26. It is lossless against the full-depth model (HR@10 $+0.12\,[-0.27,+0.51]$, NDCG@10 $0.00\,[-0.20,+0.20]$)
-and cuts the certified top-10 from 4.35 to 2.75\,ms on an H100. Late entry of the \emph{second} code below layer
+26. Against the full-depth model its HR@10 ($+0.12\,[-0.27,+0.51]$) and NDCG@10 ($0.00\,[-0.20,+0.20]$) are
+statistically unchanged, and it cuts the certified top-10 from 4.35 to 2.75\,ms on an H100. It is not a copy of
+the full-depth ranking: top-1 agrees for 79.8\% of users and the top-10 sets overlap by 77\%. The bridged model is
+a different ranker of equal measured quality, and the certificate is a statement about it, not about the
+full-depth model. Late entry of the \emph{second} code below layer
 18 is a trade-off (NDCG@10 $-0.25\,[-0.51,-0.01]$). That code decides set membership, so we stop at 18. The best
 entry layer depends on the model: 26 for the released Office model, 22 after one more fine-tuning epoch, and 18
 on Industrial. We choose it on validation.
@@ -550,7 +556,7 @@ term and its gain in points over the same model without it.}
 \toprule
 backbone & beam-50 & certified & + bridge & + SASRec & HR@10 \\
 \midrule
-1.5B release   & 8.43  & 4.35  & 2.75 & 2.89 & 0.1825 (+1.11) \\
+1.5B release   & 8.43  & 4.35  & 2.75 & 2.89 & 0.1825 (+1.36) \\
 3B (36 layers) & 13.01 & 6.91  & 4.70 & 5.03 & 0.1716 (+2.22) \\
 7B             & 21.07 & 11.74 & 7.78 & 8.00 & 0.1683 (+2.38) \\
 1.5B SFT       & 5.81  & 4.67  & --   & --   & -- \\
@@ -652,7 +658,10 @@ $\lp(c\mid a,b)\ge-\log n_p$, so some item under $p$ scores at least $L(p)$. Sin
 The values defining $\tau_L$ therefore each certify a distinct item with score $\ge\tau_L$, so $\tau^*\ge\tau_L$
 and $E\supseteq N$. After expanding $E$, the pool contains those $K$ items, so $s_{(K)}\ge\tau_L$, and every
 unexpanded prefix has $\U<\tau_L\le s_{(K)}$. Proposition~\ref{prop:sound} applies. $E\setminus N$ contains only
-prefixes with $\tau_L\le\U<\tau^*$, a band of width at most $w_c\log n_{\max}$.
+prefixes with $\tau_L\le\U<\tau^*$. The width of that band is not bounded by $w_c\log n_{\max}$: the $K$ items
+that define $\tau_L$ come from distinct prefixes, while the true top $K$ may share one, so $\tau^*-\tau_L$ can
+exceed it (two prefixes with mass 0.9 and 0.1, two equiprobable children each and $K=2$ give $\log 9$).
+Table~\ref{tab:bounds} measures $|E|$ against $|N|$ directly.
 
 \section{Engine and latency ladder}
 \label{app:engine}
