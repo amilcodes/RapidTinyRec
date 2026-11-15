@@ -795,3 +795,30 @@ or full scoring (`certT/V16`: exacttrie, trie, M=16, 300 users, 300 certified, 0
 300/300 and full-vocabulary no-suffix 190/200, 0 violations). BF16 runs of the single-bound engine did violate
 (`sweepB`: 3 and 8 of 100 users), so precision matters for the certificate. The paper's "no violations" therefore
 covers FP32, full depth, trie scoring only; the deployed decoder (FP16, cbtrie, bridged) is checked in `ver1-3`.
+
+### Session 6 results (2026-11-15; runs rv_ctlA/B, rv_ver1-3, rv_sclW, rv_sclL2, rv_sclF/F2, brT_b2, brT_ce)
+
+- **Controlled comparison (H100, FP16, one allocation per objective).** cbtrie: beam-50 5.13 ms / 970 users/s
+  (B = 64) / HR@10 0.1681; certified full depth 4.21 / 1,301 / 0.1677 (top-10 overlap with beam 99.6%); + third-code
+  bridge (22) 3.06 / – / 0.1706; + first-level bridge (18/26) 2.61 / 2,624 / 0.1687. Codebook (FlashRec's): beam
+  5.21 / 970 / 0.1681; certified (M = 64) 4.45 / 958 / 0.1681 (98.2% certified); + bridge 3.40. MiniOneRec beam 8.34.
+  **The paper's old claim "both engines run beam at the same throughput" was wrong**: it compared FlashRec's codebook
+  beam with our full-vocabulary beam (457–489 users/s). Our codebook beam serves 905–970 users/s, ~2.2× FlashRec.
+- **Late entry is the speed lever.** With bridges, M = 50 costs the same as M = 16 (2.61 vs 2.60 ms; full depth 4.64
+  vs 4.21); all 581 multi-child prefixes (exhaustive scoring) 3.24 ms bridged, 6.33 ms full depth.
+- **Verification (FP16, cbtrie).** Full depth: all 4,866 users certified at K = 10; vs the all-prefix run, 117
+  lists differ only by FP16 near-ties (max gap 0.016); scorer check 500/500, 0 violations. Bridged: 4,866 certified,
+  116 near-ties (max gap 0.022), 0 violations. FP32 cbtrie: recall@10 1.000 on 500 users. The bridged and full-depth
+  *objectives* (both exhaustive) agree on top-1 for 79.6%.
+- **Bridges on more label-free data.** First-level bridge on 38k train-split prompts: held KL 0.038 → 0.0215,
+  top-10 prefix overlap 80.5 → 84.9%. Deployed decoder with both retrained bridges: top-1 agreement with full depth
+  79.5 → 85.4%, top-10 overlap 77.2 → 82.5%, HR@10 0.1697 (+0.21 [−0.16, +0.58] vs full depth), 2.60 ms.
+- **Serving boundary.** First-level width (synthetic, trie, full depth): certified 4.28 / 4.52 / 5.11 / 6.38 ms at
+  88 / 176 / 352 / 600 first codes vs beam-50 (fused) 5.08 → 7.42 and unfused beam 6.49 ms flat: crossover ~600.
+  Long prompts: certified 2.61 / 7.59 / 21.4 vs beam 5.10 / 11.5 / 37.0 ms at ~100 / 1.1k / 3.15k tokens (new
+  streaming Triton kernels for P > 256; old kernels ran out of shared memory). 1M SIDs: 2.65–2.89 ms; fallback M = 16
+  → 32 for 1/500 users, p99 2.98 ms. Fusion on 1M SIDs (random σ = 0.5 term): top-10 certified 16% at M = 16, 96% at
+  64, 100% at 128 (2.97 ms), top-50 100% at 512 (3.19 ms); σ = 0.1 needs M = 64. Timings include the scatter-max and
+  a 4 MB per-request copy.
+- Paper (research/paper/main.tex) rewritten accordingly: Table 1 is the controlled comparison; the abstract,
+  contributions and conclusion attribute the speed (1.2× certificate, rest late entry; 2.2× engine vs FlashRec).

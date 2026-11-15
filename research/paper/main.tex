@@ -266,7 +266,8 @@ x_e(a,b) = h_e(a) &+ R_e\,\bigl[h_e(a);E_b;E_a;1\bigr]\\
 Here $E$ is the token embedding and $R_e$ is a ridge regression fit without labels. The MLP has 2,048 hidden
 units and a zero-initialized output, about 10M parameters per entry layer. It is distilled from the frozen
 model: we minimize the KL divergence between the full-depth and the late-entry distributions of the third code
-on MiniOneRec's \emph{validation} prompts. Half of each row's weight is uniform and half follows a softmax of
+on MiniOneRec's \emph{validation} prompts (any unlabeled prompts work; \S\ref{sec:exp-late} adds the training
+split's). Half of each row's weight is uniform and half follows a softmax of
 its bound $\U$, which emphasizes the rows that decide the ranking. Training takes 1--2 minutes on one H100 and
 uses no item labels.
 
@@ -599,7 +600,11 @@ full-depth model. The difference lies in the objective, not the search: scored e
 full-depth models agree on top-1 for 79.6\% of users. Nearly all of it comes from the first-level bridge. With
 only the third-code bridge (layer 22), top-1 agrees for 95.8\% of users and the top-10 overlap is 94\%
 (Table~\ref{tab:speed}), at 3.06 instead of 2.61\,ms. That configuration is the faithful choice when agreement
-with the full model matters. Late entry of the \emph{second} code below layer
+with the full model matters. The first-level bridge's held-out KL was still falling when we stopped training on
+4,600 validation prompts. Because distillation uses no labels, the training split's prompts can be used as well.
+Distilling both bridges on 38,000 training-split prompts cuts its held-out KL by 44\% and raises agreement with
+the full-depth model to 85.4\% (top-1) and 82.5\% (top-10 overlap), at the same 2.60\,ms. Quality is unchanged
+(HR@10 0.1697, $+0.21\,[-0.16,+0.58]$ against full depth). Late entry of the \emph{second} code below layer
 18 is a trade-off (NDCG@10 $-0.25\,[-0.51,-0.01]$). That code decides set membership, so we stop at 18. The best
 entry layer depends on the model: 26 for the released Office model, 22 after one more fine-tuning epoch, and 18
 on Industrial. We choose it on validation.

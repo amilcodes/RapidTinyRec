@@ -69,11 +69,19 @@ a small bridge distilled from their parent node's state (no labels, frozen model
   +2.2 / +2.4 HR@10. (3) *End-to-end fusion*: SASRec now runs inside the CUDA graph (2.89 ms Office).
 - **Against an industry engine (fifth session).** FlashRec (sohu-mptc/FlashRec, a public SID-GR serving engine with
   CUDA-graph wide beam and a fused trie kernel), ported to Qwen2 and run on the same H100 and prompts: 11.5 ms per
-  request and 408–500 users/s, vs 2.57 ms and 2,681 users/s (FP16; 3,148 with FP8) for certified decoding. Our
-  beam-50 matches FlashRec's throughput, so the gain is the decoder's. FlashRec's GPU time alone (6.78 ms) exceeds
-  our end-to-end latency. Quality: certified matches an exact implementation of FlashRec's objective (HR@10 0.1689 vs
+  request and 408–500 users/s, vs 2.57 ms and 2,681 users/s (FP16; 3,148 with FP8) for certified decoding. About
+  2.2× of that is our engine (our beam-50 under FlashRec's own objective: 5.2 ms, 970 users/s) and 2× the decoder.
+  FlashRec's GPU time alone (6.78 ms) exceeds our end-to-end latency. Quality: certified matches an exact implementation of FlashRec's objective (HR@10 0.1689 vs
   0.1679) and the fused decoder adds +1.46 [+0.88, +2.01]. NVIDIA's SID-GR example is not runnable from public code
   (its decode-attention kernel is a private submodule). Details: paper §8.1, `scripts/flashrec_job.sh`.
+- **Answering an external review (sixth session).** A controlled comparison (same engine, objective, FP16, one
+  allocation) attributes the speed: beam-50 5.13 ms → certified at full depth 4.21 ms (1.2×; under cbtrie beam-50 is
+  already 99.6% exact) → + bridges 2.61 ms (2.0×, 2.7× throughput, equal HR@10). Late entry is the main lever; the
+  certificate's value is exactness (verified against exhaustive scoring for all 4,866 users, FP16 and FP32, full depth
+  and bridged), fusion, filters and long lists. The bridges change the ranking (top-1 agrees with full depth for 79.5%
+  of users; 85.4% after distilling them on the label-free training prompts). Long prompts (to 3k tokens: 21 vs 37 ms),
+  wider first levels (to 600 codes) and fusion on 1M SIDs (M = 128 for a σ = 0.5 term, 2.97 ms) are measured.
+  Prompts over 256 tokens use new streaming Triton attention kernels.
 - **Two-sided bounds**: under trie normalization the set of prefixes that guarantees the certificate is known
   after the first forward (≤ 1.1·K on average).
 
