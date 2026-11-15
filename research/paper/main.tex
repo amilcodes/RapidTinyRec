@@ -529,6 +529,16 @@ at $M=32$, at every size. Industrial replicates this ($|N|\approx7.8/38/350$). T
 \emph{not} scale: $|E|$ grows with branching as the $-\log n_p$ lower bound loosens. On dense tries, Forward~2
 should therefore be sized by a fixed $M$, with a fallback for the rare uncertified request.
 
+\paragraph{Serving at 1M SIDs.} With both bridges, the deployed decoder takes 2.65--2.89\,ms on the 1M-SID catalog
+(2.60\,ms on the real one). Rerunning the 0.2\% of requests whose top-10 is not certified at $M=16$ with $M=32$
+gives a p99 of 2.98\,ms, including the reruns. Fusion is the harder case. A per-item term enters each prefix's
+bound through its maximum over the prefix's items. With thousands of items per prefix, that maximum is almost
+always large, so the bound loosens. With a random term ($\sigma=0.5$ nats) on 1M SIDs, $M=16$ certifies only 16\%
+of top-10s. $M=64$ certifies 96\%, $M=128$ certifies 100\% at 2.97\,ms, and $M=512$ certifies 100\% of top-50s at
+3.19\,ms. A weaker term ($\sigma=0.1$) needs only $M=64$. These timings include the catalog-wide scatter-max and a
+4\,MB host-to-device copy of the term per request. The budget must therefore scale with the term's strength and
+the catalog's density; the certificate reports when it was too small.
+
 \paragraph{First-level width.} The released model has only 88 first-code tokens, so we time wider first levels
 by borrowing the 512 deeper code tokens as extra first codes, each with a real first code's subtree (up to 600
 first codes and 23k SIDs, trie scoring, full depth). Forward~1 carries one tree node per first code, so it
