@@ -28,41 +28,60 @@ import torch
 SID_RE = re.compile(r's_a_(\d+)>\s*<s_b_(\d+)>\s*<s_c_(\d+)')
 
 
+def pack(a, b, c):
+    return (int(a) << 26) | (int(b) << 13) | int(c)       # = (a * 8192 + b) * 8192 + c, RecIF's sid2pid key format
+
+
 def load_catalog(path):
-    """Valid SIDs (a, b, c) from a JSON/parquet mapping whose keys or values hold <s_a_*><s_b_*><s_c_*> strings."""
-    sids = set()
+    """Valid SIDs as packed int64 keys. Accepts RecIF's sid2pid/sid2iid JSON (packed integer keys), any JSON/parquet
+    holding <s_a_*><s_b_*><s_c_*> strings, or a pid2sid parquet with an array column `sid` = [a, b, c]."""
     if path.endswith('.json'):
         d = json.load(open(path))
-        it = d.keys() if isinstance(d, dict) else d
-        for k in it:
+        keys = []
+        for k in (d.keys() if isinstance(d, dict) else d):
             m = SID_RE.search(str(k))
             if m:
-                sids.add(tuple(int(x) for x in m.groups()))
-            else:
-                parts = re.findall(r'\d+', str(k))
-                if len(parts) == 3:
-                    sids.add(tuple(int(x) for x in parts))
-    else:
-        import pandas as pd
-        df = pd.read_parquet(path)
-        for col in df.columns:
-            s = df[col].astype(str)
-            hits = s.str.extract(r's_a_(\d+)>\s*<s_b_(\d+)>\s*<s_c_(\d+)').dropna()
-            if len(hits):
-                sids |= {tuple(int(x) for x in r) for r in hits.values.tolist()}
-    return sids
+                keys.append(pack(*m.groups()))
+                continue
+            parts = re.findall(r'\d+', str(k))
+            if len(parts) == 3:
+                keys.append(pack(*parts))
+            elif len(parts) == 1:
+                keys.append(int(parts[0]))
+        return np.unique(np.array(keys, dtype=np.int64))
+    import pandas as pd
+    df = pd.read_parquet(path)
+    if 'sid' in df.columns and not isinstance(df['sid'].iloc[0], str):
+        s = np.stack(df['sid'].values).astype(np.int64)
+        return np.unique((s[:, 0] << 26) | (s[:, 1] << 13) | s[:, 2])
+    keys = set()
+    for col in df.columns:
+        hits = df[col].astype(str).str.extract(r's_a_(\d+)>\s*<s_b_(\d+)>\s*<s_c_(\d+)').dropna()
+        keys |= {pack(*r) for r in hits.values.tolist()}
+    return np.unique(np.array(sorted(keys), dtype=np.int64))
 
 
 class Trie:
-    def __init__(self, sids):
-        ch1, ch2 = {}, {}
-        for a, b, c in sids:
-            ch1.setdefault(a, set()).add(b)
-            ch2.setdefault((a, b), set()).add(c)
-        self.first = np.array(sorted(ch1), dtype=np.int64)
-        self.ch1 = {a: np.array(sorted(v), dtype=np.int64) for a, v in ch1.items()}
-        self.ch2 = {k: np.array(sorted(v), dtype=np.int64) for k, v in ch2.items()}
-        self.n_sids = len(sids)
+    """Catalog trie over packed SID keys, built with sorted-array splits (fast for the 14.6M-SID corpus)."""
+
+    def __init__(self, keys):
+        keys = np.unique(keys)
+        ab, c = keys >> 13, keys & 8191
+        uab, s2 = np.unique(ab, return_index=True)
+        e2 = np.r_[s2[1:], len(keys)]
+        self.ch2 = {(int(x >> 13), int(x & 8191)): c[i:j] for x, i, j in zip(uab.tolist(), s2.tolist(), e2.tolist())}
+        ua, s1 = np.unique(uab >> 13, return_index=True)
+        e1 = np.r_[s1[1:], len(uab)]
+        b = uab & 8191
+        self.ch1 = {int(x): b[i:j] for x, i, j in zip(ua.tolist(), s1.tolist(), e1.tolist())}
+        self.first = ua.astype(np.int64)
+        self.n_sids = len(keys)
+        self.keys = keys
+
+    def contains(self, sid):
+        k = pack(*sid)
+        i = np.searchsorted(self.keys, k)
+        return bool(i < len(self.keys) and self.keys[i] == k)
 
 
 def compact(logits, lvl_ids):
@@ -214,6 +233,22 @@ def targets_of(row):
     return {tuple(int(x) for x in m) for m in SID_RE.findall(blob)}
 
 
+def parse_messages(msgs):
+    """Chat messages as [{'role', 'content': str}]. RecIF stores them as a JSON string whose contents are lists of
+    {'type': 'text', 'text': ...} parts; Qwen3's chat template drops non-string content, so the parts are joined."""
+    if isinstance(msgs, (str, bytes)):
+        msgs = json.loads(msgs)
+    out = []
+    for m in (msgs.tolist() if hasattr(msgs, 'tolist') else msgs):
+        m = dict(m)
+        c = m.get('content')
+        if not isinstance(c, str):
+            parts = c.tolist() if hasattr(c, 'tolist') else (c or [])
+            c = ''.join(p.get('text', '') if isinstance(p, dict) else str(p) for p in parts)
+        out.append({'role': m['role'], 'content': c})
+    return out
+
+
 def main():
     ap = argparse.ArgumentParser()
     ap.add_argument('--model', required=True)
@@ -260,8 +295,7 @@ def main():
     f = open(a.out, 'w')
     for n, ri in enumerate(rows):
         row = df.iloc[int(ri)].to_dict()
-        msgs = row['messages']
-        msgs = [dict(m) for m in (msgs.tolist() if hasattr(msgs, 'tolist') else msgs)]
+        msgs = parse_messages(row['messages'])
         prompt_msgs = [m for m in msgs if m.get('role') != 'assistant']
         targets = targets_of({'answer': [m for m in msgs if m.get('role') == 'assistant']})
         if not targets and a.target_field:
@@ -272,7 +306,8 @@ def main():
         t1 = time.time()
         S.prompt(input_ids)
         cache_lp = {}
-        rec = {'row': int(ri), 'prompt_tokens': int(input_ids.shape[1]), 'targets': sorted(targets)}
+        rec = {'row': int(ri), 'prompt_tokens': int(input_ids.shape[1]), 'targets': sorted(targets),
+               'targets_in_catalog': sum(trie.contains(t) for t in targets)}
         if n < a.check:                                       # tree attention == sequential decoding for a few nodes
             a0 = int(trie.first[0]); b0 = int(trie.ch1[a0][0])
             tree = S.expand([(a0, b0)], 4)[0]

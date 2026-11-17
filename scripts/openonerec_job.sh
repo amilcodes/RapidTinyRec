@@ -5,6 +5,8 @@
 #                                                  #   `huggingface-cli login` first, after accepting the dataset terms)
 #   bash scripts/openonerec_job.sh inspect         # login node: columns, a sample row, catalog key format
 #   bash scripts/openonerec_job.sh run TASK [N]    # GPU job: TASK in video|ad|product, N requests (default 200)
+#     catalog: the benchmark's sid2pid.json (video/ad) or sid2iid.json (product); CATALOG=$D/RecIF/video_ad_pid2sid.parquet
+#     gives the full 14.6M-SID corpus. Ground truth comes from metadata['answer'].
 set -u
 S=/oscar/scratch/aagraw73/speedrun
 D=$S/openonerec
@@ -46,7 +48,7 @@ run)
   CAT=${CATALOG:-$D/RecIF/benchmark_data/sid2pid.json}
   [ "$T" = product ] && CAT=${CATALOG:-$D/RecIF/benchmark_data/sid2iid.json}
   $PY scripts/openonerec_cert.py --model $D/OneRec-1.7B --data $D/RecIF/benchmark_data/$T/${T}_test.parquet \
-    --catalog $CAT --out $OUT/${T}.jsonl --users $N ${EXTRA:-} 2>&1 \
+    --catalog $CAT --out $OUT/${T}.jsonl --users $N --target-field metadata ${EXTRA:-} 2>&1 \
     | grep --line-buffered -E '^\{"stage"|Error|Traceback|error' | cut -c1-1500
   ;;
 smoke)
