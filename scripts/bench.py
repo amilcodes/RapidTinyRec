@@ -14,7 +14,7 @@ import torch
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 from rapidtinyrec.speedrun.model import Qwen2Weights
 from rapidtinyrec.speedrun.beam import SidCatalog, BeamEngine, GraphRunner
-from rapidtinyrec.speedrun.exact import ExactEngine, ExactEngine3, ExactTrieEngine, OnePassTrieEngine, InflightTrieEngine
+from rapidtinyrec.speedrun.exact import ExactEngine, ExactEngine3, ExactTrieEngine, OnePassTrieEngine, InflightTrieEngine, HierTrieEngine
 from rapidtinyrec.speedrun import data
 
 
@@ -54,7 +54,7 @@ def main():
     ap.add_argument('--throughput-users', type=int, default=1024)
     ap.add_argument('--repeats', type=int, default=1, help='timed passes over the cohort')
     ap.add_argument('--no-graph', action='store_true')
-    ap.add_argument('--engine', default='beam', choices=['beam', 'exact', 'exact3', 'exacttrie', 'onepass', 'inflight'])
+    ap.add_argument('--engine', default='beam', choices=['beam', 'exact', 'exact3', 'exacttrie', 'onepass', 'inflight', 'hier'])
     ap.add_argument('--n-prefix', type=int, default=128)
     ap.add_argument('--norm', default='full', choices=['full', 'codebook', 'trie', 'cbtrie'])
     ap.add_argument('--attn', default='torch', choices=['torch', 'triton'])
@@ -90,6 +90,10 @@ def main():
     ap.add_argument('--check-exhaustive', type=int, default=0, help='compare first K cohort users against exhaustive exact scoring')
     ap.add_argument('--extra-context', type=int, default=0,
                     help='latency scaling: insert T tokens of the user\'s own history after the shared template (quality meaningless)')
+    ap.add_argument('--first-budget', type=int, default=32, help='hier engine: first codes expanded per request (A1)')
+    ap.add_argument('--shared-context', type=int, default=0,
+                    help='latency: insert the SAME T history tokens for every user after the template, so the template '
+                         'cache holds them (emulates per-user cached history K/V; quality meaningless)')
     ap.add_argument('--random-bonus', type=float, default=0.0,
                     help='timing of fusion on synthetic catalogs: a random per-item term (sigma) copied per request like --bonus-file')
     a = ap.parse_args()
@@ -107,6 +111,13 @@ def main():
     rows = data.test_rows(a.release)
     t0 = time.time()
     all_ids = data.prompts(a.release, tok, rows)
+    if a.shared_context:
+        k_ = len(all_ids[0])
+        for ids_ in all_ids:
+            k_ = min(k_, next((j for j, (x, y) in enumerate(zip(all_ids[0], ids_)) if x != y), min(len(all_ids[0]), len(ids_))))
+        src_ = all_ids[0][k_:-8]
+        fill_ = (src_ * (a.shared_context // len(src_) + 1))[:a.shared_context]
+        all_ids = [ids_[:k_] + fill_ + ids_[k_:] for ids_ in all_ids]
     if a.extra_context:
         k_ = len(all_ids[0])
         for ids_ in all_ids:
@@ -133,6 +144,9 @@ def main():
                                  norm=a.norm if a.norm in ('trie', 'cbtrie') else 'trie', n_first=a.n_first)
         eng.set_lens(torch.load(a.lens, map_location='cpu'),
                      torch.load(a.lens_a, map_location='cpu') if a.lens_a else None)
+    elif a.engine == 'hier':
+        eng = HierTrieEngine(W, cat, first_budget=a.first_budget, n_prefix=a.n_prefix, n_out=a.n_expand, fuse_first=True,
+                             ks=tuple(int(k) for k in a.ks.split(',')), norm=a.norm if a.norm in ('trie', 'cbtrie') else 'trie')
     elif a.engine == 'exacttrie':
         eng = ExactTrieEngine(W, cat, n_prefix=a.n_prefix, n_out=a.n_expand, fuse_first=True, ks=tuple(int(k) for k in a.ks.split(',')),
                               norm=a.norm if a.norm in ('trie', 'cbtrie') else 'trie')
@@ -235,20 +249,20 @@ def main():
         eng.fwd.post = torch.compile(eng.fwd.post, mode=a.compile, dynamic=False, fullgraph=True)
     bonus, aux_key = None, 'bonus'
     if a.bonus_file:
-        assert a.engine == 'exacttrie' and not a.collab
+        assert a.engine in ('exacttrie', 'hier') and not a.collab
         bonus = (a.bonus_beta * torch.load(a.bonus_file)['logq'].float().clamp(min=-30.0)).pin_memory()
         assert bonus.shape == (len(rows), eng.S)
         eng.enable_dynamic_bonus()
         meta['bonus'] = {'file': a.bonus_file, 'beta': a.bonus_beta}
     if a.random_bonus:
-        assert a.engine == 'exacttrie' and not a.bonus_file and not a.collab
+        assert a.engine in ('exacttrie', 'hier') and not a.bonus_file and not a.collab
         g_ = torch.Generator().manual_seed(0)
         bonus = (a.random_bonus * torch.randn(1, eng.S, generator=g_)).expand(len(rows), eng.S)
         eng.enable_dynamic_bonus()
         meta['bonus'] = {'random_sigma': a.random_bonus, 'S': eng.S}
     if a.collab:
         # per-request input is the user's history (item ids); SASRec runs inside the graph on a side stream
-        assert a.engine == 'exacttrie'
+        assert a.engine in ('exacttrie', 'hier')
         from rapidtinyrec.speedrun.collab import SASRecHead, history_ids
         head = SASRecHead.from_dir(a.collab, a.release, tok, eng.sid_tok, a.bonus_beta, device=dev)
         if a.collab_compile:

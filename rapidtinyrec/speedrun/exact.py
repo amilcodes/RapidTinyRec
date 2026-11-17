@@ -471,6 +471,137 @@ class ExactTrieEngine(ExactEngine3):
         return {'sids': sid, 'scores': final, 'certified': cert, 'next_bound': bound_pref}
 
 
+
+class HierTrieEngine(ExactTrieEngine):
+    """Certified top-K with a budget on every trie level (wide first levels).
+
+    The two-forward engine puts every first code into forward 1, so its cost grows with |A|. Here each level
+    gets its own fixed budget and its own exact bound, the same rule applied one level higher:
+      F0  prompt only (all layers)            -> exact s(a) for every first code (one LM-head row)
+      F1  the A1 first codes with the largest s(a) (plus item-term max) as rows; with first-level late entry
+          they join at layer e_a from bridge(h_{e_a}(last prompt token), E[a], E[last token])
+          -> exact s(b|a) for their prefixes
+      F2  the M best multi-child prefixes, as in ExactTrieEngine
+    Certificate: K-th pool score >= max(best unexpanded multi-child U2 among the chosen first codes,
+    best s(a) [+ item-term max] of an unchosen first code). Rows per forward: prompt tail, A1, M -- none grows with
+    |A| (only the first-level LM-head columns and a top-k do). Cost: one more sequential pass over layers
+    e_a..L-1 at batch 1.
+    """
+
+    def __init__(self, W, cat, first_budget=32, **kw):
+        super().__init__(W, cat, **kw)
+        self.A1 = min(int(first_budget), len(cat.first))
+        nA, W1 = len(cat.first), cat.W1
+        self.multi2 = self.multi_flat.view(nA, W1)
+        self.single2 = self.single_flat.view(nA, W1)
+
+    def alloc(self, B, P):
+        bufs = super().alloc(B, P)
+        W, dev, dt = self.W, self.W.device, self.W.dtype
+        z = lambda *s_: torch.zeros(*s_, device=dev, dtype=dt)
+        bufs['kp2'] = z(W.L, B, self.A1, 1, W.KV, W.hd)
+        bufs['vp2'] = z(W.L, B, self.A1, 1, W.KV, W.hd)
+        return bufs
+
+    def run(self, tokens, lengths, bufs):
+        W, cat, fwd, M, N, A1 = self.W, self.cat, self.fwd, self.M, self.N, self.A1
+        assert fwd.tree_fast, 'HierTrieEngine needs the fast first forward (--tree-fast)'
+        B, P = tokens.shape
+        dev = tokens.device
+        nA, W1 = len(cat.first), cat.W1
+        bi = torch.arange(B, device=dev)
+        bidx = bi[:, None]
+        neg_inf = float('-inf')
+        pmask = torch.where(torch.arange(P, device=dev)[None, :] < lengths[:, None], 0.0, torch.finfo(torch.float32).min)
+        L0 = lengths[:, None, None]
+        T0 = self._T0()
+        last = lengths - 1 - T0
+        e_a = self.node_late_cfg[0] if self.node_late_cfg is not None else None
+        self._collab_start(bufs)
+        # F0: prompt rows only (the node branch never triggers), keeping the prompt state at the node entry layer
+        capp = {e_a: None} if e_a is not None else None
+        hp, _ = fwd._prefill_tree_fast(W.embed[tokens[:, T0:]], W.embed[cat.first[:1]][None].expand(B, 1, W.D),
+                                       lengths, bufs['kc'], bufs['vc'], bufs['kp2'], bufs['vp2'], self.tmpl, None, capp,
+                                       node_late=dict(entry=1 << 30))
+        la = self._lp(hp[bi, last], 0, cat.first[None].expand(B, -1), None)          # [B, nA] exact
+        self._collab_join()
+        bo = self._bonus_tables(bufs['bonus']) if self.dyn_bonus else self.bonus
+        if bo is not None:
+            vmax = bo['vmax'].expand(B, -1) if bo['vmax'].shape[0] == 1 else bo['vmax']
+            va = vmax.view(B, nA, W1).max(-1).values                                  # best item term under a
+            ua = la + va
+        else:
+            ua = la
+        sel = ua.topk(A1, -1).indices                                                  # [B, A1] chosen first codes
+        chosen_a = torch.zeros_like(la, dtype=torch.bool).scatter_(1, sel, True)
+        bound_a = ua.masked_fill(chosen_a, neg_inf).max(1).values                      # items under unchosen a
+        # F1: chosen first codes as rows
+        a_tok = cat.first[sel]
+        pos = L0.expand(B, A1, 1)
+        if e_a is not None:
+            br_a = self.node_late_cfg[1]
+            hl = capp[e_a][bi, last][:, None, None].expand(B, A1, 1, W.D)
+            el = W.embed[tokens[bi, lengths - 1]][:, None, None].expand(B, A1, 1, W.D)
+            x1 = br_a(hl, W.embed[a_tok][:, :, None], el).to(W.dtype)
+            start1 = e_a
+        else:
+            x1, start1 = W.embed[a_tok][:, :, None], 0
+        if self.late is not None:
+            hmid = fwd.step(x1, pos, bufs['kc'], bufs['vc'], pmask, bufs['kp2'], bufs['vp2'], 0, lengths=lengths,
+                            n_layers=self.late, start=start1, raw=True)                 # entering layer `late`
+            hn = fwd.step(hmid, pos, bufs['kc'], bufs['vc'], pmask, bufs['kp2'], bufs['vp2'], 0, lengths=lengths,
+                          start=self.late)
+        else:
+            hmid = None
+            hn = fwd.step(x1, pos, bufs['kc'], bufs['vc'], pmask, bufs['kp2'], bufs['vp2'], 0, lengths=lengths,
+                          start=start1)
+        t1, v1 = cat.t1[sel], cat.v1[sel]
+        lb = self._lp(hn[:, :, 0], 1, t1, v1).masked_fill(~v1, neg_inf)
+        u2 = (la.gather(1, sel)[..., None] + lb).view(B, A1 * W1)                     # exact, chosen first codes
+        gflat = (sel[..., None] * W1 + torch.arange(W1, device=dev)).view(B, -1)
+        mul = self.multi2[sel].reshape(B, -1)
+        sgl = self.single2[sel].reshape(B, -1)
+        if bo is not None:
+            ub = u2 + vmax.gather(1, gflat)
+            vone = bo['vone'].expand(B, -1) if bo['vone'].shape[0] == 1 else bo['vone']
+            single = (u2 + vone.gather(1, gflat)).masked_fill(~sgl, neg_inf)
+        else:
+            ub = u2
+            single = u2.masked_fill(~sgl, neg_inf)
+        top2, pf = ub.masked_fill(~mul, neg_inf).topk(M + 1, -1)
+        bound = torch.maximum(top2[:, M], bound_a)
+        pf = pf[:, :M]
+        j, col = pf // W1, pf % W1
+        ai = sel.gather(1, j)                                                          # global first-code index
+        b_tok = cat.t1[ai, col]
+        pair = cat.pair_table[ai, col]
+        for kp, kp2 in ((bufs['kp3'], bufs['kp2']), (bufs['vp3'], bufs['vp2'])):
+            kp[:, :, :, 0] = kp2[:, bidx, j, 0]
+        if self.late is None:
+            x2, start = W.embed[b_tok][:, :, None], 0
+        else:
+            x2 = self.bridge(hmid[bidx, j], W.embed[b_tok][:, :, None], W.embed[cat.first[ai]][:, :, None]).to(W.dtype)
+            start = self.late
+        h = fwd.step(x2, (L0 + 1).expand(B, M, 1), bufs['kc'], bufs['vc'], pmask, bufs['kp3'], bufs['vp3'], 1,
+                     lengths=lengths, n_layers=self.exit_c, start=start)
+        t2, v2 = cat.t2[pair], cat.v2[pair]
+        lc = self._lp(h[:, :, 0], 2, t2, v2).masked_fill(~v2, neg_inf)
+        if bo is not None:
+            lc = lc + (bo['V2'][0][pair] if bo['V2'].shape[0] == 1 else bo['V2'][bidx, pair])
+        u3 = (u2.gather(1, pf)[..., None] + lc).view(B, M * cat.W2)
+        pool = torch.cat([u3, single], 1)
+        final, pidx = pool.topk(N, -1)
+        is_exp = pidx < M * cat.W2
+        e_idx = pidx.clamp(max=M * cat.W2 - 1)
+        row = e_idx // cat.W2
+        s_glob = gflat.gather(1, (pidx - M * cat.W2).clamp(min=0))
+        a_out = torch.where(is_exp, cat.first[ai.gather(1, row)], self.flat_a[s_glob])
+        b_out = torch.where(is_exp, b_tok.gather(1, row), self.flat_b[s_glob])
+        c_out = torch.where(is_exp, t2.reshape(B, -1).gather(1, e_idx), self.single_c[s_glob])
+        sid = torch.stack([a_out, b_out, c_out], -1)
+        cert = torch.stack([final[:, kk - 1] >= bound for kk in self.ks if kk <= N], -1)
+        return {'sids': sid, 'scores': final, 'certified': cert, 'next_bound': bound}
+
 class OnePassTrieEngine(ExactTrieEngine):
     """Every catalog item scored in ONE forward (trie scoring, late entry).
 

@@ -347,10 +347,12 @@ class Forward:
     # prefix K/V: [B, KV, P, hd] with additive prefix mask [B, P]
     # private K/V: [B, R, S, KV, hd]; the new tokens occupy slots [s0, s0+Q)
     def step(self, x, pos, kcache, vcache, pmask, kpriv, vpriv, s0, lengths=None, n_layers=None, start=0,
-             capture=None, functional=False):
+             capture=None, functional=False, raw=False):
         """start > 0: x is the residual stream entering layer `start` (late entry); layers below are
         skipped for these rows. capture: dict {layer: None} filled with the input of those layers.
-        functional: do not write the new K/V into kpriv (autograd-safe; torch attention path only)."""
+        functional: do not write the new K/V into kpriv (autograd-safe; torch attention path only).
+        raw: return the residual stream leaving the last layer run (no final norm), e.g. to split a
+        forward at a late-entry layer."""
         W = self.W
         B, R, Q, _ = x.shape
         rep = W.H // W.KV
@@ -366,7 +368,7 @@ class Forward:
                 if i < start:
                     continue
                 x = self.layer_fn(x, pos, kcache[i], vcache[i], kpriv[i], vpriv[i], lengths, s0, layer)
-            return self.final(x)
+            return x if raw else self.final(x)
         for i, layer in enumerate(W.layers[:n_layers]):
             if i < start:
                 continue
@@ -405,4 +407,4 @@ class Forward:
             os_ = torch.matmul(ps, vp)  # [B,KV,R,Qr,hd]
             o = (op + os_).view(B, W.KV, R, Q, rep, W.hd).permute(0, 2, 3, 1, 4, 5).reshape(B, R, Q, W.H * W.hd)
             x = self.post(x, o, layer)
-        return self.final(x)
+        return x if raw else self.final(x)
