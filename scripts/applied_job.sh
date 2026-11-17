@@ -51,6 +51,21 @@ fullB)
     N7_suf_M64       "--engine exact3 --norm full --suffix fused --n-prefix 64 --n-expand 64 --tree-fast --compile-layer $BASE --modes latency,quality" \
     N8_suf_M512      "--engine exact3 --norm full --suffix fused --n-prefix 512 --n-expand 512 --tree-fast --compile-layer $BASE --modes latency,quality"
   ;;
+fullC)
+  # every prefix expanded under the full-vocabulary objective (row-chunked LM head), full depth and bridged
+  bash scripts/run_cfgs.sh \
+    N4_cert_all      "--engine exact3 --norm full --suffix none --n-prefix 2488 --n-expand 50 --tree-fast --compile-layer $BASE --modes latency,quality --quality-batch 4" \
+    N6_cert_all_c22  "--engine exact3 --norm full --suffix none --n-prefix 2488 --n-expand 50 --tree-fast --compile-layer $BASE --late-entry $BR22 --modes latency,quality --quality-batch 4"
+  ;;
+ctx2)
+  # cached contexts beyond 4k tokens (needs the RoPE table sized from the model config)
+  args=()
+  for T in 4096 8192; do
+    args+=(C_cert_$T "--engine exacttrie --n-prefix 16 --n-expand 50 $FAST $CB $BASE $DEP --modes latency --shared-context $T")
+    args+=(C_beam_$T "--engine beam $CB $BASE --modes latency --shared-context $T")
+  done
+  bash scripts/run_cfgs.sh "${args[@]}"
+  ;;
 ctx)
   args=()
   for T in 1024 4096 8192; do

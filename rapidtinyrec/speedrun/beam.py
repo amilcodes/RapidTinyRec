@@ -120,6 +120,15 @@ class ScoreMixin:
 
     def _lp_raw(self, h, level, tok_idx, valid):
         if self.norm == 'full':
+            rows = h.numel() // h.shape[-1]
+            if rows > 1024:   # many rows (e.g. every prefix expanded): full-vocabulary logits in row chunks
+                hf = h.reshape(rows, h.shape[-1])
+                tf = tok_idx.expand(*h.shape[:-1], tok_idx.shape[-1]).reshape(rows, -1)
+                out = []
+                for s_ in range(0, rows, 1024):
+                    lg = self.W.linear(hf[s_:s_ + 1024], self.W.lm_head)[..., :self.W.V].float()
+                    out.append(lg.gather(-1, tf[s_:s_ + 1024]) - torch.logsumexp(lg, -1, keepdim=True))
+                return torch.cat(out).view(*h.shape[:-1], tok_idx.shape[-1])
             lg = self.W.linear(h, self.W.lm_head)[..., :self.W.V].float()
             return lg.gather(-1, tok_idx) - torch.logsumexp(lg, -1, keepdim=True)
         lg = torch.nn.functional.linear(h, self.sid_head).float()

@@ -822,3 +822,29 @@ covers FP32, full depth, trie scoring only; the deployed decoder (FP16, cbtrie, 
   a 4 MB per-request copy.
 - Paper (research/paper/main.tex) rewritten accordingly: Table 1 is the controlled comparison; the abstract,
   contributions and conclusion attribute the speed (1.2× certificate, rest late entry; 2.2× engine vs FlashRec).
+
+## Session 7 (2026-11-16/17): applied settings (second review: normalization, breadth, context)
+
+All Office, H100, FP16, batch 1; runs `ap_hier`, `ap_wide`, `ap_fullA/B/C`, `ap_ctx`, `ap_ctx2`
+(`scripts/applied_job.sh`).
+- **Full-vocabulary objective served exactly** (no forced suffix): beam-50 5.82 ms, HR@10 0.1624. Certified exact3
+  M = 64: 5.22 ms, top-10 certified 94%; M = 256: 6.20 ms, 97%; + third-code bridge (e22_w) M = 256: 4.55 ms, 99%.
+  Every prefix (M = 2,488, row-chunked full-vocabulary LM head): 23.2 ms full depth, 13.2 ms bridged. Fallback
+  (rerun uncertified with every prefix): M = 64 → 30/500 reruns, median 5.22, p95 28.1, p99 28.5 ms; bridged M = 256
+  → 5/500, median 4.55, p99 17.5 ms. With the forced suffix (MiniOneRec's exact objective): M = 64 / N = 64 7.85 ms,
+  52% top-10 certified; M = 512 / N = 512 16.3 ms, 89%; beam-50 8.34 ms. ⇒ normalization changes the *tail*, and the
+  forced suffix is the expensive part.
+- **First-level budget** (new `HierTrieEngine`, `--engine hier --first-budget A1`: prompt pass → exact s(a) → A1
+  first-code rows from layer 18 → prefixes; unexpanded first codes bound by s(a)). A1 = 88 reproduces the two-forward
+  engine (top-1 99.75%, identical HR@10) at +0.69 ms (3.34 vs 2.65). A1 = 48 / 32 / 16: top-10 certified 85 / 61 /
+  28%, top-1 100 / 99.9 / 97%, HR@10 0.1685 / 0.1693 / 0.1689, 3.34 / 3.27 / 3.19 ms. Wide synthetic catalogs with
+  bridges: two-forward 2.64 / 2.81 / 3.09 / 3.47 ms at 88 / 176 / 352 / 600 first codes (~1.6 µs per first code);
+  A1 = 32 flat 3.2 ms (60–65% top-10 certified). The first-level bound s(a) is loose (confirms the session-3
+  finding: mean 29 needed first codes at K = 10).
+- **Long contexts.** Cached history (same T tokens for every user, held in the template cache): certified vs beam-50
+  3.66 vs 7.19 (1k), 6.54 vs 13.09 (4k), 10.40 vs 20.70 ms (8k): a constant 2.0×. Uncached: 7.59 vs 11.5 (1.1k),
+  21.4 vs 37.0 ms (3.15k); throughput at 3k uncached B = 16: 51 vs 32 users/s (1.6×, prefill-bound; 2.7× at short
+  prompts).
+- Bugs fixed: RoPE table had 4,096 positions (prompts beyond indexed out of range → CUBLAS internal error);
+  full-vocabulary logits for thousands of rows OOM'd → row-chunked LM head. Note: `--check-exhaustive` compares with
+  the full-depth objective, so for bridged engines it reports "violations" that are objective differences.

@@ -25,6 +25,7 @@ class Qwen2Weights:
         self.I = cfg['intermediate_size']
         self.eps = cfg['rms_norm_eps']
         self.theta = cfg.get('rope_theta', 10000.0)
+        self.max_pos = cfg.get('max_position_embeddings', 32768)
         self.dtype = dtype
         self.device = device
         idx = ckpt / 'model.safetensors.index.json'
@@ -67,7 +68,8 @@ class Qwen2Weights:
             ))
         del sd
         inv_freq = 1.0 / (self.theta ** (torch.arange(0, self.hd, 2, dtype=torch.int64).float() / self.hd))
-        t = torch.arange(4096, dtype=torch.float32)
+        # positions up to the model's context (capped; prompts longer than 4,096 tokens indexed past the old table)
+        t = torch.arange(min(int(self.max_pos), 32768), dtype=torch.float32)
         freqs = torch.outer(t, inv_freq)
         emb = torch.cat([freqs, freqs], -1)
         self.cos = emb.cos().to(device=device, dtype=dtype)

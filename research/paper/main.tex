@@ -102,7 +102,10 @@ what makes it cheap.
   precision) attributes the speed. Certification alone is 1.2$\times$ faster than beam-50, and with late entry
   2.0$\times$ faster with 2.7$\times$ the throughput, at equal HR@10. Against FlashRec~\cite{flashrec} on the
   same H100, our engine adds another 2.2$\times$, for 4.5$\times$ per request in total. Results hold on two
-  datasets and on 3B and 7B backbones.
+  datasets and on 3B and 7B backbones. Applied settings test the edges (\S\ref{sec:exp-applied}). The
+  full-vocabulary objective is served exactly at beam's median cost with a heavier tail. A per-level budget
+  removes the cost of wide first levels at the price of weaker certification. The 2$\times$ gain holds with up to
+  8k tokens of cached history.
 \end{itemize}
 
 \begin{figure}[t]
@@ -303,7 +306,8 @@ head). Appendix~\ref{app:engine} gives the engine's latency ladder from Hugging 
 We answer five questions. \textbf{RQ1}: How fast is certified decoding compared with beam search and with a
 public SID serving engine? \textbf{RQ2}: How does it change quality, and what does exact fusion add?
 \textbf{RQ3}: What does the certificate cost as $K$ and the catalog grow? \textbf{RQ4}: Is late entry lossless?
-\textbf{RQ5}: Do the results transfer to other backbones?
+\textbf{RQ5}: Do the results transfer to other backbones? \textbf{RQ6}: Do they hold in applied settings, under the
+full-vocabulary objective, with wide first levels and with long user histories?
 
 \paragraph{Baselines.} (i) MiniOneRec's own beam search (width 50, full normalization, forced suffix) in our
 engine, so the decoder is the only difference. (ii) Beam-50 under FlashRec's objective (per-level codebook
@@ -383,15 +387,6 @@ beam-50 under FlashRec's own objective in 5.2\,ms at 970 users/s, about 2.2$\tim
 about 2$\times$ on top. The engine factor does not depend on where the timer stops: FlashRec's GPU kernels alone
 take 6.78\,ms per request (1,878 kernels, profiled over 50 requests), and the rest of its 11.7\,ms is host-side
 scheduling.
-
-\paragraph{Long prompts.} Our prompts are short (76--121 tokens), while serving engines target 1k--5k-token
-contexts. We lengthen every prompt by repeating the user's own history after the shared template (latency only).
-The deployed decoder takes 2.61, 7.59 and 21.4\,ms at about 100, 1,100 and 3,150 tokens; beam-50 under the same
-objective takes 5.10, 11.5 and 37.0\,ms. The prompt forward is shared, but beam's second step attends over the
-whole prompt for 50 rows, where certified decoding uses 16 rows that run only the top two layers. Certified
-decoding therefore stays 1.5--2$\times$ faster, and the absolute gap grows with the prompt. These runs use a
-streaming (online-softmax) version of our Triton attention kernels; the original kernels hold the whole prompt in
-shared memory and stop at a few hundred tokens.
 
 \paragraph{Long candidate lists.} A certified top-500 takes 2.92\,ms with bridges. Beam-500 takes 7.2\,ms under
 trie scoring and 18.1\,ms under MiniOneRec's objective, and serves 253 and 71 users/s against 450. The second
@@ -540,15 +535,6 @@ of top-10s. $M=64$ certifies 96\%, $M=128$ certifies 100\% at 2.97\,ms, and $M=5
 4\,MB host-to-device copy of the term per request. The budget must therefore scale with the term's strength and
 the catalog's density; the certificate reports when it was too small.
 
-\paragraph{First-level width.} The released model has only 88 first-code tokens, so we time wider first levels
-by borrowing the 512 deeper code tokens as extra first codes, each with a real first code's subtree (up to 600
-first codes and 23k SIDs, trie scoring, full depth). Forward~1 carries one tree node per first code, so it
-grows: certified decoding takes 4.28, 4.52, 5.11 and 6.38\,ms at 88, 176, 352 and 600 first codes, and certifies
-every top-10. Beam-50 with the same fused first level grows in step (5.08 to 7.42\,ms). Beam-50 without it does
-not grow, at 6.49\,ms (also without the cached template). The full-depth crossover is therefore near 600 first
-codes. Tokenizers with thousands of first codes would need a budget on the first level as well, or late entry
-for its rows, which costs 10 of 28 layers per row.
-
 \begin{figure}[t]
 \centering
 \includegraphics[width=\linewidth]{catalog_scaling.pdf}
@@ -643,6 +629,82 @@ SASRec term adds 2.2--2.4 HR@10 and lifts both above the released 1.5B LLM alone
 makes certification \emph{cheaper}: top-50 certifies at $M=16$ for 26--31\% of users, against 14--20\% for its SFT
 parent. RL sharpens the distribution, so fewer prefixes cross the bound.
 
+
+\subsection{RQ6: Applied settings}
+\label{sec:exp-applied}
+
+\begin{table}[t]
+\caption{Applied settings (Office, H100, FP16, batch 1, median ms; p99 where requests that do not certify are
+rerun with every prefix expanded). Synthetic rows (wider first levels, long contexts) measure latency only.}
+\label{tab:applied}
+\vspace{-2mm}
+\footnotesize
+\setlength{\tabcolsep}{2.4pt}
+\begin{tabular*}{\linewidth}{@{\extracolsep{\fill}}lrrr@{}}
+\toprule
+setting & certified & beam-50 & top-10 cert. \\
+\midrule
+\multicolumn{4}{@{}l}{\emph{full-vocabulary objective, no forced suffix}} \\
+$M=64$ / $+$ exhaustive fallback (p99)         & 5.22 / 28.5  & 5.82  & 94\% / 100\% \\
+third-code bridge, $M=256$ / $+$ fallback (p99) & 4.55 / 17.5  & --    & 99\% / 100\% \\
+every prefix, full depth / bridged             & 23.2 / 13.2  & --    & 100\% \\
+\multicolumn{4}{@{}l}{\emph{full vocabulary + forced suffix (MiniOneRec's objective)}} \\
+$M=64$ / $M=512$                               & 7.85 / 16.3  & 8.34  & 52\% / 89\% \\
+\midrule
+\multicolumn{4}{@{}l}{\emph{first-level budget $A_1$ (real catalog, 88 first codes)}} \\
+all 88, two forwards                           & 2.65         & 5.13  & 100\% \\
+$A_1=48$ / 32 / 16                             & 3.34 / 3.27 / 3.19 & & 85 / 61 / 28\% \\
+\multicolumn{4}{@{}l}{\emph{wider first level (synthetic), 88 $\to$ 600 first codes}} \\
+two forwards                                   & 2.64 $\to$ 3.47 & 5.08 $\to$ 7.42$^*$ & 100\% \\
+$A_1=32$                                       & 3.21 $\to$ 3.24 &       & 60--65\% \\
+\midrule
+\multicolumn{4}{@{}l}{\emph{long user histories}} \\
+cached history, 1k / 4k / 8k tokens            & 3.66 / 6.54 / 10.4 & 7.19 / 13.1 / 20.7 & 100\% \\
+uncached prompt, 1.1k / 3.15k tokens           & 7.59 / 21.4  & 11.5 / 37.0 & 100\% \\
+uncached 3k, users/s at $B=16$                 & 51           & 32    & -- \\
+\bottomrule
+\end{tabular*}
+\\[1pt]{\scriptsize $^*$full depth, trie scoring (\S\ref{sec:exp-cost}); the certified row uses both bridges.}
+\vspace{-3mm}
+\end{table}
+
+\paragraph{Without trie normalization.} Normalization is a decode-time choice: the model is trained with
+full-vocabulary cross-entropy either way, and on Office the restricted rules score better
+(\S\ref{sec:exp-quality}). Some deployments may still have to serve the full-vocabulary objective, for example to
+keep scores calibrated across catalogs. We serve it exactly (Table~\ref{tab:applied}). Without the forced suffix,
+a budget of $M=64$ certifies 94\% of top-10s and costs less than beam-50 (5.22 vs.\ 5.82\,ms). The rest are rerun
+with every prefix expanded, which costs 23\,ms at full depth. The median stays at 5.2\,ms, but the tail moves to
+28.5\,ms at p99. With the third-code bridge, $M=256$ certifies 99\% at 4.55\,ms, and the p99 including reruns is
+17.5\,ms. The forced suffix is what makes the original objective expensive. Its two extra terms are not bounded by
+the prefix, so certification needs a third forward over items: $M=512$ certifies 89\% at 16.3\,ms, twice beam's
+cost. The dependence on normalization is therefore one of degree. Trie-style rules certify every request at a flat
+cost. The full-vocabulary objective is served exactly at beam's median cost with a heavier tail, and the forced
+suffix roughly doubles it.
+
+\paragraph{Wide first levels.} Forward~1 carries one row per first code. With first-level late entry each row
+costs about 1.6\,$\mu$s: the deployed decoder goes from 2.64 to 3.47\,ms between 88 and 600 first codes. Linear
+extrapolation to 8,192 codes gives roughly 16\,ms, which we have not measured. A budget per level removes that
+dependence (\texttt{HierTrieEngine}). A prompt pass yields the exact $s(a)$ of every first code, and only the $A_1$
+best become rows. Each unexpanded first code then bounds its subtree by $s(a)$ inside the certificate, the same
+rule one level up. With $A_1=32$ latency stays at 3.2\,ms from 88 to 600 first codes. The extra pass costs about
+0.7\,ms, so on the released catalog the two-forward engine remains faster. The limit is the bound: $s(a)$ alone is
+loose. On the real first-code distribution, a top-10 certifies for 85\% of users at $A_1=48$, 61\% at 32 and 28\%
+at 16. Top-1 still certifies for 97\% at 16, and quality is unchanged at every budget (HR@10 0.1685--0.1693),
+because uncertified answers are almost always right. For first levels with thousands of codes, certification of
+the head of the list is cheap. A full top-10 needs a budget that grows with the number of first codes whose prior
+exceeds the tenth item's score. That number depends on the model, and we can only bound it on the models we have.
+
+\paragraph{Long user histories.} Production systems keep a user's history K/V across requests and process only
+the new tokens. We emulate that with a long history held in the prompt cache (synthetic content, latency only).
+At 1k, 4k and 8k cached tokens the deployed decoder takes 3.66, 6.54 and 10.4\,ms against 7.19, 13.1 and 20.7\,ms
+for beam-50, a constant 2.0$\times$. Every new row attends over the whole history, and beam has 50 such rows in 28
+layers, while certified decoding has 16 in two. Without a cache the prompt forward dominates. Per request the gain
+stays 1.5--1.7$\times$ (7.59 vs.\ 11.5\,ms at 1.1k tokens; 21.4 vs.\ 37.0\,ms at 3.15k), but throughput becomes
+prefill-bound and the gain shrinks from 2.7$\times$ to 1.6$\times$ (51 vs.\ 32 users/s at 3k tokens). The
+critique that long contexts dilute the speedup holds for uncached prompts and does not hold once histories are
+cached. These runs use streaming (online-softmax) versions of our Triton attention kernels for prompts over 256
+tokens.
+
 % =====================================================================================================
 \section{Related work}
 \label{sec:related}
@@ -689,8 +751,9 @@ We evaluate one model family: MiniOneRec on Qwen2/2.5, from 1.5B to 7B. The real
 first levels (thousands of codes) would need a budget on the first-level expansion as well. Late entry adds a
 learned component per model and per entry layer, and the certificate then certifies the bridged objective;
 we report quality against the full-depth model throughout. The industry comparison covers one engine, ported by
-us, with an unexplained numerical drift, and short prompts. Long prompts (up to 3k tokens) and wider first
-levels (up to 600 codes) are measured only in our engine, with synthetic content; wide beams ($\ge256$), where
+us, with an unexplained numerical drift, and short prompts. Long histories (up to 8k cached tokens) and wider
+first levels (up to 600 codes) are measured only in our engine with synthetic content. No public model has a first
+level with thousands of codes, so certification cost there is bounded, not measured. Wide beams ($\ge256$), where
 shared-K/V designs matter most, are not covered.
 
 \section{Conclusion}

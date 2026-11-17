@@ -82,6 +82,11 @@ a small bridge distilled from their parent node's state (no labels, frozen model
   of users; 85.4% after distilling them on the label-free training prompts). Long prompts (to 3k tokens: 21 vs 37 ms),
   wider first levels (to 600 codes) and fusion on 1M SIDs (M = 128 for a σ = 0.5 term, 2.97 ms) are measured.
   Prompts over 256 tokens use new streaming Triton attention kernels.
+- **Applied settings (seventh session).** The full-vocabulary objective is served exactly at beam-50's median cost
+  (5.2 vs 5.8 ms, 94% certified at M = 64) with a heavier tail (p99 17–28 ms when the rest are rerun exhaustively);
+  the forced suffix doubles the cost. A per-level budget (`--engine hier`) makes latency flat in the number of first
+  codes (3.2 ms from 88 to 600) but certifies only 61% of top-10s at 32 of 88 real first codes. With cached user
+  histories of 1k–8k tokens certified decoding stays 2.0× faster than beam-50; uncached, throughput drops to 1.6×.
 - **Two-sided bounds**: under trie normalization the set of prefixes that guarantees the certificate is known
   after the first forward (≤ 1.1·K on average).
 
