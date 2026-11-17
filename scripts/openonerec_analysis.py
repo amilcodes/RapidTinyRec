@@ -50,6 +50,20 @@ def summarize(path):
                     d[f'beam{B}_exact@{K}'] = float(np.mean([x == 1.0 for x in v]))
             d[f'hit_beam{B}@1'] = float(np.mean([x[f'hit_beam{B}@1'] for x in R]))
             d[f'hit_beam{B}@32'] = float(np.mean([x[f'hit_beam{B}@32'] for x in R]))
+        rng = np.random.default_rng(0)
+        idx = rng.integers(0, len(R), size=(2000, len(R)))
+        for B in beams:                                   # paired bootstrap: exact top-32 hit rate minus beam-B's
+            diff = np.array([x['hit_exact@32'] - x[f'hit_beam{B}@32'] for x in R], dtype=float)
+            bs = diff[idx].mean(1)
+            d[f'hit32_exact_minus_beam{B}'] = [float(diff.mean()), q(bs, 2.5), q(bs, 97.5)]
+        for K in ks:                                      # rows an exact method needs vs a beam of width B (2B rows)
+            v = [x[f'N_A@{K}'] + x[f'N_P@{K}'] for x in R if f'N_A@{K}' in x]
+            d['K'][K]['rows_p50'], d['K'][K]['rows_p90'] = q(v, 50), q(v, 90)
+        # A per-level budget (A1 first codes in prior order, then M prefixes in bound order) certifies a request's
+        # top-K exactly when the instance-optimal sets fit: N_A@K <= A1 and N_P@K <= M.
+        d['budget'] = {K: {f'{A1}/{M}': float(np.mean([x.get(f'N_A@{K}', 1 << 30) <= A1 and x.get(f'N_P@{K}', 1 << 30) <= M
+                                                     for x in R]))
+                           for A1 in (64, 128, 256, 512, 1024, 2048) for M in (64, 256)} for K in ks if K in (1, 10, 32)}
         out['norms'][nm] = d
     return out
 
@@ -64,11 +78,16 @@ def table(s):
               f"{d['hit_exact1']:.3f}/{d['hit_exact32']:.3f}, " +
               ', '.join(f"beam{B} {d.get(f'hit_beam{B}@1', float('nan')):.3f}/{d.get(f'hit_beam{B}@32', float('nan')):.3f}"
                         for B in (32, 128)))
-        print('| K | cert | N_A p50 | N_A p90 | N_P p50 | N_P p90 | N_Pmulti p50 |')
-        print('|---:|---:|---:|---:|---:|---:|---:|')
+        print('exact minus beam, hit@32 [95% CI]: ' + ', '.join(
+            f"B{B} {d[f'hit32_exact_minus_beam{B}'][0]:+.3f} [{d[f'hit32_exact_minus_beam{B}'][1]:+.3f}, "
+            f"{d[f'hit32_exact_minus_beam{B}'][2]:+.3f}]" for B in (32, 128) if f'hit32_exact_minus_beam{B}' in d))
+        print('| K | cert | N_A p50 | N_A p90 | N_P p50 | N_P p90 | N_Pmulti p50 | rows p50 | rows p90 |')
+        print('|---:|---:|---:|---:|---:|---:|---:|---:|---:|')
         for K, e in d['K'].items():
             print(f"| {K} | {e['cert']:.3f} | {e['N_A_p50']:.0f} | {e['N_A_p90']:.0f} | {e['N_P_p50']:.0f} | "
-                  f"{e['N_P_p90']:.0f} | {e['N_Pmulti_p50']:.0f} |")
+                  f"{e['N_P_p90']:.0f} | {e['N_Pmulti_p50']:.0f} | {e['rows_p50']:.0f} | {e['rows_p90']:.0f} |")
+        for K, b in d['budget'].items():
+            print(f'budget A1/M certifying top-{K}: ' + ', '.join(f'{k} {v:.2f}' for k, v in b.items()))
         print('beam recall of exact top-K (mean / share exact): ' + ', '.join(
             f"B{B}@{K} {d[f'beam{B}_recall@{K}']:.3f}/{d[f'beam{B}_exact@{K}']:.2f}"
             for B in (32, 128) for K in (1, 10, 32) if f'beam{B}_recall@{K}' in d))
