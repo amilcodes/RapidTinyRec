@@ -639,14 +639,14 @@ rerun with every prefix expanded). Synthetic rows (wider first levels, long cont
 \label{tab:applied}
 \vspace{-2mm}
 \footnotesize
-\setlength{\tabcolsep}{2.4pt}
+\setlength{\tabcolsep}{1.5pt}
 \begin{tabular*}{\linewidth}{@{\extracolsep{\fill}}lrrr@{}}
 \toprule
-setting & certified & beam-50 & top-10 cert. \\
+setting & certified & beam-50 & top-10 \\
 \midrule
 \multicolumn{4}{@{}l}{\emph{full-vocabulary objective, no forced suffix}} \\
-$M=64$ / $+$ exhaustive fallback (p99)         & 5.22 / 28.5  & 5.82  & 94\% / 100\% \\
-third-code bridge, $M=256$ / $+$ fallback (p99) & 4.55 / 17.5  & --    & 99\% / 100\% \\
+$M=64$ / + fallback (p99)                      & 5.22 / 28.5  & 5.82  & 94\% / 100\% \\
+bridge, $M=256$ / + fallback (p99)             & 4.55 / 17.5  & --    & 99\% / 100\% \\
 every prefix, full depth / bridged             & 23.2 / 13.2  & --    & 100\% \\
 \multicolumn{4}{@{}l}{\emph{full vocabulary + forced suffix (MiniOneRec's objective)}} \\
 $M=64$ / $M=512$                               & 7.85 / 16.3  & 8.34  & 52\% / 89\% \\
@@ -659,9 +659,9 @@ two forwards                                   & 2.64 $\to$ 3.47 & 5.08 $\to$ 7.
 $A_1=32$                                       & 3.21 $\to$ 3.24 &       & 60--65\% \\
 \midrule
 \multicolumn{4}{@{}l}{\emph{long user histories}} \\
-cached history, 1k / 4k / 8k tokens            & 3.66 / 6.54 / 10.4 & 7.19 / 13.1 / 20.7 & 100\% \\
-uncached prompt, 1.1k / 3.15k tokens           & 7.59 / 21.4  & 11.5 / 37.0 & 100\% \\
-uncached 3k, users/s at $B=16$                 & 51           & 32    & -- \\
+cached, 1k / 4k / 8k tokens                    & 3.66 / 6.54 / 10.4 & 7.19 / 13.1 / 20.7 & 100\% \\
+uncached, 1.1k / 3.15k tokens                  & 7.59 / 21.4  & 11.5 / 37.0 & 100\% \\
+uncached 3k, users/s ($B=16$)                  & 51           & 32    & -- \\
 \bottomrule
 \end{tabular*}
 \\[1pt]{\scriptsize $^*$full depth, trie scoring (\S\ref{sec:exp-cost}); the certified row uses both bridges.}

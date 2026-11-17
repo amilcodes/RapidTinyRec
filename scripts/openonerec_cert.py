@@ -232,6 +232,7 @@ def main():
     ap.add_argument('--target-field', default='', help='column holding the ground truth if not in an assistant message')
     ap.add_argument('--check', type=int, default=2, help='requests whose tree-attention logits are checked sequentially')
     a = ap.parse_args()
+    torch.set_grad_enabled(False)
     import pandas as pd
     from transformers import AutoModelForCausalLM, AutoTokenizer
     dev = torch.device('cuda')

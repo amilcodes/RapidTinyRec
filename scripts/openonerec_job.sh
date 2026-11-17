@@ -23,7 +23,7 @@ EOF
   du -sh $D/*
   ;;
 inspect)
-  PYTHONPATH= $PYB - <<EOF
+  PYTHONPATH=$S/pylib_oo $PYB - <<EOF
 import json, pandas as pd
 for t in ['video', 'ad', 'product']:
     df = pd.read_parquet('$D/RecIF/benchmark_data/%s/%s_test.parquet' % (t, t))
@@ -42,10 +42,17 @@ EOF
   ;;
 run)
   T=$2; N=${3:-200}
+  export PYTHONPATH=$S/pylib_oo:${PYTHONPATH:-}     # pyarrow for the benchmark parquet files
   CAT=${CATALOG:-$D/RecIF/benchmark_data/sid2pid.json}
   [ "$T" = product ] && CAT=${CATALOG:-$D/RecIF/benchmark_data/sid2iid.json}
   $PY scripts/openonerec_cert.py --model $D/OneRec-1.7B --data $D/RecIF/benchmark_data/$T/${T}_test.parquet \
     --catalog $CAT --out $OUT/${T}.jsonl --users $N ${EXTRA:-} 2>&1 \
     | grep --line-buffered -E '^\{"stage"|Error|Traceback|error' | cut -c1-1500
+  ;;
+smoke)
+  export PYTHONPATH=$S/pylib_oo:${PYTHONPATH:-}
+  $PY scripts/openonerec_cert.py --model $D/OneRec-1.7B --data $D/smoke/smoke_test.parquet --catalog $D/smoke/catalog.json \
+    --out $OUT/smoke.jsonl --users 4 --ks 1,10,32 --beams 32 --check 2 2>&1 | tail -40
+  head -c 3000 $OUT/smoke.jsonl
   ;;
 esac
