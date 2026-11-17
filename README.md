@@ -87,6 +87,9 @@ a small bridge distilled from their parent node's state (no labels, frozen model
   the forced suffix doubles the cost. A per-level budget (`--engine hier`) makes latency flat in the number of first
   codes (3.2 ms from 88 to 600) but certifies only 61% of top-10s at 32 of 88 real first codes. With cached user
   histories of 1k–8k tokens certified decoding stays 2.0× faster than beam-50; uncached, throughput drops to 1.6×.
+- **A real 8,192-code first level (eighth session).** On OpenOneRec-1.7B and its RecIF benchmark (1.3–14.6M SIDs),
+  every request certifies; an exact top-10 needs a median of 65–250 first codes and 11–17 prefixes, and the
+  benchmark's beam-32 returns only 52–91% of it (video: exact top-32 hit rate +5.0 points). `scripts/openonerec_*.py`.
 - **Two-sided bounds**: under trie normalization the set of prefixes that guarantees the certificate is known
   after the first forward (≤ 1.1·K on average).
 

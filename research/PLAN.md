@@ -848,3 +848,29 @@ All Office, H100, FP16, batch 1; runs `ap_hier`, `ap_wide`, `ap_fullA/B/C`, `ap_
 - Bugs fixed: RoPE table had 4,096 positions (prompts beyond indexed out of range → CUBLAS internal error);
   full-vocabulary logits for thousands of rows OOM'd → row-chunked LM head. Note: `--check-exhaustive` compares with
   the full-depth objective, so for bridged engines it reports "violations" that are objective differences.
+
+## Session 8 (2026-11-17): a real 8,192-code first level (OpenOneRec)
+
+OpenOneRec-1.7B (Qwen3, 3 × 8,192 RQ-Kmeans codes) on its RecIF benchmark; runs `oo_video`, `oo_videoF`, `oo_ad`,
+`oo_product` (`scripts/openonerec_job.sh run TASK N`, analysis `scripts/openonerec_analysis.py`). Reference
+implementation in HF Transformers (tree attention over the cached prompt, BF16; node logits match sequential decoding
+up to BF16 rounding, max |Δlogit| ≤ 0.56, lse equal to 1e-3). Counts are instance-optimal: first codes with
+s(a) > τ_K and prefixes with U2 > τ_K, τ_K the exact K-th score. No latency (our engine is Qwen2-only).
+- Data: prompts = RecIF `messages` (JSON string, content parts joined) with the chat template (thinking off) +
+  `<|sid_begin|>`; ground truth = SIDs in `metadata['answer']` (8.9 / 3.6 / 5.8 per request, all in the catalog).
+  Catalog = the benchmark's item table (sid2pid.json for video/ad: 1.52M SIDs, 6,847 first codes, 993k prefixes;
+  sid2iid.json for product: 1.29M, 2,628, 532k) or the full video/ad corpus (video_ad_pid2sid: 14.6M SIDs, 7,670
+  first codes, 4.7M prefixes). Keys pack SIDs as (a·8192 + b)·8192 + c. Prompt p50 2,452 / 724 / 910 tokens.
+- Full-vocabulary (the model's objective) and codebook normalization give identical results: the model puts almost
+  all mass on valid codes. Every request certifies at every K ≤ 512.
+- Exact top-10 needs (p50 / p90) first codes 250 / 551 (video), 142 / 293 (corpus), 65 / 89 (ad), 99 / 154 (product);
+  prefixes 17 / 37, 11 / 19, 16 / 22, 17 / 26. Trie normalization: 118, 122, 57, 83 first codes. Top-32: 638, 465,
+  109, 182 first codes. Denser catalog → fewer first codes (the K-th score rises).
+- Budget A1 / M certifying top-10: 256/64 52 / 82 / 100 / 98%; 512/64 86 / 96 / 100 / 100%; 1024/256 95 / 100 / 100 /
+  100%. Top-1 with A1 = 64: 94 / 100 / 99 / 95%.
+- Beam (trie-constrained, same objective) recall of the exact top-10: beam-32 0.52 / 0.68 / 0.89 / 0.91 (whole
+  top-10 for 3 / 9 / 41 / 43% of requests); beam-128 0.85 / 0.95 / 1.00 / 1.00. Top-1: beam-32 94–100%.
+- Hit@32 (any returned SID among the targets), exact vs beam-32: video .270 vs .220 (+5.0 [+0.5, +10.0], paired
+  bootstrap), beam-128 .250 (+2.0 [−2.0, +6.0]); corpus .235 vs .200 (+3.5 [−1.0, +7.5]); ad .227 vs .220; product
+  .213 vs .217 (n.s.).
+- Paper: RQ6 paragraph + Table 7 (`tab:openonerec`), abstract, contributions and limitations updated.

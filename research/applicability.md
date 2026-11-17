@@ -64,7 +64,9 @@ What these systems share:
 - **Two-forward engine:** forward 1 would carry 512–16k rows. Extrapolating our measured slope, that is about +1–26 ms.
 - **First-level budget (`HierTrieEngine`):** it caps that cost, measured flat at 3.2 ms up to 600 codes. But the certificate then depends on how concentrated the first-level prior is, and on our model only 61% of top-10s certify with 32 of 88 first codes.
 - **The asymmetry to remember:** beam search scores every first code in one LM-head row at step 1, so wide first levels cost beam nothing at that step.
-- **What it means here:** the method buys exact top-1/top-5 and late-entry speed. Full certification of a 500-item list would need a first-level budget we cannot estimate without such a model.
+- **Measured on OpenOneRec-1.7B (3 × 8,192, RecIF benchmark; `runs/oo_*`, paper Table 7).** Every request certifies up to K = 512. An exact top-10 needs a median of 65–250 first codes (p90 89–551) and only 11–17 prefixes, i.e. 81–266 rows, between beam-32 (64) and beam-128 (256). A budget of 512 first codes and 64 prefixes certifies the top-10 for 86–100% of requests, 1,024/256 for 95–100%, and 64 first codes certify top-1 for 94–100%. Node counts only: latency on such a model in our engine is not measured.
+- **Beam search is far from exact there.** The benchmark's beam-32 returns 52–91% of the model's exact top-10 (the whole top-10 for 3–43% of requests); beam-128 85–100%. On video, exact top-32 hits a held-out item for 27.0% of requests vs 22.0% for beam-32 (+5.0 [+0.5, +10.0]); on ad and product the gap is within a point.
+- **What it means here:** wide first levels move the cost from the prefix level to the first level; a few hundred first-level rows buy an exact top-10 on this model. Full certification of a 500-item list needs 2–3k first codes (video).
 - **OneRec and OpenOneRec need a valid-item trie added first.** They decode unconstrained and fix legality through training, though STATIC and FlashTrie show tries are cheap at 20M–800M items.
 
 **Applicable for exactness, not for speed.**
@@ -84,7 +86,7 @@ What these systems share:
 
 ## 4. What would close the gaps
 
-1. **A model with a wide first level.** OpenOneRec 1.7B (3 × 8,192, open weights, 15M items) is the obvious test. Measure how many first codes the top-K certificate needs on a real 8,192-code prior, and the hierarchical engine's certification rate at budgets of 64–512.
+1. ~~**A model with a wide first level.**~~ Done for node counts on OpenOneRec 1.7B (above). Still open: latency in our engine on Qwen3 with a budgeted first level, and an unconstrained-vs-trie beam comparison at the benchmark's settings.
 2. **More than 3 levels.** Extend `HierTrieEngine` to one budgeted pass per level and test 4-level SIDs (LC-Rec, GLIDE-style 4 × 256).
 3. **Batched serving under a P99 budget.** Measure throughput at a fixed P99 with fallback reruns, against a batched beam engine, at 1k–3k uncached tokens: the deployed regime (L20/H100, 100–200 ms).
 4. **eCPM-style value terms.** Run the GR4AD-like objective, log-probability plus log eCPM, inside the certified search, against SID beam followed by eCPM re-ranking.
