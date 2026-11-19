@@ -90,6 +90,10 @@ a small bridge distilled from their parent node's state (no labels, frozen model
 - **A real 8,192-code first level (eighth session).** On OpenOneRec-1.7B and its RecIF benchmark (1.3–14.6M SIDs),
   every request certifies; an exact top-10 needs a median of 65–250 first codes and 11–17 prefixes, and the
   benchmark's beam-32 returns only 52–91% of it (video: exact top-32 hit rate +5.0 points). `scripts/openonerec_*.py`.
+- **OpenOneRec latency in our engine (ninth session).** The engine runs Qwen3, with a shared-prefix attention kernel
+  for hundreds of first-level rows. On an H100 at batch 1 the certified top-10 takes 9.7–12.1 ms of decoding at the
+  median against 6.3–6.9 ms for beam-32: +20–29% end to end, with a tail on video. The paper is restructured around
+  both models. `scripts/openonerec_latency.py`.
 - **Two-sided bounds**: under trie normalization the set of prefixes that guarantees the certificate is known
   after the first forward (≤ 1.1·K on average).
 

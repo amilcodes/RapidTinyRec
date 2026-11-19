@@ -33,24 +33,22 @@
 \affiliation{\institution{Anonymous Institution}\country{}}
 
 \begin{abstract}
-LLM-based generative recommenders emit an item as a short sequence of semantic-ID (SID) tokens and are
-served with constrained beam search. Beam search costs one sequential forward pass per token and does not
-guarantee that it returns the model's best items. We show that for catalog-sized tries it can be replaced
-by \emph{certified exact decoding}. Every scored term is a log-probability $\le 0$, so one tree-attention
-forward over the prompt and every first-level trie node bounds every item. A second forward scores the
-best-bounded prefixes exactly, and an on-device test certifies that the returned top-$K$ is the global optimum
-of the model's objective. Under trie normalization the bounds are two-sided, so the prefixes that guarantee
-the certificate are known after the first forward. We also find that deeper SID codes do not need the lower
-layers: prefix rows can enter the second forward at layer 26 of 28 through a small, label-free bridge from
-their parent's state, with HR@10 and NDCG@10 statistically unchanged. Exact search also makes \emph{objective fusion} exact: an additive
-per-item term, such as a collaborative model's score, keeps the certificate. On MiniOneRec (Qwen2-1.5B) on an
-H100, in one engine and under one objective, the certified decoder with late entry takes 2.61\,ms per request
-against 5.13\,ms for beam-50, with 2.7$\times$ the throughput at equal HR@10; certification alone accounts for
-1.2$\times$, late entry for the rest. A public SID serving engine, FlashRec, takes 11.5\,ms on the same GPU and
-prompts. Fusing a 1-minute SASRec model into
-the certified search raises HR@10 by 1.36 points, to 0.1825, at 2.83\,ms per request. On OpenOneRec, a
-public model with 8,192 first-level codes and catalogs of 1.3--14.6M SIDs, every request certifies: an exact
-top-10 needs a median of 65--250 first-level nodes, and the benchmark's beam-32 returns only 52--91\% of it.
+Generative recommenders built on large language models describe each item by a short sequence of semantic-ID
+tokens and retrieve items with constrained beam search. Beam search dominates their serving cost, and it is a
+heuristic: it returns the items that survive its pruning, not necessarily the items the model scores highest. We
+show that exact decoding is affordable for these models. Every term of an item's score is a log-probability, so
+the score of a code prefix bounds every item beneath it. A decoder that expands prefixes in the order of their
+bounds can therefore prove, for each request and on the GPU, that the list it returns is the model's exact
+top-$K$. We build this certified decoder with fixed shapes, extend it to tokenizers with thousands of codes per
+level through a budget per level that contains beam search as a special case, and pair it with two techniques that
+exactness enables: \emph{late entry}, in which deeper codes skip the lower layers through a small label-free bridge
+from their parent's state, and \emph{exact objective fusion}, in which item terms such as a collaborative score or
+an eligibility filter are optimized inside the search rather than applied after it. On MiniOneRec, certified
+decoding with late entry is 2$\times$ faster than beam search in the same engine at equal accuracy and
+4.5$\times$ faster than a public serving engine, and fusion adds 1.4 points of HR@10. On OpenOneRec, an
+industrial-scale model with 8,192 codes per level and catalogs of up to 14.6M items, every request certifies: the
+benchmark's beam search returns the model's full top-10 for at most 43\% of requests, while the exact top-10 costs
+20--29\% more end-to-end latency at the median.
 \end{abstract}
 
 \keywords{generative recommendation, semantic IDs, constrained decoding, exact search, LLM inference}
@@ -68,47 +66,51 @@ limits where these models can be used. The open serving engines therefore optimi
 the prompt's key--value cache across beams, capture decode loops in CUDA graphs, and move trie masking onto
 the GPU~\cite{flashrec,nvidiasidgr,ax2512.11529,ax2602.22647}.
 
-We ask a different question: \emph{is beam search needed at all?} Its cost has a simple structure. A
-three-level SID needs one forward for the prompt and one for each generated token, and at batch size 1 every
-forward streams all the weights. So the number of sequential forwards sets the floor, not the beam width.
-Beam search is also approximate. Under MiniOneRec's training objective, beam-50 recovers only 49\% of the exact
-top-50 (Appendix~\ref{app:objective}).
+We ask a different question: \emph{is beam search needed at all?} It has two weaknesses. Its cost is set by
+sequential forwards: a three-level SID needs one forward for the prompt and one for each generated token, and at
+batch size 1 every forward streams all of the weights. And it is a heuristic: it returns the items that survive its
+pruning, not the items the model scores highest. On MiniOneRec, beam-50 recovers only 49\% of the model's top-50
+under its training objective (Appendix~\ref{app:objective}). On OpenOneRec, an industrial-scale model, beam search
+at the benchmark's width returns the model's full top-10 for only 3--43\% of requests (\S\ref{sec:exp-openonerec}).
 
-Our observation is that the catalog trie is small compared with what one forward can process. The released
-Office catalog has 88 first codes and 2,488 two-code prefixes. Every scored term is a log-probability, which
-is $\le 0$, so the score of a prefix bounds the score of every item below it. One \emph{tree-attention} forward
-over the prompt and all 88 first-level nodes therefore yields a bound for every item in the catalog. A second
-forward over the most promising prefixes scores their items exactly. The returned top-$K$ is provably optimal
-as soon as the $K$-th exact score beats every remaining bound. This check runs on the device, in the same
-CUDA graph, for every request. Certification is classical in exact search for
-sequence models~\cite{stahlberg2019,stahlberg2022,fagin2003} and was recently stated for generative
-recommendation as a post-hoc completion of beam search~\cite{ax2609.33745}. We make it the decoder and show
-what makes it cheap.
+Our observation is that SID scores come with free bounds. Every scored term is a log-probability, which is $\le0$,
+so the score of a prefix bounds the score of every item below it. A decoder that expands prefixes in the order of
+their bounds can stop as soon as the $K$-th exact score beats every remaining bound, and the list it returns is
+then provably the model's top-$K$. The check runs on the device, in the same CUDA graph, for every request.
+Certification is classical in exact search for sequence models~\cite{stahlberg2019,stahlberg2022,fagin2003} and was
+recently stated for generative recommendation as a post-hoc completion of beam search~\cite{ax2609.33745}. We make
+it the decoder and show when it is cheap. When the tokenizer is small, the whole first trie level fits into the
+prompt's forward as tree nodes, so two forwards bound and score the entire catalog: MiniOneRec's Office catalog has
+88 first codes and 2,488 two-code prefixes. When it is large, with thousands of first codes, a budget per level
+applies the same rule one level up. Beam search is the special case of that budget which never checks its answer.
+
+Exactness also changes what the rest of the decoder may do. The certificate is a statement about scores, so any
+additive item term can be optimized inside the search instead of after it, and the deeper levels can be computed
+by a cheaper approximation of the network as long as the certificate is read for the objective actually computed.
 
 \paragraph{Contributions.}
 \begin{itemize}
-\item \textbf{Certified exact decoding} (\S\ref{sec:certified}). A fixed-shape, two-forward decoder returns a
-  per-request optimality certificate and certifies 100\% of requests, with no violations against brute force.
-  Under trie normalization the bounds are \emph{two-sided}. The set of prefixes that guarantees the certificate
-  is therefore known after the first forward. It averages at most $1.1K$ prefixes and is within 1.2--2.1$\times$
-  of the instance-optimal set. On synthetic catalogs of up to 1M SIDs, the required expansion stays flat.
-\item \textbf{Late entry} (\S\ref{sec:late}). A child row's state at layer $e$ is predicted from its parent's
-  state at the same depth, using a small bridge distilled from the frozen model without labels. The third code
-  then needs only the top 2 of 28 layers, and the first-level rows only the top 10, with HR@10 and NDCG@10
-  statistically unchanged. The bridge is an approximation: the ranking it returns differs from the full-depth
-  model's for many users, so the certificate covers the bridged objective.
+\item \textbf{Certified exact decoding} (\S\ref{sec:certified}). A fixed-shape decoder returns the exact top-$K$ of
+  the model's objective with a per-request certificate. Under trie normalization the bounds are \emph{two-sided}:
+  the set of prefixes that guarantees the certificate is known after the first forward and is within
+  1.2--2.1$\times$ of the instance-optimal set. A per-level budget extends the decoder to wide tokenizers and
+  contains beam search as a special case, which makes the two directly comparable.
+\item \textbf{Late entry} (\S\ref{sec:late}). A child row's state at layer $e$ is predicted from its parent's state
+  at the same depth by a small bridge distilled from the frozen model without labels. The third code then needs
+  only the top 2 of 28 layers and the first-level rows the top 10, with HR@10 and NDCG@10 statistically unchanged.
+  The bridged model ranks differently from the full one for many users, so the certificate covers the bridged
+  objective.
 \item \textbf{Exact objective fusion} (\S\ref{sec:fusion}). Any additive item term keeps the certificate,
-  including priors, bids, eligibility filters and collaborative scores. Beam-then-rerank cannot change which
-  items are retrieved; fused certified search can.
-\item \textbf{Evaluation} (\S\ref{sec:experiments}). A controlled comparison (same engine, objective and
-  precision) attributes the speed. Certification alone is 1.2$\times$ faster than beam-50, and with late entry
-  2.0$\times$ faster with 2.7$\times$ the throughput, at equal HR@10. Against FlashRec~\cite{flashrec} on the
-  same H100, our engine adds another 2.2$\times$, for 4.5$\times$ per request in total. Results hold on two
-  datasets and on 3B and 7B backbones. Applied settings test the edges (\S\ref{sec:exp-applied}). The
-  full-vocabulary objective is served exactly at beam's median cost with a heavier tail. A per-level budget
-  removes the cost of wide first levels at the price of weaker certification. The 2$\times$ gain holds with up to
-  8k tokens of cached history. On OpenOneRec~\cite{ax2512.24762}, a public model with 8,192 first-level codes,
-  an exact top-10 needs a median of 65--250 first codes and 11--17 prefixes, and beam-32 misses 9--48\% of it.
+  including priors, bids, eligibility filters and collaborative scores. Beam-then-rerank cannot change which items
+  are retrieved; fused certified search can.
+\item \textbf{Evaluation on two public models at opposite scales} (\S\ref{sec:experiments}). On MiniOneRec
+  (3.5k items, 88 first codes), a controlled comparison in one engine attributes the speed: certification alone is
+  1.2$\times$ faster than beam-50, and with late entry 2.0$\times$ faster with 2.7$\times$ the throughput at equal
+  HR@10. Against FlashRec~\cite{flashrec} on the same H100 our engine adds another 2.2$\times$, for 4.5$\times$ per
+  request, and fusing a one-minute SASRec model adds 1.36 points of HR@10. On OpenOneRec~\cite{ax2512.24762}
+  (8,192 codes per level, 1.3--14.6M items, prompts of up to 2.6k tokens), every request certifies. An exact top-10 needs a few hundred first-level nodes and fewer than 20 prefixes, and
+  costs 20--29\% more end-to-end latency than the benchmark's beam-32 at the median. Beam-32 returns the full
+  top-10 for at most 43\% of requests and loses 5 points of hit@32 on video.
 \end{itemize}
 
 \begin{figure}[t]
@@ -126,13 +128,19 @@ over all 4,866 test users (certified points: same configurations, other runs).}
 \section{Setting}
 \label{sec:setting}
 
-\paragraph{Model and data.} We use MiniOneRec~\cite{ax2510.24431}, an open reproduction of OneRec-style
-generative recommendation. It is Qwen2-1.5B~\cite{ax2407.10671} (28 layers, $d=1536$, 12 query and 2 key--value
-heads) fine-tuned on Amazon \emph{Office Products} and \emph{Industrial and Scientific}. Items carry a
-three-level code $\langle a,b,c\rangle$ from an RQ-VAE with 256 codes per level, appended to the vocabulary as
-600 tokens. The Office catalog has 3,459 items (3,444 distinct SIDs), 88 first codes and 2,488 two-code
-prefixes; Industrial has 48 first codes. Prompts are 76--121 tokens long and share a 69-token instruction
-prefix. The test splits contain 4,866 (Office) and 4,533 (Industrial) users.
+\paragraph{Models and data.} We study two public SID recommenders at opposite ends of the design space.
+\emph{MiniOneRec}~\cite{ax2510.24431} is an open reproduction of OneRec-style generative recommendation. It is
+Qwen2-1.5B~\cite{ax2407.10671} (28 layers, $d=1536$, 12 query and 2 key--value heads) fine-tuned on Amazon
+\emph{Office Products} and \emph{Industrial and Scientific}. Items carry a three-level code $\langle a,b,c\rangle$
+from an RQ-VAE with 256 codes per level, appended to the vocabulary as 600 tokens. The Office catalog has 3,459
+items (3,444 distinct SIDs), 88 first codes and 2,488 two-code prefixes; Industrial has 48 first codes. Prompts are
+76--121 tokens long and share a 69-token instruction prefix. The test splits contain 4,866 (Office) and 4,533
+(Industrial) users. \emph{OpenOneRec}~\cite{ax2512.24762} is an industrial-scale release: a Qwen3-1.7B backbone
+(28 layers, $d=2048$, 16 query and 8 key--value heads, query/key normalization) with three levels of 8,192
+RQ-Kmeans codes, trained on Kuaishou's video, ad and product corpora. Its benchmark, RecIF, provides requests with
+long behaviour histories (median prompts of 0.7--2.5k tokens), the held-out next items, and SID tables of 1.3--1.5M
+items with 2.6k--6.8k first codes; the full video and ad corpus has 14.6M SIDs. MiniOneRec is where we build and
+dissect the decoder. OpenOneRec tests whether it survives a wide tokenizer, long prompts and million-item catalogs.
 
 \paragraph{Scores.} For a prompt $x$ and item $i=\langle a,b,c\rangle$ we write
 \begin{equation}
@@ -145,13 +153,16 @@ that level, as in FlashRec. \emph{Trie}: log-softmax over the valid children of 
 decodes with beam width 50, full normalization and $w=(1,1,1)$; its prompt format forces a newline and EOS after
 $c$, and $\lp(\sigma\mid a,b,c)$ is the log-probability of that forced suffix $\sigma$. Our
 default, \emph{cbtrie}, uses codebook normalization for $a$ and $b$, trie normalization for $c$, and
-$w=(1,0.75,0)$. These weights were chosen on the validation split. Every term in Eq.~\ref{eq:score} is $\le 0$,
-the property all our bounds rely on.
+$w=(1,0.75,0)$. These weights were chosen on the validation split. OpenOneRec scores an item by its full-vocabulary
+log-probability with no suffix, $w=(1,1,0)$, and we keep that objective. Every term in Eq.~\ref{eq:score} is
+$\le 0$, the property all our bounds rely on.
 
-\paragraph{Metrics.} SID-level HR@$K$ and NDCG@$K$ on all test users. Every quality difference is paired over
+\paragraph{Metrics.} SID-level HR@$K$ and NDCG@$K$ on all MiniOneRec test users. On RecIF a request can have
+several held-out items; hit@$K$ is the share of requests whose top $K$ contains any of them. Every quality difference is paired over
 users, with 95\% bootstrap intervals from 2,000 resamples, written $\Delta\,[\text{lo},\text{hi}]$ in points.
-Latency is measured at batch 1 on a frozen cohort of 500 test users, $2\times500$ requests, CUDA-synchronized,
-excluding compilation and graph capture. We report the median. Absolute latency varies by up to 10\% between
+Latency is measured at batch 1, CUDA-synchronized, excluding compilation and graph capture, and we report the
+median. On MiniOneRec we time a frozen cohort of 500 test users ($2\times500$ requests); on RecIF, 200--300
+sampled requests per task, each replayed five times. Absolute latency varies by up to 10\% between
 allocations of the same GPU type, so every comparison we draw a conclusion from runs within one allocation.
 
 % =====================================================================================================
@@ -190,8 +201,8 @@ allocations of the same GPU type, so every comparison we draw a conclusion from 
      \textbf{certificate:} $s_{(K)} \ge \max\U$ over unexpanded prefixes $\Rightarrow$ top-$K$ is the global optimum};
 \end{tikzpicture}
 \vspace{-2mm}
-\caption{Certified decoding of one request. Both forwards have fixed shapes, so a request is one CUDA-graph
-replay.}
+\caption{Certified decoding of one MiniOneRec request (88 first codes). Both forwards have fixed shapes, so a
+request is one CUDA-graph replay.}
 \label{fig:overview}
 \vspace{-3mm}
 \end{figure}
@@ -255,6 +266,27 @@ valid children can hold arbitrarily little probability mass. Proposition~\ref{pr
 $M$ into a choice the server can check before Forward~2: if $|E|>M$, the request is detected after Forward~1
 and can be re-run with a larger budget.
 
+\subsection{Wide first levels: a budget per level}
+\label{sec:budget}
+Forward~1 carries one row per first code. That is cheap for MiniOneRec's 88 first codes but not for industrial
+tokenizers with thousands. The bound applies one level up: every term below the first is $\le0$, so an
+unexpanded first code $a$ bounds every item beneath it by $\lp(a)$. A \emph{per-level budget} $(A_1,M)$ therefore
+runs the prompt alone and reads $\lp(a)$ for every first code from its last position. It keeps the $A_1$ first
+codes with the largest $\lp(a)$ as rows of a second forward, which gives $\U$ for all of their prefixes, and the
+$M$ prefixes with the largest $\U$ as rows of a third, which scores their items exactly. The certificate
+becomes
+\begin{equation}
+s_{(K)}\ \ge\ \max\Bigl(\max_{a\ \text{unexpanded}}\lp(a),\ \max_{p\ \text{unexpanded}}\U(p)\Bigr),
+\label{eq:cert2}
+\end{equation}
+where the second maximum runs over the prefixes of the expanded first codes.
+Proposition~\ref{prop:necessary} holds at both levels, so the smallest budget that can certify a request is
+$N_A=|\{a:\lp(a)>\tau^*\}|$ first codes and $N_P=|\{p:\U(p)>\tau^*\}|$ prefixes. With $A_1=M=B$ the procedure is
+exactly trie-constrained beam search of width $B$: beam search is a budgeted search that never checks its
+answer. The two decoders differ only in their budgets and in the check, so their costs compare directly. A
+request that does not certify is rerun with a larger budget; the certificate tells the server when that is
+needed.
+
 \subsection{Late entry: deeper codes skip the lower layers}
 \label{sec:late}
 The logit lens shows that SID codes are decided in the last 6--9 layers. Early exit, which runs only the
@@ -300,18 +332,24 @@ CUDA-graph replay of a Qwen2 forward written from the safetensors weights. The e
 projections, uses FP16 with a pre-scaled query, and computes the shared prompt's K/V once and keeps it cached.
 A Triton kernel computes shared-prefix attention for tree and beam rows, with one program per (user, row, KV
 head). Appendix~\ref{app:engine} gives the engine's latency ladder from Hugging Face \texttt{generate}
-(869\,ms on an A6000) down to 2.75\,ms on an H100.
+(869\,ms on an A6000) down to 2.75\,ms on an H100. For OpenOneRec we port the engine to Qwen3 (no QKV bias,
+query/key RMSNorm before RoPE) and run in BF16. With hundreds of rows per forward and prompts of thousands of
+tokens, per-row attention would re-read the prompt for every row, so a second kernel streams each chunk of the
+prompt once for a block of rows and merges it with the rows' own tokens by log-sum-exp. The prompt forward and
+each budget's two decode forwards are CUDA graphs, and \texttt{torch.compile} fuses each layer's normalizations,
+rotary embedding and residuals.
 
 % =====================================================================================================
 \section{Experiments}
 \label{sec:experiments}
 
-We answer six questions. \textbf{RQ1}: How fast is certified decoding compared with beam search and with a
+We answer seven questions. \textbf{RQ1}: How fast is certified decoding compared with beam search and with a
 public SID serving engine? \textbf{RQ2}: How does it change quality, and what does exact fusion add?
 \textbf{RQ3}: What does the certificate cost as $K$ and the catalog grow? \textbf{RQ4}: Is late entry lossless?
-\textbf{RQ5}: Do the results transfer to other backbones? \textbf{RQ6}: Do they hold in applied settings, under the
-full-vocabulary objective, with wide first levels (including a public model with 8,192 first-level codes) and
-with long user histories?
+\textbf{RQ5}: Do the results transfer to other backbones? \textbf{RQ6}: Does certification remain affordable with
+an industrial tokenizer, long prompts and million-item catalogs? \textbf{RQ7}: What happens under serving conditions
+that weaken the method: an objective without trie normalization, and long user histories? RQ1--RQ5 and RQ7 use
+MiniOneRec, RQ6 uses OpenOneRec.
 
 \paragraph{Baselines.} (i) MiniOneRec's own beam search (width 50, full normalization, forced suffix) in our
 engine, so the decoder is the only difference. (ii) Beam-50 under FlashRec's objective (per-level codebook
@@ -320,7 +358,9 @@ search, a fused trie kernel, a restricted LM head, a radix prefix cache and FP8 
 only Qwen3, so we added Qwen2 support (QKV bias, no QK-norm) with a 60-line patch. It decodes our exact token
 ids and catalog. Its radix cache holds the shared 69-token prefix, as our template cache does, and all other
 prefixes are evicted before each timed request. NVIDIA's SID-GR example~\cite{nvidiasidgr} could not be run: its
-decode-attention kernel is a private submodule. (iv) Beam-then-rerank with the same SASRec term.
+decode-attention kernel is a private submodule. (iv) Beam-then-rerank with the same SASRec term. (v) On
+OpenOneRec, trie-constrained beam search of width 32, the benchmark's own width, and 128, in our engine: the
+per-level budget with $A_1=M=B$ (\S\ref{sec:budget}).
 
 \subsection{RQ1: Speed}
 \label{sec:exp-speed}
@@ -634,12 +674,102 @@ makes certification \emph{cheaper}: top-50 certifies at $M=16$ for 26--31\% of u
 parent. RL sharpens the distribution, so fewer prefixes cross the bound.
 
 
-\subsection{RQ6: Applied settings}
+\subsection{RQ6: An industrial-scale tokenizer}
+\label{sec:exp-openonerec}
+
+\begin{table}[t]
+\caption{OpenOneRec-1.7B on RecIF, under the model's full-vocabulary objective. Node counts are instance-optimal
+(Prop.~\ref{prop:necessary} at both levels). Recall and hit rates come from a reference search in which beam and
+exact search read the same scores. Latency: our engine, H100, BF16 with FP32 logits, batch 1. The certified decoder
+tries budgets $A_1/M$ of 256/64, 1,024/256 and 4,096/512 in turn until the top-10 certifies, including the host
+check after each attempt. Last row: prompt forward plus decode relative to beam-32, at the median and on average.
+Corpus: all 14.6M video and ad SIDs instead of the benchmark's item table.}
+\label{tab:openonerec}
+\vspace{-2mm}
+\footnotesize
+\setlength{\tabcolsep}{2pt}
+\begin{tabular*}{\linewidth}{@{\extracolsep{\fill}}lrrrr@{}}
+\toprule
+ & video & corpus & ad & product \\
+\midrule
+first codes / SIDs                      & 6.8k / 1.5M & 7.7k / 14.6M & 6.8k / 1.5M & 2.6k / 1.3M \\
+requests / prompt (p50)                 & 200 / 2.5k & 200 / 2.5k & 300 / 0.7k & 300 / 0.9k \\
+\midrule
+\multicolumn{5}{@{}l}{\emph{nodes an exact top-10 needs (p50 / p90)}} \\
+first codes                              & 250 / 551 & 142 / 293 & 65 / 89 & 99 / 154 \\
+prefixes                                 & 17 / 37 & 11 / 19 & 16 / 22 & 17 / 26 \\
+\midrule
+\multicolumn{5}{@{}l}{\emph{beam search against the exact top-10}} \\
+beam-32 recall (all ten)                 & 0.52 (3\%) & 0.68 (9\%) & 0.89 (41\%) & 0.91 (43\%) \\
+beam-128 recall (all ten)                & 0.85 (41\%) & 0.95 (73\%) & 1.00 (99\%) & 1.00 (98\%) \\
+hit@32, exact / beam-32                  & .270 / .220 & .235 / .200 & .227 / .220 & .213 / .217 \\
+\midrule
+\multicolumn{5}{@{}l}{\emph{latency (ms, p50 unless noted)}} \\
+prompt forward (every decoder)           & 19.2 & 19.1 & 6.9 & 7.7 \\
+decode: beam-32 / beam-128               & 6.9 / 10.0 & 6.9 / 10.0 & 6.3 / 8.1 & 6.3 / 8.1 \\
+decode: certified top-10      & 12.1 & 12.0 & 9.7 & 9.7 \\
+\quad mean / p99                         & 25.4 / 91.6 & 15.1 / 34.5 & 9.7 / 9.8 & 10.0 / 30.6 \\
+end to end vs.\ beam-32       & +29 / +73\% & +20 / +32\% & +27 / +26\% & +25 / +28\% \\
+\bottomrule
+\end{tabular*}
+\vspace{-3mm}
+\end{table}
+
+OpenOneRec has 8,192 codes per level, so the first trie level no longer fits into the prompt's forward and the
+decoder uses the per-level budget of \S\ref{sec:budget}. Its objective is the full-vocabulary softmax; on this
+model that coincides with codebook normalization to the reported precision, because the model puts almost all of
+its mass on valid codes. We measure two things: how many trie nodes an exact top-$K$ needs, which is a property of
+the model and binds any exact method, and what our engine takes to expand them.
+
+\paragraph{The cost moves to the first level.} Every request certifies, up to $K=512$. A top-10 needs a median of
+65--250 first codes (p90 89--551), 1--4\% of those in use, but only 11--17 two-code prefixes
+(Table~\ref{tab:openonerec}). A denser catalog makes certification cheaper: over the full 14.6M-SID corpus more
+items sit under each prefix, the tenth-best score rises, and fewer first codes exceed it (142 vs.\ 250 on video).
+Top-1 is cheap everywhere: 64 first codes and 16 prefixes certify it for 93--100\% of requests. A top-32 needs
+more first codes (109--638 at the median), and so does a request whose first-level distribution is flat: on video,
+5\% of requests do not certify a top-10 within 1,024 first codes and 256 prefixes. Trie normalization would roughly halve the
+first-level count on video (118 vs.\ 250), but it is not this model's objective.
+
+\paragraph{What exactness costs.} At the median the certified top-10 takes 9.7--12.1\,ms of decoding, against
+6.3--6.9\,ms for beam-32 and 8.1--10.0\,ms for beam-128. Wide expansions are compute-bound: each additional
+first-level row costs about 10\,$\mu$s, of which the full-vocabulary LM head over 176k tokens accounts for about a fifth of the arithmetic.
+The prompt forward, 6.9--19.2\,ms, is the same for every decoder. End to end the exact top-10 therefore costs
+20--29\% more than beam-32 at the median and 26--32\% more on average on three of the four tasks. Video carries a
+tail: 5\% of its requests reach the largest budget, which lifts the mean decode to 25.4\,ms and the p99 to
+92\,ms. Starting at 512 first codes instead trades a slower median (15.0\,ms) for a lower mean (19.9\,ms). The
+retry policy is the simplest one; an incremental expansion that reuses the first attempt's rows would cut the
+tail and is left to future work. A certified top-32 takes 9.7--9.8\,ms at the median on ad and product and
+34\,ms on video.
+
+\paragraph{What beam search misses.} At these widths beam search is far from exact. Beam-32, the benchmark's own
+width, returns 52--91\% of the model's exact top-10 and all of it for only 3--43\% of requests. Beam-128 returns
+85--100\%. Our beam is trie-constrained; the benchmark's is not. The misses cost quality where they are most
+frequent. On video, the exact top-32 contains a held-out item for 27.0\% of requests against 22.0\% for beam-32
+($+5.0\ci{+0.5}{+10.0}$, paired bootstrap) and 25.0\% for beam-128 ($+2.0\ci{-2.0}{+6.0}$); our engine reproduces
+the beam-32 gap ($+6.0\ci{+1.5}{+11.0}$). Over the full corpus the gap is $+3.5\ci{-1.0}{+7.5}$, and on ad and
+product it is within one point. The certificate also shows how rarely beam happens to be right: beam-32's own
+budget certifies the top-10 for only 0.5--5.7\% of requests.
+
+\paragraph{Numerics.} In BF16 a request's scores depend slightly on the shape of the batch that computes them.
+Our engine's scores agree with sequential Hugging Face decoding to within 0.10--0.24 nats, and its top-10 overlaps
+the reference search's by 90--96\%. Certified lists from different budgets differ only by near-ties within
+0.26 nats of the tenth score. Each certificate is exact for the scores its forward computed. Computing the
+LM head's output in FP32 matters: BF16 logits of magnitude around 30 are rounded in steps of 0.125 and create
+spurious ties; with BF16 logits the largest disagreement between budgets on video doubled (0.18 vs.\ 0.09
+nats).
+
+\paragraph{Contrast with a small tokenizer.} On MiniOneRec a first-level budget does not pay. All 88 first codes
+fit into the fused prompt forward (2.65\,ms), while a budget adds a pass and, because its first-level prior is
+flat, certifies a top-10 for only 61\% of users at $A_1=32$ and 85\% at 48. Widening its first level synthetically
+from 88 to 600 codes raises the fused decoder from 2.64 to only 3.47\,ms. The two regimes call for the two forms of
+the same certificate.
+
+\subsection{RQ7: Serving conditions}
 \label{sec:exp-applied}
 
 \begin{table}[t]
-\caption{Applied settings (Office, H100, FP16, batch 1, median ms; p99 where requests that do not certify are
-rerun with every prefix expanded). Synthetic rows (wider first levels, long contexts) measure latency only.}
+\caption{Serving conditions (MiniOneRec Office, H100, FP16, batch 1, median ms; p99 where requests that do not
+certify are rerun with every prefix expanded). Long-history rows use synthetic content and measure latency only.}
 \label{tab:applied}
 \vspace{-2mm}
 \footnotesize
@@ -655,125 +785,37 @@ every prefix, full depth / bridged             & 23.2 / 13.2  & --    & 100\% \\
 \multicolumn{4}{@{}l}{\emph{full vocabulary + forced suffix (MiniOneRec's objective)}} \\
 $M=64$ / $M=512$                               & 7.85 / 16.3  & 8.34  & 52\% / 89\% \\
 \midrule
-\multicolumn{4}{@{}l}{\emph{first-level budget $A_1$ (real catalog, 88 first codes)}} \\
-all 88, two forwards                           & 2.65         & 5.13  & 100\% \\
-$A_1=48$ / 32 / 16                             & 3.34 / 3.27 / 3.19 & & 85 / 61 / 28\% \\
-\multicolumn{4}{@{}l}{\emph{wider first level (synthetic), 88 $\to$ 600 first codes}} \\
-two forwards                                   & 2.64 $\to$ 3.47 & 5.08 $\to$ 7.42$^*$ & 100\% \\
-$A_1=32$                                       & 3.21 $\to$ 3.24 &       & 60--65\% \\
-\midrule
 \multicolumn{4}{@{}l}{\emph{long user histories}} \\
 cached, 1k / 4k / 8k tokens                    & 3.66 / 6.54 / 10.4 & 7.19 / 13.1 / 20.7 & 100\% \\
 uncached, 1.1k / 3.15k tokens                  & 7.59 / 21.4  & 11.5 / 37.0 & 100\% \\
 uncached 3k, users/s ($B=16$)                  & 51           & 32    & -- \\
 \bottomrule
 \end{tabular*}
-\\[1pt]{\scriptsize $^*$full depth, trie scoring (\S\ref{sec:exp-cost}); the certified row uses both bridges.}
 \vspace{-3mm}
 \end{table}
 
 \paragraph{Without trie normalization.} Normalization is a decode-time choice: the model is trained with
 full-vocabulary cross-entropy either way, and on Office the restricted rules score better
-(\S\ref{sec:exp-quality}). Some deployments may still have to serve the full-vocabulary objective, for example to
-keep scores calibrated across catalogs. We serve it exactly (Table~\ref{tab:applied}). Without the forced suffix,
-a budget of $M=64$ certifies 94\% of top-10s and costs less than beam-50 (5.22 vs.\ 5.82\,ms). The rest are rerun
-with every prefix expanded, which costs 23\,ms at full depth. The median stays at 5.2\,ms, but the tail moves to
-28.5\,ms at p99. With the third-code bridge, $M=256$ certifies 99\% at 4.55\,ms, and the p99 including reruns is
-17.5\,ms. The forced suffix is what makes the original objective expensive. Its two extra terms are not bounded by
-the prefix, so certification needs a third forward over items: $M=512$ certifies 89\% at 16.3\,ms, twice beam's
-cost. The dependence on normalization is therefore one of degree. Trie-style rules certify every request at a flat
-cost. The full-vocabulary objective is served exactly at beam's median cost with a heavier tail, and the forced
-suffix roughly doubles it.
-
-\paragraph{Wide first levels.} Forward~1 carries one row per first code. With first-level late entry each row
-costs about 1.6\,$\mu$s: the deployed decoder goes from 2.64 to 3.47\,ms between 88 and 600 first codes. Linear
-extrapolation to 8,192 codes gives roughly 16\,ms, which we have not measured. A budget per level removes that
-dependence (\texttt{HierTrieEngine}). A prompt pass yields the exact $s(a)$ of every first code, and only the $A_1$
-best become rows. Each unexpanded first code then bounds its subtree by $s(a)$ inside the certificate, the same
-rule one level up. With $A_1=32$ latency stays at 3.2\,ms from 88 to 600 first codes. The extra pass costs about
-0.7\,ms, so on the released catalog the two-forward engine remains faster. The limit is the bound: $s(a)$ alone is
-loose. On the real first-code distribution, a top-10 certifies for 85\% of users at $A_1=48$, 61\% at 32 and 28\%
-at 16. Top-1 still certifies for 97\% at 16, and quality is unchanged at every budget (HR@10 0.1685--0.1693),
-because uncertified answers are almost always right. For first levels with thousands of codes, certification of
-the head of the list is cheap. A full top-10 needs a budget that grows with the number of first codes whose prior
-exceeds the tenth item's score. That number depends on the model; we measure it next on a model with 8,192
-first-level codes.
-
-\begin{table}[t]
-\caption{OpenOneRec-1.7B on RecIF (BF16, model's own full-vocabulary objective). Counts are the instance-optimal
-sets (Prop.~\ref{prop:necessary} at both levels): nodes whose bound exceeds the $K$-th exact score, which any exact
-method that sees only the bounds must expand. A budget $A_1/M$ expands the $A_1$ best first
-codes and the $M$ best prefixes. Corpus: all 14.6M video/ad SIDs instead of the benchmark's item table.}
-\label{tab:openonerec}
-\vspace{-2mm}
-\footnotesize
-\setlength{\tabcolsep}{2pt}
-\begin{tabular*}{\linewidth}{@{\extracolsep{\fill}}lrrrr@{}}
-\toprule
- & video & corpus & ad & product \\
-\midrule
-first codes / SIDs                      & 6.8k / 1.5M & 7.7k / 14.6M & 6.8k / 1.5M & 2.6k / 1.3M \\
-requests / prompt tokens                & 200 / 2.5k & 200 / 2.5k & 300 / 0.7k & 300 / 0.9k \\
-\midrule
-\multicolumn{5}{@{}l}{\emph{nodes an exact top-10 needs (p50 / p90)}} \\
-first codes                              & 250 / 551 & 142 / 293 & 65 / 89 & 99 / 154 \\
-prefixes                                 & 17 / 37 & 11 / 19 & 16 / 22 & 17 / 26 \\
-first codes, trie norm.                  & 118 / 225 & 122 / 265 & 57 / 78 & 83 / 129 \\
-first codes for a top-32                 & 638 / 1,277 & 465 / 863 & 109 / 141 & 182 / 277 \\
-\midrule
-\multicolumn{5}{@{}l}{\emph{top-10 certified with budget $A_1/M$}} \\
-256 / 64                                 & 52\% & 82\% & 100\% & 98\% \\
-512 / 64                                 & 86\% & 96\% & 100\% & 100\% \\
-1,024 / 256                              & 95\% & 100\% & 100\% & 100\% \\
-\midrule
-\multicolumn{5}{@{}l}{\emph{recall of the exact top-10 (share returning all of it)}} \\
-beam-32                                  & 0.52 (3\%) & 0.68 (9\%) & 0.89 (41\%) & 0.91 (43\%) \\
-beam-128                                 & 0.85 (41\%) & 0.95 (73\%) & 1.00 (99\%) & 1.00 (98\%) \\
-\midrule
-hit@32, exact / beam-32                  & .270 / .220 & .235 / .200 & .227 / .220 & .213 / .217 \\
-\bottomrule
-\end{tabular*}
-\vspace{-3mm}
-\end{table}
-
-\paragraph{A deployed-scale tokenizer: OpenOneRec.} OpenOneRec~\cite{ax2512.24762} is a public SID model at
-industrial scale: a Qwen3 backbone (we use the 1.7B release) with three levels of 8,192 RQ-Kmeans codes over
-Kuaishou's video, ad and product corpora. Its benchmark, RecIF, provides requests with long behaviour histories,
-the held-out next items and the SID-to-item tables. We run certified best-first search on it with a reference
-implementation in Hugging Face Transformers (tree attention over the cached prompt, BF16; tree logits match
-sequential decoding up to BF16 rounding). The costs we report are counts of trie nodes that any exact method
-must expand, so they do not depend on the engine. We did not port our engine to Qwen3 and report no latency. The
-model's own objective is the full-vocabulary softmax. On this model it coincides with codebook normalization to
-the reported precision, because the model puts almost all of its mass on valid codes.
-
-Every request certifies, up to $K=512$ (Table~\ref{tab:openonerec}). The cost sits at the first level, as the
-critique of wide first levels predicts. A top-10 needs a median of 65--250 first codes (p90 89--551), 1--4\% of the
-codes in use, but only 11--17 two-code prefixes. Counting one row per expanded node, an exact top-10 takes 81--266
-rows at the median, between beam-32 (64 rows) and beam-128 (256). A denser catalog makes it cheaper: over the full
-14.6M-SID corpus, more items sit under each prefix, the tenth-best score rises, and fewer first codes exceed it
-(142 vs.\ 250). A fixed budget per level (\texttt{HierTrieEngine}) of $A_1=512$ first codes and $M=64$ prefixes
-certifies the top-10 for 86--100\% of requests, and $1{,}024/256$ for 95--100\%. Top-1 is cheap everywhere:
-$A_1=64$ certifies it for 94--100\% of requests.
-
-At these widths beam search is far from exact. Beam-32, the benchmark's own width, returns 52--91\% of the model's
-exact top-10 and the whole top-10 for 3--43\% of requests (our beam is trie-constrained; the benchmark's is not).
-Beam-128 returns 85--100\%. The misses cost quality where they are most frequent. On video, the exact top-32
-contains a held-out item for 27.0\% of requests against 22.0\% for beam-32 ($+5.0\ci{+0.5}{+10.0}$, paired
-bootstrap) and 25.0\% for beam-128 ($+2.0\ci{-2.0}{+6.0}$). Over the full corpus the gap is
-$+3.5\ci{-1.0}{+7.5}$, and on ad and product it is within one point. Wide first levels are therefore not a barrier
-to certification. They move its cost from the prefix level to the first level, where it is set by how many first
-codes the model rates above the $K$-th item: a few hundred for a top-10 on this model.
+(\S\ref{sec:exp-quality}). Some deployments still serve the full-vocabulary objective, for example to keep scores
+calibrated across catalogs, as OpenOneRec does. We serve it exactly (Table~\ref{tab:applied}). Without the forced
+suffix, a budget of $M=64$ certifies 94\% of top-10s and costs less than beam-50 (5.22 vs.\ 5.82\,ms). The rest are
+rerun with every prefix expanded, which costs 23\,ms at full depth. The median stays at 5.2\,ms, but the tail moves
+to 28.5\,ms at p99. With the third-code bridge, $M=256$ certifies 99\% at 4.55\,ms, and the p99 including reruns is
+17.5\,ms. The forced suffix is what makes MiniOneRec's original objective expensive. Its two extra terms are not
+bounded by the prefix, so certification needs a third forward over items: $M=512$ certifies 89\% at 16.3\,ms, twice
+beam's cost. The dependence on normalization is therefore one of degree. Trie-style rules certify every request at
+a flat cost, the full-vocabulary objective is served exactly at beam's median cost with a heavier tail, and the
+forced suffix roughly doubles it.
 
 \paragraph{Long user histories.} Production systems keep a user's history K/V across requests and process only
-the new tokens. We emulate that with a long history held in the prompt cache (synthetic content, latency only).
-At 1k, 4k and 8k cached tokens the deployed decoder takes 3.66, 6.54 and 10.4\,ms against 7.19, 13.1 and 20.7\,ms
-for beam-50, a constant 2.0$\times$. Every new row attends over the whole history, and beam has 50 such rows in 28
-layers, while certified decoding has 16 in two. Without a cache the prompt forward dominates. Per request the gain
-stays 1.5--1.7$\times$ (7.59 vs.\ 11.5\,ms at 1.1k tokens; 21.4 vs.\ 37.0\,ms at 3.15k), but throughput becomes
-prefill-bound and the gain shrinks from 2.7$\times$ to 1.6$\times$ (51 vs.\ 32 users/s at 3k tokens). The
-critique that long contexts dilute the speedup holds for uncached prompts and does not hold once histories are
-cached. These runs use streaming (online-softmax) versions of our Triton attention kernels for prompts over 256
-tokens.
+the new tokens. We emulate that with a long history held in the prompt cache. At 1k, 4k and 8k cached tokens the
+deployed decoder takes 3.66, 6.54 and 10.4\,ms against 7.19, 13.1 and 20.7\,ms for beam-50, a constant
+2.0$\times$. Every new row attends over the whole history, and beam has 50 such rows in 28 layers, while certified
+decoding has 16 in two. Without a cache the prompt forward dominates. Per request the gain stays 1.5--1.7$\times$
+(7.59 vs.\ 11.5\,ms at 1.1k tokens; 21.4 vs.\ 37.0\,ms at 3.15k), but throughput becomes prefill-bound and the gain
+shrinks from 2.7$\times$ to 1.6$\times$ (51 vs.\ 32 users/s at 3k tokens). Long contexts therefore dilute the
+speedup only when histories are not cached. These runs use streaming (online-softmax) versions of our Triton
+attention kernels for prompts over 256 tokens.
 
 % =====================================================================================================
 \section{Related work}
@@ -816,25 +858,27 @@ premature pruning heuristically; certified search handles an additive item value
 % =====================================================================================================
 \section{Limitations}
 \label{sec:limitations}
-We measure speed and quality on one model family, MiniOneRec on Qwen2/2.5 from 1.5B to 7B, and certification
-cost (in expanded nodes, not time) on a second, OpenOneRec. MiniOneRec's real catalogs are small, about 3.5k items
-with 48--88 first codes. Late entry adds a
-learned component per model and per entry layer, and the certificate then certifies the bridged objective;
-we report quality against the full-depth model throughout. The industry comparison covers one engine, ported by
-us, with an unexplained numerical drift, and short prompts. Long histories (up to 8k cached tokens) and wider
-first levels (up to 600 codes) are measured in our engine only with synthetic content. On a real 8,192-code
-first level (OpenOneRec) we measure certification cost in expanded nodes with a reference implementation, not
-latency in our engine, and the hit-rate comparison there uses 200--300 requests per task. Wide beams ($\ge256$),
-where shared-K/V designs matter most, are not covered.
+We measure speed and quality on two model families: MiniOneRec on Qwen2 and Qwen2.5 from 1.5B to 7B, and
+OpenOneRec-1.7B on Qwen3. MiniOneRec's real catalogs are small, about 3.5k items with 48--88 first codes; its long
+histories (up to 8k cached tokens) and denser catalogs are measured with synthetic content. Late entry adds a
+learned component per model and per entry layer, and the certificate then certifies the bridged objective; we
+report quality against the full-depth model throughout and did not train bridges for OpenOneRec. On OpenOneRec, the
+hit-rate comparison rests on 200--300 requests per task and on SID-level matching rather than the benchmark's
+item-level metrics, our beam search is trie-constrained while the benchmark's is not, and the tail on video comes
+from a simple retry policy. The comparison with an industry engine covers one engine, ported by us, with an
+unexplained numerical drift, and short prompts. Latencies are at batch size 1; at large batches the prompt forward
+dominates, and wide first-level expansions compete with other requests for compute. Wide beams ($\ge256$), where
+shared-K/V designs matter most, are not covered.
 
 \section{Conclusion}
-For LLM generative recommenders with catalog-sized tries, beam search is optional. Two fixed-shape forwards
-return the exact top-$K$ of the model's objective with a per-request certificate, at slightly lower cost than
-beam-50 in the same engine. Late entry, which predicts a child row's state from its parent's, makes the second
-forward nearly free, at the price of a learned approximation whose ranking differs from the full model's.
-Exactness pays off where beam search's approximation shows: fused objectives, filters and long candidate lists.
-The deployed decoder takes 2.6\,ms per request on an H100: 2.0$\times$ faster than beam-50 in our engine and
-4.5$\times$ faster than a public SID serving engine.
+For LLM generative recommenders, beam search is optional. Because an item's score is a sum of log-probabilities, a
+decoder can bound every item through its prefixes and prove, per request, that it returned the model's exact
+top-$K$. With a small tokenizer, two fixed-shape forwards suffice. With late entry the decoder then takes 2.6\,ms
+per request on an H100, 2.0$\times$ faster than beam-50 in our engine and 4.5$\times$ faster than a public SID
+serving engine. With an industrial tokenizer the cost moves to the first level: a few hundred first-level rows buy
+an exact top-10, for 20--29\% more end-to-end latency than the benchmark's beam search, which misses up to half of
+that list. Exactness pays off where beam search's approximation shows: wide tokenizers, fused objectives, filters
+and long candidate lists.
 
 \bibliographystyle{ACM-Reference-Format}
 \bibliography{refs}
@@ -955,13 +999,16 @@ FlashRec's CUDA graphs are captured at 19 sizes, and its JIT trie kernel is veri
 time of \texttt{engine.generate()} from token ids to ranked beams on the host. Ours is a pinned host prompt through
 one graph replay; copying the list back to the host adds 0.02\,ms.
 
+\begin{sloppypar}
 \emph{Numerical drift.} On our port, FlashRec's first-code log-probabilities differ from Hugging Face FP32 by 0.23
 nats on average. Hugging Face in half precision differs by 0.002 (FP16) and 0.02 (BF16). FlashRec's top-1 agrees
 with exact beam under the same objective for 80\% of users. The drift persists when we disable each component we
 could isolate: the radix cache, CUDA graphs, fused expansion, the per-codebook head, GQA grouping (a
-12-KV-head copy drifts the same), output-layer tying, Q/K layout, and its pre-cut of $2\times$beam candidates.
+12-KV-head copy drifts the same), output-layer tying, Q/K layout, and its pre-cut of $2\times$ the beam width in
+candidates.
 We report FlashRec as measured and also our exact implementation of its objective. Speed is unaffected, since
 the computation is the same.
+\end{sloppypar}
 
 \section{Additional results and negative results}
 \label{app:extra}
@@ -980,13 +1027,17 @@ improves HR@10 by $+0.90\,[+0.27,+1.54]$ over the release. A full-vocabulary con
 
 \section{Reproducibility}
 \label{app:repro}
+\begin{sloppypar}
 Code, the FlashRec patch and every run are in the repository (anonymized for review). Bridges train on the
 validation split only; weights and $\beta$ are chosen on validation and evaluated once on test. Hardware: NVIDIA
 H100 80GB and RTX A6000 (L40S and A40 for FP8 and catalog-scaling runs). Main runs: \texttt{runs/frLat},
 \texttt{frTp} (Table~\ref{tab:speed}); \texttt{finalH}, \texttt{collabO}, \texttt{fuseI} (Table~\ref{tab:quality});
 \texttt{lbndA} (Table~\ref{tab:bounds}); \texttt{scaleP}, \texttt{scaleI} (Fig.~\ref{fig:catalog});
 \texttt{ladder2}, \texttt{h100M} (Table~\ref{tab:ladder}); \texttt{oo\_video}, \texttt{oo\_videoF},
-\texttt{oo\_ad}, \texttt{oo\_product} (Table~\ref{tab:openonerec}; \texttt{scripts/openonerec\_cert.py},
-\texttt{openonerec\_job.sh}, \texttt{openonerec\_analysis.py}).
+\texttt{oo\_ad}, \texttt{oo\_product} (node counts, recall and hit rates in Table~\ref{tab:openonerec};
+\texttt{scripts/openonerec\_cert.py}, \texttt{openonerec\_analysis.py}); \texttt{oo\_latV2}, \texttt{oo\_latA2}
+(latency in Table~\ref{tab:openonerec}; \texttt{scripts/openonerec\_latency.py},
+\texttt{openonerec\_latency\_analysis.py}, both launched by \texttt{openonerec\_job.sh}).
+\end{sloppypar}
 
 \end{document}

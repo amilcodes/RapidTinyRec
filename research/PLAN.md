@@ -874,3 +874,39 @@ s(a) > τ_K and prefixes with U2 > τ_K, τ_K the exact K-th score. No latency (
   bootstrap), beam-128 .250 (+2.0 [−2.0, +6.0]); corpus .235 vs .200 (+3.5 [−1.0, +7.5]); ad .227 vs .220; product
   .213 vs .217 (n.s.).
 - Paper: RQ6 paragraph + Table 7 (`tab:openonerec`), abstract, contributions and limitations updated.
+
+## Session 9 (2026-11-19): OpenOneRec latency in our engine; paper restructured
+
+Engine ported to Qwen3 (`model.py`: no QKV bias, `head_dim` from the config, q_norm/k_norm before RoPE) and a
+shared-prefix attention kernel for many rows (`kernels.prefix_attention`: a program takes a block of rows × query
+heads of one KV group and streams one prompt chunk once for all of them; chunks merged with the rows' own slots by
+log-sum-exp; self-check 1.3e-3 vs dense FP32). `scripts/openonerec_latency.py`: a budget (A1, M) keeps the A1 best
+first codes by s(a), then the M best prefixes by U2, then scores their items; A1 = M = B is trie-constrained beam-B,
+so beam and certified search run the same code. Certificate: τ_K ≥ max(s(a) of first unexpanded first code, U2 of
+first unexpanded prefix). Prompt forward = one CUDA graph per request at its exact length; the two decode forwards +
+selection + certificate = one CUDA graph per budget; torch.compile fuses each layer's small ops (without it the
+Qwen3 layer was launch-bound: beam-32 decode 12.6 ms → 5.9 ms, prefill timings erratic until graphed).
+LM head writes FP32 logits from BF16 inputs (`torch.mm(..., out_dtype=float32)`): BF16 logits of magnitude ~30 round
+in 0.125 steps and doubled the largest disagreement between budgets on video (0.18 → 0.09 nats).
+Runs `oo_latV2` (video, corpus), `oo_latA2` (ad, product): H100, batch 1, same requests as Session 8
+(`openonerec_job.sh latency TASK N REF`, analysis `scripts/openonerec_latency_analysis.py`). BF16-logit runs
+`oo_latV`, `oo_latA` superseded.
+- Prompt forward p50: 19.2 / 19.1 / 6.9 / 7.7 ms (video / corpus / ad / product).
+- Decode p50: beam-32 6.9 / 6.9 / 6.3 / 6.3 ms; beam-128 10.0 / 10.0 / 8.1 / 8.1. Budgets: 256/64 11.9 / 11.8 / 9.7 /
+  9.6; 512/64 15.0; 1024/256 22.1 / 22.1 / 20.6 / 20.8; 2048/256 34.4 / 34.4 / 31.9 / 32.0; 4096/512 57.5 (product: all
+  2,628 first codes, 38.0). Wide expansions are compute-bound at ~10 µs per extra first-level row.
+- cert@10 per budget: beam-32 0.5 / 3.0 / 5.7 / 5.3%; beam-128 12.5 / 44.5 / 98.3 / 75.7%; 256/64 52 / 86 / 100 / 98%;
+  512/64 88 / 97 / 100 / 100%; 1024/256 95 / 100 / 100 / 100%; 4096/512 100%. Top-1 at 64/16: 93.5 / 100 / 99.3 / 94.7%.
+- Policy 256/64 → 1024/256 → 4096/512 (wall clock incl. host check), top-10: p50 12.1 / 12.0 / 9.7 / 9.7 ms, mean
+  25.4 / 15.1 / 9.7 / 10.0, p99 91.6 / 34.5 / 9.8 / 30.6; 100% certified. End to end vs beam-32: p50 +29 / +20 / +27 /
+  +25%, mean +73 / +32 / +26 / +28%. Starting at 512/64: video p50 15.0, mean 19.9. Top-32 (same policy): p50 34.1 /
+  34.1 / 9.7 / 9.8 ms.
+- Numerics: engine vs sequential HF re-score 0.10 / 0.10 / 0.10 / 0.24 nats max; top-10 overlap with the Session 8
+  reference search 0.95 / 0.96 / 0.90 / 0.93; certified budgets disagree only by near-ties within 0.09 / 0.12 / 0.26 /
+  0.22 nats of the tenth score (batch-shape-dependent BF16 rounding). Beam recall and hit rates in the paper come from
+  the Session 8 reference, where beam and exact read the same cached scores; the engine reproduces the video hit@32
+  gap (exact − beam-32 +6.0 [+1.5, +11.0]).
+- Paper rewritten as one story rather than amendments: new abstract (problem → idea → techniques → results on both
+  models), introduction and contributions, Setting introduces both models, method §3.3 "a budget per level" (beam
+  search = the budget that never checks), RQ6 "an industrial-scale tokenizer" with a merged node-count + latency table,
+  RQ7 "serving conditions" (full-vocabulary objective, long histories), new limitations and conclusion.
