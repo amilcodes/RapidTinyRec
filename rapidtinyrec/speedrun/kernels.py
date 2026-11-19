@@ -386,3 +386,109 @@ def selfcheck_prompt(dtype, device='cuda'):
         ok &= a < (2e-2 if dtype != torch.float32 else 1e-4)
     out['pass'] = bool(ok)
     return out
+
+
+# -- shared-prefix attention for many rows (wide first levels). Every row of one request attends to the same
+# prompt K/V, so a program takes a block of BR rows x REP query heads of one KV group and streams one chunk of the
+# prompt once for all of them (the per-row kernels above re-read the prompt for every row). The prompt is split
+# into NS chunks for parallelism; each chunk returns its normalized output and log-sum-exp, merged by the caller
+# together with the rows' private slots.
+@triton.jit
+def _prefix_attn_kernel(Q, K, V, O, LSE, LEN, scale,
+                        sqr, sqh, skh, skp, sos, sor, soh, sls, slr,
+                        R, NS,
+                        REP: tl.constexpr, D: tl.constexpr, BR: tl.constexpr, BLK: tl.constexpr):
+    pr = tl.program_id(0)
+    g = tl.program_id(1)
+    sp = tl.program_id(2)
+    BM: tl.constexpr = BR * REP
+    m = tl.arange(0, BM)
+    r = pr * BR + m // REP
+    head = g * REP + m % REP
+    rv = r < R
+    d = tl.arange(0, D)
+    q = tl.load(Q + r[:, None] * sqr + head[:, None] * sqh + d[None, :], mask=rv[:, None], other=0.0)
+    q = (q.to(tl.float32) * scale).to(Q.dtype.element_ty)
+    L = tl.load(LEN)
+    CH = tl.cdiv(tl.cdiv(L, NS), BLK) * BLK            # chunking follows the true prompt length (graph-safe)
+    lo = sp * CH
+    hi = tl.minimum(lo + CH, L)
+    m_i = tl.full((BM,), -1.0e30, tl.float32)
+    l_i = tl.zeros((BM,), tl.float32)
+    acc = tl.zeros((BM, D), tl.float32)
+    for start in range(lo, hi, BLK):
+        p = start + tl.arange(0, BLK)
+        pv = p < hi
+        k = tl.load(K + g * skh + p[:, None] * skp + d[None, :], mask=pv[:, None], other=0.0)
+        s = tl.dot(q, tl.trans(k))
+        s = tl.where(pv[None, :], s, float('-inf'))
+        m_new = tl.maximum(m_i, tl.max(s, 1))
+        alpha = tl.exp(m_i - m_new)
+        e = tl.exp(s - m_new[:, None])
+        l_i = l_i * alpha + tl.sum(e, 1)
+        v = tl.load(V + g * skh + p[:, None] * skp + d[None, :], mask=pv[:, None], other=0.0)
+        acc = acc * alpha[:, None] + tl.dot(e.to(v.dtype), v)
+        m_i = m_new
+    has = l_i > 0
+    out = acc / tl.where(has, l_i, 1.0)[:, None]
+    lse = tl.where(has, m_i + tl.log(tl.where(has, l_i, 1.0)), float('-inf'))
+    tl.store(O + sp * sos + r[:, None] * sor + head[:, None] * soh + d[None, :], out, mask=rv[:, None])
+    tl.store(LSE + sp * sls + r * slr + head, lse, mask=rv)
+
+
+def prefix_plan(R, P, KV, REP=2, BLK=64, target=528):
+    """Static launch shape for prefix_attention: rows per program and number of prompt chunks (fixed per CUDA
+    graph; P is the longest prompt expected, the chunk size is derived from each request's length on device)."""
+    BR = 8 if R <= 64 else 32
+    BR = max(BR, triton.next_power_of_2(triton.cdiv(16, REP)))
+    assert (BR * REP) & (BR * REP - 1) == 0, 'rows x query heads per KV group must be a power of two'
+    nb = triton.cdiv(R, BR) * KV
+    NS = max(1, min(triton.cdiv(P, 4 * BLK), triton.cdiv(target, nb)))
+    return BR, NS
+
+
+def prefix_attention(q, kc, vc, length, scale, plan=None):
+    """q [R,H,hd] (unscaled, rows of one request); kc/vc [KV,P,hd] (prompt cache, first `length` rows valid);
+    length: int32 tensor [1]. Returns per-chunk outputs [NS,R,H,hd] (fp32) and log-sum-exps [NS,R,H]."""
+    R, H, D = q.shape
+    KV, P = kc.shape[0], kc.shape[1]
+    REP = H // KV
+    assert kc.stride(2) == 1 and q.stride(2) == 1 and kc.stride() == vc.stride()
+    BR, NS = plan or prefix_plan(R, P, KV, REP)
+    o = torch.empty(NS, R, H, D, device=q.device, dtype=torch.float32)
+    lse = torch.empty(NS, R, H, device=q.device, dtype=torch.float32)
+    _prefix_attn_kernel[(triton.cdiv(R, BR), KV, NS)](
+        q, kc, vc, o, lse, length, scale,
+        q.stride(0), q.stride(1), kc.stride(0), kc.stride(1),
+        o.stride(0), o.stride(1), o.stride(2), lse.stride(0), lse.stride(1),
+        R, NS, REP=REP, D=D, BR=BR, BLK=64, num_warps=4)
+    return o, lse
+
+
+def merge_attention(o, lse, os_, lse_s):
+    """Combine chunk outputs o [NS,R,H,hd] / lse [NS,R,H] with private-slot output os_ [R,H,hd] / lse_s [R,H]."""
+    allo = torch.cat([o, os_[None]], 0)
+    alll = torch.cat([lse, lse_s[None]], 0)
+    w = torch.softmax(alll, 0)
+    return (w[..., None] * allo).sum(0)
+
+
+def selfcheck_prefix(dtype=torch.bfloat16, device='cuda', R=200, H=16, KV=8, D=128, P=1000, S=2, L=777):
+    """prefix_attention + private slots + merge against dense attention in fp32."""
+    g = torch.Generator(device=device).manual_seed(0)
+    q = torch.randn(R, H, D, device=device, dtype=dtype, generator=g)
+    kc = torch.randn(KV, P, D, device=device, dtype=dtype, generator=g)
+    vc = torch.randn(KV, P, D, device=device, dtype=dtype, generator=g)
+    ks = torch.randn(R, S, KV, D, device=device, dtype=dtype, generator=g)
+    vs = torch.randn(R, S, KV, D, device=device, dtype=dtype, generator=g)
+    sc = D ** -0.5
+    o, lse = prefix_attention(q, kc, vc, torch.tensor([L], device=device, dtype=torch.int32), sc)
+    rep = H // KV
+    ksr, vsr = ks.repeat_interleave(rep, 2).float(), vs.repeat_interleave(rep, 2).float()
+    ss = torch.einsum('rhd,rshd->rhs', q.float(), ksr) * sc
+    os_ = torch.einsum('rhs,rshd->rhd', torch.softmax(ss, -1), vsr)
+    got = merge_attention(o, lse, os_, torch.logsumexp(ss, -1))
+    kf = torch.cat([kc[:, :L].repeat_interleave(rep, 0).float()[None].expand(R, -1, -1, -1), ksr.transpose(1, 2)], 2)
+    vf = torch.cat([vc[:, :L].repeat_interleave(rep, 0).float()[None].expand(R, -1, -1, -1), vsr.transpose(1, 2)], 2)
+    ref = torch.einsum('rhk,rhkd->rhd', torch.softmax(torch.einsum('rhd,rhkd->rhk', q.float(), kf) * sc, -1), vf)
+    return float((got - ref).abs().max())

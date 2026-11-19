@@ -5,6 +5,7 @@
 #                                                  #   `huggingface-cli login` first, after accepting the dataset terms)
 #   bash scripts/openonerec_job.sh inspect         # login node: columns, a sample row, catalog key format
 #   bash scripts/openonerec_job.sh run TASK [N]    # GPU job: TASK in video|ad|product, N requests (default 200)
+#   bash scripts/openonerec_job.sh latency TASK [N] [REF]   # GPU job: latency of certified vs beam in our engine
 #     catalog: the benchmark's sid2pid.json (video/ad) or sid2iid.json (product); CATALOG=$D/RecIF/video_ad_pid2sid.parquet
 #     gives the full 14.6M-SID corpus. Ground truth comes from metadata['answer'].
 set -u
@@ -50,6 +51,15 @@ run)
   $PY scripts/openonerec_cert.py --model $D/OneRec-1.7B --data $D/RecIF/benchmark_data/$T/${T}_test.parquet \
     --catalog $CAT --out $OUT/${T}.jsonl --users $N --target-field metadata ${EXTRA:-} 2>&1 \
     | grep --line-buffered -E '^\{"stage"|Error|Traceback|error' | cut -c1-1500
+  ;;
+latency)                                          # GPU job: certified vs beam latency in our engine (Qwen3 port)
+  T=$2; N=${3:-200}; R=${4:-$T}                   # R: reference run dir name under runs/ (oo_$R/$T.jsonl)
+  export PYTHONPATH=$S/pylib_oo:${PYTHONPATH:-}
+  CAT=${CATALOG:-$D/RecIF/benchmark_data/sid2pid.json}
+  [ "$T" = product ] && CAT=${CATALOG:-$D/RecIF/benchmark_data/sid2iid.json}
+  $PY scripts/openonerec_latency.py --model $D/OneRec-1.7B --data $D/RecIF/benchmark_data/$T/${T}_test.parquet \
+    --catalog $CAT --out $OUT/${R}.jsonl --users $N --ref $S/runs/oo_$R/out/${T}.jsonl ${EXTRA:-} 2>&1 \
+    | grep --line-buffered -E '^\{"stage"|Error|Traceback|error|line [0-9]' | cut -c1-2500
   ;;
 smoke)
   export PYTHONPATH=$S/pylib_oo:${PYTHONPATH:-}

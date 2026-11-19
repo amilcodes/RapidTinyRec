@@ -1,4 +1,7 @@
-"""Minimal Qwen2 forward with a shared-prefix / private-suffix KV layout.
+"""Minimal Qwen2 / Qwen3 forward with a shared-prefix / private-suffix KV layout.
+
+Qwen3 differs only in the attention block: no QKV bias, an explicit head_dim, and RMSNorm over each
+query / key head before RoPE (q_norm / k_norm). Both are read from the checkpoint when present.
 
 Weights are loaded directly from the released safetensors file. QKV and
 gate/up projections are concatenated so each layer issues four GEMMs.
@@ -21,7 +24,7 @@ class Qwen2Weights:
         self.D = cfg['hidden_size']
         self.H = cfg['num_attention_heads']
         self.KV = cfg['num_key_value_heads']
-        self.hd = self.D // self.H
+        self.hd = cfg.get('head_dim') or self.D // self.H
         self.I = cfg['intermediate_size']
         self.eps = cfg['rms_norm_eps']
         self.theta = cfg.get('rope_theta', 10000.0)
@@ -61,11 +64,14 @@ class Qwen2Weights:
                 ln1=w(p + 'input_layernorm.weight'),
                 ln2=w(p + 'post_attention_layernorm.weight'),
                 wqkv=torch.cat([w(a + 'q_proj.weight'), w(a + 'k_proj.weight'), w(a + 'v_proj.weight')], 0).contiguous(),
-                bqkv=torch.cat([w(a + 'q_proj.bias'), w(a + 'k_proj.bias'), w(a + 'v_proj.bias')], 0).contiguous(),
+                bqkv=(torch.cat([w(a + 'q_proj.bias'), w(a + 'k_proj.bias'), w(a + 'v_proj.bias')], 0).contiguous()
+                      if a + 'q_proj.bias' in sd else None),
                 wo=w(a + 'o_proj.weight'),
                 wgu=torch.cat([w(m + 'gate_proj.weight'), w(m + 'up_proj.weight')], 0).contiguous(),
                 wd=w(m + 'down_proj.weight'),
             ))
+            if a + 'q_norm.weight' in sd:                      # Qwen3
+                self.layers[-1].update(qn=w(a + 'q_norm.weight'), kn=w(a + 'k_norm.weight'))
         del sd
         inv_freq = 1.0 / (self.theta ** (torch.arange(0, self.hd, 2, dtype=torch.int64).float() / self.hd))
         # positions up to the model's context (capped; prompts longer than 4,096 tokens indexed past the old table)
@@ -141,6 +147,9 @@ class Forward:
         q = q.reshape(*shp, W.H, W.hd)
         k = k.reshape(*shp, W.KV, W.hd)
         v = v.reshape(*shp, W.KV, W.hd)
+        if 'qn' in layer:                                      # Qwen3: per-head RMSNorm before RoPE
+            q = rmsnorm(q, layer['qn'], W.eps)
+            k = rmsnorm(k, layer['kn'], W.eps)
         cos = W.cos[pos].unsqueeze(-2)
         sin = W.sin[pos].unsqueeze(-2)
         return rope(q, cos, sin), rope(k, cos, sin), v
