@@ -910,3 +910,11 @@ Runs `oo_latV2` (video, corpus), `oo_latA2` (ad, product): H100, batch 1, same r
   models), introduction and contributions, Setting introduces both models, method §3.3 "a budget per level" (beam
   search = the budget that never checks), RQ6 "an industrial-scale tokenizer" with a merged node-count + latency table,
   RQ7 "serving conditions" (full-vocabulary objective, long histories), new limitations and conclusion.
+- Paper restructured to RecSys conventions after reading 15 papers in the area (TIGER, HSTU, LC-Rec, OneRec, Semantic
+  IDs, AtSpeed, xGR, PQTopK, EAGLE, RAILS, gSASRec, ECR, RecSys'25 best paper) and the RecSys 2026 call (long paper:
+  8 content pages, appendices included, references excluded). Now: Intro → Related Work → Preliminaries (SIDs,
+  scores, constrained beam search, problem) → Method (certificate, two-sided bounds, budget per level, late entry,
+  fusion, implementation) → Experiments (setup with datasets table; RQ1–RQ5 each ending in an answer) → Discussion
+  and Limitations → Conclusion → Appendix A proofs. 8 pages with references (~6.8 content). Abstract ~200 words with
+  three headline numbers; contributions qualitative; internal name "cbtrie" → "hybrid scoring". Detail moved to
+  `research/paper/supplement.tex` (builds against main via xr; `scripts/paper_build.sh` builds both).
